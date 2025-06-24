@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý lớp tín chỉ</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800">
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="flex">
+    <div th:replace="~{fragments/sidebar :: sidebar(activePage='loptinchi')}"></div>
+    <div class="flex-1 p-6 space-y-6 ml-64 max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold text-blue-700 mb-4">Quản lý lớp tín chỉ</h1>
+
+        <div class="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 space-y-2 text-center w-full max-w-md px-4">
+            <div th:if="${success}" class="toast bg-green-500 text-white px-4 py-2 rounded shadow-lg">
+                <p th:text="${success}"></p>
+            </div>
+            <div th:if="${error}" class="toast bg-red-500 text-white px-4 py-2 rounded shadow-lg">
+                <p th:text="${error}"></p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4" th:text="${isEdit} ? 'Sửa lớp tín chỉ' : 'Thêm lớp tín chỉ'"></h2>
+            <form th:action="${isEdit} ? @{/loptinchi/update/{id}(id=${lopTinChiId})} : @{/loptinchi/save}" th:object="${lopTinChi}" method="post" class="space-y-4">
+                <input type="hidden" th:field="*{lopTinChiId}" />
+                <div>
+                    <label class="block font-medium">Mã Lớp Tín Chỉ *</label>
+                    <input type="text" th:field="*{lopTinChiId}" class="w-full border p-2 rounded-md" required />
+                    <span th:errors="*{lopTinChiId}" class="text-sm text-red-500"></span>
+                </div>
+                <div>
+                    <label class="block font-medium">Tên Lớp Tín Chỉ *</label>
+                    <input type="text" th:field="*{tenLopTinChi}" class="w-full border p-2 rounded-md" required />
+                    <span th:errors="*{tenLopTinChi}" class="text-sm text-red-500"></span>
+                </div>
+                <div>
+                    <label class="block font-medium">Học Phần *</label>
+                    <select th:field="*{maHocPhan}" class="w-full border p-2 rounded-md" required>
+                        <option value="">Chọn học phần</option>
+                        <option th:each="hp : ${hocPhanList}" th:value="${hp.maHocPhan}" th:text="${hp.maHocPhan + ' - ' + hp.tenHocPhan}"></option>
+                    </select>
+                    <span th:errors="*{maHocPhan}" class="text-sm text-red-500"></span>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        <span th:text="${isEdit} ? 'Cập nhật' : 'Lưu'"></span>
+                    </button>
+                    <a th:href="@{/loptinchi}" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Hủy</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md" th:if="${isEdit}">
+            <h2 class="text-xl font-semibold mb-4">Thêm Sinh Viên Vào Lớp</h2>
+            <form th:action="@{/loptinchi/add-students}" method="post" class="space-y-4">
+                <input type="hidden" name="lopTinChiId" th:value="${lopTinChiId}" />
+                <div>
+                    <label class="block font-medium">Chọn Lớp</label>
+                    <select id="lopSelect" name="maLop" class="w-full border p-2 rounded-md" required>
+                        <option value="">Chọn lớp</option>
+                        <option th:each="lop : ${lopList}" th:value="${lop.maLop}" th:text="${lop.maLop + ' - ' + lop.tenLop}"></option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-medium">Chọn Sinh Viên</label>
+                    <select id="sinhVienSelect" name="maSinhViens" multiple class="w-full border p-2 rounded-md h-48" required></select>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Thêm Sinh Viên</button>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md" th:if="${isEdit and sinhVienList != null}">
+            <h2 class="text-xl font-semibold mb-4">Danh Sách Sinh Viên</h2>
+            <table class="w-full table-auto border-collapse">
+                <thead class="bg-blue-100">
+                    <tr>
+                        <th class="p-2 border">Mã SV</th>
+                        <th class="p-2 border">Họ Tên</th>
+                        <th class="p-2 border">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="sv : ${sinhVienList}" class="hover:bg-gray-100">
+                        <td class="p-2 border" th:text="${sv.maSV}"></td>
+                        <td class="p-2 border" th:text="${sv.hoVaTen}"></td>
+                        <td class="p-2 border">
+                            <form th:action="@{/loptinchi/remove-student}" method="post">
+                                <input type="hidden" name="lopTinChiId" th:value="${lopTinChiId}" />
+                                <input type="hidden" name="maSinhVien" th:value="${sv.maSV}" />
+                                <button type="submit" class="text-red-600 hover:underline">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Danh Sách Lớp Tín Chỉ</h2>
+            <table class="w-full table-auto border-collapse">
+                <thead class="bg-blue-100">
+                    <tr>
+                        <th class="p-2 border">Mã</th>
+                        <th class="p-2 border">Tên</th>
+                        <th class="p-2 border">Học Phần</th>
+                        <th class="p-2 border">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="lop : ${lopTinChiPage.content}" class="hover:bg-gray-100">
+                        <td class="p-2 border" th:text="${lop.lopTinChiId}"></td>
+                        <td class="p-2 border" th:text="${lop.tenLopTinChi}"></td>
+                        <td class="p-2 border" th:text="${lop.maHocPhan}"></td>
+                        <td class="p-2 border">
+                            <a th:href="@{/loptinchi/edit/{id}(id=${lop.lopTinChiId})}" class="text-blue-600 hover:underline">Sửa</a>
+                            <a th:href="@{/loptinchi/delete/{id}(id=${lop.lopTinChiId})}" class="text-red-600 hover:underline" onclick="return confirm('Xóa lớp này?')">Xóa</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="mt-4 flex justify-between items-center">
+                <span>Trang <span th:text="${lopTinChiPage.number + 1}"></span> / <span th:text="${lopTinChiPage.totalPages}"></span></span>
+                <div class="space-x-2">
+                    <a th:href="@{/loptinchi(page=${lopTinChiPage.number - 1})}" th:if="${lopTinChiPage.hasPrevious()}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Trước</a>
+                    <a th:href="@{/loptinchi(page=${lopTinChiPage.number + 1})}" th:if="${lopTinChiPage.hasNext()}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Sau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('lopSelect')?.addEventListener('change', function () {
+        const maLop = this.value;
+        const sinhVienSelect = document.getElementById('sinhVienSelect');
+        sinhVienSelect.innerHTML = '';
+        if (maLop) {
+            fetch(`/loptinchi/get-sinhvien-by-lop?maLop=${maLop}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(sv => {
+                        const opt = document.createElement('option');
+                        opt.value = sv.maSV;
+                        opt.textContent = `${sv.maSV} - ${sv.hoVaTen}`;
+                        sinhVienSelect.appendChild(opt);
+                    });
+                });
+        }
+    });
+</script>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

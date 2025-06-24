@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Sidebar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="relative">
+
+<!-- Sidebar -->
+<aside th:fragment="sidebar(activePage)"
+       id="sidebar"
+       class="fixed top-0 left-0 h-screen w-64 bg-gray-900 text-gray-100 shadow-lg z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 md:block">
+
+    <div class="p-6 flex flex-col h-full">
+        <nav class="h-full">
+            <ul class="space-y-1">
+                <li>
+                    <a th:href="@{/home}"
+                       th:class="${activePage == 'home'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Trang Chủ
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/user}"
+                       th:class="${activePage == 'user'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Người Dùng
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/phonghoc}"
+                       th:class="${activePage == 'phonghoc'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Phòng Học
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/khoa}"
+                       th:class="${activePage == 'khoa'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Khoa
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/khoahoc}"
+                       th:class="${activePage == 'khoahoc'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Khóa Học
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/lop}"
+                       th:class="${activePage == 'lop'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Lớp Học
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/giangvien}"
+                       th:class="${activePage == 'giangvien'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Giảng Viên
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/sinhvien}"
+                       th:class="${activePage == 'sinhvien'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Sinh Viên
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/hocphan}"
+                       th:class="${activePage == 'hocphan'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Học Phần
+                    </a>
+                </li>
+             
+             	<li>
+                    <a th:href="@{/loptinchi}"
+                       th:class="${activePage == 'loptinchi'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Lớp Tín Chỉ
+                    </a>
+                </li>
+             	
+                <li>
+                    <a th:href="@{/lichhocky}"
+                       th:class="${activePage == 'lichhocky'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Lịch Học Kỳ
+                    </a>
+                </li>
+                
+                <li>
+                    <a th:href="@{/diemhoctap}"
+                       th:class="${activePage == 'diemhoctap'} ? 
+                                'block px-4 py-3 rounded-md bg-indigo-600 shadow-md' : 
+                                'block px-4 py-3 rounded-md hover:bg-indigo-700 hover:shadow-md transition duration-200'">
+                        Điểm Học Tập
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>
+
+</body>
+</html>

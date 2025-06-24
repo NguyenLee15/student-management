@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ - Hệ Thống Quản Lý Sinh Viên</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" th:href="@{/css/home.css}" href="/css/home.css">
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Header -->
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/sidebar :: sidebar(activePage='home')}"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 space-y-6 ml-64 max-w-6xl mx-auto">
+            <button onclick="toggleSidebar()" class="md:hidden bg-blue-600 text-white px-4 py-2 rounded-lg mb-4 hover:bg-blue-700 transition duration-300">Menu</button>
+            <div class="bg-white p-8 rounded-lg shadow-lg home-card">
+                <h2 class="text-3xl font-bold mb-4 text-gray-800">Chào mừng đến với Hệ Thống Quản Lý Sinh Viên</h2>
+                <p class="text-gray-600 mb-6 text-lg">
+                    Đây là trang chủ của hệ thống. Vui lòng sử dụng menu bên trái để điều hướng đến các chức năng quản lý như khoa, khóa học, lớp, học phần, học phí, lịch học, lịch thi, giảng viên, phòng học, người dùng, và điểm học tập.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <a th:href="@{/khoa}" class="bg-blue-50 p-6 rounded-lg shadow-sm hover:bg-blue-100 transition duration-300 card">
+                        <h3 class="font-semibold text-xl text-blue-600">Quản Lý Khoa</h3>
+                        <p class="text-sm text-gray-500 mt-2">Quản lý thông tin các khoa trong trường.</p>
+                    </a>
+                    <a th:href="@{/hocphi}" class="bg-green-50 p-6 rounded-lg shadow-sm hover:bg-green-100 transition duration-300 card">
+                        <h3 class="font-semibold text-xl text-green-600">Quản Lý Học Phí</h3>
+                        <p class="text-sm text-gray-500 mt-2">Theo dõi và cập nhật trạng thái học phí.</p>
+                    </a>
+                    <a th:href="@{/lichhocky}" class="bg-yellow-50 p-6 rounded-lg shadow-sm hover:bg-yellow-100 transition duration-300 card">
+                        <h3 class="font-semibold text-xl text-yellow-600">Quản Lý Lịch Học</h3>
+                        <p class="text-sm text-gray-500 mt-2">Sắp xếp lịch học kỳ cho sinh viên.</p>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

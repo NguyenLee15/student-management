@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Giảng Viên</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+<!-- Header -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<div class="flex">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/sidebar :: sidebar(activePage='giangvien')}"></div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6 space-y-6 ml-64 max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-blue-700 mb-4">Quản Lý Giảng Viên</h1>
+
+        <!-- Toast Thông báo -->
+        <div class="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 space-y-2 text-center w-full max-w-md px-4">
+            <div th:if="${success}" class="toast bg-green-500 text-white px-4 py-2 rounded shadow-lg">
+                <p th:text="${success}"></p>
+            </div>
+            <div th:if="${error}" class="toast bg-red-500 text-white px-4 py-2 rounded shadow-lg">
+                <p th:text="${error}"></p>
+            </div>
+        </div>
+
+        <!-- Form thêm/sửa giảng viên -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Thêm / Sửa Giảng Viên</h2>
+            <form th:action="@{/giangvien/save}" th:object="${giangVien_DTO_}" method="post" class="space-y-4">
+                <input type="hidden" name="page" th:value="${giangVienPage.number}" />
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block font-medium">Mã Giảng Viên *</label>
+                        <input type="text" th:field="*{maGiangVien}" class="w-full border p-2 rounded-md" />
+                        <span th:errors="*{maGiangVien}" class="text-sm text-red-500"></span>
+                    </div>
+                    <div>
+                        <label class="block font-medium">Tên Giảng Viên *</label>
+                        <input type="text" th:field="*{tenGiangVien}" class="w-full border p-2 rounded-md" />
+                        <span th:errors="*{tenGiangVien}" class="text-sm text-red-500"></span>
+                    </div>
+                    <div>
+                        <label class="block font-medium">Email *</label>
+                        <input type="email" th:field="*{email}" class="w-full border p-2 rounded-md" />
+                        <span th:errors="*{email}" class="text-sm text-red-500"></span>
+                    </div>
+                    <div>
+                        <label class="block font-medium">Khoa *</label>
+                        <select th:field="*{maKhoa}" class="w-full border p-2 rounded-md">
+                            <option value="">Chọn khoa</option>
+                            <option th:each="khoa : ${khoaList}" th:value="${khoa.maKhoa}" th:text="${khoa.tenKhoa}"></option>
+                        </select>
+                        <span th:errors="*{maKhoa}" class="text-sm text-red-500"></span>
+                    </div>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Lưu</button>
+            </form>
+        </div>
+
+        <!-- Lọc -->
+        <form th:action="@{/giangvien}" method="get" class="bg-white p-4 rounded-md shadow space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Tên giảng viên" class="border p-2 rounded-md w-full">
+                <select name="maKhoa" class="border p-2 rounded-md w-full">
+                    <option value="">Tất cả khoa</option>
+                    <option th:each="khoa : ${khoaList}" th:value="${khoa.maKhoa}" th:text="${khoa.tenKhoa}" th:selected="${maKhoa == khoa.maKhoa}"></option>
+                </select>
+            </div>
+            <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Lọc</button>
+        </form>
+
+        <!-- Danh sách giảng viên -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Danh Sách Giảng Viên</h2>
+            <table class="w-full table-auto border-collapse">
+                <thead class="bg-blue-100">
+                    <tr>
+                        <th class="p-2 border">Mã GV</th>
+                        <th class="p-2 border">Tên GV</th>
+                        <th class="p-2 border">Email</th>
+                        <th class="p-2 border">Khoa</th>
+                        <th class="p-2 border">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="gv : ${giangVienPage.content}" class="hover:bg-gray-100">
+                        <td class="p-2 border" th:text="${gv.maGiangVien}"></td>
+                        <td class="p-2 border" th:text="${gv.tenGiangVien}"></td>
+                        <td class="p-2 border" th:text="${gv.email}"></td>
+                        <td class="p-2 border" th:text="${gv.tenKhoa}"></td>
+                        <td class="p-2 border space-x-2 text-sm">
+                            <a th:href="@{/giangvien/edit/{maGiangVien}(maGiangVien=${gv.maGiangVien},page=${giangVienPage.number})}" class="text-blue-600 hover:underline">Sửa</a>
+                            <a th:href="@{/giangvien/delete/{maGiangVien}(maGiangVien=${gv.maGiangVien},page=${giangVienPage.number})}" class="text-red-600 hover:underline" onclick="return confirm('Xóa giảng viên này?')">Xóa</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Phân trang -->
+            <div class="mt-4 flex justify-between items-center">
+                <span>Trang <span th:text="${giangVienPage.number + 1}"></span> / <span th:text="${giangVienPage.totalPages}"></span></span>
+                <div class="space-x-2">
+                    <a th:href="@{/giangvien(page=${giangVienPage.number - 1},keyword=${keyword},maKhoa=${maKhoa},tenKhoa=${tenKhoa})}" th:if="${giangVienPage.hasPrevious()}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Trước</a>
+                    <a th:href="@{/giangvien(page=${giangVienPage.number + 1},keyword=${keyword},maKhoa=${maKhoa},tenKhoa=${tenKhoa})}" th:if="${giangVienPage.hasNext()}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Sau</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Auto-hide toast -->
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const toasts = document.querySelectorAll('.toast');
+        toasts.forEach(toast => {
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-5');
+            }, 3000);
+        });
+    });
+</script>
+
+</body>
+</html>

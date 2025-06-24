@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Lớp</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+<!-- Header -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<div class="flex">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/sidebar :: sidebar(activePage='lop')}"></div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6 space-y-6 ml-64 max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-blue-700 mb-4">Quản Lý Lớp</h1>
+
+        <!-- Thông báo lỗi -->
+        <div th:if="${error}" class="bg-red-100 text-red-700 px-4 py-2 rounded-md border border-red-400">
+            <p th:text="${error}"></p>
+        </div>
+
+        <!-- Form thêm/sửa lớp -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Thêm / Sửa Lớp</h2>
+            <form th:action="@{/lop/save}" th:object="${lopReq}" method="post" class="space-y-4">
+                <input type="hidden" name="page" th:value="${lopPage.number}" />
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block font-medium">Mã Lớp *</label>
+                        <input type="text" th:field="*{maLop}" class="w-full border border-gray-300 p-2 rounded-md" />
+                        <span th:errors="*{maLop}" class="text-sm text-red-500"></span>
+                    </div>
+                    <div>
+                        <label class="block font-medium">Tên Lớp *</label>
+                        <input type="text" th:field="*{tenLop}" class="w-full border border-gray-300 p-2 rounded-md" />
+                        <span th:errors="*{tenLop}" class="text-sm text-red-500"></span>
+                    </div>
+                    <div>
+                        <label class="block font-medium">Khoa *</label>
+                        <select th:field="*{maKhoa}" class="w-full border border-gray-300 p-2 rounded-md">
+                            <option th:each="khoa : ${khoaList}" th:value="${khoa.maKhoa}" th:text="${khoa.tenKhoa}"></option>
+                        </select>
+                        <span th:errors="*{maKhoa}" class="text-sm text-red-500"></span>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Lưu</button>
+                    <a th:href="@{/lop(page=${lopPage.number})}" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Hủy</a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Nhập / Xuất Excel -->
+        <div class="flex justify-between items-center bg-white p-4 rounded-md shadow">
+            <form th:action="@{/lop/import}" method="post" enctype="multipart/form-data" class="flex items-center space-x-2">
+                <input type="hidden" name="page" th:value="${lopPage.number}" />
+                <input type="file" name="file" accept=".xlsx" class="border p-1 rounded" />
+                <button type="submit" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Nhập</button>
+            </form>
+            <a th:href="@{/lop/export}" class="text-blue-600 hover:underline">Xuất Excel</a>
+        </div>
+        
+        <!-- Danh sách lớp + Tìm kiếm -->
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Danh Sách Lớp</h2>
+    </div>
+
+    <!-- Tìm kiếm -->
+    <form th:action="@{/lop}" method="get" class="mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block font-medium">Khoa</label>
+                <select name="maKhoa" class="w-full border border-gray-300 p-2 rounded-md">
+                    <option value="">Tất cả</option>
+                    <option th:each="khoa : ${khoaList}" th:value="${khoa.maKhoa}" th:text="${khoa.tenKhoa}" th:selected="${maKhoa == khoa.maKhoa}"></option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Tìm</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Bảng danh sách lớp -->
+    <table class="w-full table-auto border-collapse">
+        <thead>
+            <tr class="bg-blue-100">
+                <th class="p-2 border">Mã Lớp</th>
+                <th class="p-2 border">Tên Lớp</th>
+                <th class="p-2 border">Khoa</th>
+                <th class="p-2 border">Hành Động</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="lop : ${lopPage.content}" class="hover:bg-gray-100">
+                <td class="p-2 border" th:text="${lop.maLop}"></td>
+                <td class="p-2 border" th:text="${lop.tenLop}"></td>
+                <td class="p-2 border" th:text="${lop.tenKhoa}"></td>
+                <td class="p-2 border space-x-2 text-sm">
+                    <a th:href="@{/lop/edit/{maLop}(maLop=${lop.maLop}, page=${lopPage.number})}" class="text-blue-600 hover:underline">Sửa</a>
+                    <a th:href="@{/lop/delete/{maLop}(maLop=${lop.maLop}, page=${lopPage.number})}" class="text-red-600 hover:underline" onclick="return confirm('Bạn có chắc chắn muốn xóa lớp này không?')">Xóa</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Phân trang -->
+    <div class="mt-4 flex justify-between items-center">
+        <span>Trang <span th:text="${lopPage.number + 1}"></span> / <span th:text="${lopPage.totalPages}"></span></span>
+        <div class="space-x-2">
+            <a th:href="@{/lop(page=${lopPage.number - 1}, maKhoa=${maKhoa}, keyword=${keyword})}" th:if="${lopPage.hasPrevious()}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Trước</a>
+            <a th:href="@{/lop(page=${lopPage.number + 1}, maKhoa=${maKhoa}, keyword=${keyword})}" th:if="${lopPage.hasNext()}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Sau</a>
+        </div>
+    </div>
+</div>
+
+        </div>
+    </div>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>
