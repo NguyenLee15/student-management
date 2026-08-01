@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.student.management.dto.req.PhongHoc_DTO_Req;
 import com.example.student.management.dto.resp.PhongHoc_DTO_Resp;
@@ -52,29 +53,36 @@ public class PhongHocController {
     }
 
     @PostMapping("/save")
-    public String savePhongHoc(@Valid @ModelAttribute("phongHocReq") PhongHoc_DTO_Req phongHocReq,
-                               BindingResult result,
-                               @RequestParam(defaultValue = "0") int page,
-                               Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("phongHocPage", phongHocService.getAll(PageRequest.of(page, 5)));
-            model.addAttribute("toaNhaList", ToaNha.values());
-            return "phonghoc";
+public String savePhongHoc(@Valid @ModelAttribute("phongHocReq") PhongHoc_DTO_Req phongHocReq,
+                           BindingResult result,
+                           @RequestParam(defaultValue = "0") int page,
+                           Model model,
+                           RedirectAttributes redirectAttributes) {
+    if (result.hasErrors()) {
+        model.addAttribute("phongHocPage", phongHocService.getAll(PageRequest.of(page, 5)));
+        model.addAttribute("toaNhaList", ToaNha.values());
+        return "phonghoc";
+    }
+
+    try {
+        if (phongHocService.existsById(phongHocReq.getMaPhong())) {
+            phongHocService.update(phongHocReq.getMaPhong(), phongHocReq);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật phòng học thành công!");
+        } else {
+            phongHocService.create(phongHocReq);
+            redirectAttributes.addFlashAttribute("success", "Thêm phòng học mới thành công!");
         }
-        try {
-            if (phongHocService.existsById(phongHocReq.getMaPhong())) {
-                phongHocService.update(phongHocReq.getMaPhong(), phongHocReq);
-            } else {
-                phongHocService.create(phongHocReq);
-            }
-        } catch (IllegalArgumentException ex) {
-            model.addAttribute("error", ex.getMessage());
-            model.addAttribute("phongHocPage", phongHocService.getAll(PageRequest.of(page, 5)));
-            model.addAttribute("toaNhaList", ToaNha.values());
-            return "phonghoc";
-        }
+    } catch (IllegalArgumentException ex) {
+        redirectAttributes.addFlashAttribute("error", ex.getMessage());
+        return "redirect:/phonghoc?page=" + page;
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi lưu phòng học!");
         return "redirect:/phonghoc?page=" + page;
     }
+
+    return "redirect:/phonghoc?page=" + page;
+}
+
 
     @GetMapping("/edit/{maPhong}")
     public String editPhongHoc(@PathVariable String maPhong,
