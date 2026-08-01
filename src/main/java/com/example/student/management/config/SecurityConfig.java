@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/error", "/login", "/css/**", "/js/**", "/images/**", "/favicon.ico/**", "/access-denied",
-                                "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/api/v1/**").permitAll()
+                                "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/actuator/**", "/api/v1/**").permitAll()
                         .requestMatchers("/home", "/sinhvien/**", "/lop/**", "/khoa/**", "/khoahoc/**", "/hocphan/**",
                                 "/hocphi/**", "/lichhocky/**", "/lichthi/**", "/giangvien/**",
                                 "/phonghoc/**").hasAnyRole("ADMIN", "TEACHER")
