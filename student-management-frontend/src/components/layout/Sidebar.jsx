@@ -37,6 +37,7 @@ export default function Sidebar({ activeTab, onTabChange, counts = {} }) {
       items: [
         { id: 'grades', label: 'Academic Grades & GPA', icon: Award, badge: counts.grades },
         { id: 'users', label: 'Users & Roles (Admin)', icon: ShieldAlert, badge: counts.users },
+        { id: 'audit-logs', label: 'Audit Logs & History', icon: Layers, badge: null },
       ]
     }
   ];

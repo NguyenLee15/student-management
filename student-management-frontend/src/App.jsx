@@ -16,6 +16,8 @@ import CreditClassModule from './components/modules/CreditClassModule';
 import ScheduleModule from './components/modules/ScheduleModule';
 import GradeModule from './components/modules/GradeModule';
 import UserModule from './components/modules/UserModule';
+import AuditLogModule from './components/modules/AuditLogModule';
+import CommandPalette from './components/common/CommandPalette';
 
 import { studentApi, teacherApi, facultyApi, subjectApi } from './api';
 
@@ -23,6 +25,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
   const [isBackendConnected, setIsBackendConnected] = useState(false);
   const [apiChecking, setApiChecking] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
 
   // Authentication State
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -143,6 +146,7 @@ export default function App() {
         onRefreshHealth={checkHealthAndLoadStats}
         currentUser={currentUser}
         onOpenLogin={() => setShowLoginModal(true)}
+        onOpenCommand={() => setShowCommandPalette(true)}
         onLogout={handleLogout}
       />
 
@@ -208,11 +212,22 @@ export default function App() {
           {activeTab === 'users' && (
             <UserModule onNotify={showToast} />
           )}
+
+          {activeTab === 'audit-logs' && (
+            <AuditLogModule onNotify={showToast} />
+          )}
         </main>
       </div>
 
       {/* 🔔 GLOBAL TOAST NOTIFICATION */}
       <Toast toast={toast} onClose={() => setToast(null)} />
+
+      {/* 🔍 UNIVERSAL COMMAND PALETTE (CTRL+K) */}
+      <CommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        onNavigate={(tab) => setActiveTab(tab)}
+      />
 
       {/* 🔐 AUTH LOGIN MODAL */}
       <LoginModal

@@ -39,6 +39,7 @@ public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
     private final StudentClassRepository studentClassRepository;
     private final AcademicYearRepository academicYearRepository;
+    private final com.student.management.service.AuditLogService auditLogService;
 
     @Override
     @Transactional(readOnly = true)
@@ -79,6 +80,9 @@ public class StudentServiceImpl implements StudentService {
                 .orElseThrow(() -> new NotFoundException("Academic year not found: " + dto.getAcademicYearId()));
         Student student = StudentMapper.toEntity(dto, studentClass, academicYear);
         Student saved = studentRepository.save(student);
+        if (auditLogService != null) {
+            auditLogService.log("CREATE", "Student", saved.getStudentId(), "Registered student " + saved.getFullName(), "admin");
+        }
         return StudentMapper.toDto(saved);
     }
 
@@ -100,6 +104,9 @@ public class StudentServiceImpl implements StudentService {
         student.setEmail(dto.getEmail());
         
         Student updated = studentRepository.save(student);
+        if (auditLogService != null) {
+            auditLogService.log("UPDATE", "Student", updated.getStudentId(), "Updated student details " + updated.getFullName(), "admin");
+        }
         return StudentMapper.toDto(updated);
     }
 
@@ -119,6 +126,9 @@ public class StudentServiceImpl implements StudentService {
             throw new NotFoundException("Student not found: " + studentId);
         }
         studentRepository.deleteById(studentId);
+        if (auditLogService != null) {
+            auditLogService.log("DELETE", "Student", studentId, "Deleted student record", "admin");
+        }
     }
 
     @Override

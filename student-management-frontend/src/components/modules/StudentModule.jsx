@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Search, Filter, Upload, Download, Edit3, Trash2, 
-  GraduationCap, RefreshCw, Mail, Phone, Calendar, School, Check, FileSpreadsheet, X 
+  GraduationCap, RefreshCw, Mail, Phone, Calendar, School, Check, FileSpreadsheet, X, Award, FileText 
 } from 'lucide-react';
 import { studentApi, facultyApi, studentClassApi, academicYearApi } from '../../api';
 import Modal from '../common/Modal';
 import Pagination from '../common/Pagination';
 import ConfirmDialog from '../common/ConfirmDialog';
+import TranscriptModal from './TranscriptModal';
 
 export default function StudentModule({ onNotify }) {
   const [students, setStudents] = useState([]);
@@ -32,6 +33,7 @@ export default function StudentModule({ onNotify }) {
   const [isEdit, setIsEdit] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [transcriptStudent, setTranscriptStudent] = useState(null);
 
   // Form State
   const initialForm = {
@@ -338,6 +340,13 @@ export default function StudentModule({ onNotify }) {
                     </td>
                     <td className="px-5 py-3.5 text-right space-x-1">
                       <button
+                        onClick={() => setTranscriptStudent(st)}
+                        title="View Official Transcript & GPA"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition"
+                      >
+                        <Award className="h-4 w-4" />
+                      </button>
+                      <button
                         onClick={() => handleOpenEdit(st)}
                         title="Edit Student"
                         className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
@@ -533,6 +542,13 @@ export default function StudentModule({ onNotify }) {
           </label>
         </div>
       </Modal>
+
+      {/* 📜 Official Academic Transcript Modal */}
+      <TranscriptModal
+        isOpen={!!transcriptStudent}
+        onClose={() => setTranscriptStudent(null)}
+        student={transcriptStudent}
+      />
 
       {/* 🗑️ Confirm Delete Dialog */}
       <ConfirmDialog

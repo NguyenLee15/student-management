@@ -48,6 +48,14 @@ export default function Header({
 
       {/* Action Buttons & Authentication */}
       <div className="flex items-center gap-2.5">
+        <button
+          onClick={onOpenCommand}
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500/40 text-slate-400 hover:text-slate-200 text-xs transition"
+        >
+          <span>Search...</span>
+          <kbd className="px-1.5 py-0.5 bg-slate-800 text-[10px] rounded border border-slate-700 font-mono text-slate-300">Ctrl+K</kbd>
+        </button>
+
         <a 
           href="http://localhost:8080/swagger-ui/index.html" 
           target="_blank" 

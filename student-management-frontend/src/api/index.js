@@ -123,3 +123,15 @@ export const userApi = {
   create: (data) => axiosClient.post('/users', data),
   delete: (userName) => axiosClient.delete(`/users/${userName}`),
 };
+
+// 13. Real-time Analytics & Aggregations API
+export const analyticsApi = {
+  getSummary: () => axiosClient.get('/analytics/summary'),
+  getFacultyDistribution: () => axiosClient.get('/analytics/faculty-distribution'),
+  getGpaDistribution: () => axiosClient.get('/analytics/gpa-distribution'),
+};
+
+// 14. Audit Log API
+export const auditLogApi = {
+  getAll: (params) => axiosClient.get('/audit-logs', { params }),
+};
