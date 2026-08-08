@@ -209,13 +209,7 @@ public class StudentServiceImpl implements StudentService {
                 }
 
                 String genderStr = formatter.formatCellValue(row.getCell(3)).trim();
-                if (!genderStr.isEmpty()) {
-                    try {
-                        dto.setGender(Gender.valueOf(genderStr.toUpperCase()));
-                    } catch (IllegalArgumentException e) {
-                        logger.warn("Invalid gender at row {}: {}", i, genderStr);
-                    }
-                }
+                dto.setGender(parseGender(genderStr));
 
                 dto.setEmail(formatter.formatCellValue(row.getCell(4)).trim());
 
@@ -242,6 +236,18 @@ public class StudentServiceImpl implements StudentService {
             throw new RuntimeException("Error importing excel: " + e.getMessage());
         }
         return imported;
+    }
+
+    private Gender parseGender(String str) {
+        if (str == null || str.trim().isEmpty()) return Gender.MALE;
+        String val = str.trim().toUpperCase();
+        if (val.contains("NỮ") || val.contains("FEMALE") || val.equals("F")) {
+            return Gender.FEMALE;
+        }
+        if (val.contains("KHÁC") || val.contains("OTHER")) {
+            return Gender.OTHER;
+        }
+        return Gender.MALE;
     }
 }
 

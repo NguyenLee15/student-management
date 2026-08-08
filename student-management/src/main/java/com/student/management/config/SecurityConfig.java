@@ -2,6 +2,7 @@ package com.student.management.config;
 
 import com.student.management.entity.User;
 import com.student.management.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,18 @@ public class SecurityConfig {
                 .cors(org.springframework.security.config.Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"status\":401,\"message\":\"Chưa xác thực hoặc JWT token không hợp lệ.\",\"data\":null}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.getWriter().write("{\"status\":403,\"message\":\"Từ chối truy cập: Bạn không đủ quyền thực hiện thao tác này.\",\"data\":null}");
+                        })
+                )
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(
                                 "/api/v1/auth/**",
@@ -79,13 +92,6 @@ public class SecurityConfig {
                 .password(user.getPassword())
                 .roles(user.getRole().name())
                 .build();
-        };
-    }
-    
-    @Bean
-    AccessDeniedHandler accessDeniedHandler() {
-        return (request, response, accessDeniedException) -> {
-            response.sendRedirect("/access-denied");
         };
     }
 }

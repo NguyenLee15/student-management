@@ -79,6 +79,14 @@ public class CreditClassServiceImpl implements CreditClassService {
                 .orElseThrow(() -> new NotFoundException("Credit class not found: " + creditClassId));
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new NotFoundException("Student not found: " + studentId));
+
+        List<CreditClassStudent> existing = creditClassStudentRepository.findByCreditClassId(creditClassId);
+        boolean alreadyEnrolled = existing.stream()
+                .anyMatch(ccs -> ccs.getStudent() != null && ccs.getStudent().getStudentId().equals(studentId));
+        if (alreadyEnrolled) {
+            throw new IllegalArgumentException("Sinh viên " + student.getFullName() + " (" + studentId + ") đã đăng ký vào lớp tín chỉ này rồi.");
+        }
+
         CreditClassStudent ccs = CreditClassStudent.builder()
                 .creditClass(cc)
                 .student(student)
