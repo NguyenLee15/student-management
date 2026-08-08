@@ -1,0 +1,63 @@
+package com.student.management.controller.api;
+
+import com.student.management.dto.req.ClassroomRequestDto;
+import com.student.management.dto.resp.ApiResponse;
+import com.student.management.dto.resp.ClassroomResponseDto;
+import com.student.management.enums.Building;
+import com.student.management.service.ClassroomService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/classrooms")
+@RequiredArgsConstructor
+@Tag(name = "Classrooms API", description = "Endpoints for managing lecture halls and classrooms")
+public class ClassroomRestController {
+
+    private final ClassroomService classroomService;
+
+    @GetMapping
+    @Operation(summary = "Get all classrooms with pagination and filters")
+    public ResponseEntity<ApiResponse<Page<ClassroomResponseDto>>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Building building) {
+        Page<ClassroomResponseDto> result = classroomService.searchAndFilter(keyword, building, PageRequest.of(page, size));
+        return ResponseEntity.ok(ApiResponse.success("Classrooms fetched successfully", result));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get classroom by ID")
+    public ResponseEntity<ApiResponse<ClassroomResponseDto>> getById(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(classroomService.getById(id)));
+    }
+
+    @PostMapping
+    @Operation(summary = "Create classroom")
+    public ResponseEntity<ApiResponse<ClassroomResponseDto>> create(@Valid @RequestBody ClassroomRequestDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Classroom created successfully", classroomService.create(dto)));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update classroom")
+    public ResponseEntity<ApiResponse<ClassroomResponseDto>> update(@PathVariable String id, @Valid @RequestBody ClassroomRequestDto dto) {
+        return ResponseEntity.ok(ApiResponse.success("Classroom updated successfully", classroomService.update(id, dto)));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete classroom")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
+        classroomService.delete(id);
+        return ResponseEntity.ok(ApiResponse.success("Classroom deleted successfully", null));
+    }
+}
+

@@ -1,0 +1,94 @@
+import React from 'react';
+import { GraduationCap, RefreshCw, LogIn, LogOut, ShieldCheck, UserCheck, FileText } from 'lucide-react';
+
+export default function Header({ 
+  isBackendConnected, 
+  apiChecking, 
+  onRefreshHealth, 
+  currentUser, 
+  onOpenLogin, 
+  onLogout 
+}) {
+  return (
+    <header className="sticky top-0 z-40 bg-slate-900/85 backdrop-blur-xl border-b border-slate-800/80 px-6 py-3 flex items-center justify-between">
+      {/* Brand & System Title */}
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+          <GraduationCap className="h-6 w-6 text-white" />
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-100 to-indigo-300 bg-clip-text text-transparent">
+              EduPortal AI
+            </span>
+            <span className="px-2 py-0.5 text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">
+              Enterprise v3.0
+            </span>
+          </div>
+          <p className="text-xs text-slate-400">University Student & Academic Management System</p>
+        </div>
+      </div>
+
+      {/* Center Backend Status Badge */}
+      <div className="hidden md:flex items-center gap-3 px-3.5 py-1.5 rounded-full bg-slate-950/80 border border-slate-800 text-xs shadow-inner">
+        <button 
+          onClick={onRefreshHealth} 
+          title="Refresh connection status"
+          className="flex items-center gap-1.5 text-slate-400 hover:text-white transition"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${apiChecking ? 'animate-spin text-indigo-400' : ''}`} />
+        </button>
+        <div className="flex items-center gap-2">
+          <span className={`h-2.5 w-2.5 rounded-full ${isBackendConnected ? 'bg-emerald-400 shadow-sm shadow-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
+          <span className="font-medium text-slate-300">
+            {isBackendConnected ? 'Spring Boot REST API Live (8080)' : 'Backend Offline / Standby'}
+          </span>
+        </div>
+      </div>
+
+      {/* Action Buttons & Authentication */}
+      <div className="flex items-center gap-2.5">
+        <a 
+          href="http://localhost:8080/swagger-ui/index.html" 
+          target="_blank" 
+          rel="noreferrer"
+          className="hidden sm:flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-medium px-3 py-2 rounded-xl border border-slate-700 transition"
+        >
+          <FileText className="h-4 w-4 text-indigo-400" />
+          <span>Swagger Docs</span>
+        </a>
+
+        <div className="h-6 w-[1px] bg-slate-800 mx-1"></div>
+
+        {currentUser ? (
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
+              <div className="h-6 w-6 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs">
+                {currentUser.username?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <div className="text-left hidden sm:block">
+                <div className="text-xs font-semibold text-white leading-none">{currentUser.username}</div>
+                <div className="text-[10px] text-emerald-400 font-mono mt-0.5">{currentUser.role}</div>
+              </div>
+            </div>
+            <button
+              onClick={onLogout}
+              title="Logout"
+              className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <button 
+            onClick={onOpenLogin}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95"
+          >
+            <LogIn className="h-4 w-4" />
+            <span>Login (JWT)</span>
+          </button>
+        )}
+      </div>
+    </header>
+  );
+}

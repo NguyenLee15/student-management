@@ -1,0 +1,35 @@
+package com.student.management.repository;
+
+import com.student.management.entity.Student;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface StudentRepository extends JpaRepository<Student, String> {
+
+    @Query("SELECT s FROM Student s WHERE s.studentClass.classId = :classId")
+    List<Student> findByClassId(@Param("classId") String classId);
+
+    @Query("SELECT ccs.student FROM CreditClassStudent ccs WHERE ccs.creditClass.creditClassId = :creditClassId")
+    List<Student> findByCreditClassId(@Param("creditClassId") Long creditClassId);
+
+    @Query("SELECT s FROM Student s WHERE " +
+           "(:keyword IS NULL OR LOWER(s.studentId) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(s.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+           "(:classId IS NULL OR s.studentClass.classId = :classId) AND " +
+           "(:facultyId IS NULL OR s.studentClass.faculty.facultyId = :facultyId) AND " +
+           "(:academicYearId IS NULL OR s.academicYear.academicYearId = :academicYearId)")
+    Page<Student> searchAndFilterStudents(
+            @Param("keyword") String keyword,
+            @Param("classId") String classId,
+            @Param("facultyId") String facultyId,
+            @Param("academicYearId") String academicYearId,
+            Pageable pageable
+    );
+}
+
