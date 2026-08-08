@@ -1,0 +1,72 @@
+package com.student.management.service.impl;
+
+import com.student.management.dto.req.FacultyRequestDto;
+import com.student.management.dto.resp.FacultyResponseDto;
+import com.student.management.entity.Faculty;
+import com.student.management.exception.NotFoundException;
+import com.student.management.mapping.FacultyMapper;
+import com.student.management.repository.FacultyRepository;
+import com.student.management.service.FacultyService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class FacultyServiceImpl implements FacultyService {
+
+    private final FacultyRepository facultyRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<FacultyResponseDto> getAll(Pageable pageable) {
+        return facultyRepository.findAll(pageable).map(FacultyMapper::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FacultyResponseDto> getAll() {
+        return FacultyMapper.toDtoList(facultyRepository.findAll());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FacultyResponseDto getById(String facultyId) {
+        Faculty faculty = facultyRepository.findById(facultyId)
+                .orElseThrow(() -> new NotFoundException("Faculty not found: " + facultyId));
+        return FacultyMapper.toDto(faculty);
+    }
+
+    @Override
+    @Transactional
+    public FacultyResponseDto create(FacultyRequestDto dto) {
+        if (facultyRepository.existsById(dto.getFacultyId())) {
+            throw new IllegalArgumentException("Faculty ID already exists: " + dto.getFacultyId());
+        }
+        Faculty faculty = FacultyMapper.toEntity(dto);
+        return FacultyMapper.toDto(facultyRepository.save(faculty));
+    }
+
+    @Override
+    @Transactional
+    public FacultyResponseDto update(String facultyId, FacultyRequestDto dto) {
+        Faculty faculty = facultyRepository.findById(facultyId)
+                .orElseThrow(() -> new NotFoundException("Faculty not found: " + facultyId));
+        faculty.setFacultyName(dto.getFacultyName());
+        return FacultyMapper.toDto(facultyRepository.save(faculty));
+    }
+
+    @Override
+    @Transactional
+    public void delete(String facultyId) {
+        if (!facultyRepository.existsById(facultyId)) {
+            throw new NotFoundException("Faculty not found: " + facultyId);
+        }
+        facultyRepository.deleteById(facultyId);
+    }
+}
+
