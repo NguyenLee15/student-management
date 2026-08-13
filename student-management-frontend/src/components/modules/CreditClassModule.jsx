@@ -4,7 +4,9 @@ import { creditClassApi, subjectApi, studentClassApi, studentApi } from '../../a
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 
-export default function CreditClassModule({ onNotify }) {
+export default function CreditClassModule({ onNotify, currentUser }) {
+  const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
+
   const [creditClasses, setCreditClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -139,13 +141,15 @@ export default function CreditClassModule({ onNotify }) {
           <p className="text-xs text-slate-400 mt-1">Section quotas, subject registrations, and student rosters</p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 transition active:scale-95"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Credit Class</span>
-        </button>
+        {isAdmin && (
+          <button
+            onClick={handleOpenCreate}
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 transition active:scale-95"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Credit Class</span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -182,20 +186,24 @@ export default function CreditClassModule({ onNotify }) {
             </div>
 
             <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
-              <button
-                onClick={() => handleViewStudents(cc)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-500/20 transition"
-              >
-                <Users className="h-3.5 w-3.5" />
-                <span>Manage Roster</span>
-              </button>
+              {isAdmin && (
+                <>
+                  <button
+                    onClick={() => handleViewStudents(cc)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-500/20 transition"
+                  >
+                    <Users className="h-3.5 w-3.5" />
+                    <span>Manage Roster</span>
+                  </button>
 
-              <button
-                onClick={() => setDeleteTarget(cc)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+                  <button
+                    onClick={() => setDeleteTarget(cc)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         ))}

@@ -3,6 +3,7 @@ package com.student.management.repository;
 import com.student.management.entity.Student;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +13,8 @@ import java.util.List;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, String> {
+    @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})
+    Page<Student> findAll(Pageable pageable);
 
     @Query("SELECT s FROM Student s WHERE s.studentClass.classId = :classId")
     List<Student> findByClassId(@Param("classId") String classId);
@@ -24,6 +27,7 @@ public interface StudentRepository extends JpaRepository<Student, String> {
            "(:classId IS NULL OR s.studentClass.classId = :classId) AND " +
            "(:facultyId IS NULL OR s.studentClass.faculty.facultyId = :facultyId) AND " +
            "(:academicYearId IS NULL OR s.academicYear.academicYearId = :academicYearId)")
+    @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})
     Page<Student> searchAndFilterStudents(
             @Param("keyword") String keyword,
             @Param("classId") String classId,

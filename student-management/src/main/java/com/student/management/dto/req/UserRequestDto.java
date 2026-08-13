@@ -25,5 +25,7 @@ public class UserRequestDto {
 
     @NotNull(message = "Role cannot be null")
     private Role role;
+
+    private String studentId;
 }
 

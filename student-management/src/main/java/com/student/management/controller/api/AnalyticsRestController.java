@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,12 +22,14 @@ public class AnalyticsRestController {
 
     @GetMapping("/summary")
     @Operation(summary = "Get high-level institutional summary metrics")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getSummary() {
         return ResponseEntity.ok(ApiResponse.success("Analytics summary fetched successfully", analyticsService.getSystemSummary()));
     }
 
     @GetMapping("/faculty-distribution")
     @Operation(summary = "Get student distribution by academic faculty")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getFacultyDistribution() {
         return ResponseEntity.ok(ApiResponse.success("Faculty distribution fetched successfully", analyticsService.getFacultyDistribution()));
     }

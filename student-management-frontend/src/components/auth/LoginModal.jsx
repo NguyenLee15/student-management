@@ -20,6 +20,9 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
       
       if (payload && payload.token) {
         localStorage.setItem('jwt_token', payload.token);
+        if (payload.refreshToken) {
+          localStorage.setItem('refresh_token', payload.refreshToken);
+        }
         const userInfo = {
           username: payload.userName || username,
           role: payload.role || 'ROLE_ADMIN',

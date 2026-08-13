@@ -28,5 +28,31 @@ services:
     depends_on:
       - mysqldb
 
+  backend:
+    build:
+      context: ./student-management
+      dockerfile: Dockerfile
+    container_name: eduportal-backend
+    restart: always
+    environment:
+      - DB_URL=jdbc:mysql://mysqldb:3306/student_management_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysqldb
+
+  frontend:
+    build:
+      context: ./student-management-frontend
+      dockerfile: Dockerfile
+    container_name: eduportal-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
 volumes:
   mysql_data:

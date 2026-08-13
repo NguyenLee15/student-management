@@ -2,6 +2,7 @@ package com.student.management.entity;
 
 import com.student.management.enums.SubjectType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,11 +14,12 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "subjects")
+@SQLRestriction("deleted = false")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Subject {
+public class Subject extends BaseEntity {
 
     @Id
     @Column(name = "subject_id", nullable = false, length = 10)

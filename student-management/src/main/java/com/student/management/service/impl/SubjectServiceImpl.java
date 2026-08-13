@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,12 +40,14 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "subjects", key = "'page_' + #page + '_' + #size")
     public Page<SubjectResponseDto> getAll(int page, int size) {
         return subjectRepository.findAll(PageRequest.of(page, size)).map(SubjectMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "subjects", key = "'all'")
     public List<SubjectResponseDto> getAll() {
         return SubjectMapper.toDtoList(subjectRepository.findAll());
     }
@@ -68,12 +72,14 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "subjects", key = "#subjectId")
     public Optional<SubjectResponseDto> getById(String subjectId) {
         return subjectRepository.findById(subjectId).map(SubjectMapper::toDto);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "subjects", allEntries = true)
     public SubjectResponseDto create(SubjectRequestDto dto) {
         if (subjectRepository.existsById(dto.getSubjectId())) {
             throw new IllegalArgumentException("Subject ID already exists: " + dto.getSubjectId());
@@ -86,6 +92,7 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "subjects", allEntries = true)
     public SubjectResponseDto update(String subjectId, SubjectRequestDto dto) {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new NotFoundException("Subject not found: " + subjectId));
@@ -101,6 +108,7 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "subjects", allEntries = true)
     public void delete(String subjectId) {
         if (!subjectRepository.existsById(subjectId)) {
             throw new NotFoundException("Subject not found: " + subjectId);

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +24,7 @@ public class SubjectRestController {
 
     @GetMapping
     @Operation(summary = "Get all subjects with pagination")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Page<SubjectResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -32,6 +34,7 @@ public class SubjectRestController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get subject by ID")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<SubjectResponseDto>> getById(@PathVariable String id) {
         return subjectService.getById(id)
                 .map(s -> ResponseEntity.ok(ApiResponse.success(s)))
@@ -40,6 +43,7 @@ public class SubjectRestController {
 
     @PostMapping
     @Operation(summary = "Create subject")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<SubjectResponseDto>> create(@Valid @RequestBody SubjectRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Subject created successfully", subjectService.create(dto)));
@@ -47,12 +51,14 @@ public class SubjectRestController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update subject")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<SubjectResponseDto>> update(@PathVariable String id, @Valid @RequestBody SubjectRequestDto dto) {
         return ResponseEntity.ok(ApiResponse.success("Subject updated successfully", subjectService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete subject")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         subjectService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Subject deleted successfully", null));

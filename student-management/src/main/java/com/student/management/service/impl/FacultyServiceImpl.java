@@ -10,6 +10,8 @@ import com.student.management.service.FacultyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,18 +25,21 @@ public class FacultyServiceImpl implements FacultyService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "faculties", key = "'page_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<FacultyResponseDto> getAll(Pageable pageable) {
         return facultyRepository.findAll(pageable).map(FacultyMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "faculties", key = "'all'")
     public List<FacultyResponseDto> getAll() {
         return FacultyMapper.toDtoList(facultyRepository.findAll());
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "faculties", key = "#facultyId")
     public FacultyResponseDto getById(String facultyId) {
         Faculty faculty = facultyRepository.findById(facultyId)
                 .orElseThrow(() -> new NotFoundException("Faculty not found: " + facultyId));
@@ -43,6 +48,7 @@ public class FacultyServiceImpl implements FacultyService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "faculties", allEntries = true)
     public FacultyResponseDto create(FacultyRequestDto dto) {
         if (facultyRepository.existsById(dto.getFacultyId())) {
             throw new IllegalArgumentException("Faculty ID already exists: " + dto.getFacultyId());
@@ -53,6 +59,7 @@ public class FacultyServiceImpl implements FacultyService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "faculties", allEntries = true)
     public FacultyResponseDto update(String facultyId, FacultyRequestDto dto) {
         Faculty faculty = facultyRepository.findById(facultyId)
                 .orElseThrow(() -> new NotFoundException("Faculty not found: " + facultyId));
@@ -62,6 +69,7 @@ public class FacultyServiceImpl implements FacultyService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "faculties", allEntries = true)
     public void delete(String facultyId) {
         if (!facultyRepository.existsById(facultyId)) {
             throw new NotFoundException("Faculty not found: " + facultyId);

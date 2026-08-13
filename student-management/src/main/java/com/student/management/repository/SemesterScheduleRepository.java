@@ -5,6 +5,7 @@ import com.student.management.enums.ClassShift;
 import com.student.management.enums.Semester;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,6 +24,7 @@ public interface SemesterScheduleRepository extends JpaRepository<SemesterSchedu
            "(:teacherId IS NULL OR ss.teacher.teacherId = :teacherId) AND " +
            "(:roomId IS NULL OR ss.classroom.roomId = :roomId) AND " +
            "(:classShift IS NULL OR ss.classShift = :classShift)")
+    @EntityGraph(attributePaths = {"creditClass", "subject", "teacher", "classroom"})
     Page<SemesterSchedule> searchAndFilter(
             @Param("creditClassId") Long creditClassId,
             @Param("subjectId") String subjectId,
@@ -35,6 +37,7 @@ public interface SemesterScheduleRepository extends JpaRepository<SemesterSchedu
     );
 
     @Query("SELECT ss FROM SemesterSchedule ss WHERE ss.teacher.teacherId = :teacherId")
+    @EntityGraph(attributePaths = {"creditClass", "subject", "teacher", "classroom"})
     List<SemesterSchedule> findByTeacherId(@Param("teacherId") String teacherId);
 }
 

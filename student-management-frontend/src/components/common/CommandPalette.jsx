@@ -74,12 +74,12 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }) {
   if (!isOpen) return null;
 
   const quickNavs = [
+    { label: 'Cổng Sinh Viên (Portal)', tab: 'student-portal', icon: Award },
+    { label: 'Cổng Giảng Viên (Portal)', tab: 'teacher-portal', icon: UserSquare2 },
     { label: 'Student Directory', tab: 'students', icon: Users },
     { label: 'Lecturers / Teachers', tab: 'teachers', icon: UserSquare2 },
-    { label: 'Subjects & Modules', tab: 'subjects', icon: BookOpen },
     { label: 'Academic Grades & GPA', tab: 'grades', icon: Award },
     { label: 'Timetable & Schedule', tab: 'schedules', icon: CalendarDays },
-    { label: 'Audit Logs & Activity', tab: 'audit-logs', icon: Layers },
   ];
 
   return (

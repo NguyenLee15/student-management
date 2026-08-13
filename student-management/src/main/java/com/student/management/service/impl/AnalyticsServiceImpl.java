@@ -6,6 +6,7 @@ import com.student.management.entity.Student;
 import com.student.management.repository.*;
 import com.student.management.service.AnalyticsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -22,6 +23,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final AcademicGradeRepository academicGradeRepository;
 
     @Override
+    @Cacheable(value = "systemSummary", key = "'all'")
     public Map<String, Object> getSystemSummary() {
         long totalStudents = studentRepository.count();
         long totalTeachers = teacherRepository.count();

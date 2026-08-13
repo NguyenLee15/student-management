@@ -35,7 +35,7 @@ public class JwtTokenProvider {
         logger.info("JWT secret key initialized successfully");
     }
 
-    public String generateToken(String username, String role) {
+    public String generateToken(String username, String role, String studentId) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
@@ -44,6 +44,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
             .setSubject(username)
             .claim("role", role)
+            .claim("studentId", studentId)
             .setIssuedAt(now)
             .setExpiration(validity)
             .signWith(secretKey, io.jsonwebtoken.SignatureAlgorithm.HS512)
@@ -58,6 +59,11 @@ public class JwtTokenProvider {
     public String getRoleFromJWT(String token) {
         Claims claims = parseClaims(token);
         return claims.get("role", String.class);
+    }
+
+    public String getStudentIdFromJWT(String token) {
+        Claims claims = parseClaims(token);
+        return claims.get("studentId", String.class);
     }
 
     public boolean validateToken(String token) {

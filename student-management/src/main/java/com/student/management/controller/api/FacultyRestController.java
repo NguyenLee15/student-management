@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class FacultyRestController {
 
     @GetMapping
     @Operation(summary = "Get all faculties (Paged or List)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Object>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -43,6 +45,7 @@ public class FacultyRestController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get faculty details by ID")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<FacultyResponseDto>> getById(@PathVariable String id) {
         FacultyResponseDto dto = facultyService.getById(id);
         return ResponseEntity.ok(ApiResponse.success(dto));
@@ -50,6 +53,7 @@ public class FacultyRestController {
 
     @PostMapping
     @Operation(summary = "Create a new faculty")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<FacultyResponseDto>> create(@Valid @RequestBody FacultyRequestDto dto) {
         FacultyResponseDto created = facultyService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -58,6 +62,7 @@ public class FacultyRestController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing faculty")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<FacultyResponseDto>> update(
             @PathVariable String id,
             @Valid @RequestBody FacultyRequestDto dto) {
@@ -67,9 +72,9 @@ public class FacultyRestController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a faculty by ID")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         facultyService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Faculty deleted successfully", null));
     }
 }
-

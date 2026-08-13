@@ -1,6 +1,7 @@
 package com.student.management.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -10,12 +11,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "classes")
+@Table(name = "student_classes")
+@SQLRestriction("deleted = false")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class StudentClass {
+public class StudentClass extends BaseEntity {
 
     @Id
     @Column(name = "class_id", nullable = false, length = 10)

@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponseDto {
+    private Integer id;
     private String userName;
     private Role role;
+    private String studentId;
 }
-

@@ -4,7 +4,9 @@ import { academicYearApi } from '../../api';
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 
-export default function AcademicYearModule({ onNotify }) {
+export default function AcademicYearModule({ onNotify, currentUser }) {
+  const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
+
   const [years, setYears] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -79,13 +81,15 @@ export default function AcademicYearModule({ onNotify }) {
           <p className="text-xs text-slate-400 mt-1">Cohorts management (K63, K64, K65, K66, K67...)</p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="flex items-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-violet-600/30 transition active:scale-95"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Academic Year</span>
-        </button>
+        {isAdmin && (
+          <button
+            onClick={handleOpenCreate}
+            className="flex items-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-violet-600/30 transition active:scale-95"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Academic Year</span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -110,20 +114,22 @@ export default function AcademicYearModule({ onNotify }) {
 
             <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
               <span className="text-slate-400">Status: <span className="text-emerald-400 font-semibold">Active</span></span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => handleOpenEdit(y)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-violet-400 hover:bg-slate-800 transition"
-                >
-                  <Edit3 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(y)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
+              {isAdmin && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => handleOpenEdit(y)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-violet-400 hover:bg-slate-800 transition"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(y)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}

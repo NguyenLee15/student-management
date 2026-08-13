@@ -2,7 +2,8 @@ package com.student.management.enums;
 
 public enum Role {
     ADMIN("admin"),
-    TEACHER("teacher");
+    TEACHER("teacher"),
+    STUDENT("student");
 
     private final String role;
 

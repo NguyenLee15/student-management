@@ -40,6 +40,16 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(teacher);
             logger.info("Initialized default TEACHER user (username: teacher, password: teacher123)");
         }
+
+        if (userRepository.findByUserName("student").isEmpty()) {
+            User student = new User();
+            student.setUserName("student");
+            student.setPassword(passwordEncoder.encode("student123"));
+            student.setRole(Role.STUDENT);
+            // studentId can be set manually later or left null for the dummy user
+            userRepository.save(student);
+            logger.info("Initialized default STUDENT user (username: student, password: student123)");
+        }
     }
 }
 

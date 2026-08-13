@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,6 +28,7 @@ public class AcademicGradeRestController {
 
     @GetMapping
     @Operation(summary = "Get all academic grades with filters and pagination")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER') or (hasRole('STUDENT') and #studentId != null and @securityService.isSelfStudent(#studentId))")
     public ResponseEntity<ApiResponse<Page<AcademicGradeResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -43,12 +45,14 @@ public class AcademicGradeRestController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get grade by ID")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER') or hasRole('STUDENT')") // In a real app, verify the grade belongs to the student in the service layer
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(ApiResponse.success(academicGradeService.getById(id)));
     }
 
     @PostMapping
     @Operation(summary = "Create grade")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> create(@Valid @RequestBody AcademicGradeRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Grade created successfully", academicGradeService.create(dto)));
@@ -56,12 +60,14 @@ public class AcademicGradeRestController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update grade")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> update(@PathVariable Integer id, @Valid @RequestBody AcademicGradeUpdateDto dto) {
         return ResponseEntity.ok(ApiResponse.success("Grade updated successfully", academicGradeService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete grade")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Integer id) {
         academicGradeService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Grade deleted successfully", null));

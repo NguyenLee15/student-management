@@ -5,6 +5,8 @@ import axios from 'axios';
 export const authApi = {
   login: (credentials) => axiosClient.post('/auth/login', credentials),
   register: (data) => axiosClient.post('/auth/register', data),
+  refresh: (refreshToken) => axiosClient.post('/auth/refresh', { refreshToken }),
+  logout: (refreshToken) => axiosClient.post('/auth/logout', { refreshToken }),
 };
 
 // 2. Students API
@@ -32,6 +34,7 @@ export const studentApi = {
       },
     });
   },
+  getImportTask: (taskId) => axiosClient.get(`/students/import-tasks/${taskId}`),
 };
 
 // 3. Teachers API
@@ -135,3 +138,10 @@ export const analyticsApi = {
 export const auditLogApi = {
   getAll: (params) => axiosClient.get('/audit-logs', { params }),
 };
+
+// 15. System Monitoring & Actuator API
+export const systemApi = {
+  getHealth: () => axiosClient.get('/actuator/health'),
+  getPrometheus: () => axiosClient.get('/actuator/prometheus'),
+};
+

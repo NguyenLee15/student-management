@@ -2,11 +2,18 @@ import React from 'react';
 import { 
   BarChart3, Users, UserSquare2, Building2, CalendarRange, 
   School, BookOpen, DoorOpen, Layers, CalendarDays, Award, 
-  ShieldAlert, Sparkles, Database 
+  ShieldAlert, Sparkles, Database, GraduationCap
 } from 'lucide-react';
 
-export default function Sidebar({ activeTab, onTabChange, counts = {} }) {
+export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUser = null }) {
   const menuSections = [
+    {
+      title: 'Dedicated Portals (Mới)',
+      items: [
+        { id: 'student-portal', label: 'Cổng Sinh Viên (Portal)', icon: GraduationCap, badge: 'PORTAL', roles: ['ROLE_ADMIN', 'ROLE_STUDENT', 'ROLE_TEACHER'] },
+        { id: 'teacher-portal', label: 'Cổng Giảng Viên (Portal)', icon: UserSquare2, badge: 'PORTAL', roles: ['ROLE_ADMIN', 'ROLE_TEACHER'] },
+      ]
+    },
     {
       title: 'Analytics & Overview',
       items: [
@@ -35,17 +42,30 @@ export default function Sidebar({ activeTab, onTabChange, counts = {} }) {
     {
       title: 'Grading & System',
       items: [
-        { id: 'grades', label: 'Academic Grades & GPA', icon: Award, badge: counts.grades },
-        { id: 'users', label: 'Users & Roles (Admin)', icon: ShieldAlert, badge: counts.users },
-        { id: 'audit-logs', label: 'Audit Logs & History', icon: Layers, badge: null },
+        { id: 'grades', label: 'Academic Grades & GPA', icon: Award, badge: counts.grades, roles: ['ROLE_ADMIN', 'ROLE_TEACHER', 'ROLE_STUDENT'] },
+        { id: 'users', label: 'Users & Roles (Admin)', icon: ShieldAlert, badge: counts.users, roles: ['ROLE_ADMIN'] },
+        { id: 'audit-logs', label: 'Audit Logs & History', icon: Layers, badge: null, roles: ['ROLE_ADMIN'] },
       ]
     }
   ];
 
+  // Helper function to check role
+  const hasAccess = (itemRoles) => {
+    if (!itemRoles) return true; // if no roles specified, everyone has access
+    if (!currentUser) return false;
+    return itemRoles.includes(currentUser.role);
+  };
+
+  // Filter sections
+  const filteredSections = menuSections.map(section => ({
+    ...section,
+    items: section.items.filter(item => hasAccess(item.roles))
+  })).filter(section => section.items.length > 0);
+
   return (
     <aside className="w-72 bg-slate-900/60 border-r border-slate-800/80 p-4 flex flex-col justify-between overflow-y-auto hidden md:flex shrink-0">
       <div className="space-y-6">
-        {menuSections.map((section, sIdx) => (
+        {filteredSections.map((section, sIdx) => (
           <div key={sIdx} className="space-y-1.5">
             <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
               {section.title}

@@ -16,7 +16,7 @@ export default function UserModule({ onNotify }) {
   const [showModal, setShowModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const initialForm = { userName: '', password: '', role: 'ROLE_TEACHER' };
+  const initialForm = { userName: '', password: '', role: 'ROLE_TEACHER', studentId: '' };
   const [formData, setFormData] = useState(initialForm);
 
   useEffect(() => {
@@ -113,10 +113,17 @@ export default function UserModule({ onNotify }) {
                     <span className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold ${
                       u.role === 'ROLE_ADMIN' || u.role === 'ADMIN'
                         ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                        : u.role === 'ROLE_STUDENT' || u.role === 'STUDENT'
+                        ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                         : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                     }`}>
                       {u.role}
                     </span>
+                    {u.studentId && (
+                      <span className="ml-2 px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">
+                        {u.studentId}
+                      </span>
+                    )}
                   </td>
                   <td className="px-5 py-3.5 text-emerald-400 font-semibold flex items-center gap-1.5 pt-4">
                     <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -188,9 +195,24 @@ export default function UserModule({ onNotify }) {
               className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-red-500"
             >
               <option value="ROLE_TEACHER">TEACHER (Giảng viên phụ trách môn)</option>
+              <option value="ROLE_STUDENT">STUDENT (Sinh viên học tập)</option>
               <option value="ROLE_ADMIN">ADMIN (Quản trị viên toàn hệ thống)</option>
             </select>
           </div>
+
+          {formData.role === 'ROLE_STUDENT' && (
+            <div>
+              <label className="block text-slate-300 font-semibold mb-1">Associated Student ID (Mã SV)*</label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. SV20210001"
+                value={formData.studentId || ''}
+                onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-red-500"
+              />
+            </div>
+          )}
 
           <div className="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
             <button

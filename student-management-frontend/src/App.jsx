@@ -1,28 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import Header from './components/layout/Header';
-import Sidebar from './components/layout/Sidebar';
 import Toast from './components/common/Toast';
 import LoginModal from './components/auth/LoginModal';
-
-import DashboardModule from './components/modules/DashboardModule';
-import StudentModule from './components/modules/StudentModule';
-import TeacherModule from './components/modules/TeacherModule';
-import FacultyModule from './components/modules/FacultyModule';
-import AcademicYearModule from './components/modules/AcademicYearModule';
-import StudentClassModule from './components/modules/StudentClassModule';
-import SubjectModule from './components/modules/SubjectModule';
-import ClassroomModule from './components/modules/ClassroomModule';
-import CreditClassModule from './components/modules/CreditClassModule';
-import ScheduleModule from './components/modules/ScheduleModule';
-import GradeModule from './components/modules/GradeModule';
-import UserModule from './components/modules/UserModule';
-import AuditLogModule from './components/modules/AuditLogModule';
 import CommandPalette from './components/common/CommandPalette';
+
+import StudentLayout from './layouts/StudentLayout';
+import TeacherLayout from './layouts/TeacherLayout';
+import AdminLayout from './layouts/AdminLayout';
 
 import { studentApi, teacherApi, facultyApi, subjectApi } from './api';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('overview');
   const [isBackendConnected, setIsBackendConnected] = useState(false);
   const [apiChecking, setApiChecking] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
@@ -38,7 +25,13 @@ export default function App() {
     }
   });
 
-  // Global Counts / Badges
+  // Admin Simulator Perspective (cho phép Admin xem thử giao diện Sinh viên / Giảng viên)
+  const [simulatedRole, setSimulatedRole] = useState(null);
+
+  // Effective Role currently being rendered
+  const effectiveRole = simulatedRole || currentUser?.role || 'ROLE_ADMIN';
+
+  // Global Counts / Badges for Admin
   const [counts, setCounts] = useState({
     students: 0,
     teachers: 0,
@@ -63,11 +56,30 @@ export default function App() {
     // Listen for unauthorized 401 events from axiosClient
     const handleUnauthorized = () => {
       setCurrentUser(null);
+      setSimulatedRole(null);
       setShowLoginModal(true);
-      showToast('error', 'Session expired. Please log in again.');
+      showToast('error', 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
     };
+    
+    // Listen for forbidden 403 events from axiosClient
+    const handleForbidden = (e) => {
+      showToast('error', e.detail || 'Truy cập bị từ chối: Bạn không có quyền thực hiện thao tác này.');
+    };
+
+    // Listen for rate limit 429 events from axiosClient
+    const handleRateLimit = (e) => {
+      showToast('warning', e.detail || 'Quá nhiều yêu cầu! Vui lòng thao tác chậm lại (Rate limit).');
+    };
+
     window.addEventListener('auth:unauthorized', handleUnauthorized);
-    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    window.addEventListener('auth:forbidden', handleForbidden);
+    window.addEventListener('auth:ratelimit', handleRateLimit);
+    
+    return () => {
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+      window.removeEventListener('auth:forbidden', handleForbidden);
+      window.removeEventListener('auth:ratelimit', handleRateLimit);
+    };
   }, []);
 
   const checkHealthAndLoadStats = async () => {
@@ -115,9 +127,9 @@ export default function App() {
       });
 
       if (isLive) {
-        showToast('success', 'Connected to Spring Boot REST API (Port 8080)');
+        showToast('success', 'Đã kết nối máy chủ Spring Boot REST API (Port 8080)');
       }
-    } catch (err) {
+    } catch {
       setIsBackendConnected(false);
     } finally {
       setApiChecking(false);
@@ -126,7 +138,8 @@ export default function App() {
 
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
-    showToast('success', `Welcome back, ${user.username}! Logged in as ${user.role}`);
+    setSimulatedRole(null);
+    showToast('success', `Đăng nhập thành công: ${user.username} (${user.role})`);
     checkHealthAndLoadStats();
   };
 
@@ -134,90 +147,53 @@ export default function App() {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('user_info');
     setCurrentUser(null);
-    showToast('info', 'Logged out successfully.');
+    setSimulatedRole(null);
+    showToast('info', 'Đã đăng xuất thành công.');
+  };
+
+  const handleRoleSwitch = (role) => {
+    setSimulatedRole(role);
+    showToast('info', `Đã chuyển sang không gian làm việc: ${role}`);
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
-      {/* 🟢 TOP HEADER */}
-      <Header
-        isBackendConnected={isBackendConnected}
-        apiChecking={apiChecking}
-        onRefreshHealth={checkHealthAndLoadStats}
-        currentUser={currentUser}
-        onOpenLogin={() => setShowLoginModal(true)}
-        onOpenCommand={() => setShowCommandPalette(true)}
-        onLogout={handleLogout}
-      />
-
-      {/* 🚀 MAIN CONTENT BODY */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* 📱 SIDEBAR NAVIGATION */}
-        <Sidebar
-          activeTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab)}
-          counts={counts}
+    <>
+      {/* 🎓 RENDER STUDENT PORTAL WORKSPACE */}
+      {effectiveRole === 'ROLE_STUDENT' && (
+        <StudentLayout
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onNotify={showToast}
+          onRoleSwitch={currentUser?.role === 'ROLE_ADMIN' ? handleRoleSwitch : null}
         />
+      )}
 
-        {/* 📊 ACTIVE MODULE ROUTER */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
-          {activeTab === 'overview' && (
-            <DashboardModule
-              stats={counts}
-              faculties={facultiesList}
-              onNavigate={(tab) => setActiveTab(tab)}
-            />
-          )}
+      {/* 👨‍🏫 RENDER TEACHER PORTAL WORKSPACE */}
+      {effectiveRole === 'ROLE_TEACHER' && (
+        <TeacherLayout
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onNotify={showToast}
+          onRoleSwitch={currentUser?.role === 'ROLE_ADMIN' ? handleRoleSwitch : null}
+        />
+      )}
 
-          {activeTab === 'students' && (
-            <StudentModule onNotify={showToast} />
-          )}
-
-          {activeTab === 'teachers' && (
-            <TeacherModule onNotify={showToast} />
-          )}
-
-          {activeTab === 'faculties' && (
-            <FacultyModule onNotify={showToast} />
-          )}
-
-          {activeTab === 'academic-years' && (
-            <AcademicYearModule onNotify={showToast} />
-          )}
-
-          {activeTab === 'student-classes' && (
-            <StudentClassModule onNotify={showToast} />
-          )}
-
-          {activeTab === 'subjects' && (
-            <SubjectModule onNotify={showToast} />
-          )}
-
-          {activeTab === 'classrooms' && (
-            <ClassroomModule onNotify={showToast} />
-          )}
-
-          {activeTab === 'credit-classes' && (
-            <CreditClassModule onNotify={showToast} />
-          )}
-
-          {activeTab === 'schedules' && (
-            <ScheduleModule onNotify={showToast} />
-          )}
-
-          {activeTab === 'grades' && (
-            <GradeModule onNotify={showToast} />
-          )}
-
-          {activeTab === 'users' && (
-            <UserModule onNotify={showToast} />
-          )}
-
-          {activeTab === 'audit-logs' && (
-            <AuditLogModule onNotify={showToast} />
-          )}
-        </main>
-      </div>
+      {/* 👑 RENDER ADMIN CONTROL CENTER WORKSPACE */}
+      {effectiveRole === 'ROLE_ADMIN' && (
+        <AdminLayout
+          currentUser={currentUser}
+          isBackendConnected={isBackendConnected}
+          apiChecking={apiChecking}
+          onRefreshHealth={checkHealthAndLoadStats}
+          onOpenLogin={() => setShowLoginModal(true)}
+          onOpenCommand={() => setShowCommandPalette(true)}
+          onLogout={handleLogout}
+          showToast={showToast}
+          counts={counts}
+          facultiesList={facultiesList}
+          onRoleSwitch={handleRoleSwitch}
+        />
+      )}
 
       {/* 🔔 GLOBAL TOAST NOTIFICATION */}
       <Toast toast={toast} onClose={() => setToast(null)} />
@@ -226,7 +202,7 @@ export default function App() {
       <CommandPalette
         isOpen={showCommandPalette}
         onClose={() => setShowCommandPalette(false)}
-        onNavigate={(tab) => setActiveTab(tab)}
+        onNavigate={() => {}}
       />
 
       {/* 🔐 AUTH LOGIN MODAL */}
@@ -235,6 +211,6 @@ export default function App() {
         onClose={() => setShowLoginModal(false)}
         onLoginSuccess={handleLoginSuccess}
       />
-    </div>
+    </>
   );
 }

@@ -5,7 +5,9 @@ import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 import Pagination from '../common/Pagination';
 
-export default function SubjectModule({ onNotify }) {
+export default function SubjectModule({ onNotify, currentUser }) {
+  const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
+
   const [subjects, setSubjects] = useState([]);
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -134,13 +136,15 @@ export default function SubjectModule({ onNotify }) {
           <p className="text-xs text-slate-400 mt-1">Curriculum syllabus, credit allocations, and theoretical/practical credits</p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-cyan-600/30 transition active:scale-95"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Subject</span>
-        </button>
+        {isAdmin && (
+          <button
+            onClick={handleOpenCreate}
+            className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-cyan-600/30 transition active:scale-95"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Subject</span>
+          </button>
+        )}
       </div>
 
       <div className="glass-card p-4 rounded-2xl border border-slate-800 flex flex-wrap items-center gap-3">
@@ -210,18 +214,22 @@ export default function SubjectModule({ onNotify }) {
                     {s.theoryHours || 30}h / {s.practiceHours || 15}h
                   </td>
                   <td className="px-5 py-3.5 text-right space-x-1">
-                    <button
-                      onClick={() => handleOpenEdit(s)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-slate-800 transition"
-                    >
-                      <Edit3 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => setDeleteTarget(s)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {isAdmin && (
+                      <>
+                        <button
+                          onClick={() => handleOpenEdit(s)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-slate-800 transition"
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteTarget(s)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}

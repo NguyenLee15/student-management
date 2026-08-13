@@ -5,7 +5,9 @@ import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 import Pagination from '../common/Pagination';
 
-export default function ClassroomModule({ onNotify }) {
+export default function ClassroomModule({ onNotify, currentUser }) {
+  const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
+
   const [classrooms, setClassrooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState('');
@@ -103,13 +105,15 @@ export default function ClassroomModule({ onNotify }) {
           <p className="text-xs text-slate-400 mt-1">Campus buildings (A, B, C, D), smart halls, and seat capacities</p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="flex items-center gap-2 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-rose-600/30 transition active:scale-95"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Classroom</span>
-        </button>
+        {isAdmin && (
+          <button
+            onClick={handleOpenCreate}
+            className="flex items-center gap-2 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-rose-600/30 transition active:scale-95"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Classroom</span>
+          </button>
+        )}
       </div>
 
       <div className="glass-card p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
@@ -159,20 +163,22 @@ export default function ClassroomModule({ onNotify }) {
                 <span>{c.capacity || 60} Seats</span>
               </div>
 
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => handleOpenEdit(c)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
-                >
-                  <Edit3 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(c)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
+              {isAdmin && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => handleOpenEdit(c)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(c)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}

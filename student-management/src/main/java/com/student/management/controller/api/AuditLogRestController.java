@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,8 +21,9 @@ public class AuditLogRestController {
     private final AuditLogService auditLogService;
 
     @GetMapping
-    @Operation(summary = "Get system audit logs with pagination")
-    public ResponseEntity<ApiResponse<Page<AuditLog>>> getAll(
+    @Operation(summary = "Get audit logs with pagination and filters")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Page<AuditLog>>> getAuditLogs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
         Page<AuditLog> result = auditLogService.getAll(PageRequest.of(page, size));

@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 
@@ -17,11 +18,12 @@ import java.time.LocalDate;
 @Table(name = "semester_schedules", 
        uniqueConstraints = @UniqueConstraint(
            columnNames = {"credit_class_id", "subject_id", "semester", "academic_year", "teacher_id", "room_id", "class_shift"}))
+@SQLRestriction("deleted = false")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SemesterSchedule {
+public class SemesterSchedule extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

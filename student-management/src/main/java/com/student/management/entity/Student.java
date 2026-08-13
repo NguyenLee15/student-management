@@ -2,6 +2,7 @@ package com.student.management.entity;
 
 import com.student.management.enums.Gender;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,11 +17,12 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "students")
+@SQLRestriction("deleted = false")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Student {
+public class Student extends BaseEntity {
 
     @Id
     @Column(name = "student_id", nullable = false, length = 10)

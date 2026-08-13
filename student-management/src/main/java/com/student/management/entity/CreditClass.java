@@ -2,18 +2,20 @@ package com.student.management.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "credit_classes")
+@SQLRestriction("deleted = false")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreditClass {
+public class CreditClass extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

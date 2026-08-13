@@ -36,4 +36,7 @@ public class User {
     @Column(name = "role", nullable = false)
     @NotNull(message = "Role không được null")
     private Role role;
+
+    @Column(name = "student_id", length = 50)
+    private String studentId;
 }

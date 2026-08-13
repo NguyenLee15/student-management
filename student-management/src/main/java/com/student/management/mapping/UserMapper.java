@@ -14,14 +14,17 @@ public class UserMapper {
                 .userName(dto.getUserName())
                 .password(dto.getPassword())
                 .role(dto.getRole())
+                .studentId(dto.getStudentId())
                 .build();
     }
 
     public static UserResponseDto toDto(User user) {
         if (user == null) return null;
         return UserResponseDto.builder()
+                .id(user.getId())
                 .userName(user.getUserName())
                 .role(user.getRole())
+                .studentId(user.getStudentId())
                 .build();
     }
 

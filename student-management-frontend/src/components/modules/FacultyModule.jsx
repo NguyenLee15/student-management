@@ -4,7 +4,9 @@ import { facultyApi } from '../../api';
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 
-export default function FacultyModule({ onNotify }) {
+export default function FacultyModule({ onNotify, currentUser }) {
+  const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
+
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -80,13 +82,15 @@ export default function FacultyModule({ onNotify }) {
           <p className="text-xs text-slate-400 mt-1">Colleges, specialized schools, and academic departments</p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-amber-600/30 transition active:scale-95"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Faculty</span>
-        </button>
+        {isAdmin && (
+          <button
+            onClick={handleOpenCreate}
+            className="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-amber-600/30 transition active:scale-95"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Faculty</span>
+          </button>
+        )}
       </div>
 
       {/* Grid of Faculties */}
@@ -112,20 +116,22 @@ export default function FacultyModule({ onNotify }) {
 
             <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
               <span className="text-slate-400">Department Status: <span className="text-emerald-400 font-semibold">Active</span></span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => handleOpenEdit(f)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition"
-                >
-                  <Edit3 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(f)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
+              {isAdmin && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => handleOpenEdit(f)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(f)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}

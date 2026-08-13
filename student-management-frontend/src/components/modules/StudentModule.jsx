@@ -9,7 +9,10 @@ import Pagination from '../common/Pagination';
 import ConfirmDialog from '../common/ConfirmDialog';
 import TranscriptModal from './TranscriptModal';
 
-export default function StudentModule({ onNotify }) {
+export default function StudentModule({ onNotify, currentUser }) {
+  const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
+  const isTeacher = currentUser?.role === 'ROLE_TEACHER' || currentUser?.role === 'TEACHER';
+  
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
@@ -34,6 +37,8 @@ export default function StudentModule({ onNotify }) {
   const [showImportModal, setShowImportModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [transcriptStudent, setTranscriptStudent] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(null); // { status, processedRows, totalRows, errorCount }
 
   // Form State
   const initialForm = {
@@ -193,13 +198,56 @@ export default function StudentModule({ onNotify }) {
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    
+    setImporting(true);
+    setImportProgress({ status: 'UPLOADING', processedRows: 0, totalRows: 0, errorCount: 0 });
+    
     try {
-      await studentApi.importExcel(file);
-      onNotify('success', `Imported Excel data successfully!`);
-      setShowImportModal(false);
-      loadStudents();
+      const res = await studentApi.importExcel(file);
+      const taskId = res.data?.data?.taskId;
+      
+      if (!taskId) {
+        throw new Error("No taskId returned from server");
+      }
+      
+      // Poll for progress
+      const pollInterval = setInterval(async () => {
+        try {
+          const taskRes = await studentApi.getImportTask(taskId);
+          const taskData = taskRes.data?.data;
+          if (taskData) {
+            setImportProgress({
+              status: taskData.status,
+              processedRows: taskData.processedRows,
+              totalRows: taskData.totalRows,
+              errorCount: taskData.errorCount
+            });
+            
+            if (taskData.status === 'COMPLETED' || taskData.status === 'COMPLETED_WITH_ERRORS' || taskData.status === 'FAILED') {
+              clearInterval(pollInterval);
+              setImporting(false);
+              
+              if (taskData.status === 'FAILED') {
+                onNotify('error', `Import Failed: ${taskData.errorDetails || 'Unknown error'}`);
+              } else if (taskData.status === 'COMPLETED_WITH_ERRORS') {
+                onNotify('warning', `Import completed with ${taskData.errorCount} errors.`);
+                loadStudents();
+              } else {
+                onNotify('success', 'Imported Excel data successfully!');
+                loadStudents();
+                setTimeout(() => { setShowImportModal(false); setImportProgress(null); }, 2000);
+              }
+            }
+          }
+        } catch (pollErr) {
+          console.error("Polling error:", pollErr);
+        }
+      }, 2000);
+      
     } catch (err) {
-      onNotify('error', err?.message || 'Failed to import Excel file');
+      setImporting(false);
+      setImportProgress(null);
+      onNotify('error', err?.response?.data?.message || err?.message || 'Failed to start import');
     }
   };
 
@@ -215,29 +263,35 @@ export default function StudentModule({ onNotify }) {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-emerald-400 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-800 transition shadow-sm"
-          >
-            <Upload className="h-4 w-4" />
-            <span>Import Excel</span>
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-emerald-400 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-800 transition shadow-sm"
+            >
+              <Upload className="h-4 w-4" />
+              <span>Import Excel</span>
+            </button>
+          )}
 
-          <button
-            onClick={handleExportExcel}
-            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-cyan-400 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-800 transition shadow-sm"
-          >
-            <Download className="h-4 w-4" />
-            <span>Export (.xlsx)</span>
-          </button>
+          {(isAdmin || isTeacher) && (
+            <button
+              onClick={handleExportExcel}
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-cyan-400 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-800 transition shadow-sm"
+            >
+              <Download className="h-4 w-4" />
+              <span>Export (.xlsx)</span>
+            </button>
+          )}
 
-          <button
-            onClick={handleOpenCreate}
-            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 transition active:scale-95"
-          >
-            <Plus className="h-4 w-4" />
-            <span>New Student</span>
-          </button>
+          {isAdmin && (
+            <button
+              onClick={handleOpenCreate}
+              className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 transition active:scale-95"
+            >
+              <Plus className="h-4 w-4" />
+              <span>New Student</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -346,20 +400,24 @@ export default function StudentModule({ onNotify }) {
                       >
                         <Award className="h-4 w-4" />
                       </button>
-                      <button
-                        onClick={() => handleOpenEdit(st)}
-                        title="Edit Student"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
-                      >
-                        <Edit3 className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => setDeleteTarget(st)}
-                        title="Delete Student"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {isAdmin && (
+                        <>
+                          <button
+                            onClick={() => handleOpenEdit(st)}
+                            title="Edit Student"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => setDeleteTarget(st)}
+                            title="Delete Student"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -521,25 +579,56 @@ export default function StudentModule({ onNotify }) {
         </form>
       </Modal>
 
-      {/* 📥 Modal: Excel Import */}
       <Modal
         isOpen={showImportModal}
-        onClose={() => setShowImportModal(false)}
+        onClose={() => { if(!importing) { setShowImportModal(false); setImportProgress(null); } }}
         title="Batch Import Students via Excel"
         subtitle="Upload an .xlsx file conforming to university schema"
         maxWidth="max-w-md"
       >
         <div className="space-y-4">
-          <label className="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-8 text-center space-y-3 cursor-pointer transition block bg-slate-950/60">
-            <div className="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center">
-              <FileSpreadsheet className="h-6 w-6" />
+          {!importing && !importProgress ? (
+            <label className="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-8 text-center space-y-3 cursor-pointer transition block bg-slate-950/60">
+              <div className="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center">
+                <FileSpreadsheet className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-200">Click to select an Excel spreadsheet</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Supports Microsoft Excel (.xlsx, .xls)</p>
+              </div>
+              <input type="file" accept=".xlsx,.xls" onChange={handleFileUpload} className="hidden" />
+            </label>
+          ) : (
+            <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col items-center">
+              <div className="mb-4 text-center">
+                <p className="text-sm font-semibold text-slate-200 mb-1">
+                  {importProgress?.status === 'UPLOADING' && "Uploading file..."}
+                  {importProgress?.status === 'PENDING' && "In Queue..."}
+                  {importProgress?.status === 'PROCESSING' && "Processing rows..."}
+                  {importProgress?.status === 'COMPLETED' && "Finished successfully!"}
+                  {importProgress?.status === 'COMPLETED_WITH_ERRORS' && "Finished with errors"}
+                  {importProgress?.status === 'FAILED' && "Import failed"}
+                </p>
+                {importProgress?.totalRows > 0 && (
+                  <p className="text-xs text-slate-400">
+                    Processed {importProgress.processedRows} of {importProgress.totalRows} rows
+                  </p>
+                )}
+                {importProgress?.errorCount > 0 && (
+                  <p className="text-xs text-rose-400 mt-1">
+                    Errors: {importProgress.errorCount}
+                  </p>
+                )}
+              </div>
+              
+              <div className="w-full bg-slate-800 rounded-full h-2 mb-2 overflow-hidden">
+                <div 
+                  className={`h-2 rounded-full transition-all duration-300 ${importProgress?.status === 'FAILED' ? 'bg-rose-500' : 'bg-indigo-500'}`}
+                  style={{ width: importProgress?.totalRows ? `${(importProgress.processedRows / importProgress.totalRows) * 100}%` : '0%' }}
+                ></div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-semibold text-slate-200">Click to select an Excel spreadsheet</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">Supports Microsoft Excel (.xlsx, .xls)</p>
-            </div>
-            <input type="file" accept=".xlsx,.xls" onChange={handleFileUpload} className="hidden" />
-          </label>
+          )}
         </div>
       </Modal>
 
