@@ -46,7 +46,32 @@ Thumbs.db
 *.swp
 *.swo
 
-# Docker local data
+# Docker local data & Configs
+docker/
+docker-compose.yml
+**/docker-compose.yml
+Dockerfile
+**/Dockerfile
+nginx.conf
+**/nginx.conf
 docker-data/
 data/
+
+# AI Prompts & Workflow Templates
+.agents/
+**/.agents/
+project-standards-template/
+**/project-standards-template/
+.cursorrules
+**/.cursorrules
+PROMPT_CHEATSHEET.md
+**/PROMPT_CHEATSHEET.md
+PRODUCTION_CHECKLIST.md
+**/PRODUCTION_CHECKLIST.md
+SPEC_TEMPLATE.md
+**/SPEC_TEMPLATE.md
+WORKFLOW.md
+**/WORKFLOW.md
+.github/
+
 
