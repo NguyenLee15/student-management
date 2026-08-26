@@ -18,9 +18,11 @@ export default function Header({
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleMobileMenu}
+          aria-label="Toggle Mobile Menu"
+          aria-expanded={isMobileMenuOpen}
           className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg transition"
         >
-          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          {isMobileMenuOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
         </button>
         <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 hidden sm:flex">
           <GraduationCap className="h-6 w-6 text-white" />

@@ -71,11 +71,14 @@ export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUs
   })).filter(section => section.items.length > 0);
 
   return (
-    <aside className={`w-72 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 p-4 flex flex-col justify-between overflow-y-auto shrink-0 fixed inset-y-0 left-0 z-40 md:static md:flex transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-      <div className="space-y-6">
+    <aside 
+      aria-label="Main Navigation"
+      className={`w-72 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 p-4 flex flex-col justify-between overflow-y-auto shrink-0 fixed inset-y-0 left-0 z-40 md:static md:flex transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+    >
+      <nav className="space-y-6" aria-label="Sidebar Menu">
         {filteredSections.map((section, sIdx) => (
           <div key={sIdx} className="space-y-1.5">
-            <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+            <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider" aria-hidden="true">
               {section.title}
             </p>
             {section.items.map((item) => {
@@ -85,6 +88,7 @@ export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUs
                 <button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
+                  aria-current={isActive ? 'page' : undefined}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
                     isActive
                       ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold shadow-lg shadow-indigo-500/20'
@@ -107,7 +111,7 @@ export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUs
             })}
           </div>
         ))}
-      </div>
+      </nav>
 
       {/* Sidebar Footer Info */}
       <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2 mt-6">
