@@ -28,6 +28,9 @@ public interface AcademicGradeRepository extends JpaRepository<AcademicGrade, In
     @Query("SELECT g FROM AcademicGrade g WHERE g.student.studentId = :studentId")
     List<AcademicGrade> findByStudentId(@Param("studentId") String studentId);
 
+    @Query("SELECT g FROM AcademicGrade g WHERE g.student.studentId = :studentId AND g.subject.subjectId = :subjectId")
+    List<AcademicGrade> findByStudentIdAndSubjectId(@Param("studentId") String studentId, @Param("subjectId") String subjectId);
+
     @Query("SELECT g FROM AcademicGrade g WHERE " +
            "(:studentId IS NULL OR g.student.studentId = :studentId) AND " +
            "(:subjectId IS NULL OR g.subject.subjectId = :subjectId) AND " +
@@ -43,4 +46,3 @@ public interface AcademicGradeRepository extends JpaRepository<AcademicGrade, In
             Pageable pageable
     );
 }
-

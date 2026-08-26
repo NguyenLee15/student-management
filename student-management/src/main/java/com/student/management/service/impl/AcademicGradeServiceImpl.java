@@ -3,6 +3,7 @@ package com.student.management.service.impl;
 import com.student.management.dto.req.AcademicGradeRequestDto;
 import com.student.management.dto.req.AcademicGradeUpdateDto;
 import com.student.management.dto.resp.AcademicGradeResponseDto;
+import com.student.management.dto.resp.TranscriptResponseDto;
 import com.student.management.entity.AcademicGrade;
 import com.student.management.entity.Student;
 import com.student.management.entity.Subject;
@@ -14,6 +15,7 @@ import com.student.management.repository.AcademicGradeRepository;
 import com.student.management.repository.StudentRepository;
 import com.student.management.repository.SubjectRepository;
 import com.student.management.service.AcademicGradeService;
+import com.student.management.util.GradeCalculationUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -71,6 +73,15 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public TranscriptResponseDto getTranscriptByStudentId(String studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sinh viên ID: " + studentId));
+        List<AcademicGrade> allGrades = academicGradeRepository.findByStudentId(studentId);
+        return GradeCalculationUtils.buildTranscript(student, allGrades);
+    }
+
+    @Override
     @Transactional
     public AcademicGradeResponseDto create(AcademicGradeRequestDto dto) {
         Student student = studentRepository.findById(dto.getStudentId())
@@ -80,6 +91,14 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
 
         if (academicGradeRepository.findExistingGrade(dto.getStudentId(), dto.getSubjectId(), dto.getSemester(), dto.getAcademicYear(), dto.getStudyPhase()).isPresent()) {
             throw new IllegalArgumentException("Grade already exists for this subject, semester, academic year, and phase.");
+        }
+
+        // Tự động quy đổi điểm chuẩn Thông tư 08/2021/TT-BGDĐT nếu chưa điền
+        if (dto.getLetterGrade() == null || dto.getLetterGrade().isBlank()) {
+            dto.setLetterGrade(GradeCalculationUtils.determineLetterGrade(dto.getScoreScale10()));
+        }
+        if (dto.getScoreScale4() == null) {
+            dto.setScoreScale4(GradeCalculationUtils.determineScoreScale4(dto.getLetterGrade()));
         }
 
         AcademicGrade grade = AcademicGradeMapper.toEntity(dto, student, subject);
@@ -95,8 +114,16 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
         grade.setSemester(dto.getSemester());
         grade.setStudyPhase(dto.getStudyPhase());
         grade.setScoreScale10(dto.getScoreScale10());
-        grade.setScoreScale4(dto.getScoreScale4());
-        grade.setLetterGrade(dto.getLetterGrade());
+
+        String letterGrade = (dto.getLetterGrade() != null && !dto.getLetterGrade().isBlank())
+                ? dto.getLetterGrade()
+                : GradeCalculationUtils.determineLetterGrade(dto.getScoreScale10());
+        BigDecimal scoreScale4 = dto.getScoreScale4() != null
+                ? dto.getScoreScale4()
+                : GradeCalculationUtils.determineScoreScale4(letterGrade);
+
+        grade.setLetterGrade(letterGrade);
+        grade.setScoreScale4(scoreScale4);
 
         return AcademicGradeMapper.toDto(academicGradeRepository.save(grade));
     }
@@ -114,7 +141,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
     @Transactional
     public List<AcademicGradeResponseDto> importFromExcel(MultipartFile file) {
         List<AcademicGradeResponseDto> list = new ArrayList<>();
-        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+        try (Workbook workbook = com.student.management.util.ExcelValidationUtils.validateAndOpenWorkbook(file)) {
             Sheet sheet = workbook.getSheetAt(0);
             DataFormatter formatter = new DataFormatter();
 
@@ -133,7 +160,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
                 dto.setAcademicYear("2025-2026");
                 dto.setStudyPhase(StudyPhase.PHASE_1);
                 dto.setScoreScale10(new BigDecimal("8.0"));
-                dto.setScoreScale4(new BigDecimal("3.2"));
+                dto.setScoreScale4(new BigDecimal("3.5"));
                 dto.setLetterGrade("B+");
 
                 try {
@@ -179,4 +206,3 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
         }
     }
 }
-

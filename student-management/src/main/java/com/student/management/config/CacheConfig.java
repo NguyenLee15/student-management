@@ -15,10 +15,17 @@ public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("faculties", "academicYears", "subjects", "systemSummary");
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager(
+                "faculties", 
+                "academicYears", 
+                "subjects", 
+                "classrooms", 
+                "systemSummary"
+        );
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(30, TimeUnit.MINUTES)
-                .maximumSize(500));
+                .maximumSize(1000)
+                .recordStats());
         return cacheManager;
     }
 }

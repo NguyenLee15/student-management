@@ -18,5 +18,6 @@ public class SubjectResponseDto {
     private Integer credits;
     private String facultyId;
     private String facultyName;
+    private String prerequisiteSubjectId;
+    private String prerequisiteSubjectName;
 }
-

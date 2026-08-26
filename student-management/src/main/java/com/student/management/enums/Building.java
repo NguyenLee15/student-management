@@ -1,6 +1,10 @@
 package com.student.management.enums;
 
 public enum Building {
+    A("Tòa A"),
+    B("Tòa B"),
+    C("Tòa C"),
+    D("Tòa D"),
     PLC("PLC"),
     EAUT("EAUT"),
     DTD("DTD"),
@@ -23,4 +27,3 @@ public enum Building {
         return name;
     }
 }
-

@@ -7,22 +7,20 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "academic_grades", 
-       uniqueConstraints = @UniqueConstraint(
-           columnNames = {"student_id", "subject_id", "semester", "academic_year", "study_phase"}))
-@Data
+@Table(name = "academic_grades")
+@SQLRestriction("deleted = false")
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AcademicGrade {
+public class AcademicGrade extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,6 +51,10 @@ public class AcademicGrade {
     @NotNull(message = "Study phase is required")
     private StudyPhase studyPhase;
 
+    @Column(name = "attempt_number", nullable = false)
+    @Builder.Default
+    private Integer attemptNumber = 1;
+
     @DecimalMin(value = "0.0", inclusive = true, message = "Scale 10 score must be >= 0")
     @DecimalMax(value = "10.0", inclusive = true, message = "Scale 10 score must be <= 10")
     @Column(name = "score_scale_10", precision = 3, scale = 1)
@@ -66,4 +68,3 @@ public class AcademicGrade {
     @Column(name = "letter_grade", nullable = false, length = 5)
     private String letterGrade;
 }
-

@@ -3,6 +3,7 @@ package com.student.management.service;
 import com.student.management.dto.req.AcademicGradeRequestDto;
 import com.student.management.dto.req.AcademicGradeUpdateDto;
 import com.student.management.dto.resp.AcademicGradeResponseDto;
+import com.student.management.dto.resp.TranscriptResponseDto;
 import com.student.management.enums.Semester;
 import com.student.management.enums.StudyPhase;
 import org.springframework.data.domain.Page;
@@ -19,10 +20,10 @@ public interface AcademicGradeService {
             String studentId, String subjectId, Semester semester, String academicYear, StudyPhase studyPhase, Pageable pageable
     );
     List<AcademicGradeResponseDto> getByStudentId(String studentId);
+    TranscriptResponseDto getTranscriptByStudentId(String studentId);
     AcademicGradeResponseDto create(AcademicGradeRequestDto dto);
     AcademicGradeResponseDto update(Integer gradeId, AcademicGradeUpdateDto dto);
     void delete(Integer gradeId);
     List<AcademicGradeResponseDto> importFromExcel(MultipartFile file);
     ByteArrayInputStream exportToExcel(List<AcademicGradeResponseDto> grades);
 }
-

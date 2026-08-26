@@ -99,7 +99,7 @@ public class TeacherServiceImpl implements TeacherService {
     @Transactional
     public List<TeacherResponseDto> importFromExcel(MultipartFile file) {
         List<TeacherResponseDto> list = new ArrayList<>();
-        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+        try (Workbook workbook = com.student.management.util.ExcelValidationUtils.validateAndOpenWorkbook(file)) {
             Sheet sheet = workbook.getSheetAt(0);
             DataFormatter formatter = new DataFormatter();
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {

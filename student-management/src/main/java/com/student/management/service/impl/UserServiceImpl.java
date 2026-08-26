@@ -1,5 +1,6 @@
 package com.student.management.service.impl;
 
+import com.student.management.dto.req.ChangePasswordDto;
 import com.student.management.dto.req.UserRequestDto;
 import com.student.management.dto.resp.UserResponseDto;
 import com.student.management.entity.User;
@@ -74,10 +75,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void changePassword(String userName, ChangePasswordDto dto) {
+        User user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new NotFoundException("User not found: " + userName));
+
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Mật khẩu hiện tại không chính xác");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
     public void delete(String userName) {
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new NotFoundException("User not found: " + userName));
         userRepository.delete(user);
     }
 }
-

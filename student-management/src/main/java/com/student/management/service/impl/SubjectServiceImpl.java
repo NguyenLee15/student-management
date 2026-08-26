@@ -86,7 +86,17 @@ public class SubjectServiceImpl implements SubjectService {
         }
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
                 .orElseThrow(() -> new NotFoundException("Faculty not found: " + dto.getFacultyId()));
-        Subject subject = SubjectMapper.toEntity(dto, faculty);
+        
+        Subject prerequisiteSubject = null;
+        if (dto.getPrerequisiteSubjectId() != null && !dto.getPrerequisiteSubjectId().isBlank()) {
+            if (dto.getPrerequisiteSubjectId().equalsIgnoreCase(dto.getSubjectId())) {
+                throw new IllegalArgumentException("Môn học không thể tự làm môn tiên quyết của chính nó");
+            }
+            prerequisiteSubject = subjectRepository.findById(dto.getPrerequisiteSubjectId())
+                    .orElseThrow(() -> new NotFoundException("Môn tiên quyết không tồn tại: " + dto.getPrerequisiteSubjectId()));
+        }
+
+        Subject subject = SubjectMapper.toEntity(dto, faculty, prerequisiteSubject);
         return SubjectMapper.toDto(subjectRepository.save(subject));
     }
 
@@ -98,11 +108,22 @@ public class SubjectServiceImpl implements SubjectService {
                 .orElseThrow(() -> new NotFoundException("Subject not found: " + subjectId));
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
                 .orElseThrow(() -> new NotFoundException("Faculty not found: " + dto.getFacultyId()));
+
+        Subject prerequisiteSubject = null;
+        if (dto.getPrerequisiteSubjectId() != null && !dto.getPrerequisiteSubjectId().isBlank()) {
+            if (dto.getPrerequisiteSubjectId().equalsIgnoreCase(subjectId)) {
+                throw new IllegalArgumentException("Môn học không thể tự làm môn tiên quyết của chính nó");
+            }
+            prerequisiteSubject = subjectRepository.findById(dto.getPrerequisiteSubjectId())
+                    .orElseThrow(() -> new NotFoundException("Môn tiên quyết không tồn tại: " + dto.getPrerequisiteSubjectId()));
+        }
+
         subject.setSubjectName(dto.getSubjectName());
         subject.setSubjectType(dto.getSubjectType());
         subject.setTuitionPerCredit(dto.getTuitionPerCredit());
         subject.setCredits(dto.getCredits());
         subject.setFaculty(faculty);
+        subject.setPrerequisiteSubject(prerequisiteSubject);
         return SubjectMapper.toDto(subjectRepository.save(subject));
     }
 
@@ -121,7 +142,7 @@ public class SubjectServiceImpl implements SubjectService {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Subjects");
             Row header = sheet.createRow(0);
-            String[] cols = {"Subject ID", "Subject Name", "Type", "Tuition/Credit", "Credits", "Faculty"};
+            String[] cols = {"Mã Môn Học", "Tên Môn Học", "Loại Học Phần", "Học Phí/Tín Chỉ", "Số Tín Chỉ", "Khoa Quản Lý", "Môn Tiên Quyết"};
             for (int i = 0; i < cols.length; i++) {
                 header.createCell(i).setCellValue(cols[i]);
             }
@@ -134,6 +155,7 @@ public class SubjectServiceImpl implements SubjectService {
                 r.createCell(3).setCellValue(s.getTuitionPerCredit() != null ? s.getTuitionPerCredit() : 0);
                 r.createCell(4).setCellValue(s.getCredits() != null ? s.getCredits() : 0);
                 r.createCell(5).setCellValue(s.getFacultyName() != null ? s.getFacultyName() : "");
+                r.createCell(6).setCellValue(s.getPrerequisiteSubjectName() != null ? s.getPrerequisiteSubjectName() : "Không");
             }
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
@@ -143,4 +165,3 @@ public class SubjectServiceImpl implements SubjectService {
         }
     }
 }
-

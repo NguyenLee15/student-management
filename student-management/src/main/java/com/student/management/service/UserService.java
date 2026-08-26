@@ -1,5 +1,6 @@
 package com.student.management.service;
 
+import com.student.management.dto.req.ChangePasswordDto;
 import com.student.management.dto.req.UserRequestDto;
 import com.student.management.dto.resp.UserResponseDto;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,6 @@ public interface UserService {
     UserResponseDto getByUserName(String userName);
     UserResponseDto create(UserRequestDto dto);
     UserResponseDto saveOrUpdate(UserRequestDto dto);
+    void changePassword(String userName, ChangePasswordDto dto);
     void delete(String userName);
 }
-

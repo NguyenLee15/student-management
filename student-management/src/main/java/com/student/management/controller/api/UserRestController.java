@@ -1,5 +1,6 @@
 package com.student.management.controller.api;
 
+import com.student.management.dto.req.ChangePasswordDto;
 import com.student.management.dto.req.UserRequestDto;
 import com.student.management.dto.resp.ApiResponse;
 import com.student.management.dto.resp.UserResponseDto;
@@ -13,15 +14,34 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-@Tag(name = "Users API", description = "Endpoints for managing user accounts and roles")
+@Tag(name = "Users API", description = "Endpoints for managing user accounts, profiles and roles")
 public class UserRestController {
 
     private final UserService userService;
+
+    @GetMapping("/me")
+    @Operation(summary = "Lấy thông tin tài khoản đang đăng nhập")
+    public ResponseEntity<ApiResponse<UserResponseDto>> getCurrentUser(Authentication authentication) {
+        String currentUsername = authentication.getName();
+        UserResponseDto user = userService.getByUserName(currentUsername);
+        return ResponseEntity.ok(ApiResponse.success("Thông tin tài khoản", user));
+    }
+
+    @PutMapping("/change-password")
+    @Operation(summary = "Đổi mật khẩu tài khoản đang đăng nhập")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordDto dto) {
+        String currentUsername = authentication.getName();
+        userService.changePassword(currentUsername, dto);
+        return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công", null));
+    }
 
     @GetMapping
     @Operation(summary = "Get all users with pagination")
@@ -52,9 +72,9 @@ public class UserRestController {
 
     @DeleteMapping("/{userName}")
     @Operation(summary = "Delete user by username")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String userName) {
         userService.delete(userName);
         return ResponseEntity.ok(ApiResponse.success("User deleted successfully", null));
     }
 }
-

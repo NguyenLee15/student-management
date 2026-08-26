@@ -12,8 +12,16 @@ import com.student.management.repository.UserRepository;
 
 import org.springframework.context.annotation.Profile;
 
+import jakarta.annotation.PostConstruct;
+import java.util.TimeZone;
+
 @SpringBootApplication
 public class StudentManagementApplication {
+
+	@PostConstruct
+	public void init() {
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(StudentManagementApplication.class, args);

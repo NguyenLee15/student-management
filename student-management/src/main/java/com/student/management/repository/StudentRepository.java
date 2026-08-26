@@ -16,6 +16,10 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})
     Page<Student> findAll(Pageable pageable);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Student s WHERE s.studentId = :studentId")
+    java.util.Optional<Student> findByIdForUpdate(@Param("studentId") String studentId);
+
     @Query("SELECT s FROM Student s WHERE s.studentClass.classId = :classId")
     List<Student> findByClassId(@Param("classId") String classId);
 

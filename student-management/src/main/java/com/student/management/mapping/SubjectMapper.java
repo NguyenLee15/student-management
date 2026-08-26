@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class SubjectMapper {
 
-    public static Subject toEntity(SubjectRequestDto dto, Faculty faculty) {
+    public static Subject toEntity(SubjectRequestDto dto, Faculty faculty, Subject prerequisiteSubject) {
         return Subject.builder()
                 .subjectId(dto.getSubjectId())
                 .subjectName(dto.getSubjectName())
@@ -18,6 +18,7 @@ public class SubjectMapper {
                 .tuitionPerCredit(dto.getTuitionPerCredit())
                 .credits(dto.getCredits())
                 .faculty(faculty)
+                .prerequisiteSubject(prerequisiteSubject)
                 .build();
     }
 
@@ -31,6 +32,8 @@ public class SubjectMapper {
                 .credits(subject.getCredits())
                 .facultyId(subject.getFaculty() != null ? subject.getFaculty().getFacultyId() : null)
                 .facultyName(subject.getFaculty() != null ? subject.getFaculty().getFacultyName() : null)
+                .prerequisiteSubjectId(subject.getPrerequisiteSubject() != null ? subject.getPrerequisiteSubject().getSubjectId() : null)
+                .prerequisiteSubjectName(subject.getPrerequisiteSubject() != null ? subject.getPrerequisiteSubject().getSubjectName() : null)
                 .build();
     }
 
@@ -39,4 +42,3 @@ public class SubjectMapper {
         return list.stream().map(SubjectMapper::toDto).collect(Collectors.toList());
     }
 }
-

@@ -4,6 +4,7 @@ import com.student.management.dto.req.AcademicGradeRequestDto;
 import com.student.management.dto.req.AcademicGradeUpdateDto;
 import com.student.management.dto.resp.AcademicGradeResponseDto;
 import com.student.management.dto.resp.ApiResponse;
+import com.student.management.dto.resp.TranscriptResponseDto;
 import com.student.management.enums.Semester;
 import com.student.management.enums.StudyPhase;
 import com.student.management.service.AcademicGradeService;
@@ -21,14 +22,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/academic-grades")
 @RequiredArgsConstructor
-@Tag(name = "Academic Grades API", description = "Endpoints for managing student academic grades and scores")
+@Tag(name = "Academic Grades API", description = "Endpoints for managing student academic grades and Circular 08 transcripts")
 public class AcademicGradeRestController {
 
     private final AcademicGradeService academicGradeService;
 
     @GetMapping
     @Operation(summary = "Get all academic grades with filters and pagination")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER') or (hasRole('STUDENT') and #studentId != null and @securityService.isSelfStudent(#studentId))")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Page<AcademicGradeResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -45,9 +46,16 @@ public class AcademicGradeRestController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get grade by ID")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER') or hasRole('STUDENT')") // In a real app, verify the grade belongs to the student in the service layer
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(ApiResponse.success(academicGradeService.getById(id)));
+    }
+
+    @GetMapping("/transcript/{studentId}")
+    @Operation(summary = "Get full student academic transcript according to Circular 08/2021/TT-BGDĐT")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
+    public ResponseEntity<ApiResponse<TranscriptResponseDto>> getTranscript(@PathVariable String studentId) {
+        return ResponseEntity.ok(ApiResponse.success("Transcript calculated successfully", academicGradeService.getTranscriptByStudentId(studentId)));
     }
 
     @PostMapping
@@ -73,4 +81,3 @@ public class AcademicGradeRestController {
         return ResponseEntity.ok(ApiResponse.success("Grade deleted successfully", null));
     }
 }
-

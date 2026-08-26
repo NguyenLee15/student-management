@@ -1,8 +1,11 @@
 package com.student.management.enums;
 
 public enum SubjectType {
-    MAJOR("Chuyên Ngành"),
-    GENERAL_EDUCATION("Giáo dục đại cương");
+    GENERAL_EDUCATION("Giáo dục đại cương"),
+    BASIC("Cơ sở ngành"),
+    MAJOR("Chuyên ngành"),
+    SPECIALIZED("Chuyên sâu"),
+    ELECTIVE("Tự chọn");
 
     private final String displayName;
 
@@ -14,4 +17,3 @@ public enum SubjectType {
         return displayName;
     }
 }
-

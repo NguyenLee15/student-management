@@ -23,6 +23,20 @@ public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException ex) {
+        logger.warn("Business Rule Violation [{}]: {}", ex.getErrorCode().getCode(), ex.getMessage());
+        HttpStatus status = switch (ex.getErrorCode()) {
+            case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
+            case ACCESS_DENIED -> HttpStatus.FORBIDDEN;
+            case RESOURCE_NOT_FOUND, STUDENT_NOT_FOUND, TEACHER_NOT_FOUND, USER_NOT_FOUND, CLASS_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case REGISTRATION_CLASS_FULL, REGISTRATION_SCHEDULE_CONFLICT, REGISTRATION_DUPLICATE_SUBJECT, DUPLICATE_REQUEST_IN_PROGRESS -> HttpStatus.CONFLICT;
+            default -> HttpStatus.BAD_REQUEST;
+        };
+        return ResponseEntity.status(status)
+                .body(ApiResponse.error(status.value(), ex.getErrorCode().getCode(), ex.getMessage(), ex.getDetails()));
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotFound(NotFoundException ex) {
         logger.warn("Resource Not Found: {}", ex.getMessage());

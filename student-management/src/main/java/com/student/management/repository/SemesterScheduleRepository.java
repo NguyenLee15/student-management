@@ -39,5 +39,11 @@ public interface SemesterScheduleRepository extends JpaRepository<SemesterSchedu
     @Query("SELECT ss FROM SemesterSchedule ss WHERE ss.teacher.teacherId = :teacherId")
     @EntityGraph(attributePaths = {"creditClass", "subject", "teacher", "classroom"})
     List<SemesterSchedule> findByTeacherId(@Param("teacherId") String teacherId);
+
+    @EntityGraph(attributePaths = {"creditClass", "subject", "teacher", "classroom"})
+    List<SemesterSchedule> findByCreditClass_CreditClassIdIn(List<Long> creditClassIds);
+
+    @EntityGraph(attributePaths = {"creditClass", "subject", "teacher", "classroom"})
+    List<SemesterSchedule> findByCreditClass_CreditClassId(Long creditClassId);
 }
 

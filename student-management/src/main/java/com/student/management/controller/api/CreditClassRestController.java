@@ -15,12 +15,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/credit-classes")
 @RequiredArgsConstructor
-@Tag(name = "Credit Classes API", description = "Endpoints for managing credit classes and student enrollments")
+@Tag(name = "Credit Classes API", description = "Endpoints for managing credit classes and high-concurrency student enrollments")
 public class CreditClassRestController {
 
     private final CreditClassService creditClassService;
@@ -44,8 +42,8 @@ public class CreditClassRestController {
     @GetMapping("/{id}")
     @Operation(summary = "Get credit class by ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
-    public ResponseEntity<ApiResponse<CreditClassResponseDto>> getById(@PathVariable String id) {
-        return ResponseEntity.ok(ApiResponse.success(creditClassService.getById(Long.valueOf(id))));
+    public ResponseEntity<ApiResponse<CreditClassResponseDto>> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(creditClassService.getById(id)));
     }
 
     @PostMapping
@@ -59,31 +57,31 @@ public class CreditClassRestController {
     @PutMapping("/{id}")
     @Operation(summary = "Update credit class")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    public ResponseEntity<ApiResponse<CreditClassResponseDto>> update(@PathVariable String id, @Valid @RequestBody CreditClassRequestDto dto) {
-        return ResponseEntity.ok(ApiResponse.success("Credit class updated successfully", creditClassService.update(Long.valueOf(id), dto)));
+    public ResponseEntity<ApiResponse<CreditClassResponseDto>> update(@PathVariable Long id, @Valid @RequestBody CreditClassRequestDto dto) {
+        return ResponseEntity.ok(ApiResponse.success("Credit class updated successfully", creditClassService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete credit class")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
-        creditClassService.delete(Long.valueOf(id));
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+        creditClassService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Credit class deleted successfully", null));
     }
 
     @PostMapping("/{classId}/students/{studentId}")
-    @Operation(summary = "Add student to credit class")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    public ResponseEntity<ApiResponse<Void>> addStudent(@PathVariable String classId, @PathVariable String studentId) {
-        creditClassService.addStudentToCreditClass(Long.valueOf(classId), studentId);
-        return ResponseEntity.ok(ApiResponse.success("Student enrolled successfully", null));
+    @Operation(summary = "Đăng ký học phần (Student enrollment with Optimistic Locking)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
+    public ResponseEntity<ApiResponse<Void>> addStudent(@PathVariable Long classId, @PathVariable String studentId) {
+        creditClassService.addStudentToCreditClass(classId, studentId);
+        return ResponseEntity.ok(ApiResponse.success("Đăng ký lớp tín chỉ thành công", null));
     }
 
     @DeleteMapping("/{classId}/students/{studentId}")
-    @Operation(summary = "Remove student from credit class")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    public ResponseEntity<ApiResponse<Void>> removeStudent(@PathVariable String classId, @PathVariable String studentId) {
-        creditClassService.removeStudentFromCreditClass(Long.valueOf(classId), studentId);
-        return ResponseEntity.ok(ApiResponse.success("Student removed successfully", null));
+    @Operation(summary = "Hủy đăng ký học phần (Student unenrollment)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
+    public ResponseEntity<ApiResponse<Void>> removeStudent(@PathVariable Long classId, @PathVariable String studentId) {
+        creditClassService.removeStudentFromCreditClass(classId, studentId);
+        return ResponseEntity.ok(ApiResponse.success("Hủy đăng ký lớp tín chỉ thành công", null));
     }
 }

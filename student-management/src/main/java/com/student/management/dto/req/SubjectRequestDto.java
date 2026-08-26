@@ -37,5 +37,6 @@ public class SubjectRequestDto {
 
     @NotBlank(message = "Faculty ID cannot be blank")
     private String facultyId;
-}
 
+    private String prerequisiteSubjectId;
+}

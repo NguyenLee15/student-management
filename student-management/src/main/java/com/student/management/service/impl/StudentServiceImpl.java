@@ -177,7 +177,7 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     public List<StudentResponseDto> importFromExcel(MultipartFile file) {
         List<StudentResponseDto> imported = new ArrayList<>();
-        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+        try (Workbook workbook = com.student.management.util.ExcelValidationUtils.validateAndOpenWorkbook(file)) {
             Sheet sheet = workbook.getSheetAt(0);
             DataFormatter formatter = new DataFormatter();
 
