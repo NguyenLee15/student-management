@@ -145,3 +145,50 @@ export const systemApi = {
   getPrometheus: () => axiosClient.get('/actuator/prometheus'),
 };
 
+// 16. Registration Periods API
+export const registrationPeriodApi = {
+  getAll: () => axiosClient.get('/registration-periods'),
+  getActive: () => axiosClient.get('/registration-periods/active'),
+  getById: (id) => axiosClient.get(`/registration-periods/${id}`),
+  create: (data) => axiosClient.post('/registration-periods', data),
+  update: (id, data) => axiosClient.put(`/registration-periods/${id}`, data),
+  toggleActive: (id) => axiosClient.patch(`/registration-periods/${id}/toggle-active`),
+  delete: (id) => axiosClient.delete(`/registration-periods/${id}`),
+};
+
+// 17. Tuition Policies API
+export const tuitionPolicyApi = {
+  getAll: () => axiosClient.get('/tuition-policies'),
+  getBySemester: (semesterId) => axiosClient.get(`/tuition-policies/semester/${semesterId}`),
+  create: (data) => axiosClient.post('/tuition-policies', data),
+  update: (id, data) => axiosClient.put(`/tuition-policies/${id}`, data),
+  toggleActive: (id) => axiosClient.patch(`/tuition-policies/${id}/toggle-active`),
+  delete: (id) => axiosClient.delete(`/tuition-policies/${id}`),
+};
+
+// 18. Student Course Registration API
+export const studentRegistrationApi = {
+  getAvailableClasses: (semesterId) => axiosClient.get('/students/registration/available-classes', { params: { semesterId } }),
+  validateCart: (creditClassIds) => axiosClient.post('/students/registration/cart-validate', { creditClassIds }),
+  registerBatch: (creditClassIds, idempotencyKey) => axiosClient.post('/students/registration/register-batch', { creditClassIds, idempotencyKey }),
+  dropCourse: (enrollmentId) => axiosClient.post(`/students/registration/drop-class/${enrollmentId}`),
+  getMyEnrollments: (semesterId) => axiosClient.get('/students/registration/my-enrollments', { params: { semesterId } }),
+};
+
+// 19. Student Personal Portal API
+export const studentPortalApi = {
+  getMyOverview: () => axiosClient.get('/students/portal/me/overview'),
+  getMyTimetable: (semesterId) => axiosClient.get('/students/portal/me/timetable', { params: { semesterId } }),
+  getMyTuition: (semesterId) => axiosClient.get('/students/portal/me/tuition', { params: { semesterId } }),
+  getAllMyTuition: () => axiosClient.get('/students/portal/me/tuition/all'),
+  payTuition: (data) => axiosClient.post('/students/portal/me/tuition/pay', data),
+};
+
+// 20. Payment API (PayOS VietQR)
+export const paymentApi = {
+  createCheckout: (data) => axiosClient.post('/payments/create-checkout', data),
+  syncStatus: (orderCode) => axiosClient.post(`/payments/sync-status/${orderCode}`),
+  getMyTransactions: () => axiosClient.get('/payments/my-transactions'),
+};
+
+

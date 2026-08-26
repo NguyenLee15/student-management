@@ -1,0 +1,147 @@
+import React, { useState } from 'react';
+import { 
+  LayoutDashboard, BookOpen, Calendar, Award, 
+  CreditCard, LogOut, User, Bell, GraduationCap, 
+  ChevronRight, Menu, X, Shield 
+} from 'lucide-react';
+import StudentDashboardView from '../dashboard/StudentDashboardView';
+import CourseRegistrationView from '../registration/CourseRegistrationView';
+import MatrixTimetableView from '../timetable/MatrixTimetableView';
+import StudentTranscriptView from '../grades/StudentTranscriptView';
+import TuitionLedgerView from '../tuition/TuitionLedgerView';
+
+export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin }) {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navItems = [
+    { id: 'dashboard', label: 'Bảng Tổng Quan', icon: LayoutDashboard },
+    { id: 'registration', label: 'Đăng Ký Học Phần', icon: BookOpen, badge: 'Đang mở' },
+    { id: 'timetable', label: 'Thời Khóa Biểu', icon: Calendar },
+    { id: 'grades', label: 'Bảng Điểm Học Tập', icon: Award },
+    { id: 'tuition', label: 'Sổ Cái Học Phí', icon: CreditCard },
+  ];
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* Top Navigation Bar */}
+      <header className="sticky top-0 z-30 bg-slate-900 text-white border-b border-slate-800 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-black text-white shadow-lg shadow-blue-500/30">
+                <GraduationCap className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="font-black text-lg tracking-tight bg-gradient-to-r from-white via-blue-100 to-slate-300 bg-clip-text text-transparent">
+                  EduPortal AI
+                </span>
+                <span className="hidden sm:inline-block ml-2 px-2 py-0.5 bg-blue-500/20 text-blue-300 text-[10px] font-bold rounded-full border border-blue-400/30">
+                  Cổng Sinh Viên
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Switch to Admin if user has Admin role */}
+            {user?.roles?.some(r => r === 'ADMIN' || r === 'ROLE_ADMIN') && (
+              <button
+                onClick={onSwitchToAdmin}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold rounded-lg border border-slate-700 transition-colors"
+              >
+                <Shield className="w-3.5 h-3.5 text-amber-400" />
+                <span>Quản Trị Admin</span>
+              </button>
+            )}
+
+            <div className="flex items-center gap-2.5 pl-3 border-l border-slate-800">
+              <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'S'}
+              </div>
+              <div className="hidden md:block text-left">
+                <div className="text-xs font-bold text-white truncate max-w-[120px]">
+                  {user?.fullName || 'Sinh viên'}
+                </div>
+                <div className="text-[10px] text-slate-400 font-mono">
+                  {user?.userName || 'SV001'}
+                </div>
+              </div>
+              <button
+                onClick={onLogout}
+                className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors ml-1"
+                title="Đăng xuất"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col md:flex-row gap-6 w-full">
+        {/* Sidebar Navigation */}
+        <aside
+          className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 p-4 md:static md:w-60 md:block md:border-none md:p-0 md:bg-transparent transition-transform duration-200 ${
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          }`}
+        >
+          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold transition-all ${
+                    isActive
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span
+                      className={`px-1.5 py-0.5 text-[10px] font-black rounded-md ${
+                        isActive ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </aside>
+
+        {/* View Content Area */}
+        <main className="flex-1 min-w-0">
+          {activeTab === 'dashboard' && (
+            <StudentDashboardView onNavigateTab={(tab) => setActiveTab(tab)} />
+          )}
+          {activeTab === 'registration' && <CourseRegistrationView />}
+          {activeTab === 'timetable' && <MatrixTimetableView />}
+          {activeTab === 'grades' && <StudentTranscriptView />}
+          {activeTab === 'tuition' && <TuitionLedgerView />}
+        </main>
+      </div>
+    </div>
+  );
+}

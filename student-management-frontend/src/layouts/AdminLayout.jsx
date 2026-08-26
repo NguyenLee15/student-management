@@ -14,6 +14,8 @@ import ScheduleModule from '../components/modules/ScheduleModule';
 import GradeModule from '../components/modules/GradeModule';
 import UserModule from '../components/modules/UserModule';
 import AuditLogModule from '../components/modules/AuditLogModule';
+import StudentPortalModule from '../components/modules/StudentPortalModule';
+import TeacherPortalModule from '../components/modules/TeacherPortalModule';
 
 export default function AdminLayout({
   currentUser,
@@ -88,6 +90,14 @@ export default function AdminLayout({
 
         {/* 📊 MODULE ROUTER */}
         <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
+          {activeTab === 'student-portal' && (
+            <StudentPortalModule onNotify={showToast} currentUser={currentUser} />
+          )}
+
+          {activeTab === 'teacher-portal' && (
+            <TeacherPortalModule onNotify={showToast} currentUser={currentUser} />
+          )}
+
           {activeTab === 'overview' && (
             <DashboardModule
               stats={counts}

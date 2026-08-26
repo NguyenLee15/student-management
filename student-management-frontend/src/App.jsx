@@ -7,7 +7,7 @@ import StudentLayout from './layouts/StudentLayout';
 import TeacherLayout from './layouts/TeacherLayout';
 import AdminLayout from './layouts/AdminLayout';
 
-import { studentApi, teacherApi, facultyApi, subjectApi } from './api';
+import { authApi, studentApi, teacherApi, facultyApi, subjectApi } from './api';
 
 export default function App() {
   const [isBackendConnected, setIsBackendConnected] = useState(false);
@@ -28,8 +28,18 @@ export default function App() {
   // Admin Simulator Perspective (cho phép Admin xem thử giao diện Sinh viên / Giảng viên)
   const [simulatedRole, setSimulatedRole] = useState(null);
 
+  // Normalize Role Helper
+  const normalizeRole = (role) => {
+    if (!role) return 'ROLE_ADMIN';
+    const r = String(role).toUpperCase();
+    if (r === 'ADMIN' || r === 'ROLE_ADMIN') return 'ROLE_ADMIN';
+    if (r === 'TEACHER' || r === 'ROLE_TEACHER') return 'ROLE_TEACHER';
+    if (r === 'STUDENT' || r === 'ROLE_STUDENT') return 'ROLE_STUDENT';
+    return 'ROLE_ADMIN';
+  };
+
   // Effective Role currently being rendered
-  const effectiveRole = simulatedRole || currentUser?.role || 'ROLE_ADMIN';
+  const effectiveRole = normalizeRole(simulatedRole || currentUser?.role);
 
   // Global Counts / Badges for Admin
   const [counts, setCounts] = useState({
@@ -85,6 +95,23 @@ export default function App() {
   const checkHealthAndLoadStats = async () => {
     setApiChecking(true);
     try {
+      // Auto-authenticate default demo session if no token is present
+      if (!localStorage.getItem('jwt_token')) {
+        try {
+          const authRes = await authApi.login({ userName: 'admin', password: 'admin123' });
+          const payload = authRes.data || authRes;
+          if (payload && payload.token) {
+            localStorage.setItem('jwt_token', payload.token);
+            if (payload.refreshToken) localStorage.setItem('refresh_token', payload.refreshToken);
+            const user = { username: payload.userName || 'admin', role: payload.role || 'ROLE_ADMIN' };
+            localStorage.setItem('user_info', JSON.stringify(user));
+            setCurrentUser(user);
+          }
+        } catch (authErr) {
+          console.warn('Auto auth skipped:', authErr);
+        }
+      }
+
       const [stRes, tRes, fRes, subRes] = await Promise.allSettled([
         studentApi.getAll({ page: 0, size: 1 }),
         teacherApi.getAll({ page: 0, size: 1 }),

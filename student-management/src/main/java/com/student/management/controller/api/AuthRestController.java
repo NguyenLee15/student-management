@@ -13,10 +13,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -34,8 +38,10 @@ public class AuthRestController {
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/login")
-    @Operation(summary = "Đăng nhập lấy JWT Bearer Token & Refresh Token")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> login(@Valid @RequestBody LoginRequestDto loginRequest) {
+    @Operation(summary = "Đăng nhập lấy JWT Bearer Token & Refresh Token (Cookie & Body)")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> login(
+            @Valid @RequestBody LoginRequestDto loginRequest,
+            HttpServletResponse response) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword())
         );
@@ -44,6 +50,15 @@ public class AuthRestController {
 
         String token = jwtTokenProvider.generateToken(user.getUserName(), user.getRole().name(), user.getStudentId());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getUserName());
+
+        // Set Secure HttpOnly Cookie for Refresh Token
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken.getToken())
+                .httpOnly(true)
+                .path("/api/v1/auth")
+                .maxAge(7 * 24 * 3600)
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("token", token);
@@ -66,11 +81,20 @@ public class AuthRestController {
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "Làm mới Access Token với cơ chế Refresh Token Rotation")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> refreshToken(@Valid @RequestBody TokenRefreshRequestDto request) {
-        String requestRefreshToken = request.getRefreshToken();
+    @Operation(summary = "Làm mới Access Token với cơ chế Refresh Token Rotation (Hỗ trợ Cookie & Request Body)")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> refreshToken(
+            @RequestBody(required = false) TokenRefreshRequestDto request,
+            @CookieValue(name = "refreshToken", required = false) String cookieRefreshToken,
+            HttpServletResponse response) {
+        String tokenStr = (request != null && StringUtils.hasText(request.getRefreshToken()))
+                ? request.getRefreshToken()
+                : cookieRefreshToken;
 
-        RefreshToken oldToken = refreshTokenService.findByToken(requestRefreshToken)
+        if (!StringUtils.hasText(tokenStr)) {
+            throw new IllegalArgumentException("Refresh token không được để trống trong Cookie hoặc Request Body!");
+        }
+
+        RefreshToken oldToken = refreshTokenService.findByToken(tokenStr)
                 .map(refreshTokenService::verifyExpiration)
                 .orElseThrow(() -> new IllegalArgumentException("Refresh token không hợp lệ hoặc đã hết hạn!"));
 
@@ -79,6 +103,15 @@ public class AuthRestController {
         // Refresh token rotation: Revoke old token and create new one
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getUserName());
         String newAccessToken = jwtTokenProvider.generateToken(user.getUserName(), user.getRole().name(), user.getStudentId());
+
+        // Update Cookie
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefreshToken.getToken())
+                .httpOnly(true)
+                .path("/api/v1/auth")
+                .maxAge(7 * 24 * 3600)
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("token", newAccessToken);
@@ -93,10 +126,29 @@ public class AuthRestController {
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "Đăng xuất và thu hồi Refresh Token")
-    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody TokenRefreshRequestDto request) {
-        refreshTokenService.findByToken(request.getRefreshToken())
-                .ifPresent(token -> refreshTokenService.revokeByUserName(token.getUserName()));
+    @Operation(summary = "Đăng xuất và thu hồi Refresh Token (Cookie & Body)")
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @RequestBody(required = false) TokenRefreshRequestDto request,
+            @CookieValue(name = "refreshToken", required = false) String cookieRefreshToken,
+            HttpServletResponse response) {
+        String tokenStr = (request != null && StringUtils.hasText(request.getRefreshToken()))
+                ? request.getRefreshToken()
+                : cookieRefreshToken;
+
+        if (StringUtils.hasText(tokenStr)) {
+            refreshTokenService.findByToken(tokenStr)
+                    .ifPresent(token -> refreshTokenService.revokeByUserName(token.getUserName()));
+        }
+
+        // Clear Cookie
+        ResponseCookie clearCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .path("/api/v1/auth")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, clearCookie.toString());
+
         return ResponseEntity.ok(ApiResponse.success("Đăng xuất thành công", null));
     }
 }

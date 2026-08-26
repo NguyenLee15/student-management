@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: eduportal-mysql-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-student_management_db}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME:-eduportal_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    # Security: Database is NOT exposed to the public Internet
+    networks:
+      - eduportal-net
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  backend:
+    build:
+      context: ./student-management
+      dockerfile: Dockerfile
+    container_name: eduportal-backend-prod
+    restart: unless-stopped
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_URL=jdbc:mysql://mysqldb:3306/${DB_NAME:-student_management_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+      - DB_USERNAME=${DB_USERNAME:-eduportal_user}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-900000}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-604800000}
+      - PAYOS_CLIENT_ID=${PAYOS_CLIENT_ID:-}
+      - PAYOS_API_KEY=${PAYOS_API_KEY:-}
+      - PAYOS_CHECKSUM_KEY=${PAYOS_CHECKSUM_KEY:-}
+      - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - INITIAL_ADMIN_USERNAME=${INITIAL_ADMIN_USERNAME:-}
+      - INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+    networks:
+      - eduportal-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '1.5'
+
+  nginx:
+    image: nginx:alpine
+    container_name: eduportal-nginx-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./student-management-frontend/dist:/usr/share/nginx/html:ro
+      - ./nginx/maintenance.html:/usr/share/nginx/html/maintenance.html:ro
+      - ./nginx/production.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+    depends_on:
+      - backend
+    networks:
+      - eduportal-net
+
+networks:
+  eduportal-net:
+    driver: bridge
+
+volumes:
+  mysql_prod_data:
+

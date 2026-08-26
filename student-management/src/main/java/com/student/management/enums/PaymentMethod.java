@@ -1,6 +1,7 @@
 package com.student.management.enums;
 
 public enum PaymentMethod {
+    PAYOS("Cổng thanh toán PayOS (VietQR)"),
     BANK_TRANSFER("Chuyển khoản Ngân hàng"),
     VNPAY("Cổng VNPAY-QR"),
     MOMO("Ví điện tử MoMo"),

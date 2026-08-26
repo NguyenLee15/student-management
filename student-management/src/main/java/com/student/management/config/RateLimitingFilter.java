@@ -44,11 +44,17 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             
         String path = request.getRequestURI();
         
+        // Exclude PayOS Webhook from rate limiting to prevent dropping payment confirmations
+        if ("/api/v1/payments/payos-webhook".equals(path)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (path.startsWith("/api/")) {
             String ip = request.getRemoteAddr();
-            boolean isAuth = path.startsWith("/api/v1/auth/");
+            boolean isAuthOrPayment = path.startsWith("/api/v1/auth/") || path.contains("/payments/create-checkout");
             
-            Bucket bucket = resolveBucket(ip, isAuth);
+            Bucket bucket = resolveBucket(ip, isAuthOrPayment);
             
             if (bucket.tryConsume(1)) {
                 filterChain.doFilter(request, response);

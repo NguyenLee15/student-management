@@ -7,7 +7,8 @@ export default function Header({
   onRefreshHealth, 
   currentUser, 
   onOpenLogin, 
-  onLogout 
+  onLogout,
+  onOpenCommand
 }) {
   return (
     <header className="sticky top-0 z-40 bg-slate-900/85 backdrop-blur-xl border-b border-slate-800/80 px-6 py-3 flex items-center justify-between">

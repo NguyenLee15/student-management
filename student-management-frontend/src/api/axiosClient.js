@@ -5,6 +5,7 @@ const axiosClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
   timeout: 15000,
 });
 
@@ -63,22 +64,14 @@ axiosClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem('refresh_token');
-      if (!refreshToken) {
-        handleLogout();
-        return Promise.reject({ status, message, raw: error });
-      }
-
       return new Promise(function (resolve, reject) {
         axios
-          .post('/api/v1/auth/refresh', { refreshToken })
+          .post('/api/v1/auth/refresh', {}, { withCredentials: true })
           .then(({ data }) => {
             const token = data?.data?.token;
-            const newRefreshToken = data?.data?.refreshToken;
             
             if (token) {
               localStorage.setItem('jwt_token', token);
-              if (newRefreshToken) localStorage.setItem('refresh_token', newRefreshToken);
               
               axiosClient.defaults.headers.common['Authorization'] = 'Bearer ' + token;
               originalRequest.headers['Authorization'] = 'Bearer ' + token;
