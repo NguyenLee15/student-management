@@ -30,6 +30,9 @@ export default function TuitionLedgerView() {
     if (orderCodeParam) {
       setCurrentOrderCode(orderCodeParam);
       handleSyncPayOSStatus(orderCodeParam);
+      
+      // Clear URL params so we don't re-sync on refresh or semester change
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [selectedSemester]);
 

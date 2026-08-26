@@ -44,7 +44,7 @@ public class PaymentRestController {
 
     @PostMapping("/sync-status/{orderCode}")
     @Operation(summary = "Chủ động kiểm tra và đồng bộ trạng thái giao dịch từ PayOS")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STUDENT')")
     public ResponseEntity<ApiResponse<PaymentTransactionResponseDto>> syncStatus(@PathVariable Long orderCode) {
         PaymentTransactionResponseDto transaction = payOSService.syncTransactionStatus(orderCode);
         return ResponseEntity.ok(ApiResponse.success("Đồng bộ trạng thái giao dịch thành công", transaction));

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 import Toast from './components/common/Toast';
 import LoginModal from './components/auth/LoginModal';
 import CommandPalette from './components/common/CommandPalette';
@@ -13,6 +14,7 @@ export default function App() {
   const [isBackendConnected, setIsBackendConnected] = useState(false);
   const [apiChecking, setApiChecking] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [isInitializingAuth, setIsInitializingAuth] = useState(!!localStorage.getItem('user_info'));
 
   // Authentication State
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -67,6 +69,7 @@ export default function App() {
     const handleUnauthorized = () => {
       setCurrentUser(null);
       setSimulatedRole(null);
+      setIsInitializingAuth(false);
       setShowLoginModal(true);
       showToast('error', 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
     };
@@ -92,12 +95,13 @@ export default function App() {
     };
   }, []);
 
-    const checkHealthAndLoadStats = async () => {
+  const checkHealthAndLoadStats = async () => {
     setApiChecking(true);
     try {
       if (!currentUser) {
         setIsBackendConnected(false);
         setApiChecking(false);
+        setIsInitializingAuth(false);
         return;
       }
       const [stRes, tRes, fRes, subRes] = await Promise.allSettled([
@@ -125,9 +129,8 @@ export default function App() {
       }
       if (fRes.status === 'fulfilled') {
         const d = fRes.value.data || fRes.value;
-        const arr = Array.isArray(d) ? d : d.content || [];
-        facultyCount = arr.length;
-        setFacultiesList(arr);
+        facultyCount = d.length || 0;
+        setFacultiesList(Array.isArray(d) ? d : []);
       }
       if (subRes.status === 'fulfilled') {
         const d = subRes.value.data || subRes.value;
@@ -140,12 +143,15 @@ export default function App() {
         faculties: facultyCount,
         subjects: subjectCount,
       });
+      setIsInitializingAuth(false);
 
       if (isLive) {
         showToast('success', 'Đã kết nối máy chủ Spring Boot REST API (Port 8080)');
       }
-    } catch {
+    } catch (err) {
+      console.warn('Backend is down or unreachable', err);
       setIsBackendConnected(false);
+      setIsInitializingAuth(false);
     } finally {
       setApiChecking(false);
     }
@@ -170,6 +176,17 @@ export default function App() {
     setSimulatedRole(role);
     showToast('info', `Đã chuyển sang không gian làm việc: ${role}`);
   };
+
+  if (isInitializingAuth) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-950">
+        <div className="flex flex-col items-center gap-4 text-emerald-500">
+          <Loader2 className="w-8 h-8 animate-spin" />
+          <span className="text-sm font-semibold">Đang xác thực phiên làm việc...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

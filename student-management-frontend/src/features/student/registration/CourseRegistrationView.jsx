@@ -40,16 +40,18 @@ export default function CourseRegistrationView() {
       // 1. Load active registration period
       const periodRes = await registrationPeriodApi.getActive();
       const periods = periodRes.data?.data || [];
+      let currentSemesterId = null;
       if (periods.length > 0) {
         setActivePeriod(periods[0]);
+        currentSemesterId = periods[0].semesterId || periods[0].semester;
       }
 
       // 2. Load available classes
-      const classesRes = await studentRegistrationApi.getAvailableClasses();
+      const classesRes = await studentRegistrationApi.getAvailableClasses(currentSemesterId);
       setAvailableClasses(classesRes.data?.data || []);
 
       // 3. Load my registered classes
-      const enrollmentsRes = await studentRegistrationApi.getMyEnrollments();
+      const enrollmentsRes = await studentRegistrationApi.getMyEnrollments(currentSemesterId);
       setMyEnrollments(enrollmentsRes.data?.data || []);
     } catch (err) {
       console.error('Failed to load registration data', err);
