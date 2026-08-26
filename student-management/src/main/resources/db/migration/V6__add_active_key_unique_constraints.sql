@@ -53,29 +53,29 @@ ALTER TABLE users
   ADD COLUMN IF NOT EXISTS updated_at DATETIME,
   ADD COLUMN IF NOT EXISTS created_by VARCHAR(50),
   ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT FALSE,
-  ADD COLUMN active_key TINYINT GENERATED ALWAYS AS (CASE WHEN deleted = 0 THEN 1 ELSE NULL END) STORED,
+  ADD COLUMN active_key TINYINT GENERATED ALWAYS AS (CASE WHEN deleted = 0 THEN 1 ELSE NULL END) VIRTUAL,
   ADD CONSTRAINT uk_users_username_active UNIQUE (user_name, active_key);
 
 -- 8. Bảng students (Soft-delete Unique Constraints với active_key)
 ALTER TABLE students 
-  ADD COLUMN active_key TINYINT GENERATED ALWAYS AS (CASE WHEN deleted = 0 THEN 1 ELSE NULL END) STORED,
+  ADD COLUMN active_key TINYINT GENERATED ALWAYS AS (CASE WHEN deleted = 0 THEN 1 ELSE NULL END) VIRTUAL,
   ADD CONSTRAINT uk_students_code_active UNIQUE (student_id, active_key),
   ADD CONSTRAINT uk_students_email_active UNIQUE (email, active_key);
 
 -- 9. Bảng teachers (Soft-delete Unique Constraints với active_key)
 ALTER TABLE teachers 
-  ADD COLUMN active_key TINYINT GENERATED ALWAYS AS (CASE WHEN deleted = 0 THEN 1 ELSE NULL END) STORED,
+  ADD COLUMN active_key TINYINT GENERATED ALWAYS AS (CASE WHEN deleted = 0 THEN 1 ELSE NULL END) VIRTUAL,
   ADD CONSTRAINT uk_teachers_code_active UNIQUE (teacher_id, active_key),
   ADD CONSTRAINT uk_teachers_email_active UNIQUE (email, active_key);
 
 -- 10. Bảng subjects (Soft-delete Unique Constraints với active_key)
 ALTER TABLE subjects 
-  ADD COLUMN active_key TINYINT GENERATED ALWAYS AS (CASE WHEN deleted = 0 THEN 1 ELSE NULL END) STORED,
+  ADD COLUMN active_key TINYINT GENERATED ALWAYS AS (CASE WHEN deleted = 0 THEN 1 ELSE NULL END) VIRTUAL,
   ADD CONSTRAINT uk_subjects_code_active UNIQUE (subject_id, active_key);
 
 -- 11. Bảng academic_grades (Bổ sung attempt_number và composite unique constraint với study_phase và active_key)
 ALTER TABLE academic_grades 
   DROP INDEX uk_academic_grades,
   ADD COLUMN attempt_number INT NOT NULL DEFAULT 1,
-  ADD COLUMN active_key TINYINT GENERATED ALWAYS AS (CASE WHEN deleted = 0 THEN 1 ELSE NULL END) STORED,
+  ADD COLUMN active_key TINYINT GENERATED ALWAYS AS (CASE WHEN deleted = 0 THEN 1 ELSE NULL END) VIRTUAL,
   ADD CONSTRAINT uk_grades_composite_active UNIQUE (student_id, subject_id, semester, academic_year, study_phase, attempt_number, active_key);
