@@ -46,14 +46,7 @@ Thumbs.db
 *.swp
 *.swo
 
-# Docker local data & Configs
-docker/
-docker-compose.yml
-**/docker-compose.yml
-Dockerfile
-**/Dockerfile
-nginx.conf
-**/nginx.conf
+# Docker local data
 docker-data/
 data/
 
@@ -61,7 +54,7 @@ data/
 .agents/
 **/.agents/
 project-standards-template/
-**/project-standards-template/
+**/.project-standards-template/
 .cursorrules
 **/.cursorrules
 PROMPT_CHEATSHEET.md
@@ -72,6 +65,5 @@ SPEC_TEMPLATE.md
 **/SPEC_TEMPLATE.md
 WORKFLOW.md
 **/WORKFLOW.md
-.github/
 
 
