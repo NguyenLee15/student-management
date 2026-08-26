@@ -1,5 +1,5 @@
 -- V6__add_active_key_unique_constraints.sql
--- Module 1 & 2: Comprehensive Schema Alignment, Stored Generated Column Unique Constraints & Optimistic Locking Support
+-- Module 1 & 2: Comprehensive Schema Alignment, Active Key Unique Constraints & Optimistic Locking Support
 
 -- 1. Bảng academic_years (Đảm bảo có academic_year_name)
 ALTER TABLE academic_years 
@@ -32,8 +32,8 @@ ALTER TABLE credit_classes
   ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 0;
 
 -- 5. Bảng credit_class_students (Ràng buộc chống duplicate sinh viên)
-ALTER TABLE credit_class_students
-  ADD CONSTRAINT uk_credit_class_student UNIQUE (credit_class_id, student_id);
+ALTER TABLE credit_class_students DROP INDEX IF EXISTS uk_credit_class_student;
+ALTER TABLE credit_class_students ADD CONSTRAINT uk_credit_class_student UNIQUE (credit_class_id, student_id);
 
 -- 6. Bảng semester_schedules (Đảm bảo các trường lịch học khớp Entity)
 ALTER TABLE semester_schedules
@@ -47,35 +47,37 @@ ALTER TABLE semester_schedules
   ADD COLUMN IF NOT EXISTS class_shift VARCHAR(20);
 
 -- 7. Bảng users (Thêm soft-delete và unique active_key)
-ALTER TABLE users 
-  DROP INDEX uk_users_username,
-  ADD COLUMN IF NOT EXISTS created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS updated_at DATETIME,
-  ADD COLUMN IF NOT EXISTS created_by VARCHAR(50),
-  ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT FALSE,
-  ADD COLUMN IF NOT EXISTS active_key TINYINT NULL DEFAULT 1,
-  ADD CONSTRAINT uk_users_username_active UNIQUE (user_name, active_key);
+ALTER TABLE users DROP INDEX IF EXISTS uk_users_username;
+ALTER TABLE users DROP INDEX IF EXISTS uk_users_username_active;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at DATETIME;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS created_by VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS active_key TINYINT NULL DEFAULT 1;
+ALTER TABLE users ADD CONSTRAINT uk_users_username_active UNIQUE (user_name, active_key);
 
 -- 8. Bảng students (Soft-delete Unique Constraints với active_key)
-ALTER TABLE students 
-  ADD COLUMN IF NOT EXISTS active_key TINYINT NULL DEFAULT 1,
-  ADD CONSTRAINT uk_students_code_active UNIQUE (student_id, active_key),
-  ADD CONSTRAINT uk_students_email_active UNIQUE (email, active_key);
+ALTER TABLE students DROP INDEX IF EXISTS uk_students_code_active;
+ALTER TABLE students DROP INDEX IF EXISTS uk_students_email_active;
+ALTER TABLE students ADD COLUMN IF NOT EXISTS active_key TINYINT NULL DEFAULT 1;
+ALTER TABLE students ADD CONSTRAINT uk_students_code_active UNIQUE (student_id, active_key);
+ALTER TABLE students ADD CONSTRAINT uk_students_email_active UNIQUE (email, active_key);
 
 -- 9. Bảng teachers (Soft-delete Unique Constraints với active_key)
-ALTER TABLE teachers 
-  ADD COLUMN IF NOT EXISTS active_key TINYINT NULL DEFAULT 1,
-  ADD CONSTRAINT uk_teachers_code_active UNIQUE (teacher_id, active_key),
-  ADD CONSTRAINT uk_teachers_email_active UNIQUE (email, active_key);
+ALTER TABLE teachers DROP INDEX IF EXISTS uk_teachers_code_active;
+ALTER TABLE teachers DROP INDEX IF EXISTS uk_teachers_email_active;
+ALTER TABLE teachers ADD COLUMN IF NOT EXISTS active_key TINYINT NULL DEFAULT 1;
+ALTER TABLE teachers ADD CONSTRAINT uk_teachers_code_active UNIQUE (teacher_id, active_key);
+ALTER TABLE teachers ADD CONSTRAINT uk_teachers_email_active UNIQUE (email, active_key);
 
 -- 10. Bảng subjects (Soft-delete Unique Constraints với active_key)
-ALTER TABLE subjects 
-  ADD COLUMN IF NOT EXISTS active_key TINYINT NULL DEFAULT 1,
-  ADD CONSTRAINT uk_subjects_code_active UNIQUE (subject_id, active_key);
+ALTER TABLE subjects DROP INDEX IF EXISTS uk_subjects_code_active;
+ALTER TABLE subjects ADD COLUMN IF NOT EXISTS active_key TINYINT NULL DEFAULT 1;
+ALTER TABLE subjects ADD CONSTRAINT uk_subjects_code_active UNIQUE (subject_id, active_key);
 
 -- 11. Bảng academic_grades (Bổ sung attempt_number và composite unique constraint với study_phase và active_key)
-ALTER TABLE academic_grades 
-  DROP INDEX uk_academic_grades,
-  ADD COLUMN IF NOT EXISTS attempt_number INT NOT NULL DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS active_key TINYINT NULL DEFAULT 1,
-  ADD CONSTRAINT uk_grades_composite_active UNIQUE (student_id, subject_id, semester, academic_year, study_phase, attempt_number, active_key);
+ALTER TABLE academic_grades DROP INDEX IF EXISTS uk_academic_grades;
+ALTER TABLE academic_grades DROP INDEX IF EXISTS uk_grades_composite_active;
+ALTER TABLE academic_grades ADD COLUMN IF NOT EXISTS attempt_number INT NOT NULL DEFAULT 1;
+ALTER TABLE academic_grades ADD COLUMN IF NOT EXISTS active_key TINYINT NULL DEFAULT 1;
+ALTER TABLE academic_grades ADD CONSTRAINT uk_grades_composite_active UNIQUE (student_id, subject_id, semester, academic_year, study_phase, attempt_number, active_key);
