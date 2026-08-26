@@ -86,11 +86,19 @@ export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin })
         </div>
       </header>
 
+      {/* Mobile Backdrop */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col md:flex-row gap-6 w-full">
         {/* Sidebar Navigation */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 p-4 md:static md:w-60 md:block md:border-none md:p-0 md:bg-transparent transition-transform duration-200 ${
+          className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 p-4 pt-20 md:pt-0 md:static md:w-60 md:block md:border-none md:p-0 md:bg-transparent transition-transform duration-200 ${
             isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
           }`}
         >

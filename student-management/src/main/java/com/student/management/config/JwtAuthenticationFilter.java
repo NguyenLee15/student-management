@@ -25,6 +25,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    private com.student.management.repository.UserRepository userRepository;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -46,15 +49,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (jwtTokenProvider.validateToken(jwt)) {
                     String username = jwtTokenProvider.getUsernameFromJWT(jwt);
                     String role = jwtTokenProvider.getRoleFromJWT(jwt);
-                    logger.info("Validated JWT token for username: {}, role: {}", username, role);
-
-                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        username, null, Collections.singletonList(authority));
-                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                    logger.info("Set SecurityContext for user: {}", username);
+                    // Validate against database to ensure user is active and role matches
+                    java.util.Optional<com.student.management.entity.User> userOpt = userRepository.findByUserName(username);
+                    if (userOpt.isEmpty() || !userOpt.get().getRole().name().equalsIgnoreCase(role)) {
+                        logger.warn("User {} is either deleted, inactive or role changed. Rejecting token.", username);
+                        SecurityContextHolder.clearContext();
+                    } else {
+                        logger.info("Validated JWT token for username: {}, role: {}", username, role);
+    
+                        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
+                        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                            username, null, Collections.singletonList(authority));
+                        auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                        logger.info("Set SecurityContext for user: {}", username);
+                    }
                 } else {
                     logger.warn("Invalid JWT token");
                 }

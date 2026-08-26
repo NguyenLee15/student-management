@@ -1,5 +1,5 @@
 import React from 'react';
-import { GraduationCap, RefreshCw, LogIn, LogOut, ShieldCheck, UserCheck, FileText } from 'lucide-react';
+import { GraduationCap, RefreshCw, LogIn, LogOut, ShieldCheck, UserCheck, FileText, Menu, X } from 'lucide-react';
 
 export default function Header({ 
   isBackendConnected, 
@@ -8,13 +8,21 @@ export default function Header({
   currentUser, 
   onOpenLogin, 
   onLogout,
-  onOpenCommand
+  onOpenCommand,
+  onToggleMobileMenu,
+  isMobileMenuOpen
 }) {
   return (
-    <header className="sticky top-0 z-40 bg-slate-900/85 backdrop-blur-xl border-b border-slate-800/80 px-6 py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-slate-900/85 backdrop-blur-xl border-b border-slate-800/80 px-4 md:px-6 py-3 flex items-center justify-between">
       {/* Brand & System Title */}
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+        <button
+          onClick={onToggleMobileMenu}
+          className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg transition"
+        >
+          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+        <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 hidden sm:flex">
           <GraduationCap className="h-6 w-6 text-white" />
         </div>
         <div>

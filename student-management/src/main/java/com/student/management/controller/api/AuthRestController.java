@@ -54,9 +54,10 @@ public class AuthRestController {
         // Set Secure HttpOnly Cookie for Refresh Token
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken.getToken())
                 .httpOnly(true)
+                .secure(true)
                 .path("/api/v1/auth")
                 .maxAge(7 * 24 * 3600)
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
@@ -107,9 +108,10 @@ public class AuthRestController {
         // Update Cookie
         ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefreshToken.getToken())
                 .httpOnly(true)
+                .secure(true)
                 .path("/api/v1/auth")
                 .maxAge(7 * 24 * 3600)
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
@@ -143,9 +145,10 @@ public class AuthRestController {
         // Clear Cookie
         ResponseCookie clearCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
+                .secure(true)
                 .path("/api/v1/auth")
                 .maxAge(0)
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, clearCookie.toString());
 

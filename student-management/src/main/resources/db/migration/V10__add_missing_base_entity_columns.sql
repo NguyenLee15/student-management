@@ -28,3 +28,4 @@ ALTER TABLE tuition_payments
 -- 4. Bổ sung created_by cho các bảng ở V9 (bị sót)
 ALTER TABLE payment_transactions
     ADD COLUMN IF NOT EXISTS created_by VARCHAR(50);
+

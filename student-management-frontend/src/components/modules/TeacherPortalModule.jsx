@@ -45,13 +45,13 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
     setLoading(true);
     try {
       const found = teacherList.find(t => t.teacherId === currentTeacherId);
-      setTeacherInfo(found || { teacherId: currentTeacherId, fullName: `Giảng viên ${currentTeacherId}` });
+      setTeacherInfo(found || { teacherId: currentTeacherId, fullName: 'Unknown Teacher' });
 
       const res = await creditClassApi.getAll();
       const d = res.data || res;
       const all = Array.isArray(d) ? d : (d.content || []);
       const myClasses = all.filter(c => c.teacherId === currentTeacherId || c.teacher?.teacherId === currentTeacherId);
-      setClasses(myClasses.length > 0 ? myClasses : all.slice(0, 4)); // fallback to show classes if none match
+      setClasses(myClasses); // no fallback to all classes
       if (myClasses.length > 0) {
         handleSelectClass(myClasses[0]);
       } else if (all.length > 0) {
@@ -73,13 +73,13 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
       const stList = Array.isArray(d) ? d : (d.content || []);
       setStudents(stList);
 
-      // Pre-fill grade sheet
+      // Initialize empty grade sheet
       const initialGrades = {};
-      stList.forEach((s, idx) => {
+      stList.forEach((s) => {
         initialGrades[s.studentId] = {
-          attendanceScore: 9.0 + (idx % 2 === 0 ? 1 : 0),
-          midtermScore: 8.0 + (idx % 3 === 0 ? 1 : -0.5),
-          finalExamScore: 7.5 + (idx % 2 === 0 ? 1 : 0.5),
+          attendanceScore: '',
+          midtermScore: '',
+          finalExamScore: '',
         };
       });
       setGradeSheet(initialGrades);
@@ -107,12 +107,12 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
         const entry = gradeSheet[st.studentId] || {};
         return gradeApi.create({
           studentId: st.studentId,
-          subjectId: selectedClass?.subjectId || 'IT001',
-          attendanceScore: entry.attendanceScore || 10,
-          midtermScore: entry.midtermScore || 8,
-          finalExamScore: entry.finalExamScore || 8,
-          semester: selectedClass?.semester || 'SEMESTER_1',
-          academicYear: selectedClass?.academicYear || '2025-2026',
+          subjectId: selectedClass?.subjectId || selectedClass?.subject?.subjectId || 'IT001',
+          attendanceScore: entry.attendanceScore || 0,
+          midtermScore: entry.midtermScore || 0,
+          finalExamScore: entry.finalExamScore || 0,
+          semester: selectedClass?.semester,
+          academicYear: selectedClass?.academicYear,
         });
       });
       await Promise.allSettled(promises);
@@ -147,21 +147,23 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
           </div>
         </div>
 
-        {/* Demo Switcher */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 font-medium">Chọn GV xem thử:</span>
-          <select
-            value={currentTeacherId}
-            onChange={(e) => setCurrentTeacherId(e.target.value)}
-            className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
-          >
-            {teacherList.map(t => (
-              <option key={t.teacherId} value={t.teacherId}>
-                {t.fullName} ({t.teacherId})
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Demo Switcher (Admin Only) */}
+        {currentUser?.role === 'ROLE_ADMIN' && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-medium">Chọn GV xem thử:</span>
+            <select
+              value={currentTeacherId}
+              onChange={(e) => setCurrentTeacherId(e.target.value)}
+              className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+            >
+              {teacherList.map(t => (
+                <option key={t.teacherId} value={t.teacherId}>
+                  {t.fullName} ({t.teacherId})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Main Content Layout: Left Class list, Right Grade Sheet */}
@@ -194,14 +196,14 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
                       Lớp #{c.creditClassId}
                     </span>
                     <span className="text-[10px] font-semibold bg-slate-800 px-2 py-0.5 rounded text-slate-300">
-                      {c.semester || 'Học kỳ 1'}
+                      {c.semester}
                     </span>
                   </div>
                   <div className="font-semibold text-xs text-white truncate">
-                    {c.subjectName || `Môn học #${c.subjectId}`}
+                    {c.subjectName || c.subject?.subjectName || `Môn học #${c.subjectId}`}
                   </div>
                   <div className="text-[11px] text-slate-400 flex items-center justify-between pt-1">
-                    <span>Sĩ số: {c.maxStudents || 40} SV</span>
+                    <span>Sĩ số: {c.maxStudents} SV</span>
                     <span className="text-emerald-400 font-medium">Nhập điểm &rarr;</span>
                   </div>
                 </button>

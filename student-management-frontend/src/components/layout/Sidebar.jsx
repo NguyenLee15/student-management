@@ -5,7 +5,7 @@ import {
   ShieldAlert, Sparkles, Database, GraduationCap
 } from 'lucide-react';
 
-export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUser = null }) {
+export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUser = null, isMobileMenuOpen = false }) {
   const menuSections = [
     {
       title: 'Dedicated Portals (Mới)',
@@ -71,7 +71,7 @@ export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUs
   })).filter(section => section.items.length > 0);
 
   return (
-    <aside className="w-72 bg-slate-900/60 border-r border-slate-800/80 p-4 flex flex-col justify-between overflow-y-auto hidden md:flex shrink-0">
+    <aside className={`w-72 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 p-4 flex flex-col justify-between overflow-y-auto shrink-0 fixed inset-y-0 left-0 z-40 md:static md:flex transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
       <div className="space-y-6">
         {filteredSections.map((section, sIdx) => (
           <div key={sIdx} className="space-y-1.5">

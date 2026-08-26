@@ -3,6 +3,8 @@ import { LogIn, Lock, User, AlertCircle, ShieldCheck } from 'lucide-react';
 import Modal from '../common/Modal';
 import { authApi } from '../../api';
 
+import { setMemoryToken } from '../../api/axiosClient';
+
 export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -17,9 +19,9 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     try {
       const res = await authApi.login({ userName: username, password });
       const payload = res.data || res;
-      
+
       if (payload && payload.token) {
-        localStorage.setItem('jwt_token', payload.token);
+        setMemoryToken(payload.token);
         const userInfo = {
           username: payload.userName || username,
           role: payload.role || 'ROLE_ADMIN',

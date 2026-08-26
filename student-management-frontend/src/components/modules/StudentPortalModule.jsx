@@ -58,7 +58,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
     try {
       // Find current student info
       const found = studentList.find(s => s.studentId === currentStudentId);
-      setStudentInfo(found || { studentId: currentStudentId, fullName: `Student ${currentStudentId}` });
+      setStudentInfo(found || { studentId: currentStudentId, fullName: 'Unknown Student' });
 
       if (activeSubTab === 'transcript') {
         const res = await gradeApi.getAll({ studentId: currentStudentId, size: 100 });
@@ -163,21 +163,23 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
           </div>
         </div>
 
-        {/* Demo Switcher for Testing/Grading */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 font-medium">Chọn SV xem thử:</span>
-          <select
-            value={currentStudentId}
-            onChange={(e) => setCurrentStudentId(e.target.value)}
-            className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
-          >
-            {studentList.map(s => (
-              <option key={s.studentId} value={s.studentId}>
-                {s.fullName} ({s.studentId})
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Demo Switcher for Testing/Grading (Admin Only) */}
+        {currentUser?.role === 'ROLE_ADMIN' && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-medium">Chọn SV xem thử:</span>
+            <select
+              value={currentStudentId}
+              onChange={(e) => setCurrentStudentId(e.target.value)}
+              className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+            >
+              {studentList.map(s => (
+                <option key={s.studentId} value={s.studentId}>
+                  {s.fullName} ({s.studentId})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Navigation Subtabs */}
@@ -295,7 +297,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
                             {g.subjectName || g.subjectId}
                           </td>
                           <td className="px-5 py-3.5 text-slate-400">
-                            {g.semester || 'Học kỳ 1'} ({g.academicYear || '2025-2026'})
+                            {g.semester} ({g.academicYear})
                           </td>
                           <td className="px-5 py-3.5 text-center font-mono text-slate-300">{g.attendanceScore ?? '-'}</td>
                           <td className="px-5 py-3.5 text-center font-mono text-slate-300">{g.midtermScore ?? '-'}</td>
@@ -363,22 +365,22 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
                               {s.subjectName || `Lớp Tín Chỉ #${s.creditClassId}`}
                             </span>
                             <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-800 text-slate-300 shrink-0">
-                              {s.shift || 'Ca Sáng'}
+                              {s.shift}
                             </span>
                           </div>
 
                           <div className="space-y-1 text-[11px] text-slate-400">
                             <div className="flex items-center gap-1.5">
                               <Clock className="h-3 w-3 text-indigo-400 shrink-0" />
-                              <span>{s.startTime || '07:30'} - {s.endTime || '11:00'}</span>
+                              <span>{s.startTime} - {s.endTime}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <MapPin className="h-3 w-3 text-emerald-400 shrink-0" />
-                              <span>{s.classroomName || 'Phòng A1-203'}</span>
+                              <span>{s.classroomName || s.classroomId}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <User className="h-3 w-3 text-amber-400 shrink-0" />
-                              <span className="truncate">{s.teacherName || 'Giảng viên phụ trách'}</span>
+                              <span className="truncate">{s.teacherName || s.teacherId || 'Chưa cập nhật'}</span>
                             </div>
                           </div>
                         </div>
@@ -460,7 +462,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
                       </div>
                       <div className="flex items-center justify-between">
                         <span>Học kỳ:</span>
-                        <span className="text-slate-200">{cc.semester || 'Học kỳ 1'} ({cc.academicYear || '2025-2026'})</span>
+                        <span className="text-slate-200">{cc.semester} ({cc.academicYear})</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span>Sĩ số lớp:</span>

@@ -19,9 +19,9 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const stored = localStorage.getItem('user_info');
-      return stored ? JSON.parse(stored) : { username: 'admin', role: 'ROLE_ADMIN' };
+      return stored ? JSON.parse(stored) : null;
     } catch {
-      return { username: 'admin', role: 'ROLE_ADMIN' };
+      return null;
     }
   });
 
@@ -30,12 +30,12 @@ export default function App() {
 
   // Normalize Role Helper
   const normalizeRole = (role) => {
-    if (!role) return 'ROLE_ADMIN';
+    if (!role) return null;
     const r = String(role).toUpperCase();
     if (r === 'ADMIN' || r === 'ROLE_ADMIN') return 'ROLE_ADMIN';
     if (r === 'TEACHER' || r === 'ROLE_TEACHER') return 'ROLE_TEACHER';
     if (r === 'STUDENT' || r === 'ROLE_STUDENT') return 'ROLE_STUDENT';
-    return 'ROLE_ADMIN';
+    return null;
   };
 
   // Effective Role currently being rendered
@@ -92,26 +92,14 @@ export default function App() {
     };
   }, []);
 
-  const checkHealthAndLoadStats = async () => {
+    const checkHealthAndLoadStats = async () => {
     setApiChecking(true);
     try {
-      // Auto-authenticate default demo session if no token is present
-      if (!localStorage.getItem('jwt_token')) {
-        try {
-          const authRes = await authApi.login({ userName: 'admin', password: 'admin123' });
-          const payload = authRes.data || authRes;
-          if (payload && payload.token) {
-            localStorage.setItem('jwt_token', payload.token);
-            if (payload.refreshToken) localStorage.setItem('refresh_token', payload.refreshToken);
-            const user = { username: payload.userName || 'admin', role: payload.role || 'ROLE_ADMIN' };
-            localStorage.setItem('user_info', JSON.stringify(user));
-            setCurrentUser(user);
-          }
-        } catch (authErr) {
-          console.warn('Auto auth skipped:', authErr);
-        }
+      if (!currentUser) {
+        setIsBackendConnected(false);
+        setApiChecking(false);
+        return;
       }
-
       const [stRes, tRes, fRes, subRes] = await Promise.allSettled([
         studentApi.getAll({ page: 0, size: 1 }),
         teacherApi.getAll({ page: 0, size: 1 }),
@@ -234,8 +222,8 @@ export default function App() {
 
       {/* 🔐 AUTH LOGIN MODAL */}
       <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
+        isOpen={showLoginModal || !currentUser}
+        onClose={() => { if (currentUser) setShowLoginModal(false); }}
         onLoginSuccess={handleLoginSuccess}
       />
     </>

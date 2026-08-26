@@ -36,6 +36,7 @@ public class AnalyticsRestController {
 
     @GetMapping("/gpa-distribution")
     @Operation(summary = "Get GPA academic classification breakdown")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getGpaDistribution() {
         return ResponseEntity.ok(ApiResponse.success("GPA distribution fetched successfully", analyticsService.getGpaDistribution()));
     }

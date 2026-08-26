@@ -31,6 +31,7 @@ export default function AdminLayout({
   onRoleSwitch
 }) {
   const [activeTab, setActiveTab] = useState('overview');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
@@ -76,16 +77,30 @@ export default function AdminLayout({
         onOpenLogin={onOpenLogin}
         onOpenCommand={onOpenCommand}
         onLogout={onLogout}
+        onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        isMobileMenuOpen={isMobileMenuOpen}
       />
+
+      {/* Mobile Backdrop */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       {/* 🚀 MAIN ADMIN BODY */}
       <div className="flex-1 flex overflow-hidden">
         {/* 📱 ADMIN SIDEBAR */}
         <Sidebar
           activeTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab)}
+          onTabChange={(tab) => {
+            setActiveTab(tab);
+            setIsMobileMenuOpen(false);
+          }}
           counts={counts}
           currentUser={currentUser}
+          isMobileMenuOpen={isMobileMenuOpen}
         />
 
         {/* 📊 MODULE ROUTER */}

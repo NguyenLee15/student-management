@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 @RestController
 @RequestMapping("/api/v1/classes")
 @Tag(name = "Student Classes API", description = "Endpoints for managing student classes")
+@PreAuthorize("hasRole('ADMIN')")
 public class StudentClassRestController {
 
     @Autowired
@@ -27,6 +30,7 @@ public class StudentClassRestController {
 
     @GetMapping
     @Operation(summary = "Get all classes (Paged or List)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Object>> getAllClasses(
             @RequestParam(required = false) String facultyId,
             @RequestParam(defaultValue = "0") int page,
@@ -50,6 +54,7 @@ public class StudentClassRestController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get class details by ID")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<StudentClassResponseDto>> getById(@PathVariable String id) {
         StudentClassResponseDto dto = studentClassService.getById(id);
         return ResponseEntity.ok(ApiResponse.success(dto));

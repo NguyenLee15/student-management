@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { studentPortalApi } from '../../../api';
 
+import Skeleton from '../../common/Skeleton';
+
 export default function StudentDashboardView({ onNavigateTab }) {
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,9 +30,23 @@ export default function StudentDashboardView({ onNavigateTab }) {
 
   if (loading) {
     return (
-      <div className="py-24 text-center text-slate-400 space-y-3">
-        <RefreshCw className="w-8 h-8 animate-spin mx-auto text-blue-600" />
-        <p className="text-sm font-medium">Đang tải bảng tổng quan sinh viên...</p>
+      <div className="space-y-6">
+        {/* Banner Skeleton */}
+        <Skeleton className="h-40 w-full rounded-2xl" />
+        
+        {/* KPI Cards Skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+        </div>
+
+        {/* Bottom Content Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="lg:col-span-2 h-96 w-full rounded-2xl" />
+          <Skeleton className="h-96 w-full rounded-2xl" />
+        </div>
       </div>
     );
   }

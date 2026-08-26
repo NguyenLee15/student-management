@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   UserSquare2, Layers, Users, Award, Save, CheckCircle2, 
   RefreshCw, BookOpen, Clock, AlertCircle, Edit3, Calendar,
-  Home, LogOut, Sparkles, MapPin, User, CheckCheck, FileSpreadsheet
+  Home, LogOut, Sparkles, MapPin, User, CheckCheck, FileSpreadsheet, Menu, X
 } from 'lucide-react';
 import { creditClassApi, teacherApi, studentApi, gradeApi, scheduleApi } from '../api';
 
@@ -156,22 +156,30 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     { id: 'profile', label: 'Hồ Sơ Giảng Viên', icon: User },
   ];
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-white">
       {/* 🟢 TOP HEADER FOR TEACHER */}
-      <header className="h-16 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-40">
+      <header className="h-16 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md px-4 md:px-6 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-emerald-500/30">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg transition"
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-emerald-500/30 hidden sm:flex">
             👨‍🏫
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-sm text-white tracking-tight">CỔNG THÔNG TIN GIẢNG VIÊN</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 TEACHER PORTAL
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">Hệ thống Quản lý Giảng dạy & Chấm điểm</p>
+            <p className="hidden sm:block text-[11px] text-slate-400">Hệ thống Quản lý Giảng dạy & Chấm điểm</p>
           </div>
         </div>
 
@@ -193,7 +201,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
           </div>
 
           {/* Teacher Badge */}
-          <div className="flex items-center gap-3 pl-3 border-l border-slate-800">
+          <div className="flex items-center gap-3 sm:pl-3 sm:border-l border-slate-800">
             <div className="text-right hidden md:block">
               <div className="text-xs font-bold text-white">{teacherInfo?.fullName || 'Giảng Viên'}</div>
               <div className="text-[10px] text-emerald-400 font-mono">Mã GV: {currentTeacherId}</div>
@@ -207,7 +215,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
           {onRoleSwitch && (
             <button
               onClick={() => onRoleSwitch('ROLE_ADMIN')}
-              className="px-3 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 text-xs font-semibold border border-purple-500/30 transition"
+              className="hidden sm:inline-block px-3 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 text-xs font-semibold border border-purple-500/30 transition"
               title="Quay lại giao diện Admin"
             >
               👑 Trở về Admin
@@ -225,10 +233,18 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
         </div>
       </header>
 
+      {/* Mobile Backdrop */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-slate-900/80 backdrop-blur-sm md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* 🚀 MAIN BODY */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {/* 📱 TEACHER SIDEBAR */}
-        <aside className="w-64 bg-slate-900/60 border-r border-slate-800/80 p-4 flex flex-col justify-between overflow-y-auto hidden md:flex shrink-0">
+        <aside className={`w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 p-4 flex flex-col justify-between overflow-y-auto shrink-0 fixed inset-y-0 left-0 z-40 md:static md:flex transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
           <div className="space-y-6">
             {/* Teacher Mini Profile */}
             <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/20 space-y-2">

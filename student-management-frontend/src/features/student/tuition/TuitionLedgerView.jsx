@@ -3,7 +3,8 @@ import {
   CreditCard, CheckCircle2, Clock, AlertTriangle, 
   DollarSign, Receipt, ArrowRight, ShieldCheck, RefreshCw, X 
 } from 'lucide-react';
-import { studentPortalApi } from '../../../api';
+import { studentPortalApi, paymentApi } from '../../../api';
+import Skeleton from '../../common/Skeleton';
 
 export default function TuitionLedgerView() {
   const [invoice, setInvoice] = useState(null);
@@ -136,8 +137,8 @@ export default function TuitionLedgerView() {
             onChange={(e) => setSelectedSemester(Number(e.target.value))}
             className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           >
-            <option value={1}>Học kỳ 1 (2026-2027)</option>
-            <option value={2}>Học kỳ 2 (2026-2027)</option>
+            <option value={1}>Học kỳ 1</option>
+            <option value={2}>Học kỳ 2</option>
           </select>
         </div>
       </div>
@@ -169,9 +170,9 @@ export default function TuitionLedgerView() {
 
       {/* Invoice Overview Card */}
       {loading ? (
-        <div className="py-20 text-center text-slate-400">
-          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-blue-600" />
-          <span>Đang tải thông tin sổ cái học phí...</span>
+        <div className="space-y-6">
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-64 w-full rounded-2xl" />
         </div>
       ) : !invoice ? (
         <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400 space-y-2">
@@ -185,7 +186,7 @@ export default function TuitionLedgerView() {
             <div className="space-y-1">
               <span className="text-xs uppercase font-bold text-slate-400">Mã Hóa Đơn</span>
               <div className="font-mono font-bold text-lg text-blue-300">{invoice.invoiceCode}</div>
-              <div className="text-xs text-slate-400">Hạn: {invoice.dueDate || '30/10/2026'}</div>
+              <div className="text-xs text-slate-400">Hạn: {invoice.dueDate}</div>
             </div>
 
             <div className="space-y-1">
@@ -202,7 +203,7 @@ export default function TuitionLedgerView() {
                 {Number(invoice.paidAmount || 0).toLocaleString('vi-VN')} đ
               </div>
               <div className="text-xs text-slate-400">
-                Trạng thái: <strong>{invoice.statusName || 'Chưa nộp'}</strong>
+                Trạng thái: <strong>{invoice.statusName}</strong>
               </div>
             </div>
 

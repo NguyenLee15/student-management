@@ -55,15 +55,6 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedUsers() {
-        if (userRepository.findByUserName("admin").isEmpty()) {
-            User admin = User.builder()
-                    .userName("admin")
-                    .password(passwordEncoder.encode("admin123"))
-                    .role(Role.ADMIN)
-                    .build();
-            userRepository.save(admin);
-            logger.info("Initialized default ADMIN user (admin / admin123)");
-        }
 
         if (userRepository.findByUserName("teacher").isEmpty()) {
             User teacher = User.builder()

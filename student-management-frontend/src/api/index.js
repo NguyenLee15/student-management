@@ -1,5 +1,6 @@
 import axiosClient from './axiosClient';
 import axios from 'axios';
+import { getMemoryToken } from './axiosClient';
 
 // 1. Authentication API
 export const authApi = {
@@ -17,20 +18,20 @@ export const studentApi = {
   update: (id, data) => axiosClient.put(`/students/${id}`, data),
   delete: (id) => axiosClient.delete(`/students/${id}`),
   exportExcel: () => {
-    return axios.get('/api/v1/students/export', {
+    return axios.get(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/students/export`, {
       responseType: 'blob',
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('jwt_token') || ''}`,
+        Authorization: `Bearer ${getMemoryToken() || ''}`,
       },
     });
   },
   importExcel: (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    return axios.post('/api/v1/students/import', formData, {
+    return axios.post(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/students/import`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${localStorage.getItem('jwt_token') || ''}`,
+        Authorization: `Bearer ${getMemoryToken() || ''}`,
       },
     });
   },

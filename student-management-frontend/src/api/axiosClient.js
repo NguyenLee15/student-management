@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-  baseURL: '/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -9,12 +9,20 @@ const axiosClient = axios.create({
   timeout: 15000,
 });
 
+// Memory storage for JWT token (more secure than localStorage against XSS)
+let memoryToken = null;
+
+export const setMemoryToken = (token) => {
+  memoryToken = token;
+};
+
+export const getMemoryToken = () => memoryToken;
+
 // Request interceptor to automatically add Authorization: Bearer <token>
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('jwt_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (memoryToken) {
+      config.headers.Authorization = `Bearer ${memoryToken}`;
     }
     return config;
   },
@@ -66,12 +74,12 @@ axiosClient.interceptors.response.use(
 
       return new Promise(function (resolve, reject) {
         axios
-          .post('/api/v1/auth/refresh', {}, { withCredentials: true })
+          .post(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/auth/refresh`, {}, { withCredentials: true })
           .then(({ data }) => {
             const token = data?.data?.token;
             
             if (token) {
-              localStorage.setItem('jwt_token', token);
+              setMemoryToken(token);
               
               axiosClient.defaults.headers.common['Authorization'] = 'Bearer ' + token;
               originalRequest.headers['Authorization'] = 'Bearer ' + token;
@@ -112,8 +120,7 @@ axiosClient.interceptors.response.use(
 
 const handleLogout = () => {
   console.warn('Session expired or unauthorized. Please re-login.');
-  localStorage.removeItem('jwt_token');
-  localStorage.removeItem('refresh_token');
+  setMemoryToken(null);
   localStorage.removeItem('user_info');
   window.dispatchEvent(new Event('auth:unauthorized'));
 };
