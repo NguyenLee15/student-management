@@ -57,15 +57,15 @@ export default function StudentDashboardView({ onNavigateTab }) {
       <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 rounded-2xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 bg-blue-500/20 text-blue-300 border border-blue-400/30 text-xs font-bold rounded-full">
-              {overview?.className || 'CNTT1-K65'} • {overview?.facultyName || 'Công nghệ Thông tin'}
+            <span className="px-3 py-1 bg-blue-50/20 text-blue-100 border border-blue-400/30 text-xs font-bold rounded-full">
+              {overview?.className || 'Chưa xếp lớp'} • {overview?.facultyName || 'Chưa phân khoa'}
             </span>
             <span className="text-blue-200 text-xs font-medium">
-              Mã SV: <strong>{overview?.studentId || 'SV001'}</strong>
+              Mã SV: <strong>{overview?.studentId || 'N/A'}</strong>
             </span>
           </div>
           <h1 className="text-2xl md:text-3xl font-black tracking-tight">
-            Xin chào, {overview?.fullName || 'Nguyễn Hữu Đạt'}! 👋
+            Xin chào, {overview?.fullName || 'Sinh viên'}! 👋
           </h1>
           <p className="text-xs md:text-sm text-slate-300 max-w-xl">
             Chào mừng bạn đến với Cổng thông tin Đào tạo Đại học Thế hệ mới. Theo dõi tiến độ học tập, đăng ký tín chỉ và công nợ học phí theo thời gian thực.
@@ -96,16 +96,16 @@ export default function StudentDashboardView({ onNavigateTab }) {
           </div>
           <div className="my-3 flex items-baseline gap-2">
             <span className="text-3xl font-black text-slate-800">
-              {overview?.cumulativeGpa10 || '8.2'}
+              {overview?.cumulativeGpa10 || '0.0'}
             </span>
             <span className="text-xs font-bold text-slate-400">/ 10.0</span>
             <span className="ml-auto text-sm font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-              {overview?.cumulativeGpa4 || '3.28'} / 4.0
+              {overview?.cumulativeGpa4 || '0.00'} / 4.0
             </span>
           </div>
           <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
             <span>Xếp loại:</span>
-            <span className="font-bold text-emerald-600">{overview?.academicStanding || 'Giỏi'}</span>
+            <span className="font-bold text-emerald-600">{overview?.academicStanding || 'Chưa xét'}</span>
           </div>
         </div>
 
@@ -120,20 +120,20 @@ export default function StudentDashboardView({ onNavigateTab }) {
           <div className="my-3">
             <div className="flex items-baseline justify-between mb-1.5">
               <span className="text-3xl font-black text-slate-800">
-                {overview?.totalAccumulatedCredits || '45'}
+                {overview?.totalAccumulatedCredits || '0'}
               </span>
-              <span className="text-xs font-bold text-slate-400">/ {overview?.requiredCredits || 135} TC</span>
+              <span className="text-xs font-bold text-slate-400">/ {overview?.requiredCredits || 0} TC</span>
             </div>
             <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full"
-                style={{ width: `${overview?.progressPercentage || 33}%` }}
+                style={{ width: `${overview?.progressPercentage || 0}%` }}
               />
             </div>
           </div>
           <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
             <span>Hoàn thành:</span>
-            <span className="font-bold text-indigo-600">{overview?.progressPercentage || 33}% chương trình</span>
+            <span className="font-bold text-indigo-600">{overview?.progressPercentage || 0}% chương trình</span>
           </div>
         </div>
 
@@ -147,13 +147,13 @@ export default function StudentDashboardView({ onNavigateTab }) {
           </div>
           <div className="my-3 flex items-baseline gap-2">
             <span className="text-3xl font-black text-slate-800">
-              {overview?.registeredClassesThisSemester || '4'}
+              {overview?.registeredClassesThisSemester || '0'}
             </span>
             <span className="text-xs font-bold text-slate-400">lớp học phần</span>
           </div>
           <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
             <span>Tổng tín chỉ ĐK:</span>
-            <span className="font-bold text-purple-600">{overview?.registeredCreditsThisSemester || 13} tín chỉ</span>
+            <span className="font-bold text-purple-600">{overview?.registeredCreditsThisSemester || 0} tín chỉ</span>
           </div>
         </div>
 

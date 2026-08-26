@@ -94,19 +94,19 @@ export default function StudentTranscriptView() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
           <div>
             <span className="text-slate-400 block">Họ và tên:</span>
-            <strong className="text-slate-800 text-sm">{overview?.fullName || 'Nguyễn Hữu Đạt'}</strong>
+            <strong className="text-slate-800 text-sm">{overview?.fullName || 'Sinh viên'}</strong>
           </div>
           <div>
             <span className="text-slate-400 block">Mã sinh viên:</span>
-            <strong className="text-slate-800 text-sm font-mono">{overview?.studentId || 'SV001'}</strong>
+            <strong className="text-slate-800 text-sm font-mono">{overview?.studentId || 'N/A'}</strong>
           </div>
           <div>
             <span className="text-slate-400 block">Lớp danh nghĩa:</span>
-            <strong className="text-slate-800">{overview?.className || 'CNTT1-K65'}</strong>
+            <strong className="text-slate-800">{overview?.className || 'Chưa xếp lớp'}</strong>
           </div>
           <div>
             <span className="text-slate-400 block">Khoa / Ngành:</span>
-            <strong className="text-slate-800">{overview?.facultyName || 'Công nghệ Thông tin'}</strong>
+            <strong className="text-slate-800">{overview?.facultyName || 'Chưa phân khoa'}</strong>
           </div>
         </div>
 
@@ -145,13 +145,13 @@ export default function StudentTranscriptView() {
                       {idx + 1}
                     </td>
                     <td className="p-2 border-r border-slate-300 font-mono font-bold">
-                      {g.subject?.subjectId || g.subjectId || 'IT101'}
+                      {g.subject?.subjectId || g.subjectId || ''}
                     </td>
                     <td className="p-2 border-r border-slate-300 font-bold text-slate-800">
-                      {g.subject?.subjectName || g.subjectName || 'Lập trình ứng dụng'}
+                      {g.subject?.subjectName || g.subjectName || 'Học phần'}
                     </td>
                     <td className="p-2 border-r border-slate-300 text-center font-semibold">
-                      {g.subject?.credits || 3}
+                      {g.subject?.credits || 0}
                     </td>
                     <td className="p-2 border-r border-slate-300 text-center font-bold text-blue-700">
                       {g.scoreScale10 != null ? Number(g.scoreScale10).toFixed(1) : '-'}
@@ -173,15 +173,15 @@ export default function StudentTranscriptView() {
         <div className="grid grid-cols-3 gap-4 p-4 bg-slate-900 text-white rounded-xl text-center">
           <div>
             <div className="text-[11px] text-slate-400 uppercase font-bold">Tổng Tín Chỉ Tích Lũy</div>
-            <div className="text-xl font-black">{overview?.totalAccumulatedCredits || 45} TC</div>
+            <div className="text-xl font-black">{overview?.totalAccumulatedCredits || 0} TC</div>
           </div>
           <div>
             <div className="text-[11px] text-slate-400 uppercase font-bold">Điểm GPA Hệ 10</div>
-            <div className="text-xl font-black text-emerald-400">{overview?.cumulativeGpa10 || '8.20'}</div>
+            <div className="text-xl font-black text-emerald-400">{overview?.cumulativeGpa10 || '0.00'}</div>
           </div>
           <div>
             <div className="text-[11px] text-slate-400 uppercase font-bold">Điểm GPA Hệ 4</div>
-            <div className="text-xl font-black text-blue-400">{overview?.cumulativeGpa4 || '3.28'}</div>
+            <div className="text-xl font-black text-blue-400">{overview?.cumulativeGpa4 || '0.00'}</div>
           </div>
         </div>
 

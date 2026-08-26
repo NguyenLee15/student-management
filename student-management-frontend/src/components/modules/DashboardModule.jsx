@@ -83,27 +83,16 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
     value: f.studentCount || 1,
   })) : (faculties.length > 0 ? faculties.map(f => ({
     name: f.facultyName,
-    value: f.totalStudents || 10,
-  })) : [
-    { name: 'Khoa Công Nghệ Thông Tin', value: 450 },
-    { name: 'Khoa Điện Tử Viễn Thông', value: 320 },
-    { name: 'Khoa Quản Trị Kinh Doanh', value: 280 },
-    { name: 'Khoa Khoa Học Dữ Liệu', value: 210 },
-  ]);
+    value: f.totalStudents || 0,
+  })) : []);
 
   const barData = gpaDist ? [
-    { rank: 'Xuất sắc (>=3.6)', count: gpaDist.excellent || 45, fill: '#10b981' },
-    { rank: 'Giỏi (3.2-3.59)', count: gpaDist.good || 120, fill: '#6366f1' },
-    { rank: 'Khá (2.5-3.19)', count: gpaDist.fair || 95, fill: '#38bdf8' },
-    { rank: 'Trung bình (2.0-2.49)', count: gpaDist.average || 25, fill: '#f59e0b' },
-    { rank: 'Cảnh báo (<2.0)', count: gpaDist.warning || 5, fill: '#f43f5e' },
-  ] : [
-    { rank: 'Xuất sắc (>=3.6)', count: 45, fill: '#10b981' },
-    { rank: 'Giỏi (3.2-3.59)', count: 120, fill: '#6366f1' },
-    { rank: 'Khá (2.5-3.19)', count: 95, fill: '#38bdf8' },
-    { rank: 'Trung bình (2.0-2.49)', count: 25, fill: '#f59e0b' },
-    { rank: 'Cảnh báo (<2.0)', count: 5, fill: '#f43f5e' },
-  ];
+    { rank: 'Xuất sắc (>=3.6)', count: gpaDist.excellent || 0, fill: '#10b981' },
+    { rank: 'Giỏi (3.2-3.59)', count: gpaDist.good || 0, fill: '#6366f1' },
+    { rank: 'Khá (2.5-3.19)', count: gpaDist.fair || 0, fill: '#38bdf8' },
+    { rank: 'Trung bình (2.0-2.49)', count: gpaDist.average || 0, fill: '#f59e0b' },
+    { rank: 'Cảnh báo (<2.0)', count: gpaDist.warning || 0, fill: '#f43f5e' },
+  ] : [];
 
   return (
     <div className="space-y-6">
@@ -119,31 +108,31 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Tổng số Sinh viên"
-          value={summaryData?.totalStudents ?? stats.students ?? '1,284'}
+          value={summaryData?.totalStudents ?? stats?.students ?? '0'}
           subtitle="Sinh viên đang theo học"
           icon={Users}
-          trend="+12.4%"
+          trend=""
           color="indigo"
         />
         <StatCard
           title="Tổng số Giảng viên"
-          value={summaryData?.totalTeachers ?? stats.teachers ?? '86'}
+          value={summaryData?.totalTeachers ?? stats?.teachers ?? '0'}
           subtitle="Giáo sư & Giảng viên"
           icon={UserSquare2}
-          trend="+4.2%"
+          trend=""
           color="emerald"
         />
         <StatCard
           title="Điểm trung bình (GPA)"
-          value={summaryData?.averageGpa4 ? `${summaryData.averageGpa4} / 4.0` : '3.48 / 4.0'}
-          subtitle={`Tỉ lệ đạt: ${summaryData?.passRate ?? 96.5}%`}
+          value={summaryData?.averageGpa4 ? `${summaryData.averageGpa4} / 4.0` : '0.0 / 4.0'}
+          subtitle={`Tỉ lệ đạt: ${summaryData?.passRate ?? 0}%`}
           icon={GraduationCap}
-          trend="+0.15"
+          trend=""
           color="amber"
         />
         <StatCard
           title="Lớp Học Phần"
-          value={summaryData?.totalSubjects ?? stats.subjects ?? '64'}
+          value={summaryData?.totalSubjects ?? stats?.subjects ?? '0'}
           subtitle="Chương trình đào tạo"
           icon={BookOpen}
           color="cyan"

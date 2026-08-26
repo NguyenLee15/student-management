@@ -6,7 +6,7 @@ import {
 import { creditClassApi, teacherApi, studentApi, gradeApi } from '../../api';
 
 export default function TeacherPortalModule({ onNotify, currentUser }) {
-  const [currentTeacherId, setCurrentTeacherId] = useState(currentUser?.teacherId || 'GV001');
+  const [currentTeacherId, setCurrentTeacherId] = useState(currentUser?.teacherId || '');
   const [teacherList, setTeacherList] = useState([]);
   const [teacherInfo, setTeacherInfo] = useState(null);
 
@@ -252,8 +252,12 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {students.map((st) => {
-                  const entry = gradeSheet[st.studentId] || { attendanceScore: 10, midtermScore: 8, finalExamScore: 8 };
-                  const finalScore = ((entry.attendanceScore * 0.1) + (entry.midtermScore * 0.3) + (entry.finalExamScore * 0.6)).toFixed(1);
+                  const entry = gradeSheet[st.studentId] || { attendanceScore: '', midtermScore: '', finalExamScore: '' };
+                  
+                  const att = parseFloat(entry.attendanceScore) || 0;
+                  const mid = parseFloat(entry.midtermScore) || 0;
+                  const fin = parseFloat(entry.finalExamScore) || 0;
+                  const finalScore = ((att * 0.1) + (mid * 0.3) + (fin * 0.6)).toFixed(1);
 
                   return (
                     <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
