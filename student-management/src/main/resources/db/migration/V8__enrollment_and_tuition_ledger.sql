@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS enrollments (
     CONSTRAINT fk_enrollments_credit_class FOREIGN KEY (credit_class_id) REFERENCES credit_classes(credit_class_id),
     CONSTRAINT fk_enrollments_semester FOREIGN KEY (semester_id) REFERENCES semesters(id),
     CONSTRAINT uk_student_active_enrollment UNIQUE (student_id, credit_class_id, active_key)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2. Tạo bảng tuition_invoices (Hóa đơn học phí theo học kỳ của sinh viên)
 CREATE TABLE IF NOT EXISTS tuition_invoices (
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS tuition_invoices (
     CONSTRAINT fk_invoices_student FOREIGN KEY (student_id) REFERENCES students(student_id),
     CONSTRAINT fk_invoices_semester FOREIGN KEY (semester_id) REFERENCES semesters(id),
     CONSTRAINT uk_student_semester_invoice UNIQUE (student_id, semester_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3. Tạo bảng tuition_items (Dòng chi tiết học phí từng môn đã đăng ký)
 CREATE TABLE IF NOT EXISTS tuition_items (
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS tuition_items (
     CONSTRAINT fk_items_invoice FOREIGN KEY (invoice_id) REFERENCES tuition_invoices(id),
     CONSTRAINT fk_items_enrollment FOREIGN KEY (enrollment_id) REFERENCES enrollments(id),
     CONSTRAINT fk_items_credit_class FOREIGN KEY (credit_class_id) REFERENCES credit_classes(credit_class_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 4. Tạo bảng tuition_payments (Biên lai thanh toán học phí)
 CREATE TABLE IF NOT EXISTS tuition_payments (
@@ -70,4 +70,4 @@ CREATE TABLE IF NOT EXISTS tuition_payments (
     updated_at DATETIME NULL,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_payments_invoice FOREIGN KEY (invoice_id) REFERENCES tuition_invoices(id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

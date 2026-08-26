@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS semesters (
     updated_at DATETIME NULL,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_semesters_academic_year FOREIGN KEY (academic_year_id) REFERENCES academic_years(academic_year_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2. Tạo bảng registration_periods
 CREATE TABLE IF NOT EXISTS registration_periods (
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS registration_periods (
     updated_at DATETIME NULL,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_reg_periods_semester FOREIGN KEY (semester_id) REFERENCES semesters(id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3. Tạo bảng tuition_policies
 CREATE TABLE IF NOT EXISTS tuition_policies (
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS tuition_policies (
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_tuition_policies_semester FOREIGN KEY (semester_id) REFERENCES semesters(id),
     CONSTRAINT fk_tuition_policies_faculty FOREIGN KEY (faculty_id) REFERENCES faculties(faculty_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 4. Bổ sung các cột trọng số template vào bảng subjects
 ALTER TABLE subjects
