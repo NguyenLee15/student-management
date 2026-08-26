@@ -4,7 +4,7 @@ import {
   DollarSign, Receipt, ArrowRight, ShieldCheck, RefreshCw, X 
 } from 'lucide-react';
 import { studentPortalApi, paymentApi } from '../../../api';
-import Skeleton from '../../common/Skeleton';
+import Skeleton from '../../../components/common/Skeleton';
 
 export default function TuitionLedgerView() {
   const [invoice, setInvoice] = useState(null);

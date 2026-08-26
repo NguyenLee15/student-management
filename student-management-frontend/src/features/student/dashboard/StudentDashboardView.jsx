@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { studentPortalApi } from '../../../api';
 
-import Skeleton from '../../common/Skeleton';
+import Skeleton from '../../../components/common/Skeleton';
 
 export default function StudentDashboardView({ onNavigateTab }) {
   const [overview, setOverview] = useState(null);
