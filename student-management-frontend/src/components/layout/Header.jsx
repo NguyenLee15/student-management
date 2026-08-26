@@ -31,10 +31,10 @@ export default function Header({
               EduPortal AI
             </span>
             <span className="px-2 py-0.5 text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">
-              Enterprise v3.0
+              Phiên bản 3.0
             </span>
           </div>
-          <p className="text-xs text-slate-400">University Student & Academic Management System</p>
+          <p className="hidden sm:block text-xs text-slate-400">Hệ thống Quản lý Đào tạo và Sinh viên</p>
         </div>
       </div>
 
@@ -42,7 +42,7 @@ export default function Header({
       <div className="hidden md:flex items-center gap-3 px-3.5 py-1.5 rounded-full bg-slate-950/80 border border-slate-800 text-xs shadow-inner">
         <button 
           onClick={onRefreshHealth} 
-          title="Refresh connection status"
+          title="Kiểm tra kết nối"
           className="flex items-center gap-1.5 text-slate-400 hover:text-white transition"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${apiChecking ? 'animate-spin text-indigo-400' : ''}`} />
@@ -50,7 +50,7 @@ export default function Header({
         <div className="flex items-center gap-2">
           <span className={`h-2.5 w-2.5 rounded-full ${isBackendConnected ? 'bg-emerald-400 shadow-sm shadow-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
           <span className="font-medium text-slate-300">
-            {isBackendConnected ? 'Spring Boot REST API Live (8080)' : 'Backend Offline / Standby'}
+            {isBackendConnected ? 'Máy chủ API Đang hoạt động' : 'Máy chủ Offline / Chờ kết nối'}
           </span>
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function Header({
           onClick={onOpenCommand}
           className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500/40 text-slate-400 hover:text-slate-200 text-xs transition"
         >
-          <span>Search...</span>
+          <span>Tìm kiếm...</span>
           <kbd className="px-1.5 py-0.5 bg-slate-800 text-[10px] rounded border border-slate-700 font-mono text-slate-300">Ctrl+K</kbd>
         </button>
 
@@ -69,10 +69,10 @@ export default function Header({
           href="http://localhost:8080/swagger-ui/index.html" 
           target="_blank" 
           rel="noreferrer"
-          className="hidden sm:flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-medium px-3 py-2 rounded-xl border border-slate-700 transition"
+          className="hidden lg:flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-medium px-3 py-2 rounded-xl border border-slate-700 transition"
         >
           <FileText className="h-4 w-4 text-indigo-400" />
-          <span>Swagger Docs</span>
+          <span>Tài liệu API</span>
         </a>
 
         <div className="h-6 w-[1px] bg-slate-800 mx-1"></div>
@@ -90,7 +90,7 @@ export default function Header({
             </div>
             <button
               onClick={onLogout}
-              title="Logout"
+              title="Đăng xuất"
               className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
             >
               <LogOut className="h-4 w-4" />
@@ -102,7 +102,7 @@ export default function Header({
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95"
           >
             <LogIn className="h-4 w-4" />
-            <span>Login (JWT)</span>
+            <span>Đăng nhập</span>
           </button>
         )}
       </div>

@@ -109,42 +109,42 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
     <div className="space-y-6">
       {/* Title & Subtitle */}
       <div>
-        <h1 className="text-2xl font-extrabold text-white tracking-tight">Academic Overview & Analytics</h1>
+        <h1 className="text-2xl font-extrabold text-white tracking-tight">Tổng quan & Phân tích Đào tạo</h1>
         <p className="text-xs text-slate-400 mt-1">
-          Real-time institutional performance metrics, GPA distributions, and faculty enrollments
+          Chỉ số hiệu suất thời gian thực, phân bố GPA và dữ liệu tuyển sinh
         </p>
       </div>
 
       {/* 4 Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total Students"
+          title="Tổng số Sinh viên"
           value={summaryData?.totalStudents ?? stats.students ?? '1,284'}
-          subtitle="Enrolled active learners"
+          subtitle="Sinh viên đang theo học"
           icon={Users}
           trend="+12.4%"
           color="indigo"
         />
         <StatCard
-          title="Faculty Members"
+          title="Tổng số Giảng viên"
           value={summaryData?.totalTeachers ?? stats.teachers ?? '86'}
-          subtitle="Professors & Lecturers"
+          subtitle="Giáo sư & Giảng viên"
           icon={UserSquare2}
           trend="+4.2%"
           color="emerald"
         />
         <StatCard
-          title="Average GPA"
+          title="Điểm trung bình (GPA)"
           value={summaryData?.averageGpa4 ? `${summaryData.averageGpa4} / 4.0` : '3.48 / 4.0'}
-          subtitle={`Pass Rate: ${summaryData?.passRate ?? 96.5}%`}
+          subtitle={`Tỉ lệ đạt: ${summaryData?.passRate ?? 96.5}%`}
           icon={GraduationCap}
           trend="+0.15"
           color="amber"
         />
         <StatCard
-          title="Credit Modules (Học phần)"
+          title="Lớp Học Phần"
           value={summaryData?.totalSubjects ?? stats.subjects ?? '64'}
-          subtitle="Curriculum syllabus"
+          subtitle="Chương trình đào tạo"
           icon={BookOpen}
           color="cyan"
         />
@@ -156,11 +156,11 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
         <div className="lg:col-span-2 glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">Academic GPA Progression Trend</h3>
-              <p className="text-xs text-slate-400">Cumulative average GPA across consecutive semesters</p>
+              <h3 className="text-sm font-bold text-white tracking-tight">Biểu đồ Xu hướng Điểm GPA</h3>
+              <p className="text-xs text-slate-400">Điểm trung bình tích lũy qua các học kỳ</p>
             </div>
             <span className="text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">
-              GPA Analytics
+              Phân tích GPA
             </span>
           </div>
 
@@ -200,8 +200,8 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
         {/* Faculty Breakdown Pie Chart */}
         <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4 flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-bold text-white tracking-tight">Student Enrollment by Faculty</h3>
-            <p className="text-xs text-slate-400">Distribution proportion</p>
+            <h3 className="text-sm font-bold text-white tracking-tight">Phân bố Sinh viên theo Khoa</h3>
+            <p className="text-xs text-slate-400">Tỉ lệ sinh viên các chuyên ngành</p>
           </div>
 
           <div className="h-48 w-full flex items-center justify-center">
@@ -250,11 +250,11 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
       <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-white tracking-tight">Academic Grade Performance Distribution</h3>
-            <p className="text-xs text-slate-400">Student count categorised by official university grading standards</p>
+            <h3 className="text-sm font-bold text-white tracking-tight">Phân bố Kết quả Học tập</h3>
+            <p className="text-xs text-slate-400">Số lượng sinh viên phân loại theo xếp loại học lực</p>
           </div>
           <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-            Grade Histogram
+            Biểu đồ xếp loại
           </span>
         </div>
 
@@ -291,13 +291,13 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-white">Live Server & Observability Status</h3>
+                <h3 className="text-sm font-bold text-white">Trạng thái Máy chủ & Kết nối</h3>
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                   {healthData.status}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">Spring Boot 3 Actuator • Caffeine Cache • Prometheus Registry</p>
+              <p className="text-xs text-slate-400 mt-0.5">Hệ thống giám sát Actuator • Cache • Prometheus Registry</p>
             </div>
           </div>
 
@@ -307,7 +307,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700 transition active:scale-95 self-start sm:self-auto"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${healthLoading ? 'animate-spin text-indigo-400' : ''}`} />
-            <span>Ping Health ({healthData.pingTime})</span>
+            <span>Kiểm tra độ trễ ({healthData.pingTime})</span>
           </button>
         </div>
 
@@ -315,52 +315,52 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
           <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1">
             <div className="flex items-center gap-1.5 text-slate-400 font-medium">
               <Database className="h-3.5 w-3.5 text-indigo-400" />
-              <span>MySQL 8 Database</span>
+              <span>Cơ sở dữ liệu MySQL 8</span>
             </div>
             <p className="font-bold text-white text-sm">{healthData.db}</p>
-            <p className="text-[10px] text-emerald-400">Connection Pool: Active</p>
+            <p className="text-[10px] text-emerald-400">Kết nối: Ổn định</p>
           </div>
 
           <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1">
             <div className="flex items-center gap-1.5 text-slate-400 font-medium">
               <HardDrive className="h-3.5 w-3.5 text-emerald-400" />
-              <span>Storage & Disk</span>
+              <span>Bộ nhớ & Lưu trữ</span>
             </div>
             <p className="font-bold text-white text-sm">{healthData.disk}</p>
-            <p className="text-[10px] text-slate-400">Free threshold: OK</p>
+            <p className="text-[10px] text-slate-400">Dung lượng trống: Tốt</p>
           </div>
 
           <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1">
             <div className="flex items-center gap-1.5 text-slate-400 font-medium">
               <Cpu className="h-3.5 w-3.5 text-amber-400" />
-              <span>Caffeine In-Memory Cache</span>
+              <span>Hệ thống In-Memory Cache</span>
             </div>
-            <p className="font-bold text-white text-sm">ENABLED</p>
-            <p className="text-[10px] text-amber-400">TTL 10m (Analytics / Meta)</p>
+            <p className="font-bold text-white text-sm">ĐANG HOẠT ĐỘNG</p>
+            <p className="text-[10px] text-amber-400">Thời gian lưu: 10 phút</p>
           </div>
 
           <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1">
             <div className="flex items-center gap-1.5 text-slate-400 font-medium">
               <Activity className="h-3.5 w-3.5 text-purple-400" />
-              <span>Rate Limiting (Bucket4j)</span>
+              <span>Giới hạn truy cập (Rate Limit)</span>
             </div>
-            <p className="font-bold text-white text-sm">ACTIVE</p>
-            <p className="text-[10px] text-purple-400">60 req/min API • 5/min Login</p>
+            <p className="font-bold text-white text-sm">ĐANG BẬT</p>
+            <p className="text-[10px] text-purple-400">60 req/phút API • 5 req/phút Login</p>
           </div>
         </div>
       </div>
 
       {/* Quick Launchpad Shortcuts */}
       <div className="glass-card p-5 rounded-2xl border border-slate-800 space-y-3">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Quick Management Modules</h3>
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Lối tắt Phân hệ Quản lý</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
           {[
-            { id: 'students', label: 'Students', icon: Users, color: 'text-indigo-400' },
-            { id: 'teachers', label: 'Teachers', icon: UserSquare2, color: 'text-emerald-400' },
-            { id: 'subjects', label: 'Subjects', icon: BookOpen, color: 'text-cyan-400' },
-            { id: 'schedules', label: 'Timetable', icon: Layers, color: 'text-amber-400' },
-            { id: 'grades', label: 'Grades & GPA', icon: Award, color: 'text-rose-400' },
-            { id: 'audit-logs', label: 'Audit Logs', icon: ShieldCheck, color: 'text-violet-400' },
+            { id: 'students', label: 'Sinh viên', icon: Users, color: 'text-indigo-400' },
+            { id: 'teachers', label: 'Giảng viên', icon: UserSquare2, color: 'text-emerald-400' },
+            { id: 'subjects', label: 'Học phần', icon: BookOpen, color: 'text-cyan-400' },
+            { id: 'schedules', label: 'Lịch học', icon: Layers, color: 'text-amber-400' },
+            { id: 'grades', label: 'Điểm số', icon: Award, color: 'text-rose-400' },
+            { id: 'audit-logs', label: 'Nhật ký HT', icon: ShieldCheck, color: 'text-violet-400' },
           ].map((btn) => {
             const Icon = btn.icon;
             return (

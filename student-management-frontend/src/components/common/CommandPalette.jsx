@@ -42,7 +42,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }) {
           list.forEach(s => items.push({
             id: s.studentId,
             title: s.fullName,
-            subtitle: `Student ID: ${s.studentId} • Class: ${s.classId || s.className || 'CNTT'}`,
+            subtitle: `Mã SV: ${s.studentId} • Lớp: ${s.classId || s.className || 'CNTT'}`,
             type: 'student',
             tab: 'students',
           }));
@@ -54,7 +54,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }) {
           list.forEach(t => items.push({
             id: t.teacherId,
             title: t.fullName,
-            subtitle: `Lecturer ID: ${t.teacherId} • Dept: ${t.facultyName || t.facultyId}`,
+            subtitle: `Mã GV: ${t.teacherId} • Khoa: ${t.facultyName || t.facultyId}`,
             type: 'teacher',
             tab: 'teachers',
           }));
@@ -76,10 +76,10 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }) {
   const quickNavs = [
     { label: 'Cổng Sinh Viên (Portal)', tab: 'student-portal', icon: Award },
     { label: 'Cổng Giảng Viên (Portal)', tab: 'teacher-portal', icon: UserSquare2 },
-    { label: 'Student Directory', tab: 'students', icon: Users },
-    { label: 'Lecturers / Teachers', tab: 'teachers', icon: UserSquare2 },
-    { label: 'Academic Grades & GPA', tab: 'grades', icon: Award },
-    { label: 'Timetable & Schedule', tab: 'schedules', icon: CalendarDays },
+    { label: 'Danh sách Sinh viên', tab: 'students', icon: Users },
+    { label: 'Danh sách Giảng viên', tab: 'teachers', icon: UserSquare2 },
+    { label: 'Quản lý Điểm số (GPA)', tab: 'grades', icon: Award },
+    { label: 'Thời khóa biểu & Lịch học', tab: 'schedules', icon: CalendarDays },
   ];
 
   return (
@@ -92,7 +92,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }) {
           <input
             type="text"
             autoFocus
-            placeholder="Type a student name, lecturer ID, or command... (e.g. SV001, Nguyen)"
+            placeholder="Nhập tên sinh viên, mã giảng viên, hoặc lệnh... (vd: SV001, Nguyen)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none"
@@ -109,7 +109,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }) {
         <div className="max-h-80 overflow-y-auto p-3 space-y-1 text-xs">
           {query.trim() === '' ? (
             <div className="space-y-2">
-              <p className="px-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Quick Navigation</p>
+              <p className="px-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Truy cập nhanh</p>
               <div className="grid grid-cols-2 gap-1.5">
                 {quickNavs.map(item => {
                   const Icon = item.icon;
@@ -129,9 +129,9 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }) {
           ) : (
             <div>
               {loading ? (
-                <div className="text-center py-6 text-slate-500">Searching database...</div>
+                <div className="text-center py-6 text-slate-500">Đang tìm kiếm trong hệ thống...</div>
               ) : results.length === 0 ? (
-                <div className="text-center py-6 text-slate-500">No records found matching "{query}"</div>
+                <div className="text-center py-6 text-slate-500">Không tìm thấy kết quả nào phù hợp với "{query}"</div>
               ) : (
                 results.map((r, i) => (
                   <button
@@ -153,7 +153,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }) {
 
         {/* Footer */}
         <div className="px-4 py-2 bg-slate-900/80 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
-          <span>Tip: Press <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-[10px] text-slate-300 font-mono">Ctrl</kbd> + <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-[10px] text-slate-300 font-mono">K</kbd> anywhere to open Universal Search</span>
+          <span>Mẹo: Nhấn <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-[10px] text-slate-300 font-mono">Ctrl</kbd> + <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-[10px] text-slate-300 font-mono">K</kbd> ở bất kỳ đâu để mở Tìm kiếm nhanh</span>
           <span className="text-indigo-400">EduPortal AI</span>
         </div>
       </div>

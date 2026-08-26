@@ -8,43 +8,43 @@ import {
 export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUser = null, isMobileMenuOpen = false }) {
   const menuSections = [
     {
-      title: 'Dedicated Portals (Mới)',
+      title: 'Cổng Thông Tin Riêng',
       items: [
         { id: 'student-portal', label: 'Cổng Sinh Viên (Portal)', icon: GraduationCap, badge: 'PORTAL', roles: ['ROLE_ADMIN', 'ROLE_STUDENT', 'ROLE_TEACHER'] },
         { id: 'teacher-portal', label: 'Cổng Giảng Viên (Portal)', icon: UserSquare2, badge: 'PORTAL', roles: ['ROLE_ADMIN', 'ROLE_TEACHER'] },
       ]
     },
     {
-      title: 'Analytics & Overview',
+      title: 'Tổng quan & Thống kê',
       items: [
-        { id: 'overview', label: 'Overview Analytics', icon: BarChart3, badge: null },
+        { id: 'overview', label: 'Bảng điều khiển chung', icon: BarChart3, badge: null },
       ]
     },
     {
-      title: 'People & Organization',
+      title: 'Nhân sự & Tổ chức',
       items: [
-        { id: 'students', label: 'Students Directory', icon: Users, badge: counts.students },
-        { id: 'teachers', label: 'Lecturers / Teachers', icon: UserSquare2, badge: counts.teachers },
-        { id: 'faculties', label: 'Academic Faculties', icon: Building2, badge: counts.faculties },
-        { id: 'academic-years', label: 'Academic Years (Khóa)', icon: CalendarRange, badge: counts.academicYears },
-        { id: 'student-classes', label: 'Student Classes (Lớp)', icon: School, badge: counts.classes },
+        { id: 'students', label: 'Danh sách Sinh viên', icon: Users, badge: counts.students },
+        { id: 'teachers', label: 'Danh sách Giảng viên', icon: UserSquare2, badge: counts.teachers },
+        { id: 'faculties', label: 'Quản lý Khoa', icon: Building2, badge: counts.faculties },
+        { id: 'academic-years', label: 'Khóa học (Niên khóa)', icon: CalendarRange, badge: counts.academicYears },
+        { id: 'student-classes', label: 'Lớp sinh viên (Hành chính)', icon: School, badge: counts.classes },
       ]
     },
     {
-      title: 'Curriculum & Facilities',
+      title: 'Đào tạo & Cơ sở vật chất',
       items: [
-        { id: 'subjects', label: 'Subjects & Modules', icon: BookOpen, badge: counts.subjects },
-        { id: 'classrooms', label: 'Classrooms & Buildings', icon: DoorOpen, badge: counts.classrooms },
-        { id: 'credit-classes', label: 'Credit Classes (Tín chỉ)', icon: Layers, badge: counts.creditClasses },
-        { id: 'schedules', label: 'Timetable & Schedules', icon: CalendarDays, badge: counts.schedules },
+        { id: 'subjects', label: 'Môn học & Học phần', icon: BookOpen, badge: counts.subjects },
+        { id: 'classrooms', label: 'Phòng học & Tòa nhà', icon: DoorOpen, badge: counts.classrooms },
+        { id: 'credit-classes', label: 'Lớp tín chỉ (Học phần)', icon: Layers, badge: counts.creditClasses },
+        { id: 'schedules', label: 'Thời khóa biểu & Lịch', icon: CalendarDays, badge: counts.schedules },
       ]
     },
     {
-      title: 'Grading & System',
+      title: 'Điểm số & Hệ thống',
       items: [
-        { id: 'grades', label: 'Academic Grades & GPA', icon: Award, badge: counts.grades, roles: ['ROLE_ADMIN', 'ROLE_TEACHER', 'ROLE_STUDENT'] },
-        { id: 'users', label: 'Users & Roles (Admin)', icon: ShieldAlert, badge: counts.users, roles: ['ROLE_ADMIN'] },
-        { id: 'audit-logs', label: 'Audit Logs & History', icon: Layers, badge: null, roles: ['ROLE_ADMIN'] },
+        { id: 'grades', label: 'Quản lý Điểm số (GPA)', icon: Award, badge: counts.grades, roles: ['ROLE_ADMIN', 'ROLE_TEACHER', 'ROLE_STUDENT'] },
+        { id: 'users', label: 'Tài khoản & Phân quyền', icon: ShieldAlert, badge: counts.users, roles: ['ROLE_ADMIN'] },
+        { id: 'audit-logs', label: 'Nhật ký Hoạt động (Logs)', icon: Layers, badge: null, roles: ['ROLE_ADMIN'] },
       ]
     }
   ];
@@ -116,7 +116,7 @@ export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUs
           <span>Spring Boot 3 + React 18</span>
         </div>
         <p className="text-[11px] text-slate-400 leading-relaxed">
-          Pure REST API Backend with JWT Security, JPA, and Vite SPA.
+          Hệ thống Quản lý Đào tạo Đại học phiên bản mới nhất. Tích hợp JWT, JPA và Vite SPA.
         </p>
       </div>
     </aside>

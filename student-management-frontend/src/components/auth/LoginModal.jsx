@@ -86,7 +86,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
             onClick={onClose}
             className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
           >
-            Cancel
+            Hủy bỏ
           </button>
           <button
             type="submit"
@@ -94,7 +94,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
             className="flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition disabled:opacity-50"
           >
             <LogIn className="h-4 w-4" />
-            <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
+            <span>{loading ? 'Đang xác thực...' : 'Đăng nhập'}</span>
           </button>
         </div>
       </form>
