@@ -26,6 +26,14 @@ public class PayOSConfig {
         return StringUtils.hasText(clientId) && StringUtils.hasText(apiKey) && StringUtils.hasText(checksumKey);
     }
 
+    @jakarta.annotation.PostConstruct
+    public void validateConfig() {
+        if (!isConfigured()) {
+            log.error("CRITICAL CONFIG ERROR: PayOS keys (client-id, api-key, checksum-key) must be provided in application.properties!");
+            throw new IllegalStateException("Missing PayOS configuration. Application cannot start.");
+        }
+    }
+
     @Bean
     public RestClient payOSRestClient() {
         return RestClient.builder()

@@ -30,6 +30,9 @@ public class JwtTokenProvider {
 
     @PostConstruct
     public void init() {
+        if (secretKeyString == null || secretKeyString.trim().length() < 64) {
+            throw new IllegalArgumentException("CRITICAL CONFIG ERROR: JWT_SECRET must be at least 64 characters long for HS512.");
+        }
         // Khởi tạo khóa bí mật từ chuỗi secretKeyString
         this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
         logger.info("JWT secret key initialized successfully");
