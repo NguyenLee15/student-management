@@ -359,6 +359,7 @@ public class PayOSService {
 
     private static final Set<String> ALLOWED_HOSTS = Set.of(
         "localhost", "127.0.0.1",
+        "lee-eduportal.vercel.app",
         "student-management-frontend.vercel.app",
         "eduportal-frontend.vercel.app"
     );
