@@ -162,8 +162,9 @@ class PayOSServiceTest {
                 .paymentMethod(PaymentMethod.PAYOS)
                 .build();
 
-        when(paymentTransactionRepository.findByOrderCode(123456789L)).thenReturn(Optional.of(txn));
-        when(payOSConfig.isConfigured()).thenReturn(false); // Bỏ qua verify signature khi test mock
+        when(paymentTransactionRepository.findByOrderCodeForUpdate(123456789L)).thenReturn(Optional.of(txn));
+        when(payOSConfig.isConfigured()).thenReturn(true);
+        when(payOSConfig.getChecksumKey()).thenReturn("checksum_key");
 
         Map<String, Object> data = new HashMap<>();
         data.put("orderCode", 123456789L);
@@ -176,6 +177,7 @@ class PayOSServiceTest {
         payload.put("code", "00");
         payload.put("desc", "success");
         payload.put("data", data);
+        payload.put("signature", "5a9dc5c17355a717a53c3f19a1c10e70eb898eae2662947962f985700a399990");
 
         Map<String, Object> result = payOSService.processWebhook(payload);
 
@@ -202,16 +204,21 @@ class PayOSServiceTest {
                 .paymentMethod(PaymentMethod.PAYOS)
                 .build();
 
-        when(paymentTransactionRepository.findByOrderCode(123456789L)).thenReturn(Optional.of(alreadyPaidTxn));
-        when(payOSConfig.isConfigured()).thenReturn(false);
+        when(paymentTransactionRepository.findByOrderCodeForUpdate(123456789L)).thenReturn(Optional.of(alreadyPaidTxn));
+        when(payOSConfig.isConfigured()).thenReturn(true);
+        when(payOSConfig.getChecksumKey()).thenReturn("checksum_key");
 
         Map<String, Object> data = new HashMap<>();
         data.put("orderCode", 123456789L);
+        data.put("amount", 4500000);
         data.put("code", "00");
+        data.put("desc", "success");
+        data.put("reference", "MB12345678");
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("code", "00");
         payload.put("data", data);
+        payload.put("signature", "5a9dc5c17355a717a53c3f19a1c10e70eb898eae2662947962f985700a399990");
 
         Map<String, Object> result = payOSService.processWebhook(payload);
 
