@@ -24,6 +24,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.student.management.repository.StudentRepository studentRepository;
+    private final com.student.management.repository.TeacherRepository teacherRepository;
+    private final com.student.management.repository.PasswordResetTokenRepository passwordResetTokenRepository;
+    private final com.student.management.service.EmailService emailService;
+
+
 
     @Override
     @Transactional(readOnly = true)
@@ -89,9 +95,63 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void forgotPassword(String email, String appUrl) {
+        String userName = null;
+        var studentOpt = studentRepository.findByEmail(email);
+        if (studentOpt.isPresent()) {
+            userName = studentOpt.get().getStudentId();
+        } else {
+            var teacherOpt = teacherRepository.findByEmail(email);
+            if (teacherOpt.isPresent()) {
+                userName = teacherOpt.get().getTeacherId();
+            }
+        }
+        
+        if (userName == null) return; 
+        
+        var user = userRepository.findByUserName(userName).orElse(null);
+        if (user == null) return;
+        
+        String token = java.util.UUID.randomUUID().toString();
+        var resetToken = com.student.management.entity.PasswordResetToken.builder()
+                .token(token)
+                .userName(userName)
+                .expiresAt(java.time.LocalDateTime.now().plusMinutes(15))
+                .used(false)
+                .build();
+                
+        passwordResetTokenRepository.save(resetToken);
+        String resetLink = appUrl + "/reset-password?token=" + token;
+        emailService.sendPasswordResetEmail(email, resetLink);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        var resetToken = passwordResetTokenRepository.findByTokenAndUsedFalse(token)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired token"));
+                
+        if (resetToken.isExpired()) {
+            throw new IllegalArgumentException("Token has expired");
+        }
+        
+        var user = userRepository.findByUserName(resetToken.getUserName())
+                .orElseThrow(() -> new com.student.management.exception.NotFoundException("User not found"));
+                
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        resetToken.setUsed(true);
+        passwordResetTokenRepository.save(resetToken);
+    }
+
+
+    @Override
+    @Transactional
     public void delete(String userName) {
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(() -> new NotFoundException("User not found: " + userName));
         userRepository.delete(user);
     }
 }
+
+

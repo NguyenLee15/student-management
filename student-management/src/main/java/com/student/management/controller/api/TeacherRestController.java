@@ -21,6 +21,17 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Teachers API", description = "Endpoints for managing university teachers/lecturers")
 public class TeacherRestController {
 
+    @GetMapping("/export")
+    @Operation(summary = "Export teacher list to Excel file (.xlsx)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ResponseEntity<org.springframework.core.io.InputStreamResource> exportExcel() {
+        List<TeacherResponseDto> list = teacherService.getAll(org.springframework.data.domain.Pageable.unpaged()).getContent();
+        java.io.ByteArrayInputStream in = teacherService.exportToExcel(list);
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=teachers_export.xlsx");
+        return ResponseEntity.ok().headers(headers).contentType(org.springframework.http.MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")).body(new org.springframework.core.io.InputStreamResource(in));
+    }
+
     private final TeacherService teacherService;
 
     @GetMapping
@@ -65,4 +76,5 @@ public class TeacherRestController {
         return ResponseEntity.ok(ApiResponse.success("Teacher deleted successfully", null));
     }
 }
+
 

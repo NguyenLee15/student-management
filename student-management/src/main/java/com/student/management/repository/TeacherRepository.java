@@ -12,6 +12,7 @@ import java.util.List;
 
 @Repository
 public interface TeacherRepository extends JpaRepository<Teacher, String> {
+    java.util.Optional<Teacher> findByEmail(String email);
 
     @Query("SELECT t FROM Teacher t WHERE t.faculty.facultyId = :facultyId")
     List<Teacher> findByFacultyId(@Param("facultyId") String facultyId);

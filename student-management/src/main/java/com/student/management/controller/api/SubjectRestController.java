@@ -20,6 +20,17 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Subjects API", description = "Endpoints for managing subjects/courses")
 public class SubjectRestController {
 
+    @GetMapping("/export")
+    @Operation(summary = "Export subject list to Excel file (.xlsx)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ResponseEntity<org.springframework.core.io.InputStreamResource> exportExcel() {
+        org.springframework.data.domain.Page<SubjectResponseDto> list = subjectService.getAll(null, org.springframework.data.domain.Pageable.unpaged());
+        java.io.ByteArrayInputStream in = subjectService.exportToExcel(list);
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=subjects_export.xlsx");
+        return ResponseEntity.ok().headers(headers).contentType(org.springframework.http.MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")).body(new org.springframework.core.io.InputStreamResource(in));
+    }
+
     private final SubjectService subjectService;
 
     @GetMapping
@@ -64,4 +75,5 @@ public class SubjectRestController {
         return ResponseEntity.ok(ApiResponse.success("Subject deleted successfully", null));
     }
 }
+
 

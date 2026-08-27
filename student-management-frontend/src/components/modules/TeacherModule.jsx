@@ -5,6 +5,8 @@ import {
 import { teacherApi, facultyApi } from '../../api';
 import Modal from '../common/Modal';
 import Pagination from '../common/Pagination';
+import EmptyState from '../common/EmptyState';
+import Skeleton from '../common/Skeleton';
 import ConfirmDialog from '../common/ConfirmDialog';
 
 export default function TeacherModule({ onNotify, currentUser }) {
@@ -200,10 +202,20 @@ export default function TeacherModule({ onNotify, currentUser }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {teachers.length === 0 ? (
+              {loading ? (
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-40" /></td>
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-32" /></td>
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-8" /></td>
+                    </tr>
+                  ))
+                ) : teachers.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-5 py-8 text-center text-slate-500">
-                    {loading ? 'Fetching lecturers from database...' : 'No lecturers found.'}
+                  <td colSpan="5" className="p-0">
+                    <EmptyState title="Không tìm thấy giảng viên" message="Không có giảng viên nào khớp với điều kiện tìm kiếm hiện tại." />
                   </td>
                 </tr>
               ) : (
@@ -351,3 +363,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
     </div>
   );
 }
+
+
+
+

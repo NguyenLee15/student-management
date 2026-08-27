@@ -127,6 +127,27 @@ public class AuthRestController {
         return ResponseEntity.ok(ApiResponse.success("Làm mới token thành công", responseData));
     }
 
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Quên mật khẩu (gửi email reset)")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Valid @RequestBody com.student.management.dto.req.ForgotPasswordRequestDto dto,
+            @RequestHeader(value = "Origin", required = false) String origin) {
+            
+        String appUrl = (origin != null && !origin.isEmpty()) ? origin : "http://localhost:5173";
+        userService.forgotPassword(dto.getEmail(), appUrl);
+        
+        return ResponseEntity.ok(ApiResponse.success("Nếu email tồn tại, link reset đã được gửi", null));
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Đặt lại mật khẩu bằng token")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody com.student.management.dto.req.ResetPasswordRequestDto dto) {
+            
+        userService.resetPassword(dto.getToken(), dto.getNewPassword());
+        return ResponseEntity.ok(ApiResponse.success("Đặt lại mật khẩu thành công", null));
+    }
+
     @PostMapping("/logout")
     @Operation(summary = "Đăng xuất và thu hồi Refresh Token (Cookie & Body)")
     public ResponseEntity<ApiResponse<Void>> logout(
@@ -138,19 +159,18 @@ public class AuthRestController {
                 : cookieRefreshToken;
 
         if (StringUtils.hasText(tokenStr)) {
-            refreshTokenService.findByToken(tokenStr)
-                    .ifPresent(token -> refreshTokenService.revokeByUserName(token.getUserName()));
+            refreshTokenService.deleteByToken(tokenStr);
         }
 
-        // Clear Cookie
-        ResponseCookie clearCookie = ResponseCookie.from("refreshToken", "")
+        // Clear cookie
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(true)
                 .path("/api/v1/auth")
                 .maxAge(0)
                 .sameSite("None")
                 .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, clearCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok(ApiResponse.success("Đăng xuất thành công", null));
     }

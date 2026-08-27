@@ -1,5 +1,6 @@
-import React from 'react';
-import { GraduationCap, RefreshCw, LogIn, LogOut, ShieldCheck, UserCheck, FileText, Menu, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { GraduationCap, RefreshCw, LogIn, LogOut, ShieldCheck, UserCheck, FileText, Menu, X, Settings } from 'lucide-react';
+import ProfileSettingsModal from '../profile/ProfileSettingsModal';
 
 export default function Header({ 
   isBackendConnected, 
@@ -12,6 +13,8 @@ export default function Header({
   onToggleMobileMenu,
   isMobileMenuOpen
 }) {
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-40 bg-slate-900/85 backdrop-blur-xl border-b border-slate-800/80 px-4 md:px-6 py-3 flex items-center justify-between">
       {/* Brand & System Title */}
@@ -81,15 +84,19 @@ export default function Header({
 
         {currentUser ? (
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
+            <button 
+              onClick={() => setIsProfileModalOpen(true)}
+              className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 cursor-pointer border border-slate-800 hover:border-indigo-500/50 px-3 py-1.5 rounded-xl transition-all"
+            >
               <div className="h-6 w-6 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs">
                 {currentUser.username?.charAt(0)?.toUpperCase() || 'U'}
               </div>
-              <div className="text-left hidden sm:block">
+              <div className="text-left hidden sm:block pr-2">
                 <div className="text-xs font-semibold text-white leading-none">{currentUser.username}</div>
                 <div className="text-[10px] text-emerald-400 font-mono mt-0.5">{currentUser.role}</div>
               </div>
-            </div>
+              <Settings className="h-4 w-4 text-slate-400 hover:text-white transition-colors" />
+            </button>
             <button
               onClick={onLogout}
               title="Đăng xuất"
@@ -108,6 +115,11 @@ export default function Header({
           </button>
         )}
       </div>
+
+      <ProfileSettingsModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+      />
     </header>
   );
 }

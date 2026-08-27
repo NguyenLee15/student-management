@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LogIn, Lock, User, AlertCircle, ShieldCheck } from 'lucide-react';
 import Modal from '../common/Modal';
+import ForgotPasswordModal from './ForgotPasswordModal';
 import { authApi } from '../../api';
 
 import { setMemoryToken } from '../../api/axiosClient';
@@ -10,6 +11,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showForgot, setShowForgot] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -101,3 +103,4 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     </Modal>
   );
 }
+

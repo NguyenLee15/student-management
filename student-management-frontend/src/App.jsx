@@ -7,10 +7,15 @@ import CommandPalette from './components/common/CommandPalette';
 import StudentLayout from './layouts/StudentLayout';
 import TeacherLayout from './layouts/TeacherLayout';
 import AdminLayout from './layouts/AdminLayout';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 import { authApi, studentApi, teacherApi, facultyApi, subjectApi } from './api';
 
 export default function App() {
+  if (window.location.pathname === '/reset-password') {
+    return <ResetPasswordPage />;
+  }
+
   const [isBackendConnected, setIsBackendConnected] = useState(false);
   const [apiChecking, setApiChecking] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);

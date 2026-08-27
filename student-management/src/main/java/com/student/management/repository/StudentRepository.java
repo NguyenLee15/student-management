@@ -13,6 +13,8 @@ import java.util.List;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, String> {
+    java.util.Optional<Student> findByEmail(String email);
+
     @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})
     Page<Student> findAll(Pageable pageable);
 

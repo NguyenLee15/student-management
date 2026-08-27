@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, BookOpen, RefreshCw, GitBranch } from 'lucide-react';
+import { Plus, Edit3, Trash2, BookOpen, RefreshCw, GitBranch, Download } from 'lucide-react';
 import { subjectApi, facultyApi } from '../../api';
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 import Pagination from '../common/Pagination';
+import EmptyState from '../common/EmptyState';
+import Skeleton from '../common/Skeleton';
 
 export default function SubjectModule({ onNotify, currentUser }) {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
@@ -195,7 +197,25 @@ export default function SubjectModule({ onNotify, currentUser }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {subjects.map((s) => (
+              {loading ? (
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-40" /></td>
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-32" /></td>
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-12" /></td>
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-8" /></td>
+                    </tr>
+                  ))
+                ) : subjects.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="p-0">
+                      <EmptyState title="Không tìm thấy môn học" message="Không có môn học nào khớp với điều kiện tìm kiếm hiện tại." />
+                    </td>
+                  </tr>
+                ) : subjects.map((s) => (
                 <tr key={s.subjectId} className="hover:bg-slate-800/40 transition">
                   <td className="px-5 py-3.5 font-bold text-cyan-400 font-mono">{s.subjectId}</td>
                   <td className="px-5 py-3.5 font-semibold text-white">
@@ -396,3 +416,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
     </div>
   );
 }
+
+
+
+

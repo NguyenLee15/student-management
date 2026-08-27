@@ -4,10 +4,11 @@ import { getMemoryToken } from './axiosClient';
 
 // 1. Authentication API
 export const authApi = {
-  login: (credentials) => axiosClient.post('/auth/login', credentials),
-  register: (data) => axiosClient.post('/auth/register', data),
-  refresh: (refreshToken) => axiosClient.post('/auth/refresh', { refreshToken }),
-  logout: (refreshToken) => axiosClient.post('/auth/logout', { refreshToken }),
+  login: (data) => axiosClient.post('/auth/login', data),
+  logout: () => axiosClient.post('/auth/logout'),
+  refreshToken: (data) => axiosClient.post('/auth/refresh', data),
+  forgotPassword: (data) => axiosClient.post('/auth/forgot-password', data),
+  resetPassword: (data) => axiosClient.post('/auth/reset-password', data),
 };
 
 // 2. Students API
@@ -126,6 +127,8 @@ export const userApi = {
   getAll: (params) => axiosClient.get('/users', { params }),
   create: (data) => axiosClient.post('/users', data),
   delete: (userName) => axiosClient.delete(`/users/${userName}`),
+  changePassword: (data) => axiosClient.put('/users/change-password', data),
+  getMe: () => axiosClient.get('/users/me'),
 };
 
 // 13. Real-time Analytics & Aggregations API
@@ -191,5 +194,6 @@ export const paymentApi = {
   syncStatus: (orderCode) => axiosClient.post(`/payments/sync-status/${orderCode}`),
   getMyTransactions: () => axiosClient.get('/payments/my-transactions'),
 };
+
 
 

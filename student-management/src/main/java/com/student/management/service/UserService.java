@@ -15,5 +15,7 @@ public interface UserService {
     UserResponseDto create(UserRequestDto dto);
     UserResponseDto saveOrUpdate(UserRequestDto dto);
     void changePassword(String userName, ChangePasswordDto dto);
+    void forgotPassword(String email, String appUrl);
+    void resetPassword(String token, String newPassword);
     void delete(String userName);
 }
