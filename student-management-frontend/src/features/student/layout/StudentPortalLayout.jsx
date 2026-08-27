@@ -68,10 +68,10 @@ export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin })
               </div>
               <div className="hidden md:block text-left">
                 <div className="text-xs font-bold text-white truncate max-w-[120px]">
-                  {user?.fullName || 'Sinh viên'}
+                  {user?.fullName || ''}
                 </div>
                 <div className="text-[10px] text-slate-400 font-mono">
-                  {user?.userName || 'SV001'}
+                  {user?.userName || ''}
                 </div>
               </div>
               <button

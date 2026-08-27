@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 
+import java.net.URI;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
@@ -73,19 +74,18 @@ public class PayOSService {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Số tiền cần thanh toán không hợp lệ.");
         }
 
-        // Tạo orderCode duy nhất dạng số nguyên dương (PayOS yêu cầu orderCode < 9007199254740991)
-        long orderCode = System.currentTimeMillis() % 10000000000L;
+        // Tạo orderCode duy nhất: nanoTime kết hợp random
+        long orderCode = (System.nanoTime() % 10000000000L) * 100 + java.util.concurrent.ThreadLocalRandom.current().nextInt(100);
         String description = ("Hoc phi " + student.getStudentId() + " " + invoice.getSemester().getSemesterCode()).trim();
         if (description.length() > 25) {
             description = description.substring(0, 25);
         }
 
-        String returnUrl = StringUtils.hasText(requestDto.getReturnUrl()) 
-                ? requestDto.getReturnUrl() 
-                : "http://localhost:5173/student/tuition?payment_status=success&order_code=" + orderCode;
-        String cancelUrl = StringUtils.hasText(requestDto.getCancelUrl()) 
-                ? requestDto.getCancelUrl() 
-                : "http://localhost:5173/student/tuition?payment_status=cancelled&order_code=" + orderCode;
+        String fallbackReturn = "http://localhost:5173/student/tuition?payment_status=success&order_code=" + orderCode;
+        String fallbackCancel = "http://localhost:5173/student/tuition?payment_status=cancelled&order_code=" + orderCode;
+
+        String returnUrl = validateRedirectUrl(requestDto.getReturnUrl(), fallbackReturn);
+        String cancelUrl = validateRedirectUrl(requestDto.getCancelUrl(), fallbackCancel);
 
         String checkoutUrl = "";
         String qrCode = "";
@@ -192,7 +192,7 @@ public class PayOSService {
             String desc = root.path("desc").asText(dataNode.path("desc").asText(""));
             String reference = dataNode.path("reference").asText("");
 
-            Optional<PaymentTransaction> optionalTxn = paymentTransactionRepository.findByOrderCode(orderCode);
+            Optional<PaymentTransaction> optionalTxn = paymentTransactionRepository.findByOrderCodeForUpdate(orderCode);
             if (optionalTxn.isEmpty()) {
                 log.warn("⚠️ PAYOS_WEBHOOK_TXN_NOT_FOUND orderCode={}", orderCode);
                 return Map.of("error", 0, "message", "Transaction not found but acknowledged");
@@ -249,7 +249,7 @@ public class PayOSService {
      */
     @Transactional(rollbackFor = Exception.class)
     public PaymentTransactionResponseDto syncTransactionStatus(Long orderCode) {
-        PaymentTransaction txn = paymentTransactionRepository.findByOrderCode(orderCode)
+        PaymentTransaction txn = paymentTransactionRepository.findByOrderCodeForUpdate(orderCode)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Không tìm thấy giao dịch với mã: " + orderCode));
 
         if (txn.getStatus() == PaymentTransactionStatus.PAID) {
@@ -343,6 +343,21 @@ public class PayOSService {
             log.error("Signature verification error: {}", e.getMessage());
             return false;
         }
+    }
+
+    private static final Set<String> ALLOWED_HOSTS = Set.of(
+        "localhost", "127.0.0.1",
+        "student-management-frontend.vercel.app",
+        "eduportal-frontend.vercel.app"
+    );
+
+    private String validateRedirectUrl(String url, String fallback) {
+        if (!StringUtils.hasText(url)) return fallback;
+        try {
+            URI uri = URI.create(url);
+            if (ALLOWED_HOSTS.contains(uri.getHost())) return url;
+        } catch (Exception ignored) {}
+        return fallback;
     }
 
     private String calculateHmacSha256(String data, String key) throws NoSuchAlgorithmException, InvalidKeyException {

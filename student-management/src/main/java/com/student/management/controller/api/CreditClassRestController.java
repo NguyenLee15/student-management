@@ -3,6 +3,9 @@ package com.student.management.controller.api;
 import com.student.management.dto.req.CreditClassRequestDto;
 import com.student.management.dto.resp.ApiResponse;
 import com.student.management.dto.resp.CreditClassResponseDto;
+import com.student.management.exception.BusinessException;
+import com.student.management.exception.ErrorCode;
+import com.student.management.security.SecurityService;
 import com.student.management.service.CreditClassService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 public class CreditClassRestController {
 
     private final CreditClassService creditClassService;
+    private final SecurityService securityService;
 
     @GetMapping
     @Operation(summary = "Get all credit classes with pagination and search")
@@ -73,6 +77,9 @@ public class CreditClassRestController {
     @Operation(summary = "Đăng ký học phần (Student enrollment with Optimistic Locking)")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Void>> addStudent(@PathVariable Long classId, @PathVariable String studentId) {
+        if (securityService.isStudentRole() && !studentId.equals(securityService.getCurrentStudentId())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không có quyền thao tác enrollment cho sinh viên khác.");
+        }
         creditClassService.addStudentToCreditClass(classId, studentId);
         return ResponseEntity.ok(ApiResponse.success("Đăng ký lớp tín chỉ thành công", null));
     }
@@ -81,6 +88,9 @@ public class CreditClassRestController {
     @Operation(summary = "Hủy đăng ký học phần (Student unenrollment)")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Void>> removeStudent(@PathVariable Long classId, @PathVariable String studentId) {
+        if (securityService.isStudentRole() && !studentId.equals(securityService.getCurrentStudentId())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không có quyền thao tác enrollment cho sinh viên khác.");
+        }
         creditClassService.removeStudentFromCreditClass(classId, studentId);
         return ResponseEntity.ok(ApiResponse.success("Hủy đăng ký lớp tín chỉ thành công", null));
     }

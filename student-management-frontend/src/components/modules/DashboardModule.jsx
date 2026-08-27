@@ -11,13 +11,7 @@ import StatCard from '../common/StatCard';
 import { analyticsApi, systemApi } from '../../api';
 import { Server, Activity, Database, Cpu, HardDrive, RefreshCw } from 'lucide-react';
 
-const GPA_TREND_DATA = [
-  { semester: 'Sem 1', avgGpa: 3.10, enrolled: 1100 },
-  { semester: 'Sem 2', avgGpa: 3.22, enrolled: 1150 },
-  { semester: 'Sem 3', avgGpa: 3.35, enrolled: 1200 },
-  { semester: 'Sem 4', avgGpa: 3.42, enrolled: 1260 },
-  { semester: 'Sem 5', avgGpa: 3.48, enrolled: 1284 },
-];
+const GPA_TREND_DATA = [];
 
 const FACULTY_PIE_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#38bdf8'];
 
@@ -47,7 +41,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
         pingTime: `${latency}ms`,
       });
     } catch {
-      setHealthData({ status: 'ONLINE', db: 'CONNECTED', disk: 'HEALTHY', pingTime: '18ms' });
+      setHealthData({ status: 'OFFLINE', db: 'DISCONNECTED', disk: 'UNKNOWN', pingTime: 'N/A' });
     } finally {
       setHealthLoading(false);
     }
@@ -155,7 +149,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={GPA_TREND_DATA}>
+              <AreaChart data={[]}>
                 <defs>
                   <linearGradient id="colorGpa" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />

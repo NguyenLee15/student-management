@@ -18,7 +18,7 @@ const WEEKDAYS = [
 
 export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleSwitch }) {
   const [activeTab, setActiveTab] = useState('overview'); // overview | schedule | classes | grades | profile
-  const [currentTeacherId, setCurrentTeacherId] = useState(currentUser?.teacherId || 'GV001');
+  const [currentTeacherId, setCurrentTeacherId] = useState(currentUser?.teacherId || '');
   const [teacherList, setTeacherList] = useState([]);
   const [teacherInfo, setTeacherInfo] = useState(null);
 
@@ -47,7 +47,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       const list = Array.isArray(d) ? d : (d.content || []);
       setTeacherList(list);
       if (list.length > 0) {
-        const found = list.find(t => t.teacherId === (currentUser?.teacherId || 'GV001'));
+        const found = list.find(t => t.teacherId === (currentUser?.teacherId || ''));
         if (found) {
           setCurrentTeacherId(found.teacherId);
           setTeacherInfo(found);

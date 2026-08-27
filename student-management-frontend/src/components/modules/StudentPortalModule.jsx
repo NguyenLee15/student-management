@@ -18,7 +18,7 @@ const WEEKDAYS = [
 
 export default function StudentPortalModule({ onNotify, currentUser }) {
   const [activeSubTab, setActiveSubTab] = useState('transcript'); // transcript | timetable | registration
-  const [currentStudentId, setCurrentStudentId] = useState(currentUser?.studentId || 'SV001');
+  const [currentStudentId, setCurrentStudentId] = useState(currentUser?.studentId || '');
   const [studentList, setStudentList] = useState([]);
   const [studentInfo, setStudentInfo] = useState(null);
 

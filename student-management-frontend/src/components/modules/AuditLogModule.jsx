@@ -103,7 +103,7 @@ export default function AuditLogModule({ onNotify }) {
                     <td className="px-5 py-3.5 text-slate-300 max-w-xs truncate">{log.details || '—'}</td>
                     <td className="px-5 py-3.5 text-right">
                       <span className="px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300 font-mono font-medium text-[11px]">
-                        {log.performedBy || 'admin'}
+                        {log.performedBy || 'Hệ thống'}
                       </span>
                     </td>
                   </tr>

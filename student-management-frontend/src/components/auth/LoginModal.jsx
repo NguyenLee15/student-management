@@ -24,7 +24,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
         setMemoryToken(payload.token);
         const userInfo = {
           username: payload.userName || username,
-          role: payload.role || 'ROLE_ADMIN',
+          role: payload.role,
           studentId: payload.studentId,
         };
         localStorage.setItem('user_info', JSON.stringify(userInfo));

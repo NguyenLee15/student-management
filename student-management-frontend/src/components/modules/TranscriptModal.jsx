@@ -36,12 +36,12 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
   let totalScore10 = 0;
   let passedCredits = 0;
   grades.forEach(g => {
-    const s = g.totalScore10 !== undefined && g.totalScore10 !== null ? g.totalScore10 : 8.0;
+    const s = g.totalScore10 !== undefined && g.totalScore10 !== null ? g.totalScore10 : 0.0;
     totalScore10 += s;
     if (s >= 4.0) passedCredits += 3; // Standard 3 credits
   });
 
-  const avg10 = grades.length > 0 ? totalScore10 / grades.length : 8.2;
+  const avg10 = grades.length > 0 ? totalScore10 / grades.length : 0.0;
   const gpa4 = Math.round(((avg10 / 10.0) * 4.0) * 100.0) / 100.0;
 
   const getRank = (gpa) => {
@@ -122,11 +122,11 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
                     <td className="px-4 py-3 font-semibold text-white">
                       {g.subjectName || g.subjectId || `Module #${idx + 1}`}
                     </td>
-                    <td className="px-4 py-3 font-mono text-slate-300">{g.attendanceScore ?? '10.0'}</td>
-                    <td className="px-4 py-3 font-mono text-slate-300">{g.midtermScore ?? '8.5'}</td>
-                    <td className="px-4 py-3 font-mono text-slate-300">{g.finalExamScore ?? '8.0'}</td>
+                    <td className="px-4 py-3 font-mono text-slate-300">{g.attendanceScore ?? '0.0'}</td>
+                    <td className="px-4 py-3 font-mono text-slate-300">{g.midtermScore ?? '0.0'}</td>
+                    <td className="px-4 py-3 font-mono text-slate-300">{g.finalExamScore ?? '0.0'}</td>
                     <td className="px-4 py-3 font-mono font-bold text-indigo-400">
-                      {g.totalScore10 ? g.totalScore10.toFixed(1) : '8.3'}
+                      {g.totalScore10 ? g.totalScore10.toFixed(1) : '0.0'}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <span className="px-2 py-0.5 rounded font-bold text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">

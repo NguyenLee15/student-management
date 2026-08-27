@@ -81,7 +81,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
     setIsEdit(false);
     setFormData({
       ...initialForm,
-      facultyId: faculties[0]?.facultyId || 'CNTT',
+      facultyId: faculties[0]?.facultyId || '',
     });
     setShowModal(true);
   };
@@ -94,7 +94,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
       credits: s.credits || 3,
       tuitionPerCredit: s.tuitionPerCredit || 500000,
       subjectType: s.subjectType || 'MAJOR',
-      facultyId: s.facultyId || faculties[0]?.facultyId || 'CNTT',
+      facultyId: s.facultyId || faculties[0]?.facultyId || '',
       prerequisiteSubjectId: s.prerequisiteSubjectId || '',
     });
     setShowModal(true);

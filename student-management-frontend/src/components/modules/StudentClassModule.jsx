@@ -71,7 +71,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
     setIsEdit(false);
     setFormData({
       ...initialForm,
-      facultyId: faculties[0]?.facultyId || 'CNTT',
+      facultyId: faculties[0]?.facultyId || '',
     });
     setShowModal(true);
   };
@@ -170,7 +170,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
 
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">{c.className || c.classId}</h3>
-              <p className="text-xs text-slate-400 mt-1">{c.facultyName || c.facultyId || 'Khoa CNTT'}</p>
+              <p className="text-xs text-slate-400 mt-1">{c.facultyName || c.facultyId || 'Chưa phân khoa'}</p>
             </div>
 
             <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">

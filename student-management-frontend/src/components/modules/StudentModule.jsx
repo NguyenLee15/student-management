@@ -127,8 +127,8 @@ export default function StudentModule({ onNotify, currentUser }) {
     setIsEdit(false);
     setFormData({
       ...initialForm,
-      facultyId: faculties[0]?.facultyId || 'CNTT',
-      classId: classes[0]?.classId || 'CNTT1-K65',
+      facultyId: faculties[0]?.facultyId || '',
+      classId: classes[0]?.classId || '',
       academicYearId: academicYears[0]?.academicYearId || 'K65',
     });
     setShowModal(true);
@@ -379,8 +379,8 @@ export default function StudentModule({ onNotify, currentUser }) {
                     </td>
                     <td className="px-5 py-3.5 text-slate-300">
                       <div>
-                        <div className="font-medium text-slate-200">{st.className || st.classId || 'CNTT1-K65'}</div>
-                        <div className="text-[10px] text-slate-500">{st.facultyName || st.facultyId || 'Khoa CNTT'}</div>
+                        <div className="font-medium text-slate-200">{st.className || st.classId || ''}</div>
+                        <div className="text-[10px] text-slate-500">{st.facultyName || st.facultyId || 'Chưa phân khoa'}</div>
                       </div>
                     </td>
                     <td className="px-5 py-3.5 text-slate-400 font-mono font-medium">

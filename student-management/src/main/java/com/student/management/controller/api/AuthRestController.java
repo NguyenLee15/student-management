@@ -63,7 +63,7 @@ public class AuthRestController {
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("token", token);
-        responseData.put("refreshToken", refreshToken.getToken());
+        
         responseData.put("tokenType", "Bearer");
         responseData.put("userName", user.getUserName());
         responseData.put("role", user.getRole());
@@ -117,7 +117,7 @@ public class AuthRestController {
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("token", newAccessToken);
-        responseData.put("refreshToken", newRefreshToken.getToken());
+        
         responseData.put("tokenType", "Bearer");
         responseData.put("userName", user.getUserName());
         responseData.put("role", user.getRole());

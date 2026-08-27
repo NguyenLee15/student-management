@@ -9,10 +9,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
+
 @Repository
 public interface PaymentTransactionRepository extends JpaRepository<PaymentTransaction, Long> {
 
     Optional<PaymentTransaction> findByOrderCode(Long orderCode);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT t FROM PaymentTransaction t WHERE t.orderCode = :orderCode")
+    Optional<PaymentTransaction> findByOrderCodeForUpdate(@Param("orderCode") Long orderCode);
 
     List<PaymentTransaction> findByStudent_StudentIdOrderByCreatedAtDesc(String studentId);
 

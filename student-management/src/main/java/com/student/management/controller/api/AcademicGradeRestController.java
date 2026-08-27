@@ -8,6 +8,9 @@ import com.student.management.dto.resp.TranscriptResponseDto;
 import com.student.management.enums.Semester;
 import com.student.management.enums.StudyPhase;
 import com.student.management.service.AcademicGradeService;
+import com.student.management.security.SecurityService;
+import com.student.management.exception.BusinessException;
+import com.student.management.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class AcademicGradeRestController {
 
     private final AcademicGradeService academicGradeService;
+    private final SecurityService securityService;
 
     @GetMapping
     @Operation(summary = "Get all academic grades with filters and pagination")
@@ -38,8 +42,14 @@ public class AcademicGradeRestController {
             @RequestParam(required = false) Semester semester,
             @RequestParam(required = false) String academicYear,
             @RequestParam(required = false) StudyPhase studyPhase) {
+        
+        String queryStudentId = studentId;
+        if (securityService.isStudentRole()) {
+            queryStudentId = securityService.getCurrentStudentId();
+        }
+
         Page<AcademicGradeResponseDto> result = academicGradeService.searchAndFilter(
-                studentId, subjectId, semester, academicYear, studyPhase, PageRequest.of(page, size)
+                queryStudentId, subjectId, semester, academicYear, studyPhase, PageRequest.of(page, size)
         );
         return ResponseEntity.ok(ApiResponse.success("Grades fetched successfully", result));
     }
@@ -48,13 +58,20 @@ public class AcademicGradeRestController {
     @Operation(summary = "Get grade by ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> getById(@PathVariable Integer id) {
-        return ResponseEntity.ok(ApiResponse.success(academicGradeService.getById(id)));
+        AcademicGradeResponseDto grade = academicGradeService.getById(id);
+        if (securityService.isStudentRole() && !grade.getStudentId().equals(securityService.getCurrentStudentId())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không có quyền xem điểm của sinh viên khác.");
+        }
+        return ResponseEntity.ok(ApiResponse.success(grade));
     }
 
     @GetMapping("/transcript/{studentId}")
-    @Operation(summary = "Get full student academic transcript according to Circular 08/2021/TT-BGDĐT")
+    @Operation(summary = "Get full student academic transcript according to Circular 08/2021/TT-BGDDT")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<TranscriptResponseDto>> getTranscript(@PathVariable String studentId) {
+        if (securityService.isStudentRole() && !studentId.equals(securityService.getCurrentStudentId())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không có quyền xem bảng điểm của sinh viên khác.");
+        }
         return ResponseEntity.ok(ApiResponse.success("Transcript calculated successfully", academicGradeService.getTranscriptByStudentId(studentId)));
     }
 

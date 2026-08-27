@@ -67,6 +67,24 @@ public class SecurityService {
         return user.getUserName() != null && user.getUserName().equalsIgnoreCase(cc.getTeacher().getTeacherId());
     }
 
+    public boolean isStudentRole() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"));
+    }
+
+    public boolean isTeacherRole() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TEACHER"));
+    }
+
+    public boolean isAdminRole() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
     public String getCurrentStudentId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
@@ -75,11 +93,7 @@ public class SecurityService {
         String username = authentication.getName();
         User user = userRepository.findByUserName(username)
                 .orElseThrow(() -> new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.USER_NOT_FOUND));
-        if (user.getStudentId() == null || user.getStudentId().isEmpty()) {
-            // Fallback: nếu username là sinh viên (ví dụ SV001)
-            if (user.getUserName() != null && user.getUserName().startsWith("SV")) {
-                return user.getUserName();
-            }
+        if (user.getStudentId() == null || user.getStudentId().trim().isEmpty()) {
             throw new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.ACCESS_DENIED, "Tài khoản chưa liên kết mã sinh viên.");
         }
         return user.getStudentId();
@@ -93,8 +107,8 @@ public class SecurityService {
         String username = authentication.getName();
         User user = userRepository.findByUserName(username)
                 .orElseThrow(() -> new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.USER_NOT_FOUND));
-        if (user.getUserName() != null && user.getUserName().startsWith("GV")) {
-            return user.getUserName();
+        if (user.getRole() != com.student.management.enums.Role.TEACHER) {
+            throw new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.ACCESS_DENIED, "Tài khoản không phải là giảng viên.");
         }
         return user.getUserName();
     }

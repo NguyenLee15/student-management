@@ -42,7 +42,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }) {
           list.forEach(s => items.push({
             id: s.studentId,
             title: s.fullName,
-            subtitle: `Mã SV: ${s.studentId} • Lớp: ${s.classId || s.className || 'CNTT'}`,
+            subtitle: `Mã SV: ${s.studentId} • Lớp: ${s.classId || s.className || ''}`,
             type: 'student',
             tab: 'students',
           }));

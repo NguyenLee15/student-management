@@ -53,14 +53,14 @@ export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUs
   const hasAccess = (itemRoles) => {
     if (!itemRoles) return true; // if no roles specified, everyone has access
     const normalize = (r) => {
-      if (!r) return 'ROLE_ADMIN';
+      if (!r) return null;
       const s = String(r).toUpperCase();
       if (s === 'ADMIN' || s === 'ROLE_ADMIN') return 'ROLE_ADMIN';
       if (s === 'TEACHER' || s === 'ROLE_TEACHER') return 'ROLE_TEACHER';
       if (s === 'STUDENT' || s === 'ROLE_STUDENT') return 'ROLE_STUDENT';
       return s;
     };
-    const userRole = normalize(currentUser?.role || 'ROLE_ADMIN');
+    const userRole = normalize(currentUser?.role || null);
     return itemRoles.some(r => normalize(r) === userRole);
   };
 
