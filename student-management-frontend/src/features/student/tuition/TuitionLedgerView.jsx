@@ -41,7 +41,7 @@ export default function TuitionLedgerView() {
     setErrorMsg(null);
     try {
       const res = await studentPortalApi.getMyTuition(selectedSemester);
-      const inv = res.data?.data;
+      const inv = res.data;
       setInvoice(inv);
       if (inv) {
         setPayAmount(inv.remainingAmount || 0);
@@ -61,7 +61,7 @@ export default function TuitionLedgerView() {
     setIsSyncing(true);
     try {
       const res = await paymentApi.syncStatus(code);
-      const txn = res.data?.data;
+      const txn = res.data;
       if (txn?.status === 'PAID') {
         setSuccessMsg(`✅ Giao dịch #${code} đã được xác nhận thanh toán thành công! Công nợ đã giảm.`);
       } else {
@@ -92,7 +92,7 @@ export default function TuitionLedgerView() {
           cancelUrl: `${window.location.origin}${window.location.pathname}?payment_status=cancelled`,
         });
 
-        const txn = res.data?.data;
+        const txn = res.data;
         if (txn?.checkoutUrl) {
           setCurrentOrderCode(txn.orderCode);
           // Redirect trực tiếp sang trang thanh toán VietQR của PayOS

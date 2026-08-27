@@ -20,7 +20,7 @@ export default function StudentDashboardView({ onNavigateTab }) {
     setLoading(true);
     try {
       const res = await studentPortalApi.getMyOverview();
-      setOverview(res.data?.data);
+      setOverview(res.data);
     } catch (err) {
       console.error('Failed to load overview', err);
     } finally {

@@ -22,12 +22,15 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CourseRegistrationServiceImpl implements CourseRegistrationService {
+
+    private static final ConcurrentHashMap<String, Long> idempotencyCache = new ConcurrentHashMap<>();
 
     private final StudentRepository studentRepository;
     private final CreditClassRepository creditClassRepository;
@@ -225,6 +228,18 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     public RegistrationBatchResponseDto registerBatch(String studentId, RegistrationBatchRequestDto requestDto) {
         log.info("REGISTRATION_BATCH_START studentId={} classIds={} key={}",
                 studentId, requestDto.getCreditClassIds(), requestDto.getIdempotencyKey());
+
+        if (requestDto.getIdempotencyKey() != null && !requestDto.getIdempotencyKey().isBlank()) {
+            long nowTs = System.currentTimeMillis();
+            idempotencyCache.entrySet().removeIf(e -> nowTs - e.getValue() > 60000); // 1 min TTL
+            if (idempotencyCache.putIfAbsent(requestDto.getIdempotencyKey(), nowTs) != null) {
+                log.warn("IDEMPOTENCY_KEY_DUPLICATE key={}", requestDto.getIdempotencyKey());
+                return RegistrationBatchResponseDto.builder()
+                        .success(false)
+                        .message("Yêu cầu đang được xử lý hoặc đã được xử lý (Duplicate Request).")
+                        .build();
+            }
+        }
 
         // 1. KHÓA BẢN GHI SINH VIÊN (Chống race condition trần tín chỉ khi mở nhiều tab đồng thời)
         Student student = studentRepository.findByIdForUpdate(studentId)

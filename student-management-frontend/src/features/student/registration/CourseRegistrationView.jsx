@@ -39,7 +39,7 @@ export default function CourseRegistrationView() {
     try {
       // 1. Load active registration period
       const periodRes = await registrationPeriodApi.getActive();
-      const periods = periodRes.data?.data || [];
+      const periods = periodRes.data || [];
       let currentSemesterId = null;
       if (periods.length > 0) {
         setActivePeriod(periods[0]);
@@ -48,11 +48,11 @@ export default function CourseRegistrationView() {
 
       // 2. Load available classes
       const classesRes = await studentRegistrationApi.getAvailableClasses(currentSemesterId);
-      setAvailableClasses(classesRes.data?.data || []);
+      setAvailableClasses(classesRes.data || []);
 
       // 3. Load my registered classes
       const enrollmentsRes = await studentRegistrationApi.getMyEnrollments(currentSemesterId);
-      setMyEnrollments(enrollmentsRes.data?.data || []);
+      setMyEnrollments(enrollmentsRes.data || []);
     } catch (err) {
       console.error('Failed to load registration data', err);
       setErrorMessage(err.response?.data?.message || 'Không thể tải dữ liệu đợt đăng ký tín chỉ.');
@@ -65,7 +65,7 @@ export default function CourseRegistrationView() {
     try {
       const classIds = cart.map(c => c.creditClassId || c.id);
       const res = await studentRegistrationApi.validateCart(classIds);
-      setValidationResult(res.data?.data);
+      setValidationResult(res.data);
     } catch (err) {
       console.error('Validation error', err);
     }

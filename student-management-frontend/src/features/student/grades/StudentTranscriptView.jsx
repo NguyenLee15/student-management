@@ -18,8 +18,8 @@ export default function StudentTranscriptView() {
         gradeApi.getAll({ unpaged: true }),
         studentPortalApi.getMyOverview(),
       ]);
-      setGrades(gradeRes.data?.data?.content || gradeRes.data?.data || []);
-      setOverview(overRes.data?.data);
+      setGrades(gradeRes.data?.content || gradeRes.data || []);
+      setOverview(overRes.data);
     } catch (err) {
       console.error('Failed to load transcript data', err);
     } finally {

@@ -67,11 +67,11 @@ export const academicYearApi = {
 
 // 6. Student Classes (Lớp sinh hoạt) API
 export const studentClassApi = {
-  getAll: (params) => axiosClient.get('/student-classes', { params }),
-  getById: (id) => axiosClient.get(`/student-classes/${id}`),
-  create: (data) => axiosClient.post('/student-classes', data),
-  update: (id, data) => axiosClient.put(`/student-classes/${id}`, data),
-  delete: (id) => axiosClient.delete(`/student-classes/${id}`),
+  getAll: (params) => axiosClient.get('/classes', { params }),
+  getById: (id) => axiosClient.get(`/classes/${id}`),
+  create: (data) => axiosClient.post('/classes', data),
+  update: (id, data) => axiosClient.put(`/classes/${id}`, data),
+  delete: (id) => axiosClient.delete(`/classes/${id}`),
 };
 
 // 7. Subjects (Học phần) API

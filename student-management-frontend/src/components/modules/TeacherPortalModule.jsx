@@ -29,13 +29,10 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
 
   const loadTeachers = async () => {
     try {
-      const res = await teacherApi.getAll({ page: 0, size: 50 });
+      const res = await teacherApi.getAll();
       const d = res.data || res;
       const list = Array.isArray(d) ? d : (d.content || []);
       setTeacherList(list);
-      if (list.length > 0 && !currentUser?.teacherId) {
-        setCurrentTeacherId(list[0].teacherId);
-      }
     } catch (e) {
       console.warn('Err load teachers', e);
     }

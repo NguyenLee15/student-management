@@ -24,7 +24,7 @@ export default function MatrixTimetableView() {
     setLoading(true);
     try {
       const res = await studentPortalApi.getMyTimetable(selectedSemester);
-      setTimetable(res.data?.data || []);
+      setTimetable(res.data || []);
     } catch (err) {
       console.error('Failed to load timetable', err);
     } finally {

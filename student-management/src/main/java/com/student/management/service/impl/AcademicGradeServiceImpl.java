@@ -166,7 +166,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
                 try {
                     list.add(create(dto));
                 } catch (Exception e) {
-                    logger.warn("Skipping row {}: {}", i, e.getMessage());
+                    throw new RuntimeException("Error in row " + i + ": " + e.getMessage(), e);
                 }
             }
         } catch (Exception e) {

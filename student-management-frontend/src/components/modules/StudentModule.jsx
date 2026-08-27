@@ -204,7 +204,7 @@ export default function StudentModule({ onNotify, currentUser }) {
     
     try {
       const res = await studentApi.importExcel(file);
-      const taskId = res.data?.data?.taskId;
+      const taskId = res.data?.taskId;
       
       if (!taskId) {
         throw new Error("No taskId returned from server");
@@ -214,7 +214,7 @@ export default function StudentModule({ onNotify, currentUser }) {
       const pollInterval = setInterval(async () => {
         try {
           const taskRes = await studentApi.getImportTask(taskId);
-          const taskData = taskRes.data?.data;
+          const taskData = taskRes.data;
           if (taskData) {
             setImportProgress({
               status: taskData.status,

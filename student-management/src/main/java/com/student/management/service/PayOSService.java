@@ -172,6 +172,11 @@ public class PayOSService {
             String rawJson = objectMapper.writeValueAsString(payload);
             JsonNode root = objectMapper.readTree(rawJson);
 
+            if (!payOSConfig.isConfigured()) {
+                log.warn("⚠️ PAYOS_WEBHOOK_REJECTED: PayOS is not configured!");
+                return Map.of("error", 1, "message", "PayOS is not configured");
+            }
+
             // Kiểm tra chữ ký webhook nếu PayOS được cấu hình
             if (payOSConfig.isConfigured()) {
                 boolean isValidSignature = verifyWebhookSignature(root, payOSConfig.getChecksumKey());
@@ -210,6 +215,13 @@ public class PayOSService {
             txn.setProviderTransactionId(reference);
 
             if (code == 0 || "00".equals(String.valueOf(code)) || "success".equalsIgnoreCase(desc)) {
+                // Kiểm tra số tiền
+                long webhookAmount = dataNode.path("amount").asLong();
+                if (webhookAmount != txn.getAmount().longValue()) {
+                    log.warn("⚠️ PAYOS_WEBHOOK_AMOUNT_MISMATCH: Expected {}, got {}", txn.getAmount(), webhookAmount);
+                    return Map.of("error", 1, "message", "Amount mismatch");
+                }
+
                 // Thanh toán thành công
                 txn.setStatus(PaymentTransactionStatus.PAID);
                 txn.setPaidAt(LocalDateTime.now());

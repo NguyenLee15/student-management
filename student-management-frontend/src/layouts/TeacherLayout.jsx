@@ -51,9 +51,6 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
         if (found) {
           setCurrentTeacherId(found.teacherId);
           setTeacherInfo(found);
-        } else {
-          setCurrentTeacherId(list[0].teacherId);
-          setTeacherInfo(list[0]);
         }
       }
     } catch (e) {
