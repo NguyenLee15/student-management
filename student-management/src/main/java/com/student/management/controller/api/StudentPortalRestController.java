@@ -69,6 +69,11 @@ public class StudentPortalRestController {
     public ResponseEntity<ApiResponse<TuitionPaymentResponseDto>> payTuition(
             @Valid @RequestBody TuitionPaymentRequestDto requestDto) {
         String studentId = securityService.getCurrentStudentId();
+        
+        if (requestDto.getPaymentMethod() != com.student.management.enums.PaymentMethod.PAYOS) {
+            throw new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.ACCESS_DENIED, "Sinh viên không được tự gạch nợ thủ công. Vui lòng thanh toán qua hệ thống hoặc liên hệ phòng Tài vụ.");
+        }
+        
         TuitionPaymentResponseDto payment = tuitionService.recordPayment(studentId, requestDto);
         return ResponseEntity.ok(ApiResponse.success("Thanh toán học phí thành công", payment));
     }

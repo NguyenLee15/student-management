@@ -38,6 +38,7 @@ services:
       - DB_URL=jdbc:mysql://mysqldb:3306/student_management_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - DB_USERNAME=root
       - DB_PASSWORD=root
+      - JWT_SECRET=super_secret_jwt_key_that_is_at_least_256_bits_long
     ports:
       - "8080:8080"
     depends_on:

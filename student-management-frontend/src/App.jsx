@@ -164,7 +164,12 @@ export default function App() {
     checkHealthAndLoadStats();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (e) {
+      console.warn("Lỗi khi logout:", e);
+    }
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('user_info');
     setCurrentUser(null);

@@ -47,6 +47,11 @@ public class PaymentRestController {
     @PreAuthorize("hasAnyRole('ADMIN', 'STUDENT')")
     public ResponseEntity<ApiResponse<PaymentTransactionResponseDto>> syncStatus(@PathVariable Long orderCode) {
         PaymentTransactionResponseDto transaction = payOSService.syncTransactionStatus(orderCode);
+        
+        if (securityService.isStudentRole() && !transaction.getStudentId().equals(securityService.getCurrentStudentId())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không có quyền đồng bộ giao dịch của sinh viên khác");
+        }
+        
         return ResponseEntity.ok(ApiResponse.success("Đồng bộ trạng thái giao dịch thành công", transaction));
     }
 
