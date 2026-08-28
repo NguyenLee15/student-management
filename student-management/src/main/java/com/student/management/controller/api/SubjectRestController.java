@@ -24,7 +24,7 @@ public class SubjectRestController {
     @Operation(summary = "Export subject list to Excel file (.xlsx)")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<org.springframework.core.io.InputStreamResource> exportExcel() {
-        org.springframework.data.domain.Page<SubjectResponseDto> list = subjectService.getAll(null, org.springframework.data.domain.Pageable.unpaged());
+        org.springframework.data.domain.Page<SubjectResponseDto> list = subjectService.getAll(0, Integer.MAX_VALUE);
         java.io.ByteArrayInputStream in = subjectService.exportToExcel(list);
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.add("Content-Disposition", "attachment; filename=subjects_export.xlsx");
@@ -75,5 +75,6 @@ public class SubjectRestController {
         return ResponseEntity.ok(ApiResponse.success("Subject deleted successfully", null));
     }
 }
+
 
 

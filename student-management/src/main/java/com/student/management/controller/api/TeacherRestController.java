@@ -25,7 +25,7 @@ public class TeacherRestController {
     @Operation(summary = "Export teacher list to Excel file (.xlsx)")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<org.springframework.core.io.InputStreamResource> exportExcel() {
-        List<TeacherResponseDto> list = teacherService.getAll(org.springframework.data.domain.Pageable.unpaged()).getContent();
+        java.util.List<TeacherResponseDto> list = teacherService.getAll(org.springframework.data.domain.Pageable.unpaged()).getContent();
         java.io.ByteArrayInputStream in = teacherService.exportToExcel(list);
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.add("Content-Disposition", "attachment; filename=teachers_export.xlsx");
@@ -76,5 +76,6 @@ public class TeacherRestController {
         return ResponseEntity.ok(ApiResponse.success("Teacher deleted successfully", null));
     }
 }
+
 
 
