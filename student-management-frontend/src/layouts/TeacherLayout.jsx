@@ -1,3 +1,4 @@
+import { msg } from '../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { 
   UserSquare2, Layers, Users, Award, Save, CheckCircle2, 
@@ -7,13 +8,13 @@ import {
 import { creditClassApi, teacherApi, studentApi, gradeApi, scheduleApi } from '../api';
 
 const WEEKDAYS = [
-  { key: 'MONDAY', label: 'Thứ Hai (Mon)' },
-  { key: 'TUESDAY', label: 'Thứ Ba (Tue)' },
-  { key: 'WEDNESDAY', label: 'Thứ Tư (Wed)' },
-  { key: 'THURSDAY', label: 'Thứ Năm (Thu)' },
-  { key: 'FRIDAY', label: 'Thứ Sáu (Fri)' },
-  { key: 'SATURDAY', label: 'Thứ Bảy (Sat)' },
-  { key: 'SUNDAY', label: 'Chủ Nhật (Sun)' },
+  { key: 'MONDAY', label: 'Thứ Hai' },
+  { key: 'TUESDAY', label: 'Thứ Ba' },
+  { key: 'WEDNESDAY', label: 'Thứ Tư' },
+  { key: 'THURSDAY', label: 'Thứ Năm' },
+  { key: 'FRIDAY', label: 'Thứ Sáu' },
+  { key: 'SATURDAY', label: 'Thứ Bảy' },
+  { key: 'SUNDAY', label: 'Chủ Nhật' },
 ];
 
 export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleSwitch }) {
@@ -410,7 +411,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                                   {s.subjectName || `Lớp #${s.creditClassId}`}
                                 </span>
                                 <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-800 text-slate-300 shrink-0">
-                                  {s.shift || 'Ca Sáng'}
+                                  {msg.enum.shift[s.shift] || s.shift || 'Ca Sáng'}
                                 </span>
                               </div>
 

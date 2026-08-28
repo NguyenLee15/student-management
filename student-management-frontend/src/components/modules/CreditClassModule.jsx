@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit3, Trash2, Layers, Users, BookOpen, UserPlus, X, RefreshCw } from 'lucide-react';
 import { creditClassApi, subjectApi, studentClassApi, studentApi } from '../../api';
@@ -126,7 +127,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await creditClassApi.delete(deleteTarget.creditClassId);
-      onNotify('success', `Credit Class ${deleteTarget.creditClassId} đã được xóa thành công!`);
+      onNotify('success', msg.success.deleted('lớp tín chỉ', deleteTarget.creditClassId));
       loadCreditClasses();
     } catch (err) {
       onNotify('error', err?.message || 'Lỗi khi hủy lớp tín chỉ');
@@ -163,14 +164,14 @@ export default function CreditClassModule({ onNotify, currentUser }) {
                 <Layers className="h-6 w-6" />
               </div>
               <span className="px-2.5 py-1 text-xs font-mono font-bold bg-slate-900 border border-slate-800 text-blue-300 rounded-lg">
-                ID: {cc.creditClassId}
+                Mã: {cc.creditClassId}
               </span>
             </div>
 
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">{cc.subjectName || cc.subjectId}</h3>
               <p className="text-xs text-slate-400 mt-1">
-                Class: <span className="text-slate-200 font-semibold">{cc.className || cc.classId}</span>
+                Lớp: <span className="text-slate-200 font-semibold">{cc.className || cc.classId}</span>
               </p>
             </div>
 
@@ -232,7 +233,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Homeroom Class (Lớp)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Lớp hành chính *</label>
               <select
                 value={formData.classId}
                 onChange={(e) => setFormData({ ...formData, classId: e.target.value })}
@@ -281,7 +282,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
               type="submit"
               className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg shadow-blue-600/30 transition"
             >
-              Open Section
+              Mở lớp mới
             </button>
           </div>
         </form>
@@ -291,8 +292,8 @@ export default function CreditClassModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showStudentsModal}
         onClose={() => setShowStudentsModal(false)}
-        title={`Sinh Viên Roster: ${selectedClass?.subjectName || selectedClass?.subjectId}`}
-        subtitle={`Section ID: ${selectedClass?.creditClassId} | Total: ${enrolledStudents.length} registered students`}
+        title={`Danh Sách Sinh Viên: ${selectedClass?.subjectName || selectedClass?.subjectId}`}
+        subtitle={`Mã LTC: ${selectedClass?.creditClassId} | Tổng: ${enrolledStudents.length} sinh viên đã đăng ký`}
         maxWidth="max-w-xl"
       >
         <div className="space-y-4 text-xs">
@@ -347,7 +348,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
         title="Hủy Lớp Tín Chỉ"
-        message={`Are you sure you want to remove this credit class section (ID: ${deleteTarget?.creditClassId})?`}
+        message={msg.confirm.delete('lớp tín chỉ', '', deleteTarget?.creditClassId)}
       />
     </div>
   );

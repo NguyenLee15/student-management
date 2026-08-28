@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit3, Trash2, Award, Download, RefreshCw, Calculator, CheckCircle2 } from 'lucide-react';
 import { gradeApi, studentApi, subjectApi } from '../../api';
@@ -123,15 +124,15 @@ export default function GradeModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await gradeApi.update(formData.gradeId, formData);
-        onNotify('success', `Grade record #${formData.gradeId} đã được cập nhật thành công!`);
+        onNotify('success', msg.success.updated('điểm số', '#' + formData.gradeId));
       } else {
         await gradeApi.create(formData);
-        onNotify('success', `Grade score registered for student ${formData.studentId}!`);
+        onNotify('success', msg.success.created('điểm số', 'SV ' + formData.studentId));
       }
       setShowModal(false);
       loadGrades();
     } catch (err) {
-      onNotify('error', err?.message || 'Error saving academic grade');
+      onNotify('error', err?.message || msg.error.save('điểm số'));
     }
   };
 
@@ -139,10 +140,10 @@ export default function GradeModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await gradeApi.delete(deleteTarget.gradeId);
-      onNotify('success', `Grade record #${deleteTarget.gradeId} removed!`);
+      onNotify('success', msg.success.deleted('bản ghi điểm', '#' + deleteTarget.gradeId));
       loadGrades();
     } catch (err) {
-      onNotify('error', err?.message || 'Lỗi khi xóa điểm');
+      onNotify('error', err?.message || msg.error.delete('bản ghi điểm'));
     }
   };
 
@@ -182,8 +183,8 @@ export default function GradeModule({ onNotify, currentUser }) {
           className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-purple-500"
         >
           <option value="">Tất Cả Các Học Kỳ</option>
-          <option value="SEMESTER_1">Semester 1 (Học kỳ 1)</option>
-          <option value="SEMESTER_2">Semester 2 (Học kỳ 2)</option>
+          <option value="SEMESTER_1">Học kỳ 1</option>
+          <option value="SEMESTER_2">Học kỳ 2</option>
         </select>
 
         <button
@@ -273,7 +274,7 @@ export default function GradeModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Edit Grade Record #${formData.gradeId}` : 'Submit Academic Grade Evaluation'}
+        title={isEdit ? `Sửa Điểm #${formData.gradeId}` : 'Nhập Điểm Học Phần'}
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -291,7 +292,7 @@ export default function GradeModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Course Học Phần (Môn Học)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Môn Học *</label>
               <select
                 value={formData.subjectId}
                 onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
@@ -306,7 +307,7 @@ export default function GradeModule({ onNotify, currentUser }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Chuyên Cần (10%) Score (Chuyên cần)</label>
+              <label className="block text-slate-300 font-semibold mb-1">Điểm Chuyên Cần (10%)</label>
               <input
                 type="number"
                 step="0.1"
@@ -319,7 +320,7 @@ export default function GradeModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Giữa Kỳ (30%) Assessment (Thường xuyên)</label>
+              <label className="block text-slate-300 font-semibold mb-1">Điểm Giữa Kỳ (30%)</label>
               <input
                 type="number"
                 step="0.1"
@@ -332,7 +333,7 @@ export default function GradeModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Cuối Kỳ (60%) Score (Thi kết thúc)</label>
+              <label className="block text-slate-300 font-semibold mb-1">Điểm Cuối Kỳ (60%)</label>
               <input
                 type="number"
                 step="0.1"
@@ -355,7 +356,7 @@ export default function GradeModule({ onNotify, currentUser }) {
               type="submit"
               className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-lg shadow-purple-600/30 transition"
             >
-              {isEdit ? 'Lưu thay đổi' : 'Record Grade'}
+              {isEdit ? 'Lưu thay đổi' : 'Lưu điểm'}
             </button>
           </div>
         </form>
@@ -366,7 +367,7 @@ export default function GradeModule({ onNotify, currentUser }) {
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
         title="Xóa Bản Ghi Điểm"
-        message={`Are you sure you want to remove grade record #${deleteTarget?.gradeId}?`}
+        message={msg.confirm.delete('bản ghi điểm', '', '#' + deleteTarget?.gradeId)}
       />
     </div>
   );

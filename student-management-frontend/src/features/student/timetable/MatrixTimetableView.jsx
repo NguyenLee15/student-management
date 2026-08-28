@@ -1,3 +1,4 @@
+import { msg } from '../../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, User, Download, Printer, RefreshCw } from 'lucide-react';
 import { studentPortalApi } from '../../../api';
@@ -122,11 +123,11 @@ export default function MatrixTimetableView() {
                             </div>
                             <div className="text-[11px] text-blue-700 font-semibold flex items-center gap-1">
                               <MapPin className="w-3 h-3 text-blue-500 flex-shrink-0" />
-                              <span className="truncate">{item.roomName || 'Phòng TBA'}</span>
+                              <span className="truncate">{item.roomName || 'Chưa xếp phòng'}</span>
                             </div>
                             <div className="text-[10px] text-slate-500 flex items-center gap-1">
                               <User className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                              <span className="truncate">{item.teacherName || 'GV'}</span>
+                              <span className="truncate">{item.teacherName || 'Chưa phân công'}</span>
                             </div>
                           </div>
                         ))}

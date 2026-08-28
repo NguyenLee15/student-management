@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit3, Trash2, CalendarDays, Clock, MapPin, User, BookOpen, RefreshCw } from 'lucide-react';
 import { scheduleApi, creditClassApi, teacherApi, classroomApi } from '../../api';
@@ -130,15 +131,15 @@ export default function ScheduleModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await scheduleApi.update(formData.scheduleId, formData);
-        onNotify('success', `Schedule slot updated successfully!`);
+        onNotify('success', msg.success.updated('lịch học', '#' + formData.scheduleId));
       } else {
         await scheduleApi.create(formData);
-        onNotify('success', `Schedule slot created successfully!`);
+        onNotify('success', msg.success.created('lịch học', ''));
       }
       setShowModal(false);
       loadSchedules();
     } catch (err) {
-      onNotify('error', err?.message || 'Error saving timetable slot');
+      onNotify('error', err?.message || msg.error.save('lịch học'));
     }
   };
 
@@ -146,21 +147,21 @@ export default function ScheduleModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await scheduleApi.delete(deleteTarget.scheduleId);
-      onNotify('success', `Schedule slot deleted successfully!`);
+      onNotify('success', msg.success.deleted('lịch học', '#' + deleteTarget.scheduleId));
       loadSchedules();
     } catch (err) {
-      onNotify('error', err?.message || 'Error deleting timetable slot');
+      onNotify('error', err?.message || msg.error.delete('lịch học'));
     }
   };
 
   const dayOfWeekNames = {
-    2: 'Thứ 2 (Mon)',
-    3: 'Thứ 3 (Tue)',
-    4: 'Thứ 4 (Wed)',
-    5: 'Thứ 5 (Thu)',
-    6: 'Thứ 6 (Fri)',
-    7: 'Thứ 7 (Sat)',
-    8: 'Chủ Nhật (Sun)',
+    2: 'Thứ Hai',
+    3: 'Thứ Ba',
+    4: 'Thứ Tư',
+    5: 'Thứ Năm',
+    6: 'Thứ Sáu',
+    7: 'Thứ Bảy',
+    8: 'Chủ Nhật',
   };
 
   return (
@@ -177,7 +178,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
             className="flex items-center gap-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-teal-600/30 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            <span>Thêm Lịch Học Mới Slot</span>
+            <span>Thêm Lịch Học Mới</span>
           </button>
         )}
       </div>
@@ -190,9 +191,9 @@ export default function ScheduleModule({ onNotify, currentUser }) {
           className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-teal-500 transition"
         >
           <option value="">Tất Cả Các Học Kỳ (Tất cả học kỳ)</option>
-          <option value="SEMESTER_1">Học kỳ 1 (Fall Semester)</option>
-          <option value="SEMESTER_2">Học kỳ 2 (Spring Semester)</option>
-          <option value="SEMESTER_SUMMER">Học kỳ Phụ (Summer)</option>
+          <option value="SEMESTER_1">Học kỳ 1</option>
+          <option value="SEMESTER_2">Học kỳ 2</option>
+          <option value="SEMESTER_SUMMER">Học kỳ phụ</option>
         </select>
 
         <select
@@ -200,7 +201,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
           onChange={(e) => { setSelectedShift(e.target.value); setPage(0); }}
           className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-teal-500 transition"
         >
-          <option value="">All Class Shifts (Tất cả ca học)</option>
+          <option value="">Tất cả ca học</option>
           <option value="SHIFT_1">Ca 1: 07:00 - 09:15 (Sáng)</option>
           <option value="SHIFT_2">Ca 2: 09:30 - 11:45 (Sáng)</option>
           <option value="SHIFT_3">Ca 3: 13:00 - 15:15 (Chiều)</option>
@@ -223,7 +224,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
                 <th className="px-5 py-3.5">Thứ Trong Tuần & Ca Học</th>
-                <th className="px-5 py-3.5">Course / Học Phần</th>
+                <th className="px-5 py-3.5">Học Phần</th>
                 <th className="px-5 py-3.5">Giảng Viên Phụ Trách</th>
                 <th className="px-5 py-3.5">Phòng Học / Giảng Đường</th>
                 <th className="px-5 py-3.5">Học kỳ</th>
@@ -235,8 +236,8 @@ export default function ScheduleModule({ onNotify, currentUser }) {
                 <tr key={s.scheduleId} className="hover:bg-slate-800/40 transition">
                   <td className="px-5 py-3.5 font-bold text-teal-400">
                     <div>
-                      <div>{dayOfWeekNames[s.dayOfWeek] || `Day ${s.dayOfWeek}`}</div>
-                      <div className="text-[10px] text-slate-400 font-mono font-normal mt-0.5">{s.classShift || 'SHIFT_1'}</div>
+                      <div>{msg.enum.weekday[s.dayOfWeek] || 'Không xác định'}</div>
+                      <div className="text-[10px] text-slate-400 font-mono font-normal mt-0.5">{msg.enum.shift[s.classShift] || 'Ca 1'}</div>
                     </div>
                   </td>
                   <td className="px-5 py-3.5">
@@ -246,12 +247,12 @@ export default function ScheduleModule({ onNotify, currentUser }) {
                   <td className="px-5 py-3.5 text-slate-300">
                     <div className="flex items-center gap-2">
                       <User className="h-3.5 w-3.5 text-indigo-400" />
-                      <span>{s.teacherName || s.teacherId || 'Unassigned'}</span>
+                      <span>{s.teacherName || s.teacherId || 'Chưa phân công'}</span>
                     </div>
                   </td>
                   <td className="px-5 py-3.5 text-slate-300">
                     <span className="px-2.5 py-1 rounded-lg bg-slate-800 text-rose-300 font-mono font-semibold">
-                      {s.roomName || s.roomId || 'Hall A101'}
+                      {s.roomName || s.roomId || 'Chưa xếp phòng'}
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-slate-400">
@@ -294,7 +295,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Edit Schedule Slot #${formData.scheduleId}` : 'Schedule Class Slot'}
+        title={isEdit ? `Sửa Lịch Học #${formData.scheduleId}` : 'Thêm Lịch Học'}
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -307,7 +308,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
               >
                 {creditClasses.map((cc) => (
                   <option key={cc.creditClassId} value={cc.creditClassId}>
-                    {cc.subjectName || cc.subjectId} (Section #{cc.creditClassId})
+                    {cc.subjectName || cc.subjectId} (Mã LTC: {cc.creditClassId})
                   </option>
                 ))}
               </select>
@@ -342,24 +343,24 @@ export default function ScheduleModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Weekday (Thứ)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Thứ *</label>
               <select
                 value={formData.dayOfWeek}
                 onChange={(e) => setFormData({ ...formData, dayOfWeek: parseInt(e.target.value) || 2 })}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-teal-500"
               >
-                <option value={2}>Thứ 2 (Monday)</option>
-                <option value={3}>Thứ 3 (Tuesday)</option>
-                <option value={4}>Thứ 4 (Wednesday)</option>
-                <option value={5}>Thứ 5 (Thursday)</option>
-                <option value={6}>Thứ 6 (Friday)</option>
-                <option value={7}>Thứ 7 (Saturday)</option>
-                <option value={8}>Chủ Nhật (Sunday)</option>
+                <option value={2}>Thứ 2</option>
+                <option value={3}>Thứ 3</option>
+                <option value={4}>Thứ 4</option>
+                <option value={5}>Thứ 5</option>
+                <option value={6}>Thứ 6</option>
+                <option value={7}>Thứ 7</option>
+                <option value={8}>Chủ Nhật</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Class Shift (Ca Học)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Ca Học *</label>
               <select
                 value={formData.classShift}
                 onChange={(e) => setFormData({ ...formData, classShift: e.target.value })}
@@ -384,7 +385,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
               type="submit"
               className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold shadow-lg shadow-teal-600/30 transition"
             >
-              {isEdit ? 'Lưu thay đổi' : 'Schedule Class'}
+              {isEdit ? 'Lưu thay đổi' : 'Lưu lịch học'}
             </button>
           </div>
         </form>
@@ -395,7 +396,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
         title="Xóa Lịch Học"
-        message={`Are you sure you want to remove timetable slot #${deleteTarget?.scheduleId}?`}
+        message={msg.confirm.delete('lịch học', '', '#' + deleteTarget?.scheduleId)}
       />
     </div>
   );

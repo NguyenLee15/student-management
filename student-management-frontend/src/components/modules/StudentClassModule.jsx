@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit3, Trash2, School, RefreshCw, Building2 } from 'lucide-react';
 import { studentClassApi, facultyApi } from '../../api';
@@ -91,15 +92,15 @@ export default function StudentClassModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await studentClassApi.update(formData.classId, formData);
-        onNotify('success', `Class ${formData.classId} đã được cập nhật thành công!`);
+        onNotify('success', msg.success.updated('lớp hành chính', formData.classId));
       } else {
         await studentClassApi.create(formData);
-        onNotify('success', `Class ${formData.classId} đã được tạo thành công!`);
+        onNotify('success', msg.success.created('lớp hành chính', formData.classId));
       }
       setShowModal(false);
       loadClasses();
     } catch (err) {
-      onNotify('error', err?.message || 'Error saving student class');
+      onNotify('error', err?.message || msg.error.save('lớp hành chính'));
     }
   };
 
@@ -107,10 +108,10 @@ export default function StudentClassModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await studentClassApi.delete(deleteTarget.classId);
-      onNotify('success', `Class ${deleteTarget.classId} đã được xóa thành công!`);
+      onNotify('success', msg.success.deleted('lớp hành chính', deleteTarget.classId));
       loadClasses();
     } catch (err) {
-      onNotify('error', err?.message || 'Error deleting student class');
+      onNotify('error', err?.message || msg.error.delete('lớp hành chính'));
     }
   };
 
@@ -118,7 +119,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Sinh Viên Homeroom Classes</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Danh Sách Lớp Hành Chính</h1>
           <p className="text-xs text-slate-400 mt-1">Quản lý các lớp sinh viên hành chính theo từng khoa và cố vấn học tập</p>
         </div>
 
@@ -207,11 +208,11 @@ export default function StudentClassModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Sửa Lớp: ${formData.classId}` : 'Create Sinh Viên Class'}
+        title={isEdit ? `Sửa Lớp: ${formData.classId}` : 'Thêm Lớp Hành Chính Mới'}
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Class ID (Mã Lớp)*</label>
+            <label className="block text-slate-300 font-semibold mb-1">Mã Lớp *</label>
             <input
               type="text"
               required
@@ -224,7 +225,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Class Name (Tên Lớp)*</label>
+            <label className="block text-slate-300 font-semibold mb-1">Tên Lớp *</label>
             <input
               type="text"
               required
@@ -269,7 +270,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
         title="Xóa Lớp Hành Chính"
-        message={`Are you sure you want to remove class "${deleteTarget?.className}" (ID: ${deleteTarget?.classId})?`}
+        message={msg.confirm.delete('lớp hành chính', deleteTarget?.className, deleteTarget?.classId)}
       />
     </div>
   );

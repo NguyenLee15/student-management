@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Search, Filter, Upload, Download, Edit3, Trash2, 
@@ -50,7 +51,7 @@ export default function StudentModule({ onNotify, currentUser }) {
     phoneNumber: '',
     gender: 'MALE',
     dateOfBirth: '2004-01-01',
-    address: 'Ha Noi, Viet Nam',
+    address: 'Hà Nội, Việt Nam',
     classId: '',
     facultyId: '',
     academicYearId: '',
@@ -158,15 +159,15 @@ export default function StudentModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await studentApi.update(formData.studentId, formData);
-        onNotify('success', `Sinh Viên ${formData.studentId} updated successfully!`);
+        onNotify('success', msg.success.updated('sinh viên', formData.studentId));
       } else {
         await studentApi.create(formData);
-        onNotify('success', `Sinh Viên ${formData.studentId} created successfully!`);
+        onNotify('success', msg.success.created('sinh viên', formData.studentId));
       }
       setShowModal(false);
       loadStudents();
     } catch (err) {
-      onNotify('error', err?.message || 'Error saving student');
+      onNotify('error', err?.message || msg.error.save('sinh viên'));
     }
   };
 
@@ -174,10 +175,10 @@ export default function StudentModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await studentApi.delete(deleteTarget.studentId);
-      onNotify('success', `Sinh Viên ${deleteTarget.studentId} deleted successfully!`);
+      onNotify('success', msg.success.deleted('sinh viên', deleteTarget.studentId));
       loadStudents();
     } catch (err) {
-      onNotify('error', err?.message || 'Error deleting student');
+      onNotify('error', err?.message || msg.error.delete('sinh viên'));
     }
   };
 
@@ -187,11 +188,11 @@ export default function StudentModule({ onNotify, currentUser }) {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Sinh Viêns_List_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      link.setAttribute('download', `DanhSachSinhVien_${new Date().toISOString().slice(0, 10)}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      onNotify('success', 'Excel student report exported successfully!');
+      onNotify('success', 'Xuất báo cáo Excel thành công!');
     } catch (err) {
       onNotify('error', 'Xuất file Excel thất bại.');
     }
@@ -230,9 +231,9 @@ export default function StudentModule({ onNotify, currentUser }) {
               setImporting(false);
               
               if (taskData.status === 'FAILED') {
-                onNotify('error', `Import Failed: ${taskData.errorDetails || 'Unknown error'}`);
+                onNotify('error', `Nhập dữ liệu thất bại: ${msg.safeMessage(taskData.errorDetails, 'Lỗi không xác định')}`);
               } else if (taskData.status === 'COMPLETED_WITH_ERRORS') {
-                onNotify('warning', `Import completed with ${taskData.errorCount} errors.`);
+                onNotify('warning', `Nhập dữ liệu hoàn tất với ${taskData.errorCount} lỗi.`);
                 loadStudents();
               } else {
                 onNotify('success', 'Nhập dữ liệu Excel thành công!');
@@ -386,7 +387,7 @@ export default function StudentModule({ onNotify, currentUser }) {
                         </div>
                         <div>
                           <div className="font-semibold text-white">{st.fullName}</div>
-                          <div className="text-[10px] text-slate-400 capitalize">{st.gender?.toLowerCase() || 'Nam'}</div>
+                          <div className="text-[10px] text-slate-400 capitalize">{msg.enum.gender[st.gender] || st.gender || 'Nam'}</div>
                         </div>
                       </div>
                     </td>
@@ -627,7 +628,7 @@ export default function StudentModule({ onNotify, currentUser }) {
                 )}
                 {importProgress?.errorCount > 0 && (
                   <p className="text-xs text-rose-400 mt-1">
-                    Errors: {importProgress.errorCount}
+                    Lỗi: {importProgress.errorCount}
                   </p>
                 )}
               </div>

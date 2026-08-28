@@ -1,3 +1,4 @@
+import { msg } from '../../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { 
   GraduationCap, Award, BookOpen, CreditCard, 
@@ -61,7 +62,7 @@ export default function StudentDashboardView({ onNavigateTab }) {
               {overview?.className || 'Chưa xếp lớp'} • {overview?.facultyName || 'Chưa phân khoa'}
             </span>
             <span className="text-blue-200 text-xs font-medium">
-              Mã SV: <strong>{overview?.studentId || 'N/A'}</strong>
+              Mã SV: <strong>{overview?.studentId || 'Chưa có'}</strong>
             </span>
           </div>
           <h1 className="text-2xl md:text-3xl font-black tracking-tight">
@@ -216,11 +217,11 @@ export default function StudentDashboardView({ onNavigateTab }) {
                     </span>
                     <h4 className="font-bold text-slate-800 text-sm">{item.subjectName}</h4>
                     <p className="text-xs text-slate-500">
-                      GV: {item.teacherName || 'TBA'} • {item.credits} Tín chỉ
+                      GV: {item.teacherName || 'Chưa phân công'} • {item.credits} Tín chỉ
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-slate-800 text-xs">{item.roomName || 'Phòng TBA'}</div>
+                    <div className="font-bold text-slate-800 text-xs">{item.roomName || 'Chưa xếp phòng'}</div>
                     <div className="text-xs text-slate-400">{item.studyTime || item.shiftName}</div>
                   </div>
                 </div>

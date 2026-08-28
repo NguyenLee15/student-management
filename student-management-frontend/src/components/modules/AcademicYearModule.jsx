@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit3, Trash2, CalendarRange, RefreshCw } from 'lucide-react';
 import { academicYearApi } from '../../api';
@@ -50,10 +51,10 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await academicYearApi.update(formData.academicYearId, formData);
-        onNotify('success', `Academic Year ${formData.academicYearId} đã được cập nhật thành công!`);
+        onNotify('success', msg.success.updated('niên khóa', formData.academicYearId));
       } else {
         await academicYearApi.create(formData);
-        onNotify('success', `Academic Year ${formData.academicYearId} đã được tạo thành công!`);
+        onNotify('success', msg.success.created('niên khóa', formData.academicYearId));
       }
       setShowModal(false);
       loadYears();
@@ -66,7 +67,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await academicYearApi.delete(deleteTarget.academicYearId);
-      onNotify('success', `Academic Year ${deleteTarget.academicYearId} đã được xóa thành công!`);
+      onNotify('success', msg.success.deleted('niên khóa', deleteTarget.academicYearId));
       loadYears();
     } catch (err) {
       onNotify('error', err?.message || 'Lỗi khi xóa niên khóa');
@@ -143,7 +144,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Academic Year Code (Mã Khóa)*</label>
+            <label className="block text-slate-300 font-semibold mb-1">Mã Khóa *</label>
             <input
               type="text"
               required
@@ -156,7 +157,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Cohort Title (Tên Khóa Học)*</label>
+            <label className="block text-slate-300 font-semibold mb-1">Tên Khóa Học *</label>
             <input
               type="text"
               required
@@ -188,7 +189,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
         title="Xóa niên khóa"
-        message={`Are you sure you want to remove cohort "${deleteTarget?.academicYearName}" (ID: ${deleteTarget?.academicYearId})?`}
+        message={msg.confirm.delete('niên khóa', deleteTarget?.academicYearName, deleteTarget?.academicYearId)}
       />
     </div>
   );

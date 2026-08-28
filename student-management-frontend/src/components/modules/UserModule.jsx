@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, ShieldAlert, Key, UserCheck, RefreshCw } from 'lucide-react';
 import { userApi } from '../../api';
@@ -53,7 +54,7 @@ export default function UserModule({ onNotify }) {
     e.preventDefault();
     try {
       await userApi.create(formData);
-      onNotify('success', `User account ${formData.userName} created successfully!`);
+      onNotify('success', msg.success.created('tài khoản', formData.userName));
       setShowModal(false);
       loadUsers();
     } catch (err) {
@@ -65,7 +66,7 @@ export default function UserModule({ onNotify }) {
     if (!deleteTarget) return;
     try {
       await userApi.delete(deleteTarget.userName);
-      onNotify('success', `User ${deleteTarget.userName} đã được xóa thành công!`);
+      onNotify('success', msg.success.deleted('tài khoản', deleteTarget.userName));
       loadUsers();
     } catch (err) {
       onNotify('error', err?.message || 'Lỗi khi xóa tài khoản');
@@ -95,7 +96,7 @@ export default function UserModule({ onNotify }) {
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
                 <th className="px-5 py-3.5">Tên đăng nhập</th>
-                <th className="px-5 py-3.5">Quyền Hạn (Role)</th>
+                <th className="px-5 py-3.5">Quyền Hạn</th>
                 <th className="px-5 py-3.5">Trạng thái</th>
                 <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
@@ -117,7 +118,7 @@ export default function UserModule({ onNotify }) {
                         ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                         : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                     }`}>
-                      {u.role}
+                      {msg.enum.role[u.role] || u.role}
                     </span>
                     {u.studentId && (
                       <span className="ml-2 px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">
@@ -194,15 +195,15 @@ export default function UserModule({ onNotify }) {
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-red-500"
             >
-              <option value="ROLE_TEACHER">TEACHER (Giảng viên phụ trách môn)</option>
-              <option value="ROLE_STUDENT">STUDENT (Sinh viên học tập)</option>
-              <option value="ROLE_ADMIN">ADMIN (Quản trị viên toàn hệ thống)</option>
+              <option value="ROLE_TEACHER">Giảng viên</option>
+              <option value="ROLE_STUDENT">Sinh viên</option>
+              <option value="ROLE_ADMIN">Quản trị viên</option>
             </select>
           </div>
 
           {formData.role === 'ROLE_STUDENT' && (
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Associated Sinh Viên ID (Mã SV)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Mã Sinh Viên Liên Kết *</label>
               <input
                 type="text"
                 required

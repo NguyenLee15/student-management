@@ -1,3 +1,4 @@
+import { msg } from '../../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, Search, Filter, ShoppingCart, CheckCircle, 
@@ -5,6 +6,7 @@ import {
 } from 'lucide-react';
 import { studentRegistrationApi, registrationPeriodApi } from '../../../api';
 import RegistrationCartDrawer from './RegistrationCartDrawer';
+import ConfirmDialog from '../../../components/common/ConfirmDialog';
 
 export default function CourseRegistrationView() {
   const [activeTab, setActiveTab] = useState('available'); // 'available' | 'enrolled'
@@ -19,6 +21,7 @@ export default function CourseRegistrationView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [withdrawTarget, setWithdrawTarget] = useState(null);
 
   useEffect(() => {
     loadRegistrationData();
@@ -109,10 +112,14 @@ export default function CourseRegistrationView() {
     }
   };
 
-  const handleDropCourse = async (enrollmentId, subjectName) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn rút môn học '${subjectName}' không?`)) {
-      return;
-    }
+  const handleDropCourse = (enrollmentId, subjectName) => {
+    setWithdrawTarget({ enrollmentId, subjectName });
+  };
+  
+  const confirmWithdraw = async () => {
+    if (!withdrawTarget) return;
+    const { enrollmentId, subjectName } = withdrawTarget;
+    setWithdrawTarget(null);
 
     try {
       await studentRegistrationApi.dropCourse(enrollmentId);
@@ -304,8 +311,8 @@ export default function CourseRegistrationView() {
                           {item.teacherName || 'Chưa phân công'}
                         </td>
                         <td className="px-4 py-4 text-xs text-slate-600">
-                          <div className="font-semibold text-slate-800">{item.roomName || 'TBA'}</div>
-                          <div className="text-slate-400">{item.semester || 'HK1'}</div>
+                          <div className="font-semibold text-slate-800">{item.roomName || 'Chưa xếp phòng'}</div>
+                          <div className="text-slate-400">{item.semester ? msg.enum.semester[item.semester] : 'Học kỳ 1'}</div>
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex flex-col items-center gap-1">
@@ -403,9 +410,9 @@ export default function CourseRegistrationView() {
                       </td>
                       <td className="px-4 py-4 font-bold text-slate-800">{enr.credits}</td>
                       <td className="px-4 py-4 text-slate-700">{enr.teacherName || 'Chưa phân công'}</td>
-                      <td className="px-4 py-4 text-slate-700">{enr.roomName || 'TBA'}</td>
+                      <td className="px-4 py-4 text-slate-700">{enr.roomName || 'Chưa xếp phòng'}</td>
                       <td className="px-4 py-4 text-xs text-slate-500">
-                        {enr.enrollmentDate ? new Date(enr.enrollmentDate).toLocaleDateString('vi-VN') : 'N/A'}
+                        {enr.enrollmentDate ? new Date(enr.enrollmentDate).toLocaleDateString('vi-VN') : 'Chưa ghi nhận'}
                       </td>
                       <td className="px-4 py-4">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-full">
@@ -441,6 +448,17 @@ export default function CourseRegistrationView() {
         validationResult={validationResult}
         isSubmitting={isSubmitting}
         onSubmitRegistration={handleSubmitBatch}
+      />
+
+      <ConfirmDialog 
+        isOpen={!!withdrawTarget}
+        title="Xác nhận rút môn học"
+        message={withdrawTarget ? `Bạn có chắc chắn muốn rút môn học '${withdrawTarget.subjectName}' không?` : ''}
+        confirmText="Rút môn"
+        cancelText="Hủy"
+        onConfirm={confirmWithdraw}
+        onCancel={() => setWithdrawTarget(null)}
+        isDestructive={true}
       />
     </div>
   );

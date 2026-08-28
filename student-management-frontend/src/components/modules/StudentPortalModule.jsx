@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { 
   GraduationCap, Award, Calendar, BookOpen, Layers, CheckCircle2, 
@@ -7,13 +8,13 @@ import {
 import { gradeApi, scheduleApi, creditClassApi, studentApi } from '../../api';
 
 const WEEKDAYS = [
-  { key: 'MONDAY', label: 'Thứ Hai (Mon)' },
-  { key: 'TUESDAY', label: 'Thứ Ba (Tue)' },
-  { key: 'WEDNESDAY', label: 'Thứ Tư (Wed)' },
-  { key: 'THURSDAY', label: 'Thứ Năm (Thu)' },
-  { key: 'FRIDAY', label: 'Thứ Sáu (Fri)' },
-  { key: 'SATURDAY', label: 'Thứ Bảy (Sat)' },
-  { key: 'SUNDAY', label: 'Chủ Nhật (Sun)' },
+  { key: 'MONDAY', label: 'Thứ Hai' },
+  { key: 'TUESDAY', label: 'Thứ Ba' },
+  { key: 'WEDNESDAY', label: 'Thứ Tư' },
+  { key: 'THURSDAY', label: 'Thứ Năm' },
+  { key: 'FRIDAY', label: 'Thứ Sáu' },
+  { key: 'SATURDAY', label: 'Thứ Bảy' },
+  { key: 'SUNDAY', label: 'Chủ Nhật' },
 ];
 
 export default function StudentPortalModule({ onNotify, currentUser }) {
@@ -58,7 +59,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
     try {
       // Find current student info
       const found = studentList.find(s => s.studentId === currentStudentId);
-      setStudentsInfo(found || { studentId: currentStudentId, fullName: 'Unknown Sinh Viên' });
+      setStudentsInfo(found || { studentId: currentStudentId, fullName: 'Sinh viên' });
 
       if (activeSubTab === 'transcript') {
         const res = await gradeApi.getAll({ studentId: currentStudentId, size: 100 });
@@ -83,7 +84,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
   // GPA Calculations
   const calculateGPA = () => {
     if (!grades || grades.length === 0) {
-      return { gpa10: 0, gpa4: 0, totalCredits: 0, rank: 'N/A' };
+      return { gpa10: 0, gpa4: 0, totalCredits: 0, rank: 'Chưa xếp loại' };
     }
     let totalScore10 = 0;
     let count = 0;

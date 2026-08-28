@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Award, BookOpen, GraduationCap, CheckCircle2, AlertTriangle, Printer, Download, X } from 'lucide-react';
 import Modal from '../common/Modal';
@@ -45,11 +46,11 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
   const gpa4 = Math.round(((avg10 / 10.0) * 4.0) * 100.0) / 100.0;
 
   const getRank = (gpa) => {
-    if (gpa >= 3.6) return { text: 'Xuất sắc (Excellent)', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' };
-    if (gpa >= 3.2) return { text: 'Giỏi (Very Good)', color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30' };
-    if (gpa >= 2.5) return { text: 'Khá (Good)', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30' };
-    if (gpa >= 2.0) return { text: 'Trung bình (Average)', color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' };
-    return { text: 'Cảnh báo học vụ (Academic Warning)', color: 'text-rose-400 bg-rose-500/10 border-rose-500/30' };
+    if (gpa >= 3.6) return { text: 'Xuất sắc', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' };
+    if (gpa >= 3.2) return { text: 'Giỏi', color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30' };
+    if (gpa >= 2.5) return { text: 'Khá', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30' };
+    if (gpa >= 2.0) return { text: 'Trung bình', color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' };
+    return { text: 'Cảnh báo học vụ', color: 'text-rose-400 bg-rose-500/10 border-rose-500/30' };
   };
 
   const rank = getRank(gpa4);
@@ -63,7 +64,7 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
       isOpen={isOpen}
       onClose={onClose}
       title={`Bảng Điểm Học Tập Chính Thức: ${student.fullName}`}
-      subtitle={`Sinh Viên ID: ${student.studentId} • Class: ${student.classId || student.className || 'CNTT1'} • Faculty: ${student.facultyName || student.facultyId || 'Khoa CNTT'}`}
+      subtitle={`Sinh Viên ID: ${student.studentId} • Lớp: ${student.classId || student.className || 'CNTT1'} • Khoa: ${student.facultyName || student.facultyId || 'Khoa CNTT'}`}
       maxWidth="max-w-3xl"
     >
       <div className="space-y-5 text-xs">
@@ -101,7 +102,7 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
-                <th className="px-4 py-3">Học Phần / Course</th>
+                <th className="px-4 py-3">Học Phần</th>
                 <th className="px-4 py-3">Chuyên Cần (10%)</th>
                 <th className="px-4 py-3">Giữa Kỳ (30%)</th>
                 <th className="px-4 py-3">Cuối Kỳ (60%)</th>
@@ -120,7 +121,7 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
                 grades.map((g, idx) => (
                   <tr key={idx} className="hover:bg-slate-800/40">
                     <td className="px-4 py-3 font-semibold text-white">
-                      {g.subjectName || g.subjectId || `Module #${idx + 1}`}
+                      {g.subjectName || g.subjectId || `Học phần #${idx + 1}`}
                     </td>
                     <td className="px-4 py-3 font-mono text-slate-300">{g.attendanceScore ?? '0.0'}</td>
                     <td className="px-4 py-3 font-mono text-slate-300">{g.midtermScore ?? '0.0'}</td>

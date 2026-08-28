@@ -1,3 +1,4 @@
+import { msg } from '../../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Award, Printer, Download, BookOpen, CheckCircle, RefreshCw } from 'lucide-react';
 import { gradeApi, studentPortalApi } from '../../../api';
@@ -98,7 +99,7 @@ export default function StudentTranscriptView() {
           </div>
           <div>
             <span className="text-slate-400 block">Mã sinh viên:</span>
-            <strong className="text-slate-800 text-sm font-mono">{overview?.studentId || 'N/A'}</strong>
+            <strong className="text-slate-800 text-sm font-mono">{overview?.studentId || 'Chưa có'}</strong>
           </div>
           <div>
             <span className="text-slate-400 block">Lớp danh nghĩa:</span>

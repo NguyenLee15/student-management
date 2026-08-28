@@ -10,6 +10,8 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   if (!isOpen) return null;
 
@@ -17,26 +19,28 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     e.preventDefault();
 
     if (formData.newPassword !== formData.confirmPassword) {
-      alert('Mật khẩu xác nhận không khớp');
+      setErrorMsg('Mật khẩu xác nhận không khớp');
       return;
     }
 
     if (formData.newPassword.length < 8) {
-      alert('Mật khẩu mới phải có ít nhất 8 ký tự');
+      setErrorMsg('Mật khẩu mới phải có ít nhất 8 ký tự');
       return;
     }
 
+    setErrorMsg('');
+    setSuccessMsg('');
     setLoading(true);
     try {
       await userApi.changePassword({
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword
       });
-      alert('Đổi mật khẩu thành công');
+      setSuccessMsg('Đổi mật khẩu thành công');
       setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      onClose();
+      setTimeout(() => { setSuccessMsg(''); onClose(); }, 1500);
     } catch (error) {
-      alert(error.message || 'Lỗi khi đổi mật khẩu');
+      setErrorMsg(error.message || 'Lỗi khi đổi mật khẩu');
     } finally {
       setLoading(false);
     }
@@ -59,6 +63,9 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {errorMsg && <div className="p-3 text-xs bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-lg">{errorMsg}</div>}
+          {successMsg && <div className="p-3 text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg">{successMsg}</div>}
+
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">
               Mật khẩu hiện tại

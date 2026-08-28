@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit3, Trash2, Building2, RefreshCw, Layers } from 'lucide-react';
 import { facultyApi } from '../../api';
@@ -50,10 +51,10 @@ export default function FacultyModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await facultyApi.update(formData.facultyId, formData);
-        onNotify('success', `Faculty ${formData.facultyId} đã được cập nhật thành công!`);
+        onNotify('success', msg.success.updated('khoa', formData.facultyId));
       } else {
         await facultyApi.create(formData);
-        onNotify('success', `Faculty ${formData.facultyId} đã được tạo thành công!`);
+        onNotify('success', msg.success.created('khoa', formData.facultyId));
       }
       setShowModal(false);
       loadFaculties();
@@ -66,7 +67,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await facultyApi.delete(deleteTarget.facultyId);
-      onNotify('success', `Faculty ${deleteTarget.facultyId} đã được xóa thành công!`);
+      onNotify('success', msg.success.deleted('khoa', deleteTarget.facultyId));
       loadFaculties();
     } catch (err) {
       onNotify('error', err?.message || 'Lỗi khi xóa khoa');
@@ -141,12 +142,12 @@ export default function FacultyModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Sửa Khoa: ${formData.facultyId}` : 'Create Academic Faculty'}
+        title={isEdit ? `Sửa Khoa: ${formData.facultyId}` : 'Thêm Khoa Đào Tạo Mới'}
         subtitle="Nhập mã khoa, tên khoa và thông tin lãnh đạo"
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Faculty Code (Mã Khoa)*</label>
+            <label className="block text-slate-300 font-semibold mb-1">Mã Khoa *</label>
             <input
               type="text"
               required
@@ -159,7 +160,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Faculty Name (Tên Khoa)*</label>
+            <label className="block text-slate-300 font-semibold mb-1">Tên Khoa *</label>
             <input
               type="text"
               required
@@ -191,7 +192,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
         title="Xóa Khoa"
-        message={`Are you sure you want to remove faculty "${deleteTarget?.facultyName}" (ID: ${deleteTarget?.facultyId})?`}
+        message={msg.confirm.delete('khoa', deleteTarget?.facultyName, deleteTarget?.facultyId)}
       />
     </div>
   );

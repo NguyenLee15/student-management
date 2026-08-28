@@ -11,7 +11,7 @@ export default function ConfirmDialog({ isOpen, onClose, onConfirm, title = 'Xá
             <AlertTriangle className="h-5 w-5" />
           </div>
           <p className="text-xs text-slate-300 leading-relaxed pt-0.5">
-            {message || 'Are you sure you want to proceed? This action cannot be undone.'}
+            {message || 'Bạn có chắc chắn muốn thực hiện thao tác này? Hành động này không thể hoàn tác.'}
           </p>
         </div>
 

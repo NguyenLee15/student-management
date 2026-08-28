@@ -1,3 +1,4 @@
+import { msg } from './lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import Toast from './components/common/Toast';
@@ -86,7 +87,7 @@ export default function App() {
 
     // Listen for rate limit 429 events from axiosClient
     const handleRateLimit = (e) => {
-      showToast('warning', e.detail || 'Quá nhiều yêu cầu! Vui lòng thao tác chậm lại (Rate limit).');
+      showToast('warning', e.detail || 'Quá nhiều yêu cầu! Vui lòng thao tác chậm lại.');
     };
 
     window.addEventListener('auth:unauthorized', handleUnauthorized);
@@ -151,7 +152,7 @@ export default function App() {
       setIsInitializingAuth(false);
 
       if (isLive) {
-        showToast('success', 'Đã kết nối máy chủ Spring Boot REST API (Port 8080)');
+        showToast('success', 'Đã kết nối thành công máy chủ Backend');
       }
     } catch (err) {
       console.warn('Backend is down or unreachable', err);
@@ -165,7 +166,7 @@ export default function App() {
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
     setSimulatedRole(null);
-    showToast('success', `Đăng nhập thành công: ${user.username} (${user.role})`);
+    showToast('success', `Đăng nhập thành công: ${user.username} (${msg.enum.role[user.role] || user.role})`);
     checkHealthAndLoadStats();
   };
 
@@ -184,7 +185,7 @@ export default function App() {
 
   const handleRoleSwitch = (role) => {
     setSimulatedRole(role);
-    showToast('info', `Đã chuyển sang không gian làm việc: ${role}`);
+    showToast('info', `Đã chuyển sang: ${msg.enum.role[role] || role}`);
   };
 
   if (isInitializingAuth) {

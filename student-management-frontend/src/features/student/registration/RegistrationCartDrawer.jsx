@@ -1,3 +1,4 @@
+import { msg } from '../../../lib/messages';
 import React from 'react';
 import { 
   X, ShoppingCart, AlertTriangle, CheckCircle2, 
@@ -137,7 +138,7 @@ export default function RegistrationCartDrawer({
                       </div>
                       <div className="flex items-center gap-1.5">
                         <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{item.roomName || 'Phòng học TBA'}</span>
+                        <span>{item.roomName || 'Chưa xếp phòng'}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-blue-700 font-semibold">
                         <span>{((item.unitPrice || 450000) * (item.credits || 3)).toLocaleString('vi-VN')} đ</span>

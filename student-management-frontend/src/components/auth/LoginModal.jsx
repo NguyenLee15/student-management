@@ -101,28 +101,28 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
         </div>
 
         <div className="mt-4 pt-4 border-t border-slate-800/50">
-          <p className="text-[11px] text-slate-400 mb-3 text-center">Dành cho Nhà tuyển dụng / HR Demo</p>
+          <p className="text-[11px] text-slate-400 mb-3 text-center">Tài khoản trải nghiệm nhanh</p>
           <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => { setUsername('admin'); setPassword('admin123'); }}
               className="px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-indigo-500 hover:text-indigo-300 text-slate-300 text-[10px] font-medium transition"
             >
-              Demo Admin
+              Quản trị viên
             </button>
             <button
               type="button"
               onClick={() => { setUsername('teacher'); setPassword('teacher123'); }}
               className="px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-indigo-500 hover:text-indigo-300 text-slate-300 text-[10px] font-medium transition"
             >
-              Demo Giảng viên
+              Giảng viên
             </button>
             <button
               type="button"
               onClick={() => { setUsername('student'); setPassword('student123'); }}
               className="px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-indigo-500 hover:text-indigo-300 text-slate-300 text-[10px] font-medium transition"
             >
-              Demo Sinh viên
+              Sinh viên
             </button>
           </div>
         </div>

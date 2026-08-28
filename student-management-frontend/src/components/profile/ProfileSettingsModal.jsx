@@ -7,6 +7,7 @@ import ChangePasswordModal from '../auth/ChangePasswordModal';
 const ProfileSettingsModal = ({ isOpen, onClose }) => {
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   useEffect(() => {
@@ -16,12 +17,13 @@ const ProfileSettingsModal = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   const loadUserInfo = async () => {
+    setErrorMsg('');
     setLoading(true);
     try {
       const res = await userApi.getMe();
       setUserInfo(res.data);
     } catch (error) {
-      alert('Không thể tải thông tin hồ sơ');
+      setErrorMsg('Không thể tải thông tin hồ sơ');
     } finally {
       setLoading(false);
     }
@@ -52,6 +54,8 @@ const ProfileSettingsModal = ({ isOpen, onClose }) => {
                 <div className="h-12 bg-slate-700/50 rounded-lg"></div>
                 <div className="h-12 bg-slate-700/50 rounded-lg"></div>
               </div>
+            ) : errorMsg ? (
+              <p className="text-center text-rose-400 text-sm">{errorMsg}</p>
             ) : userInfo ? (
               <>
                 <div className="flex items-center space-x-4 p-4 bg-slate-900/50 rounded-xl border border-slate-700/50">

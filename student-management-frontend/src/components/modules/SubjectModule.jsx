@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit3, Trash2, BookOpen, RefreshCw, GitBranch, Download } from 'lucide-react';
 import { subjectApi, facultyApi } from '../../api';
@@ -134,7 +135,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Academic Học Phầns & Modules</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Danh Sách Học Phần & Môn Học</h1>
           <p className="text-xs text-slate-400 mt-1">Quản lý chương trình đào tạo, số tín chỉ, học phí và môn học tiên quyết</p>
         </div>
 
@@ -228,7 +229,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
                   </td>
                   <td className="px-5 py-3.5 text-slate-300">
                     <span className="px-2 py-0.5 rounded-md bg-slate-800 text-cyan-300 font-medium">
-                      {s.subjectType || 'MAJOR'}
+                      {msg.enum.subjectType[s.subjectType] || 'Chuyên ngành'}
                     </span>
                     <span className="ml-2 text-slate-400">({s.facultyName || s.facultyId})</span>
                   </td>
@@ -370,7 +371,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Môn Học Tiên Quyết (Prerequisite)</label>
+              <label className="block text-slate-300 font-semibold mb-1">Môn Học Tiên Quyết</label>
               <select
                 value={formData.prerequisiteSubjectId || ''}
                 onChange={(e) => setFormData({ ...formData, prerequisiteSubjectId: e.target.value })}

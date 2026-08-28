@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Layers, ShieldCheck, User, Clock, RefreshCw, Activity, ArrowRight } from 'lucide-react';
 import { auditLogApi } from '../../api';
@@ -85,7 +86,7 @@ export default function AuditLogModule({ onNotify }) {
               {logs.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-5 py-8 text-center text-slate-500">
-                    {loading ? 'Fetching security audit logs...' : 'No system mutations recorded yet.'}
+                    {loading ? 'Đang tải nhật ký hoạt động...' : 'Chưa có hoạt động nào được ghi nhận.'}
                   </td>
                 </tr>
               ) : (
@@ -94,7 +95,7 @@ export default function AuditLogModule({ onNotify }) {
                     <td className="px-5 py-3.5 text-slate-400 font-mono text-[11px] whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5 text-slate-500 shrink-0" />
-                        <span>{log.timestamp ? new Date(log.timestamp).toLocaleString('vi-VN') : 'Just now'}</span>
+                        <span>{log.timestamp ? new Date(log.timestamp).toLocaleString('vi-VN') : 'Vừa xong'}</span>
                       </div>
                     </td>
                     <td className="px-5 py-3.5">{getActionBadge(log.action)}</td>

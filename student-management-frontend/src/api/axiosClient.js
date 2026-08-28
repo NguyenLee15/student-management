@@ -53,7 +53,7 @@ axiosClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const status = error?.response?.status;
-    const message = error?.response?.data?.message || error?.message || 'Something went wrong';
+    const message = error?.response?.data?.message || error?.message || 'Đã xảy ra lỗi không xác định';
     
     if (status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
@@ -88,7 +88,7 @@ axiosClient.interceptors.response.use(
               processQueue(null, token);
               resolve(axiosClient(originalRequest));
             } else {
-              throw new Error('No token returned');
+              throw new Error('Máy chủ không trả về mã xác thực');
             }
           })
           .catch((err) => {
@@ -110,12 +110,15 @@ axiosClient.interceptors.response.use(
     if (status === 429) {
       console.warn('Rate limit exceeded.');
       window.dispatchEvent(new CustomEvent('auth:ratelimit', { 
-        detail: message || 'Too many requests. Please wait a moment before trying again.' 
+        detail: message || 'Quá nhiều yêu cầu! Vui lòng thao tác chậm lại.' 
       }));
       return Promise.reject({ status, message: 'Quá nhiều yêu cầu! Vui lòng thao tác chậm lại.', raw: error });
     }
     
-    return Promise.reject({ status, message, raw: error });
+    // Import msg dynamically if needed, or just safe fallback
+    const hasVietnamese = /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i.test(message);
+    const safeMsg = hasVietnamese ? message : 'Đã xảy ra lỗi không xác định (hệ thống)';
+    return Promise.reject({ status, message: safeMsg, raw: error });
   }
 );
 

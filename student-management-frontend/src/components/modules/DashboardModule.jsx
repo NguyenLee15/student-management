@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { 
   Users, UserSquare2, Building2, BookOpen, GraduationCap, 
@@ -47,7 +48,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
         pingTime: `${latency}ms`,
       });
     } catch {
-      setHealthData({ status: 'OFFLINE', db: 'DISCONNECTED', disk: 'UNKNOWN', pingTime: 'N/A' });
+      setHealthData({ status: 'OFFLINE', db: 'DISCONNECTED', disk: 'UNKNOWN', pingTime: '—' });
     } finally {
       setHealthLoading(false);
     }
@@ -313,7 +314,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
                 <h3 className="text-sm font-bold text-white">Trạng Thái Dịch Vụ & Hạ Tầng Máy Chủ</h3>
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  {healthData.status}
+                  {msg.enum.healthStatus[healthData.status] || healthData.status}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">Giám sát Actuator Health Check • TiDB Cloud • JWT Security Gateway</p>
@@ -336,7 +337,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
               <Database className="h-3.5 w-3.5 text-indigo-400" />
               <span>Cơ sở dữ liệu TiDB</span>
             </div>
-            <p className="font-bold text-white text-sm">{healthData.db}</p>
+            <p className="font-bold text-white text-sm">{msg.enum.healthStatus[healthData.db] || healthData.db}</p>
             <p className="text-[10px] text-emerald-400">Kết nối: Ổn định</p>
           </div>
 
@@ -345,7 +346,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
               <HardDrive className="h-3.5 w-3.5 text-emerald-400" />
               <span>Dung lượng Lưu trữ</span>
             </div>
-            <p className="font-bold text-white text-sm">{healthData.disk}</p>
+            <p className="font-bold text-white text-sm">{msg.enum.healthStatus[healthData.disk] || healthData.disk}</p>
             <p className="text-[10px] text-slate-400">Trạng thái: An toàn</p>
           </div>
 

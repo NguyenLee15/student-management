@@ -29,7 +29,7 @@ const TAB_TITLES = {
   'students': { title: 'Hồ Sơ & Danh Sách Sinh Viên', group: 'Hồ Sơ Nhân Sự' },
   'teachers': { title: 'Hồ Sơ & Danh Sách Giảng Viên', group: 'Hồ Sơ Nhân Sự' },
   'users': { title: 'Tài Khoản & Phân Quyền Hệ Thống', group: 'Hệ Thống & Bảo Mật' },
-  'audit-logs': { title: 'Nhật Ký Hoạt Động (Audit Logs)', group: 'Hệ Thống & Bảo Mật' },
+  'audit-logs': { title: 'Nhật Ký Hoạt Động', group: 'Hệ Thống & Bảo Mật' },
 };
 
 export default function AdminLayout({
@@ -97,7 +97,7 @@ export default function AdminLayout({
               className="flex items-center gap-1 hover:text-indigo-400 transition"
             >
               <Home className="w-3.5 h-3.5" />
-              <span>Admin</span>
+              <span>Quản trị</span>
             </button>
             <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
             <span className="text-slate-500">{currentTabInfo.group}</span>

@@ -7,13 +7,13 @@ export default function Pagination({ page, totalPages, totalElements, size, onPa
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-800 text-xs text-slate-400">
       <div>
-        Showing <span className="font-semibold text-slate-200">{page * size + 1}</span> to{' '}
-        <span className="font-semibold text-slate-200">{Math.min((page + 1) * size, totalElements || 0)}</span> of{' '}
-        <span className="font-semibold text-slate-200">{totalElements || 0}</span> records
+        Hiển thị <span className="font-semibold text-slate-200">{page * size + 1}</span> đến{' '}
+        <span className="font-semibold text-slate-200">{Math.min((page + 1) * size, totalElements || 0)}</span> trong tổng số{' '}
+        <span className="font-semibold text-slate-200">{totalElements || 0}</span> bản ghi
       </div>
 
-      <div className="flex items-center gap-1.5">
-        <button
+      <div className="flex items-center gap-1.5" aria-label="Phân trang">
+        <button aria-label="Trang trước"
           onClick={() => onPageChange(Math.max(0, page - 1))}
           disabled={page === 0}
           className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
@@ -46,7 +46,7 @@ export default function Pagination({ page, totalPages, totalElements, size, onPa
           })}
         </div>
 
-        <button
+        <button aria-label="Trang sau"
           onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}
           disabled={page >= totalPages - 1}
           className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition"

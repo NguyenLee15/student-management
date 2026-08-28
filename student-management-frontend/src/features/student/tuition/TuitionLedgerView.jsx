@@ -1,3 +1,4 @@
+import { msg } from '../../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { 
   CreditCard, CheckCircle2, Clock, AlertTriangle, 
@@ -65,7 +66,7 @@ export default function TuitionLedgerView() {
       if (txn?.status === 'PAID') {
         setSuccessMsg(`✅ Giao dịch #${code} đã được xác nhận thanh toán thành công! Công nợ đã giảm.`);
       } else {
-        setErrorMsg(`Trạng thái giao dịch #${code}: ${txn?.status || 'Đang chờ xử lý'}.`);
+        setErrorMsg(`Trạng thái giao dịch #${code}: ${msg.enum.paymentStatus[txn?.status] || txn?.status || 'Đang chờ xử lý'}.`);
       }
       await loadInvoice();
     } catch (err) {
@@ -302,7 +303,7 @@ export default function TuitionLedgerView() {
                         Mã GD: {p.transactionCode}
                       </div>
                       <div className="text-xs text-slate-400">
-                        {p.paymentTime ? new Date(p.paymentTime).toLocaleString('vi-VN') : 'N/A'} • Phương thức: {p.paymentMethodName}
+                        {p.paymentTime ? new Date(p.paymentTime).toLocaleString('vi-VN') : 'Chưa ghi nhận'} • Phương thức: {p.paymentMethodName}
                       </div>
                     </div>
                     <div className="text-right">

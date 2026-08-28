@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Search, Edit3, Trash2, UserSquare2, RefreshCw, Mail, Phone, Building2 
@@ -110,10 +111,10 @@ export default function TeacherModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await teacherApi.update(formData.teacherId, formData);
-        onNotify('success', `Teacher ${formData.teacherId} updated successfully!`);
+        onNotify('success', msg.success.updated('giảng viên', formData.teacherId));
       } else {
         await teacherApi.create(formData);
-        onNotify('success', `Teacher ${formData.teacherId} created successfully!`);
+        onNotify('success', msg.success.created('giảng viên', formData.teacherId));
       }
       setShowModal(false);
       loadTeachers();
@@ -126,7 +127,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await teacherApi.delete(deleteTarget.teacherId);
-      onNotify('success', `Teacher ${deleteTarget.teacherId} deleted successfully!`);
+      onNotify('success', msg.success.deleted('giảng viên', deleteTarget.teacherId));
       loadTeachers();
     } catch (err) {
       onNotify('error', err?.message || 'Lỗi khi xóa giảng viên');
@@ -276,13 +277,13 @@ export default function TeacherModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Sửa Giảng Viên: ${formData.teacherId}` : 'Register Thêm Khoa Mới Member'}
+        title={isEdit ? `Sửa Giảng Viên: ${formData.teacherId}` : 'Thêm Giảng Viên Mới'}
         subtitle="Nhập học vị, học hàm và khoa công tác"
       >
         <form onSubmit={handleSaveTeacher} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Teacher ID (Mã GV)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Mã Giảng Viên *</label>
               <input
                 type="text"
                 required

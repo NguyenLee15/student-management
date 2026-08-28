@@ -74,8 +74,8 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }) {
   if (!isOpen) return null;
 
   const quickNavs = [
-    { label: 'Cổng Sinh Viên (Portal)', tab: 'student-portal', icon: Award },
-    { label: 'Cổng Giảng Viên (Portal)', tab: 'teacher-portal', icon: UserSquare2 },
+    { label: 'Cổng Sinh Viên', tab: 'student-portal', icon: Award },
+    { label: 'Cổng Giảng Viên', tab: 'teacher-portal', icon: UserSquare2 },
     { label: 'Danh sách Sinh viên', tab: 'students', icon: Users },
     { label: 'Danh sách Giảng viên', tab: 'teachers', icon: UserSquare2 },
     { label: 'Quản lý Điểm số (GPA)', tab: 'grades', icon: Award },

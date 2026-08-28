@@ -1,3 +1,4 @@
+import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit3, Trash2, DoorOpen, Building, RefreshCw, Users } from 'lucide-react';
 import { classroomApi } from '../../api';
@@ -74,10 +75,10 @@ export default function ClassroomModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await classroomApi.update(formData.roomId, formData);
-        onNotify('success', `Classroom ${formData.roomId} đã được cập nhật thành công!`);
+        onNotify('success', msg.success.updated('phòng học', formData.roomId));
       } else {
         await classroomApi.create(formData);
-        onNotify('success', `Classroom ${formData.roomId} đã được tạo thành công!`);
+        onNotify('success', msg.success.created('phòng học', formData.roomId));
       }
       setShowModal(false);
       loadClassrooms();
@@ -90,7 +91,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await classroomApi.delete(deleteTarget.roomId);
-      onNotify('success', `Classroom ${deleteTarget.roomId} đã được xóa thành công!`);
+      onNotify('success', msg.success.deleted('phòng học', deleteTarget.roomId));
       loadClassrooms();
     } catch (err) {
       onNotify('error', err?.message || 'Lỗi khi xóa phòng học');
@@ -123,10 +124,10 @@ export default function ClassroomModule({ onNotify, currentUser }) {
           className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-rose-500 transition"
         >
           <option value="">Tất Cả Các Tòa Nhà</option>
-          <option value="BUILDING_A">Building A (Tòa A)</option>
-          <option value="BUILDING_B">Building B (Tòa B)</option>
-          <option value="BUILDING_C">Building C (Tòa C)</option>
-          <option value="BUILDING_D">Building D (Tòa D)</option>
+          <option value="BUILDING_A">Tòa A</option>
+          <option value="BUILDING_B">Tòa B</option>
+          <option value="BUILDING_C">Tòa C</option>
+          <option value="BUILDING_D">Tòa D</option>
         </select>
 
         <button
@@ -154,13 +155,13 @@ export default function ClassroomModule({ onNotify, currentUser }) {
 
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">{c.roomName || c.roomId}</h3>
-              <p className="text-xs text-slate-400 mt-1">{c.building || 'Building A'}</p>
+              <p className="text-xs text-slate-400 mt-1">{msg.enum.building[c.building] || 'Tòa A'}</p>
             </div>
 
             <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
               <div className="flex items-center gap-1.5 text-slate-400">
                 <Users className="h-3.5 w-3.5 text-slate-500" />
-                <span>{c.capacity || 60} Seats</span>
+                <span>{c.capacity || 60} chỗ</span>
               </div>
 
               {isAdmin && (
@@ -200,7 +201,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Room ID (Mã Phòng)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Mã Phòng *</label>
               <input
                 type="text"
                 required
@@ -233,15 +234,15 @@ export default function ClassroomModule({ onNotify, currentUser }) {
                 onChange={(e) => setFormData({ ...formData, building: e.target.value })}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500"
               >
-                <option value="BUILDING_A">Building A (Tòa A)</option>
-                <option value="BUILDING_B">Building B (Tòa B)</option>
-                <option value="BUILDING_C">Building C (Tòa C)</option>
-                <option value="BUILDING_D">Building D (Tòa D)</option>
+                <option value="BUILDING_A">Tòa A</option>
+                <option value="BUILDING_B">Tòa B</option>
+                <option value="BUILDING_C">Tòa C</option>
+                <option value="BUILDING_D">Tòa D</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Capacity (Sức chứa chỗ ngồi)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Sức chứa (chỗ ngồi) *</label>
               <input
                 type="number"
                 min="10"
@@ -275,7 +276,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
         title="Xóa phòng học"
-        message={`Are you sure you want to remove classroom "${deleteTarget?.roomName}" (ID: ${deleteTarget?.roomId})?`}
+        message={msg.confirm.delete('phòng học', deleteTarget?.roomName, deleteTarget?.roomId)}
       />
     </div>
   );
