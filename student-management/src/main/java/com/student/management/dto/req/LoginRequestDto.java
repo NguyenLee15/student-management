@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.dto.req;
 
 import jakarta.validation.constraints.NotBlank;

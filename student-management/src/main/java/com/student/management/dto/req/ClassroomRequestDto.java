@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.dto.req;
 
 import com.student.management.enums.Building;

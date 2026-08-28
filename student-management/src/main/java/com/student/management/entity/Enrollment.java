@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.entity;
 
 import com.student.management.enums.EnrollmentStatus;

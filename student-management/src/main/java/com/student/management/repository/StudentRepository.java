@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.repository;
 
 import com.student.management.entity.Student;
@@ -16,7 +17,8 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     java.util.Optional<Student> findByEmail(String email);
 
     @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})
-    Page<Student> findAll(Pageable pageable);
+    @org.springframework.lang.NonNull
+    Page<Student> findAll(@org.springframework.lang.NonNull Pageable pageable);
 
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM Student s WHERE s.studentId = :studentId")

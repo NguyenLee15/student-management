@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.util;
 
 import com.student.management.dto.resp.TranscriptResponseDto;

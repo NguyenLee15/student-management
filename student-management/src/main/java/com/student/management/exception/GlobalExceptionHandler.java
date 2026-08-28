@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.exception;
 
 import com.student.management.dto.resp.ApiResponse;

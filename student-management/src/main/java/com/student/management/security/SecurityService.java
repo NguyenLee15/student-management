@@ -1,10 +1,11 @@
+// cSpell:disable
 package com.student.management.security;
 
 import com.student.management.entity.CreditClass;
 import com.student.management.entity.User;
 import com.student.management.repository.CreditClassRepository;
 import com.student.management.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -12,13 +13,12 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service("securityEvaluator")
+@lombok.RequiredArgsConstructor
 public class SecurityService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private CreditClassRepository creditClassRepository;
+    private final CreditClassRepository creditClassRepository;
 
     public boolean isSelfStudent(String studentId) {
         if (studentId == null || studentId.isEmpty()) return false;
@@ -113,3 +113,4 @@ public class SecurityService {
         return user.getUserName();
     }
 }
+

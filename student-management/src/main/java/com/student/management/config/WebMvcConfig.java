@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.config;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -11,8 +12,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Value("${app.cors.allowed-origins:http://localhost:5173,https://lee-eduportal.vercel.app}")
     private String[] allowedOrigins;
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
+        @Override
+    public void addCorsMappings(@org.springframework.lang.NonNull CorsRegistry registry) {
         registry.addMapping("/api/v1/**")
                 .allowedOrigins(allowedOrigins)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")

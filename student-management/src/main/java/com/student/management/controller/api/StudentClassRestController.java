@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.controller.api;
 
 import com.student.management.dto.req.StudentClassRequestDto;
@@ -7,7 +8,7 @@ import com.student.management.service.StudentClassService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -23,10 +24,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @RequestMapping("/api/v1/classes")
 @Tag(name = "Student Classes API", description = "Endpoints for managing student classes")
 @PreAuthorize("hasRole('ADMIN')")
+@lombok.RequiredArgsConstructor
 public class StudentClassRestController {
 
-    @Autowired
-    private StudentClassService studentClassService;
+    private final StudentClassService studentClassService;
 
     @GetMapping
     @Operation(summary = "Get all classes (Paged or List)")
@@ -84,4 +85,5 @@ public class StudentClassRestController {
         return ResponseEntity.ok(ApiResponse.success("Class deleted successfully", null));
     }
 }
+
 

@@ -1,10 +1,11 @@
+// cSpell:disable
 package com.student.management.service;
 
 import com.student.management.entity.PaymentTransaction;
 import com.student.management.entity.Student;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,14 +21,18 @@ import java.util.Locale;
 @Service
 public class EmailReceiptService {
 
-    @Autowired(required = false)
-    private JavaMailSender mailSender;
+    private final ObjectProvider<JavaMailSender> mailSenderProvider;
+
+    public EmailReceiptService(ObjectProvider<JavaMailSender> mailSenderProvider) {
+        this.mailSenderProvider = mailSenderProvider;
+    }
 
     @Value("${spring.mail.username:}")
     private String mailSenderUsername;
 
     @Async
     public void sendPaymentReceipt(Student student, PaymentTransaction transaction) {
+        JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
         if (mailSender == null || !StringUtils.hasText(mailSenderUsername)) {
             log.info("📧 Email service unconfigured (mailSender is null or MAIL_USERNAME empty). Skipping receipt email for student: {}", student.getStudentId());
             return;

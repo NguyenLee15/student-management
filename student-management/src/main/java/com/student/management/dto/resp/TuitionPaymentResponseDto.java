@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.dto.resp;
 
 import com.student.management.enums.PaymentMethod;

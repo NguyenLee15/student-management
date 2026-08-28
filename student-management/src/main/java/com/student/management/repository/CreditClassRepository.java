@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.repository;
 
 import com.student.management.entity.CreditClass;
@@ -18,7 +19,8 @@ import java.util.Optional;
 public interface CreditClassRepository extends JpaRepository<CreditClass, Long> {
 
     @EntityGraph(attributePaths = {"subject", "teacher", "classroom"})
-    Page<CreditClass> findAll(Pageable pageable);
+    @org.springframework.lang.NonNull
+    Page<CreditClass> findAll(@org.springframework.lang.NonNull Pageable pageable);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT c FROM CreditClass c WHERE c.creditClassId = :id")

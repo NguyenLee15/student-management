@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.service.impl;
 
 import com.student.management.dto.req.CartValidationRequestDto;
@@ -46,7 +47,6 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND, "Không tìm thấy sinh viên ID: " + studentId));
 
-        LocalDateTime now = LocalDateTime.now();
         List<RegistrationPeriodResponseDto> activePeriods = registrationPeriodService.getCurrentlyActivePeriods();
         
         List<ValidationViolationDto> violations = new ArrayList<>();

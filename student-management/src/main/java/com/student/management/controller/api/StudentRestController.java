@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.controller.api;
 
 import com.student.management.dto.req.StudentRequestDto;
@@ -10,7 +11,7 @@ import jakarta.validation.Valid;
 import com.student.management.service.AsyncImportService;
 import com.student.management.entity.ImportTask;
 import com.student.management.repository.ImportTaskRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,16 +31,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/students")
 @Tag(name = "Students API", description = "Endpoints for managing university students, filtering, and Excel import/export")
+@lombok.RequiredArgsConstructor
 public class StudentRestController {
 
-    @Autowired
-    private StudentService studentService;
+    private final StudentService studentService;
 
-    @Autowired
-    private AsyncImportService asyncImportService;
+    private final AsyncImportService asyncImportService;
     
-    @Autowired
-    private ImportTaskRepository importTaskRepository;
+    private final ImportTaskRepository importTaskRepository;
 
     @GetMapping
     @Operation(summary = "Search and filter students with pagination")
@@ -144,4 +143,5 @@ public class StudentRestController {
                 .body(new InputStreamResource(in));
     }
 }
+
 

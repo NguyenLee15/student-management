@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.exception;
 
 public class UserAlreadyExistsException extends RuntimeException {

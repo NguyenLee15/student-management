@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.service;
 
 import com.student.management.dto.req.CartValidationRequestDto;
@@ -18,12 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.List;
-import java.util.ArrayList;
 import com.student.management.exception.ErrorCode;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -206,3 +204,5 @@ class CourseRegistrationValidationTest {
         assertEquals(new BigDecimal("1350000.00"), result.getEstimatedTotalTuition());
     }
 }
+
+

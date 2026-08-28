@@ -1,8 +1,9 @@
+// cSpell:disable
 package com.student.management.service;
 
 import com.student.management.entity.RefreshToken;
 import com.student.management.repository.RefreshTokenRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,13 +13,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@lombok.RequiredArgsConstructor
 public class RefreshTokenService {
 
     @Value("${jwt.refresh-expiration:604800000}") // 7 days in ms
     private long refreshExpirationMs;
 
-    @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public RefreshToken createRefreshToken(String userName) {
         // Revoke existing tokens for user to ensure single active session (optional, but good practice)
@@ -61,4 +62,5 @@ public class RefreshTokenService {
         refreshTokenRepository.saveAll(activeTokens);
     }
 }
+
 

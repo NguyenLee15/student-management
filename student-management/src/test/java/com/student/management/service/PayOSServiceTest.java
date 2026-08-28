@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -227,4 +228,5 @@ class PayOSServiceTest {
         verify(tuitionService, never()).recordPayment(any(), any());
     }
 }
+
 

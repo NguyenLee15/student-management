@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.service;
 
 import com.student.management.dto.req.RegistrationPeriodRequestDto;
@@ -135,3 +136,4 @@ class RegistrationPeriodServiceTest {
         assertEquals(ErrorCode.VALIDATION_ERROR, ex.getErrorCode());
     }
 }
+

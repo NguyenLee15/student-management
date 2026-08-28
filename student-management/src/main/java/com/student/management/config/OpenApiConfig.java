@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.config;
 
 import io.swagger.v3.oas.models.Components;

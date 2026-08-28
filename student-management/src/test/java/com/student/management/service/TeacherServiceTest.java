@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.service;
 
 import com.student.management.dto.req.TeacherRequestDto;
@@ -93,4 +94,5 @@ public class TeacherServiceTest {
         verify(teacherRepository, times(1)).save(any(Teacher.class));
     }
 }
+
 

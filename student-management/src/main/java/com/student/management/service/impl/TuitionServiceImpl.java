@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.service.impl;
 
 import com.student.management.dto.req.TuitionPaymentRequestDto;

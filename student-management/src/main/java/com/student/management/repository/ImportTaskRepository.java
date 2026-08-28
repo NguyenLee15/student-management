@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.repository;
 
 import com.student.management.entity.ImportTask;

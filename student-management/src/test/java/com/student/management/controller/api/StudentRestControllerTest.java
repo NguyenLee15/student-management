@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.controller.api;
 
 import com.student.management.dto.resp.StudentResponseDto;
@@ -75,3 +76,4 @@ class StudentRestControllerTest {
                 .andExpect(jsonPath("$.data.fullName").value("Nguyen Van A"));
     }
 }
+

@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.controller.api;
 
 import com.student.management.dto.req.FacultyRequestDto;
@@ -7,7 +8,7 @@ import com.student.management.service.FacultyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -21,10 +22,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/faculties")
 @Tag(name = "Faculties API", description = "Endpoints for managing university faculties")
+@lombok.RequiredArgsConstructor
 public class FacultyRestController {
 
-    @Autowired
-    private FacultyService facultyService;
+    private final FacultyService facultyService;
 
     @GetMapping
     @Operation(summary = "Get all faculties (Paged or List)")
@@ -78,3 +79,4 @@ public class FacultyRestController {
         return ResponseEntity.ok(ApiResponse.success("Faculty deleted successfully", null));
     }
 }
+

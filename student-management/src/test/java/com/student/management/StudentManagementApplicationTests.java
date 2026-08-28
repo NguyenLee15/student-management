@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management;
 
 import org.junit.jupiter.api.Test;
@@ -13,4 +14,5 @@ class StudentManagementApplicationTests {
 	}
 
 }
+
 

@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.controller.api;
 
 import com.student.management.dto.req.ClassroomRequestDto;

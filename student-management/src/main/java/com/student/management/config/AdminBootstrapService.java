@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.config;
 
 import com.student.management.entity.User;

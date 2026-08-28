@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.policy;
 
 import com.student.management.entity.CreditClass;
@@ -102,3 +103,4 @@ class SubjectGradePolicyTest {
         assertEquals(new BigDecimal("0.60"), creditClass.getFinalExamWeight());
     }
 }
+

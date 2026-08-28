@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.service;
 
 import com.student.management.dto.req.TuitionPolicyRequestDto;
@@ -160,3 +161,4 @@ class TuitionPolicyServiceTest {
         assertEquals("KHOA Công nghệ Thông tin", response.getScope());
     }
 }
+

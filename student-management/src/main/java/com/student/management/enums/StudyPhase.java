@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.enums;
 
 public enum StudyPhase {

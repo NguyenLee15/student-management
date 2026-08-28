@@ -1,3 +1,4 @@
+// cSpell:disable
 package com.student.management.mapping;
 
 import com.student.management.dto.req.SubjectRequestDto;
