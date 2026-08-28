@@ -7,11 +7,11 @@ import lombok.Data;
 
 @Data
 public class ResetPasswordRequestDto {
-    @NotBlank(message = "Token is required")
+    @NotBlank(message = "Token là bắt buộc")
     private String token;
 
-    @NotBlank(message = "New password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
+    @NotBlank(message = "Mật khẩu mới là bắt buộc")
+    @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 ký tự")
     private String newPassword;
 }
 

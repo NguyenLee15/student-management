@@ -15,19 +15,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TeacherRequestDto {
 
-    @NotBlank(message = "Teacher ID cannot be blank")
-    @Size(max = 10, message = "Teacher ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã giảng viên không được để trống")
+    @Size(max = 10, message = "Mã giảng viên không được vượt quá 10 ký tự")
     private String teacherId;
 
-    @NotBlank(message = "Full name cannot be blank")
-    @Size(max = 100, message = "Full name cannot exceed 100 characters")
+    @NotBlank(message = "Họ và tên không được để trống")
+    @Size(max = 100, message = "Họ và tên không được vượt quá 100 ký tự")
     private String fullName;
 
-    @NotBlank(message = "Email cannot be blank")
-    @Email(message = "Email is invalid")
+    @NotBlank(message = "Email không được để trống")
+    @Email(message = "Email không hợp lệ")
     private String email;
 
-    @NotBlank(message = "Faculty ID cannot be blank")
+    @NotBlank(message = "Mã khoa không được để trống")
     private String facultyId;
 }
 

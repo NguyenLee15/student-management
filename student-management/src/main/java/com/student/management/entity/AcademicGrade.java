@@ -30,26 +30,26 @@ public class AcademicGrade extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
-    @NotNull(message = "Student is required")
+    @NotNull(message = "Student là bắt buộc")
     private Student student;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id", nullable = false)
-    @NotNull(message = "Subject is required")
+    @NotNull(message = "Môn học là bắt buộc")
     private Subject subject;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "semester", nullable = false)
-    @NotNull(message = "Semester is required")
+    @NotNull(message = "Học kỳ là bắt buộc")
     private Semester semester;
 
     @Column(name = "academic_year", nullable = false, length = 9)
-    @NotBlank(message = "Academic year is required")
+    @NotBlank(message = "Năm học là bắt buộc")
     private String academicYear;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "study_phase", nullable = false)
-    @NotNull(message = "Study phase is required")
+    @NotNull(message = "Study phase là bắt buộc")
     private StudyPhase studyPhase;
 
     @Column(name = "attempt_number", nullable = false)

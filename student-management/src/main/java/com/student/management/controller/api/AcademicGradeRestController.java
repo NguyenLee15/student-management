@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/academic-grades")
 @RequiredArgsConstructor
-@Tag(name = "Academic Grades API", description = "Endpoints for managing student academic grades and Circular 08 transcripts")
+@Tag(name = "Academic Grades API", description = "Quản lý điểm học tập sinh viên và bảng điểm theo Thông tư 08")
 public class AcademicGradeRestController {
 
     private final AcademicGradeService academicGradeService;
@@ -52,7 +52,7 @@ public class AcademicGradeRestController {
         Page<AcademicGradeResponseDto> result = academicGradeService.searchAndFilter(
                 queryStudentId, subjectId, semester, academicYear, studyPhase, PageRequest.of(page, size)
         );
-        return ResponseEntity.ok(ApiResponse.success("Grades fetched successfully", result));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách Grades thành công", result));
     }
 
     @GetMapping("/{id}")
@@ -81,14 +81,14 @@ public class AcademicGradeRestController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> create(@Valid @RequestBody AcademicGradeRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Grade created successfully", academicGradeService.create(dto)));
+                .body(ApiResponse.success("Thêm mới Grade thành công", academicGradeService.create(dto)));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update grade")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> update(@PathVariable Integer id, @Valid @RequestBody AcademicGradeUpdateDto dto) {
-        return ResponseEntity.ok(ApiResponse.success("Grade updated successfully", academicGradeService.update(id, dto)));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật Grade thành công", academicGradeService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
@@ -96,6 +96,6 @@ public class AcademicGradeRestController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Integer id) {
         academicGradeService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Grade deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Xóa Grade thành công", null));
     }
 }

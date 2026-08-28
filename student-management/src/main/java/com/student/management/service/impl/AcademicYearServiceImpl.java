@@ -43,7 +43,7 @@ public class AcademicYearServiceImpl implements AcademicYearService {
     @Cacheable(value = "academicYears", key = "#academicYearId")
     public AcademicYearResponseDto getById(String academicYearId) {
         AcademicYear year = academicYearRepository.findById(academicYearId)
-                .orElseThrow(() -> new NotFoundException("Academic year not found: " + academicYearId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy Academic year: " + academicYearId));
         return AcademicYearMapper.toDto(year);
     }
 
@@ -52,7 +52,7 @@ public class AcademicYearServiceImpl implements AcademicYearService {
     @CacheEvict(value = "academicYears", allEntries = true)
     public AcademicYearResponseDto create(AcademicYearRequestDto dto) {
         if (academicYearRepository.existsById(dto.getAcademicYearId())) {
-            throw new IllegalArgumentException("Academic year ID already exists: " + dto.getAcademicYearId());
+            throw new IllegalArgumentException("Mã năm học đã tồn tại: " + dto.getAcademicYearId());
         }
         AcademicYear year = AcademicYearMapper.toEntity(dto);
         return AcademicYearMapper.toDto(academicYearRepository.save(year));
@@ -63,7 +63,7 @@ public class AcademicYearServiceImpl implements AcademicYearService {
     @CacheEvict(value = "academicYears", allEntries = true)
     public AcademicYearResponseDto update(String academicYearId, AcademicYearRequestDto dto) {
         AcademicYear year = academicYearRepository.findById(academicYearId)
-                .orElseThrow(() -> new NotFoundException("Academic year not found: " + academicYearId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy Academic year: " + academicYearId));
         year.setAcademicYearName(dto.getAcademicYearName());
         return AcademicYearMapper.toDto(academicYearRepository.save(year));
     }
@@ -73,7 +73,7 @@ public class AcademicYearServiceImpl implements AcademicYearService {
     @CacheEvict(value = "academicYears", allEntries = true)
     public void delete(String academicYearId) {
         if (!academicYearRepository.existsById(academicYearId)) {
-            throw new NotFoundException("Academic year not found: " + academicYearId);
+            throw new NotFoundException("Không tìm thấy Academic year: " + academicYearId);
         }
         academicYearRepository.deleteById(academicYearId);
     }

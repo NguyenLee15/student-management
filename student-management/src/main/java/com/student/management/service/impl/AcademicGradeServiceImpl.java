@@ -55,7 +55,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
     @Transactional(readOnly = true)
     public AcademicGradeResponseDto getById(Integer gradeId) {
         AcademicGrade grade = academicGradeRepository.findById(gradeId)
-                .orElseThrow(() -> new NotFoundException("Grade not found: " + gradeId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy Grade: " + gradeId));
         return AcademicGradeMapper.toDto(grade);
     }
 
@@ -86,9 +86,9 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
     @Transactional
     public AcademicGradeResponseDto create(AcademicGradeRequestDto dto) {
         Student student = studentRepository.findById(dto.getStudentId())
-                .orElseThrow(() -> new NotFoundException("Student not found: " + dto.getStudentId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sinh viên: " + dto.getStudentId()));
         Subject subject = subjectRepository.findById(dto.getSubjectId())
-                .orElseThrow(() -> new NotFoundException("Subject not found: " + dto.getSubjectId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy môn học: " + dto.getSubjectId()));
 
         if (academicGradeRepository.findExistingGrade(dto.getStudentId(), dto.getSubjectId(), dto.getSemester(), dto.getAcademicYear(), dto.getStudyPhase()).isPresent()) {
             throw new IllegalArgumentException("Grade already exists for this subject, semester, academic year, and phase.");
@@ -110,7 +110,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
     @Transactional
     public AcademicGradeResponseDto update(Integer gradeId, AcademicGradeUpdateDto dto) {
         AcademicGrade grade = academicGradeRepository.findById(gradeId)
-                .orElseThrow(() -> new NotFoundException("Grade not found: " + gradeId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy Grade: " + gradeId));
 
         grade.setSemester(dto.getSemester());
         grade.setStudyPhase(dto.getStudyPhase());
@@ -133,7 +133,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
     @Transactional
     public void delete(Integer gradeId) {
         if (!academicGradeRepository.existsById(gradeId)) {
-            throw new NotFoundException("Grade not found: " + gradeId);
+            throw new NotFoundException("Không tìm thấy Grade: " + gradeId);
         }
         academicGradeRepository.deleteById(gradeId);
     }
@@ -171,8 +171,8 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
                 }
             }
         } catch (Exception e) {
-            logger.error("Error importing grade excel: ", e);
-            throw new RuntimeException("Error importing grade excel: " + e.getMessage());
+            logger.error("Lỗi khi nhập grade từ file Excel: ", e);
+            throw new RuntimeException("Lỗi khi nhập grade từ file Excel: " + e.getMessage());
         }
         return list;
     }
@@ -180,9 +180,9 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
     @Override
     public ByteArrayInputStream exportToExcel(List<AcademicGradeResponseDto> grades) {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet("Grades");
+            Sheet sheet = workbook.createSheet("Điểm");
             Row header = sheet.createRow(0);
-            String[] cols = {"Student ID", "Student Name", "Subject ID", "Subject Name", "Semester", "Academic Year", "Score 10", "Score 4", "Letter"};
+            String[] cols = {"Mã sinh viên", "Student Name", "Mã môn học", "Tên môn học", "Học kỳ", "Academic Year", "Điểm hệ 10", "Điểm hệ 4", "Điểm chữ"};
             for (int i = 0; i < cols.length; i++) {
                 header.createCell(i).setCellValue(cols[i]);
             }
@@ -202,8 +202,8 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
         } catch (IOException e) {
-            logger.error("Error exporting grade excel: ", e);
-            throw new RuntimeException("Error exporting grade excel: " + e.getMessage());
+            logger.error("Lỗi khi xuất danh sách grade ra file Excel: ", e);
+            throw new RuntimeException("Lỗi khi xuất danh sách grade ra file Excel: " + e.getMessage());
         }
     }
 }

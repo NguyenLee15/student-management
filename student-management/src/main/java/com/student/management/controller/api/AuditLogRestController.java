@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/audit-logs")
 @RequiredArgsConstructor
-@Tag(name = "Audit Log API", description = "Endpoints for retrieving system activity history")
+@Tag(name = "Audit Log API", description = "Lịch sử hoạt động hệ thống")
 public class AuditLogRestController {
 
     private final AuditLogService auditLogService;
@@ -28,6 +28,6 @@ public class AuditLogRestController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
         Page<AuditLog> result = auditLogService.getAll(PageRequest.of(page, size));
-        return ResponseEntity.ok(ApiResponse.success("Audit logs fetched successfully", result));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lịch sử hệ thống thành công", result));
     }
 }

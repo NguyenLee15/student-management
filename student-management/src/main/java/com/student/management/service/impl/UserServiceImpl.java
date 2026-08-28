@@ -48,14 +48,14 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserResponseDto getByUserName(String userName) {
         return findByUserName(userName)
-                .orElseThrow(() -> new NotFoundException("User not found: " + userName));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng: " + userName));
     }
 
     @Override
     @Transactional
     public UserResponseDto create(UserRequestDto dto) {
         if (userRepository.findByUserName(dto.getUserName()).isPresent()) {
-            throw new UserAlreadyExistsException("Username already exists: " + dto.getUserName());
+            throw new UserAlreadyExistsException("Tên đăng nhập đã tồn tại: " + dto.getUserName());
         }
         User user = UserMapper.toEntity(dto);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void changePassword(String userName, ChangePasswordDto dto) {
         User user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new NotFoundException("User not found: " + userName));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng: " + userName));
 
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Mật khẩu hiện tại không chính xác");
@@ -130,14 +130,14 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void resetPassword(String token, String newPassword) {
         var resetToken = passwordResetTokenRepository.findByTokenAndUsedFalse(token)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired token"));
+                .orElseThrow(() -> new IllegalArgumentException("Token không hợp lệ hoặc đã hết hạn"));
                 
         if (resetToken.isExpired()) {
-            throw new IllegalArgumentException("Token has expired");
+            throw new IllegalArgumentException("Token đã hết hạn");
         }
         
         var user = userRepository.findByUserName(resetToken.getUserName())
-                .orElseThrow(() -> new com.student.management.exception.NotFoundException("User not found"));
+                .orElseThrow(() -> new com.student.management.exception.NotFoundException("Không tìm thấy người dùng"));
                 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
@@ -150,7 +150,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void delete(String userName) {
         User user = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new NotFoundException("User not found: " + userName));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng: " + userName));
         userRepository.delete(user);
     }
 }

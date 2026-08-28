@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-@Tag(name = "Users API", description = "Endpoints for managing user accounts, profiles and roles")
+@Tag(name = "Users API", description = "Quản lý tài khoản người dùng, hồ sơ và phân quyền")
 public class UserRestController {
 
     private final UserService userService;
@@ -45,17 +45,17 @@ public class UserRestController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all users with pagination")
+    @Operation(summary = "Lấy danh sách người dùng có phân trang")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<UserResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<UserResponseDto> result = userService.getAll(PageRequest.of(page, size));
-        return ResponseEntity.ok(ApiResponse.success("Users fetched successfully", result));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách người dùng thành công", result));
     }
 
     @GetMapping("/{userName}")
-    @Operation(summary = "Get user by username")
+    @Operation(summary = "Lấy chi tiết người dùng theo tên đăng nhập")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponseDto>> getByUserName(@PathVariable String userName) {
         return userService.findByUserName(userName)
@@ -64,18 +64,18 @@ public class UserRestController {
     }
 
     @PostMapping
-    @Operation(summary = "Create user")
+    @Operation(summary = "Tạo người dùng mới")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponseDto>> create(@Valid @RequestBody UserRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("User created successfully", userService.create(dto)));
+                .body(ApiResponse.success("Thêm mới người dùng thành công", userService.create(dto)));
     }
 
     @DeleteMapping("/{userName}")
-    @Operation(summary = "Delete user by username")
+    @Operation(summary = "Xóa người dùng theo tên đăng nhập")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String userName) {
         userService.delete(userName);
-        return ResponseEntity.ok(ApiResponse.success("User deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Xóa người dùng thành công", null));
     }
 }

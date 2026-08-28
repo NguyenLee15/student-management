@@ -19,20 +19,20 @@ public class AcademicGradeRequestDto {
 
     private Integer gradeId;
 
-    @NotBlank(message = "Student ID cannot be blank")
+    @NotBlank(message = "Mã sinh viên không được để trống")
     private String studentId;
 
-    @NotBlank(message = "Subject ID cannot be blank")
+    @NotBlank(message = "Mã môn học không được để trống")
     private String subjectId;
 
-    @NotNull(message = "Semester cannot be null")
+    @NotNull(message = "Học kỳ không được để trống")
     private Semester semester;
 
-    @NotBlank(message = "Academic year cannot be blank")
-    @Size(max = 9, message = "Academic year cannot exceed 9 characters")
+    @NotBlank(message = "Năm học không được để trống")
+    @Size(max = 9, message = "Năm học không được vượt quá 9 ký tự")
     private String academicYear;
 
-    @NotNull(message = "Study phase cannot be null")
+    @NotNull(message = "Study phase không được để trống")
     private StudyPhase studyPhase;
 
     @DecimalMin(value = "0.0", inclusive = true, message = "Scale 10 score must be >= 0")

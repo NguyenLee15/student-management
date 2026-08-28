@@ -17,18 +17,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ClassroomRequestDto {
 
-    @NotBlank(message = "Room ID cannot be blank")
-    @Size(max = 10, message = "Room ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã phòng không được để trống")
+    @Size(max = 10, message = "Mã phòng không được vượt quá 10 ký tự")
     private String roomId;
 
-    @NotBlank(message = "Room name cannot be blank")
-    @Size(max = 100, message = "Room name cannot exceed 100 characters")
+    @NotBlank(message = "Tên phòng không được để trống")
+    @Size(max = 100, message = "Tên phòng không được vượt quá 100 ký tự")
     private String roomName;
 
-    @Min(value = 1, message = "Capacity must be greater than 0")
+    @Min(value = 1, message = "Sức chứa phải lớn hơn 0")
     private int capacity;
 
-    @NotNull(message = "Building cannot be null")
+    @NotNull(message = "Tòa nhà không được để trống")
     private Building building;
 }
 

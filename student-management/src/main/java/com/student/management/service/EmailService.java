@@ -37,7 +37,7 @@ public class EmailService {
             mailSender.send(message);
             log.info("Password reset email sent to {}", to);
         } catch (Exception e) {
-            log.error("Failed to send password reset email to {}: {}", to, e.getMessage());
+            log.error("Lỗi khi gửi email đặt lại mật khẩu đến {}: {}", to, e.getMessage());
         }
     }
 }

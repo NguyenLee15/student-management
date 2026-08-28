@@ -31,22 +31,22 @@ public class CreditClass extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id", nullable = false)
-    @NotNull(message = "Subject is required")
+    @NotNull(message = "Môn học là bắt buộc")
     private Subject subject;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable = false)
-    @NotNull(message = "Teacher is required")
+    @NotNull(message = "Giảng viên là bắt buộc")
     private Teacher teacher;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "classroom_id", nullable = false)
-    @NotNull(message = "Classroom is required")
+    @NotNull(message = "Phòng học là bắt buộc")
     private Classroom classroom;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "academic_year_id", nullable = false)
-    @NotNull(message = "Academic year is required")
+    @NotNull(message = "Năm học là bắt buộc")
     private AcademicYear academicYear;
 
     @ManyToOne(fetch = FetchType.LAZY)

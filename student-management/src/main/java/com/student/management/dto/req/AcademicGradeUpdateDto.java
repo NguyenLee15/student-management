@@ -19,13 +19,13 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class AcademicGradeUpdateDto {
 
-    @NotNull(message = "Grade ID cannot be null")
+    @NotNull(message = "Grade ID không được để trống")
     private Integer gradeId;
 
-    @NotNull(message = "Semester cannot be null")
+    @NotNull(message = "Học kỳ không được để trống")
     private Semester semester;
 
-    @NotNull(message = "Study phase cannot be null")
+    @NotNull(message = "Study phase không được để trống")
     private StudyPhase studyPhase;
 
     @DecimalMin(value = "0.0", inclusive = true, message = "Scale 10 score must be >= 0")

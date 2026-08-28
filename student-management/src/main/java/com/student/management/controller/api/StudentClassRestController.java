@@ -22,7 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/classes")
-@Tag(name = "Student Classes API", description = "Endpoints for managing student classes")
+@Tag(name = "Student Classes API", description = "Quản lý lớp học sinh viên")
 @PreAuthorize("hasRole('ADMIN')")
 @lombok.RequiredArgsConstructor
 public class StudentClassRestController {
@@ -30,7 +30,7 @@ public class StudentClassRestController {
     private final StudentClassService studentClassService;
 
     @GetMapping
-    @Operation(summary = "Get all classes (Paged or List)")
+    @Operation(summary = "Lấy danh sách lớp học (Phân trang hoặc danh sách)")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Object>> getAllClasses(
             @RequestParam(required = false) String facultyId,
@@ -40,7 +40,7 @@ public class StudentClassRestController {
 
         if (unpaged) {
             List<StudentClassResponseDto> list = studentClassService.getAll();
-            return ResponseEntity.ok(ApiResponse.success("Classes fetched successfully", list));
+            return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lớp học thành công", list));
         }
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("classId"));
@@ -50,11 +50,11 @@ public class StudentClassRestController {
         } else {
             result = studentClassService.getAll(pageRequest);
         }
-        return ResponseEntity.ok(ApiResponse.success("Classes fetched successfully", result));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lớp học thành công", result));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get class details by ID")
+    @Operation(summary = "Lấy chi tiết lớp học theo ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<StudentClassResponseDto>> getById(@PathVariable String id) {
         StudentClassResponseDto dto = studentClassService.getById(id);
@@ -62,27 +62,27 @@ public class StudentClassRestController {
     }
 
     @PostMapping
-    @Operation(summary = "Create a new student class")
+    @Operation(summary = "Tạo lớp học mới")
     public ResponseEntity<ApiResponse<StudentClassResponseDto>> create(@Valid @RequestBody StudentClassRequestDto dto) {
         StudentClassResponseDto created = studentClassService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Class created successfully", created));
+                .body(ApiResponse.success("Thêm mới lớp học thành công", created));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update an existing student class")
+    @Operation(summary = "Cập nhật lớp học")
     public ResponseEntity<ApiResponse<StudentClassResponseDto>> update(
             @PathVariable String id,
             @Valid @RequestBody StudentClassRequestDto dto) {
         StudentClassResponseDto updated = studentClassService.update(id, dto);
-        return ResponseEntity.ok(ApiResponse.success("Class updated successfully", updated));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật lớp học thành công", updated));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a student class by ID")
+    @Operation(summary = "Xóa lớp học theo ID")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         studentClassService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Class deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Xóa lớp học thành công", null));
     }
 }
 

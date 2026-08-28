@@ -60,7 +60,7 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Transactional(readOnly = true)
     public ClassroomResponseDto getById(String roomId) {
         Classroom classroom = classroomRepository.findById(roomId)
-                .orElseThrow(() -> new NotFoundException("Classroom not found: " + roomId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy phòng học: " + roomId));
         return ClassroomMapper.toDto(classroom);
     }
 
@@ -68,7 +68,7 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Transactional
     public ClassroomResponseDto create(ClassroomRequestDto dto) {
         if (classroomRepository.existsById(dto.getRoomId())) {
-            throw new IllegalArgumentException("Room ID already exists: " + dto.getRoomId());
+            throw new IllegalArgumentException("Mã phòng đã tồn tại: " + dto.getRoomId());
         }
         Classroom classroom = ClassroomMapper.toEntity(dto);
         return ClassroomMapper.toDto(classroomRepository.save(classroom));
@@ -78,7 +78,7 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Transactional
     public ClassroomResponseDto update(String roomId, ClassroomRequestDto dto) {
         Classroom classroom = classroomRepository.findById(roomId)
-                .orElseThrow(() -> new NotFoundException("Classroom not found: " + roomId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy phòng học: " + roomId));
         classroom.setRoomName(dto.getRoomName());
         classroom.setCapacity(dto.getCapacity());
         classroom.setBuilding(dto.getBuilding());
@@ -89,7 +89,7 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Transactional
     public void delete(String roomId) {
         if (!classroomRepository.existsById(roomId)) {
-            throw new NotFoundException("Classroom not found: " + roomId);
+            throw new NotFoundException("Không tìm thấy phòng học: " + roomId);
         }
         classroomRepository.deleteById(roomId);
     }
@@ -97,9 +97,9 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Override
     public ByteArrayInputStream exportToExcel(List<ClassroomResponseDto> classrooms) {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet("Classrooms");
+            Sheet sheet = workbook.createSheet("Phòng học");
             Row header = sheet.createRow(0);
-            String[] cols = {"Room ID", "Room Name", "Capacity", "Building"};
+            String[] cols = {"Mã phòng", "Tên phòng", "Sức chứa", "Tòa nhà"};
             for (int i = 0; i < cols.length; i++) {
                 header.createCell(i).setCellValue(cols[i]);
             }
@@ -114,8 +114,8 @@ public class ClassroomServiceImpl implements ClassroomService {
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
         } catch (IOException e) {
-            logger.error("Error exporting classroom excel: ", e);
-            throw new RuntimeException("Error exporting classroom excel: " + e.getMessage());
+            logger.error("Lỗi khi xuất danh sách classroom ra file Excel: ", e);
+            throw new RuntimeException("Lỗi khi xuất danh sách classroom ra file Excel: " + e.getMessage());
         }
     }
 }

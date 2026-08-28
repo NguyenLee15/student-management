@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/subjects")
 @RequiredArgsConstructor
-@Tag(name = "Subjects API", description = "Endpoints for managing subjects/courses")
+@Tag(name = "Subjects API", description = "Quản lý môn học / học phần")
 public class SubjectRestController {
 
     @GetMapping("/export")
-    @Operation(summary = "Export subject list to Excel file (.xlsx)")
+    @Operation(summary = "Xuất danh sách môn học ra file Excel (.xlsx)")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<org.springframework.core.io.InputStreamResource> exportExcel() {
         org.springframework.data.domain.Page<SubjectResponseDto> list = subjectService.getAll(0, Integer.MAX_VALUE);
@@ -35,17 +35,17 @@ public class SubjectRestController {
     private final SubjectService subjectService;
 
     @GetMapping
-    @Operation(summary = "Get all subjects with pagination")
+    @Operation(summary = "Lấy danh sách môn học có phân trang")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Page<SubjectResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<SubjectResponseDto> result = subjectService.getAll(page, size);
-        return ResponseEntity.ok(ApiResponse.success("Subjects fetched successfully", result));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách môn học thành công", result));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get subject by ID")
+    @Operation(summary = "Lấy chi tiết môn học theo ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<SubjectResponseDto>> getById(@PathVariable String id) {
         return subjectService.getById(id)
@@ -54,26 +54,26 @@ public class SubjectRestController {
     }
 
     @PostMapping
-    @Operation(summary = "Create subject")
+    @Operation(summary = "Thêm mới môn học")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<SubjectResponseDto>> create(@Valid @RequestBody SubjectRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Subject created successfully", subjectService.create(dto)));
+                .body(ApiResponse.success("Thêm mới môn học thành công", subjectService.create(dto)));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update subject")
+    @Operation(summary = "Cập nhật môn học")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<SubjectResponseDto>> update(@PathVariable String id, @Valid @RequestBody SubjectRequestDto dto) {
-        return ResponseEntity.ok(ApiResponse.success("Subject updated successfully", subjectService.update(id, dto)));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật môn học thành công", subjectService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete subject")
+    @Operation(summary = "Xóa môn học")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         subjectService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Subject deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Xóa môn học thành công", null));
     }
 }
 

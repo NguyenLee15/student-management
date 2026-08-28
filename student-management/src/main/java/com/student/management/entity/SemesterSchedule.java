@@ -34,51 +34,51 @@ public class SemesterSchedule extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "credit_class_id", nullable = false)
-    @NotNull(message = "Credit class is required")
+    @NotNull(message = "Lớp tín chỉ là bắt buộc")
     private CreditClass creditClass;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id", nullable = false)
-    @NotNull(message = "Subject is required")
+    @NotNull(message = "Môn học là bắt buộc")
     private Subject subject;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable = false)
-    @NotNull(message = "Teacher is required")
+    @NotNull(message = "Giảng viên là bắt buộc")
     private Teacher teacher;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "classroom_id", nullable = false)
-    @NotNull(message = "Classroom is required")
+    @NotNull(message = "Phòng học là bắt buộc")
     private Classroom classroom;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "semester", nullable = false)
-    @NotNull(message = "Semester is required")
+    @NotNull(message = "Học kỳ là bắt buộc")
     private Semester semester;
 
     @Column(name = "academic_year", nullable = false, length = 9)
-    @NotBlank(message = "Academic year is required")
+    @NotBlank(message = "Năm học là bắt buộc")
     private String academicYear;
 
     @Column(name = "study_time", nullable = false, length = 30)
-    @NotBlank(message = "Study time is required")
+    @NotBlank(message = "Thời gian học là bắt buộc")
     private String studyTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "class_shift", nullable = false)
-    @NotNull(message = "Class shift is required")
+    @NotNull(message = "Ca học là bắt buộc")
     private ClassShift classShift;
 
-    @NotNull(message = "Start date is required")
+    @NotNull(message = "Ngày bắt đầu là bắt buộc")
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
-    @NotNull(message = "End date is required")
+    @NotNull(message = "Ngày kết thúc là bắt buộc")
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    @AssertTrue(message = "End date must be after or equal to start date")
+    @AssertTrue(message = "Ngày kết thúc phải sau hoặc bằng ngày bắt đầu")
     public boolean isValidDateRange() {
         if (startDate == null || endDate == null) return true;
         return !endDate.isBefore(startDate);

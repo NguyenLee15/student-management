@@ -25,13 +25,13 @@ public class AcademicYear extends BaseEntity {
 
     @Id
     @Column(name = "academic_year_id", nullable = false, length = 10)
-    @NotBlank(message = "Academic year ID is required")
-    @Size(max = 10, message = "Academic year ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã năm học là bắt buộc")
+    @Size(max = 10, message = "Mã năm học không được vượt quá 10 ký tự")
     private String academicYearId;
 
     @Column(name = "academic_year_name", nullable = false, length = 50)
-    @NotBlank(message = "Academic year name is required")
-    @Size(max = 50, message = "Academic year name cannot exceed 50 characters")
+    @NotBlank(message = "Academic year name là bắt buộc")
+    @Size(max = 50, message = "Academic year name không được vượt quá 50 ký tự")
     private String academicYearName;
 }
 

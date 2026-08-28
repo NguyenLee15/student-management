@@ -73,16 +73,16 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     public StudentResponseDto create(StudentRequestDto dto) {
         if (studentRepository.existsById(dto.getStudentId())) {
-            throw new IllegalArgumentException("Student ID already exists: " + dto.getStudentId());
+            throw new IllegalArgumentException("Mã sinh viên đã tồn tại: " + dto.getStudentId());
         }
         StudentClass studentClass = studentClassRepository.findById(dto.getClassId())
-                .orElseThrow(() -> new NotFoundException("Class not found: " + dto.getClassId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp học: " + dto.getClassId()));
         AcademicYear academicYear = academicYearRepository.findById(dto.getAcademicYearId())
-                .orElseThrow(() -> new NotFoundException("Academic year not found: " + dto.getAcademicYearId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy Academic year: " + dto.getAcademicYearId()));
         Student student = StudentMapper.toEntity(dto, studentClass, academicYear);
         Student saved = studentRepository.save(student);
         if (auditLogService != null) {
-            auditLogService.log("CREATE", "Student", saved.getStudentId(), "Registered student " + saved.getFullName(), "admin");
+            auditLogService.log("CREATE", "Student", saved.getStudentId(), "Đăng ký sinh viên " + saved.getFullName(), "admin");
         }
         return StudentMapper.toDto(saved);
     }
@@ -91,11 +91,11 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     public StudentResponseDto update(String studentId, StudentRequestDto dto) {
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found: " + studentId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sinh viên: " + studentId));
         StudentClass studentClass = studentClassRepository.findById(dto.getClassId())
-                .orElseThrow(() -> new NotFoundException("Class not found: " + dto.getClassId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp học: " + dto.getClassId()));
         AcademicYear academicYear = academicYearRepository.findById(dto.getAcademicYearId())
-                .orElseThrow(() -> new NotFoundException("Academic year not found: " + dto.getAcademicYearId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy Academic year: " + dto.getAcademicYearId()));
         
         student.setFullName(dto.getFullName());
         student.setDateOfBirth(dto.getDateOfBirth());
@@ -106,7 +106,7 @@ public class StudentServiceImpl implements StudentService {
         
         Student updated = studentRepository.save(student);
         if (auditLogService != null) {
-            auditLogService.log("UPDATE", "Student", updated.getStudentId(), "Updated student details " + updated.getFullName(), "admin");
+            auditLogService.log("UPDATE", "Student", updated.getStudentId(), "Cập nhật thông tin sinh viên " + updated.getFullName(), "admin");
         }
         return StudentMapper.toDto(updated);
     }
@@ -124,11 +124,11 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     public void delete(String studentId) {
         if (!studentRepository.existsById(studentId)) {
-            throw new NotFoundException("Student not found: " + studentId);
+            throw new NotFoundException("Không tìm thấy sinh viên: " + studentId);
         }
         studentRepository.deleteById(studentId);
         if (auditLogService != null) {
-            auditLogService.log("DELETE", "Student", studentId, "Deleted student record", "admin");
+            auditLogService.log("DELETE", "Student", studentId, "Xóa hồ sơ sinh viên", "admin");
         }
     }
 
@@ -136,7 +136,7 @@ public class StudentServiceImpl implements StudentService {
     @Transactional(readOnly = true)
     public StudentResponseDto getById(String studentId) {
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found: " + studentId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sinh viên: " + studentId));
         return StudentMapper.toDto(student);
     }
 
@@ -149,9 +149,9 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public ByteArrayInputStream exportToExcel(List<StudentResponseDto> students) {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet("Students");
+            Sheet sheet = workbook.createSheet("Sinh viên");
             Row headerRow = sheet.createRow(0);
-            String[] columns = {"Student ID", "Full Name", "Date of Birth", "Gender", "Email", "Class"};
+            String[] columns = {"Mã sinh viên", "Họ và tên", "Ngày sinh", "Giới tính", "Email", "Class"};
             for (int i = 0; i < columns.length; i++) {
                 Cell cell = headerRow.createCell(i);
                 cell.setCellValue(columns[i]);
@@ -169,8 +169,8 @@ public class StudentServiceImpl implements StudentService {
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
         } catch (IOException e) {
-            logger.error("Error exporting excel: ", e);
-            throw new RuntimeException("Error exporting excel: " + e.getMessage());
+            logger.error("Lỗi khi xuất file Excel: ", e);
+            throw new RuntimeException("Lỗi khi xuất file Excel: " + e.getMessage());
         }
     }
 
@@ -203,7 +203,7 @@ public class StudentServiceImpl implements StudentService {
                             try {
                                 dto.setDateOfBirth(LocalDate.parse(dateStr));
                             } catch (Exception e) {
-                                logger.warn("Failed to parse date at row {}: {}", i, dateStr);
+                                logger.warn("Lỗi khi đọc ngày tháng ở dòng {}: {}", i, dateStr);
                             }
                         }
                     }
@@ -233,8 +233,8 @@ public class StudentServiceImpl implements StudentService {
                 }
             }
         } catch (Exception e) {
-            logger.error("Error importing excel: ", e);
-            throw new RuntimeException("Error importing excel: " + e.getMessage());
+            logger.error("Lỗi khi nhập file Excel: ", e);
+            throw new RuntimeException("Lỗi khi nhập file Excel: " + e.getMessage());
         }
         return imported;
     }

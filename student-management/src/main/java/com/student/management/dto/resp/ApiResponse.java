@@ -29,7 +29,7 @@ public class ApiResponse<T> {
         return ApiResponse.<T>builder()
                 .success(true)
                 .status(200)
-                .message("Success")
+                .message("Thành công")
                 .data(data)
                 .timestamp(LocalDateTime.now())
                 .build();

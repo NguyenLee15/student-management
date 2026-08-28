@@ -22,13 +22,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/semester-schedules")
 @RequiredArgsConstructor
-@Tag(name = "Semester Schedules API", description = "Endpoints for managing academic timetables and semester schedules")
+@Tag(name = "Semester Schedules API", description = "Quản lý thời khóa biểu và lịch trình học kỳ")
 public class SemesterScheduleRestController {
 
     private final SemesterScheduleService semesterScheduleService;
 
     @GetMapping
-    @Operation(summary = "Get all semester schedules with filters and pagination")
+    @Operation(summary = "Lấy danh sách lịch học có lọc và phân trang")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Page<SemesterScheduleResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -43,36 +43,36 @@ public class SemesterScheduleRestController {
         Page<SemesterScheduleResponseDto> result = semesterScheduleService.searchAndFilter(
                 creditClassId, subjectId, semester, academicYear, teacherId, roomId, classShift, PageRequest.of(page, size)
         );
-        return ResponseEntity.ok(ApiResponse.success("Schedules fetched successfully", result));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lịch trình thành công", result));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get schedule by ID")
+    @Operation(summary = "Lấy chi tiết lịch học theo ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<SemesterScheduleResponseDto>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(semesterScheduleService.getById(id)));
     }
 
     @PostMapping
-    @Operation(summary = "Create schedule")
+    @Operation(summary = "Tạo lịch học mới")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<SemesterScheduleResponseDto>> create(@Valid @RequestBody SemesterScheduleRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Schedule created successfully", semesterScheduleService.create(dto)));
+                .body(ApiResponse.success("Thêm mới lịch trình thành công", semesterScheduleService.create(dto)));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update schedule")
+    @Operation(summary = "Cập nhật lịch học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<SemesterScheduleResponseDto>> update(@PathVariable Long id, @Valid @RequestBody SemesterScheduleUpdateDto dto) {
-        return ResponseEntity.ok(ApiResponse.success("Schedule updated successfully", semesterScheduleService.update(id, dto)));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật lịch trình thành công", semesterScheduleService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete schedule")
+    @Operation(summary = "Xóa lịch học")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         semesterScheduleService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Schedule deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Xóa lịch trình thành công", null));
     }
 }

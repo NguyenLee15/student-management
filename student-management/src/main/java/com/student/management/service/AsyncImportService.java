@@ -117,7 +117,7 @@ public class AsyncImportService {
             importTaskRepository.save(task);
 
         } catch (Exception e) {
-            logger.error("Error during async excel import for task {}", taskId, e);
+            logger.error("Lỗi khi nhập dữ liệu excel bất đồng bộ cho tiến trình {}", taskId, e);
             task.setStatus("FAILED");
             task.setErrorDetails(e.getMessage());
             task.setCompletedAt(LocalDateTime.now());

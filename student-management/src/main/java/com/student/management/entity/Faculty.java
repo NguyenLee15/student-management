@@ -25,13 +25,13 @@ public class Faculty extends BaseEntity {
 
     @Id
     @Column(name = "faculty_id", nullable = false, length = 10)
-    @NotBlank(message = "Faculty ID is required")
-    @Size(max = 10, message = "Faculty ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã khoa là bắt buộc")
+    @Size(max = 10, message = "Mã khoa không được vượt quá 10 ký tự")
     private String facultyId;
 
     @Column(name = "faculty_name", nullable = false, length = 100)
-    @NotBlank(message = "Faculty name is required")
-    @Size(max = 100, message = "Faculty name cannot exceed 100 characters")
+    @NotBlank(message = "Tên khoa là bắt buộc")
+    @Size(max = 100, message = "Tên khoa không được vượt quá 100 ký tự")
     private String facultyName;
 }
 

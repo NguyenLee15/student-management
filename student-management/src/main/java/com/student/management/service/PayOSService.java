@@ -175,7 +175,7 @@ public class PayOSService {
 
             if (!payOSConfig.isConfigured()) {
                 log.warn("⚠️ PAYOS_WEBHOOK_REJECTED: PayOS is not configured!");
-                return Map.of("error", 1, "message", "PayOS is not configured");
+                return Map.of("error", 1, "message", "PayOS chưa được cấu hình");
             }
 
             // Kiểm tra chữ ký webhook nếu PayOS được cấu hình
@@ -184,13 +184,13 @@ public class PayOSService {
                 if (!isValidSignature) {
                     log.warn("🚨 PAYOS_WEBHOOK_INVALID_SIGNATURE: Webhook signature verification failed!");
                     telegramAlertService.sendAlert("Cảnh báo chữ ký Webhook PayOS không hợp lệ", "Nhận webhook với chữ ký không khớp. Có thể là giả mạo.", "WARN");
-                    return Map.of("error", 1, "message", "Invalid signature");
+                    return Map.of("error", 1, "message", "Chữ ký không hợp lệ");
                 }
             }
 
             JsonNode dataNode = root.path("data");
             if (dataNode.isMissingNode()) {
-                return Map.of("error", 1, "message", "Missing data object in webhook");
+                return Map.of("error", 1, "message", "Thiếu dữ liệu object trong webhook");
             }
 
             long orderCode = dataNode.path("orderCode").asLong();
@@ -201,7 +201,7 @@ public class PayOSService {
             Optional<PaymentTransaction> optionalTxn = paymentTransactionRepository.findByOrderCodeForUpdate(orderCode);
             if (optionalTxn.isEmpty()) {
                 log.warn("⚠️ PAYOS_WEBHOOK_TXN_NOT_FOUND orderCode={}", orderCode);
-                return Map.of("error", 0, "message", "Transaction not found but acknowledged");
+                return Map.of("error", 0, "message", "Không tìm thấy giao dịch nhưng đã ghi nhận");
             }
 
             PaymentTransaction txn = optionalTxn.get();
@@ -209,7 +209,7 @@ public class PayOSService {
             // Idempotency: Nếu giao dịch đã được đánh dấu PAID trước đó, không ghi nhận lại
             if (txn.getStatus() == PaymentTransactionStatus.PAID) {
                 log.info("ℹ️ PAYOS_WEBHOOK_ALREADY_PAID orderCode={}", orderCode);
-                return Map.of("error", 0, "message", "Transaction already processed");
+                return Map.of("error", 0, "message", "Giao dịch đã được xử lý");
             }
 
             txn.setRawWebhookPayload(rawJson);
@@ -220,7 +220,7 @@ public class PayOSService {
                 long webhookAmount = dataNode.path("amount").asLong();
                 if (webhookAmount != txn.getAmount().longValue()) {
                     log.warn("⚠️ PAYOS_WEBHOOK_AMOUNT_MISMATCH: Expected {}, got {}", txn.getAmount(), webhookAmount);
-                    return Map.of("error", 1, "message", "Amount mismatch");
+                    return Map.of("error", 1, "message", "Số tiền không khớp");
                 }
 
                 // Thanh toán thành công
@@ -249,7 +249,7 @@ public class PayOSService {
                 log.warn("⚠️ PAYOS_PAYMENT_FAILED orderCode={} code={} desc={}", orderCode, code, desc);
             }
 
-            return Map.of("error", 0, "message", "Webhook processed successfully");
+            return Map.of("error", 0, "message", "Xử lý Webhook thành công");
         } catch (Exception e) {
             log.error("❌ PAYOS_WEBHOOK_PROCESSING_ERROR: {}", e.getMessage(), e);
             telegramAlertService.sendAlert("Lỗi xử lý Webhook PayOS", e.getMessage(), "ERROR");

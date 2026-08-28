@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/classrooms")
 @RequiredArgsConstructor
-@Tag(name = "Classrooms API", description = "Endpoints for managing lecture halls and classrooms")
+@Tag(name = "Classrooms API", description = "Quản lý phòng học và giảng đường")
 public class ClassroomRestController {
 
     private final ClassroomService classroomService;
@@ -34,7 +34,7 @@ public class ClassroomRestController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Building building) {
         Page<ClassroomResponseDto> result = classroomService.searchAndFilter(keyword, building, PageRequest.of(page, size));
-        return ResponseEntity.ok(ApiResponse.success("Classrooms fetched successfully", result));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách phòng học thành công", result));
     }
 
     @GetMapping("/{id}")
@@ -49,14 +49,14 @@ public class ClassroomRestController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ClassroomResponseDto>> create(@Valid @RequestBody ClassroomRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Classroom created successfully", classroomService.create(dto)));
+                .body(ApiResponse.success("Thêm mới phòng học thành công", classroomService.create(dto)));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update classroom")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ClassroomResponseDto>> update(@PathVariable String id, @Valid @RequestBody ClassroomRequestDto dto) {
-        return ResponseEntity.ok(ApiResponse.success("Classroom updated successfully", classroomService.update(id, dto)));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật phòng học thành công", classroomService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
@@ -64,7 +64,7 @@ public class ClassroomRestController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         classroomService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Classroom deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Xóa phòng học thành công", null));
     }
 }
 

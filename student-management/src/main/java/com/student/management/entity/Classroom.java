@@ -25,22 +25,22 @@ public class Classroom extends BaseEntity {
 
     @Id
     @Column(name = "classroom_id", nullable = false, length = 10)
-    @NotBlank(message = "Room ID is required")
-    @Size(max = 10, message = "Room ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã phòng là bắt buộc")
+    @Size(max = 10, message = "Mã phòng không được vượt quá 10 ký tự")
     private String roomId;
 
     @Column(name = "room_name", nullable = false, length = 100)
-    @NotBlank(message = "Room name is required")
-    @Size(max = 100, message = "Room name cannot exceed 100 characters")
+    @NotBlank(message = "Tên phòng là bắt buộc")
+    @Size(max = 100, message = "Tên phòng không được vượt quá 100 ký tự")
     private String roomName;
 
     @Column(name = "capacity", nullable = false)
-    @Min(value = 1, message = "Capacity must be greater than 0")
+    @Min(value = 1, message = "Sức chứa phải lớn hơn 0")
     private int capacity;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "building", nullable = false)
-    @NotNull(message = "Building is required")
+    @NotNull(message = "Tòa nhà là bắt buộc")
     private Building building;
 }
 

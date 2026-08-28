@@ -16,28 +16,28 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class StudentRequestDto {
 
-    @NotBlank(message = "Student ID cannot be blank")
-    @Size(max = 10, message = "Student ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã sinh viên không được để trống")
+    @Size(max = 10, message = "Mã sinh viên không được vượt quá 10 ký tự")
     private String studentId;
 
-    @NotBlank(message = "Full name cannot be blank")
-    @Size(max = 100, message = "Full name cannot exceed 100 characters")
+    @NotBlank(message = "Họ và tên không được để trống")
+    @Size(max = 100, message = "Họ và tên không được vượt quá 100 ký tự")
     private String fullName;
 
-    @Past(message = "Date of birth must be in the past")
+    @Past(message = "Ngày sinh phải ở trong quá khứ")
     private LocalDate dateOfBirth;
 
-    @NotNull(message = "Gender cannot be null")
+    @NotNull(message = "Giới tính không được để trống")
     private Gender gender;
 
-    @NotBlank(message = "Class ID cannot be blank")
+    @NotBlank(message = "Mã lớp không được để trống")
     private String classId;
 
-    @NotBlank(message = "Academic year ID cannot be blank")
+    @NotBlank(message = "Mã năm học không được để trống")
     private String academicYearId;
 
-    @NotBlank(message = "Email cannot be blank")
-    @Email(message = "Email is invalid")
+    @NotBlank(message = "Email không được để trống")
+    @Email(message = "Email không hợp lệ")
     private String email;
 }
 

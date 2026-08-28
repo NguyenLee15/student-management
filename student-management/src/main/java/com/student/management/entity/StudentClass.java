@@ -23,18 +23,18 @@ public class StudentClass extends BaseEntity {
 
     @Id
     @Column(name = "class_id", nullable = false, length = 10)
-    @NotBlank(message = "Class ID is required")
-    @Size(max = 10, message = "Class ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã lớp là bắt buộc")
+    @Size(max = 10, message = "Mã lớp không được vượt quá 10 ký tự")
     private String classId;
 
     @Column(name = "class_name", nullable = false, length = 100)
-    @NotBlank(message = "Class name is required")
-    @Size(max = 100, message = "Class name cannot exceed 100 characters")
+    @NotBlank(message = "Tên lớp là bắt buộc")
+    @Size(max = 100, message = "Tên lớp không được vượt quá 100 ký tự")
     private String className;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "faculty_id", nullable = false)
-    @NotNull(message = "Faculty is required")
+    @NotNull(message = "Khoa là bắt buộc")
     private Faculty faculty;
 }
 

@@ -14,12 +14,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AcademicYearRequestDto {
 
-    @NotBlank(message = "Academic year ID cannot be blank")
-    @Size(max = 10, message = "Academic year ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã năm học không được để trống")
+    @Size(max = 10, message = "Mã năm học không được vượt quá 10 ký tự")
     private String academicYearId;
 
-    @NotBlank(message = "Academic year name cannot be blank")
-    @Size(max = 50, message = "Academic year name cannot exceed 50 characters")
+    @NotBlank(message = "Academic year name không được để trống")
+    @Size(max = 50, message = "Academic year name không được vượt quá 50 ký tự")
     private String academicYearName;
 }
 

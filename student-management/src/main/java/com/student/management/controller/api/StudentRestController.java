@@ -30,7 +30,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/students")
-@Tag(name = "Students API", description = "Endpoints for managing university students, filtering, and Excel import/export")
+@Tag(name = "Students API", description = "Quản lý sinh viên, tìm kiếm lọc và nhập/xuất Excel")
 @lombok.RequiredArgsConstructor
 public class StudentRestController {
 
@@ -41,7 +41,7 @@ public class StudentRestController {
     private final ImportTaskRepository importTaskRepository;
 
     @GetMapping
-    @Operation(summary = "Search and filter students with pagination")
+    @Operation(summary = "Tìm kiếm và lọc sinh viên có phân trang")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<Page<StudentResponseDto>>> getStudents(
             @RequestParam(defaultValue = "0") int page,
@@ -54,11 +54,11 @@ public class StudentRestController {
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortBy));
         Page<StudentResponseDto> result = studentService.searchAndFilter(keyword, classId, facultyId, academicYearId, pageRequest);
-        return ResponseEntity.ok(ApiResponse.success("Students fetched successfully", result));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách sinh viên thành công", result));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get student details by Student ID")
+    @Operation(summary = "Lấy chi tiết sinh viên theo mã SV")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER') or (hasRole('STUDENT') and @securityService.isSelfStudent(#id))")
     public ResponseEntity<ApiResponse<StudentResponseDto>> getById(@PathVariable String id) {
         StudentResponseDto dto = studentService.getById(id);
@@ -66,34 +66,34 @@ public class StudentRestController {
     }
 
     @PostMapping
-    @Operation(summary = "Create a new student")
+    @Operation(summary = "Thêm mới sinh viên")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<StudentResponseDto>> create(@Valid @RequestBody StudentRequestDto dto) {
         StudentResponseDto created = studentService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Student created successfully", created));
+                .body(ApiResponse.success("Thêm mới sinh viên thành công", created));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update an existing student")
+    @Operation(summary = "Cập nhật sinh viên")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<StudentResponseDto>> update(
             @PathVariable String id,
             @Valid @RequestBody StudentRequestDto dto) {
         StudentResponseDto updated = studentService.update(id, dto);
-        return ResponseEntity.ok(ApiResponse.success("Student updated successfully", updated));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật sinh viên thành công", updated));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a student by ID")
+    @Operation(summary = "Xóa sinh viên theo mã SV")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         studentService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Student deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Xóa sinh viên thành công", null));
     }
 
     @PostMapping("/import")
-    @Operation(summary = "Import student list from Excel file asynchronously (.xlsx)")
+    @Operation(summary = "Nhập danh sách sinh viên từ file Excel bất đồng bộ (.xlsx)")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Map<String, String>>> importExcel(@RequestParam("file") MultipartFile file) {
         try {
@@ -113,12 +113,12 @@ public class StudentRestController {
             return ResponseEntity.accepted().body(ApiResponse.success("Excel import started asynchronously", data));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to read file: " + e.getMessage()));
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Lỗi đọc file: " + e.getMessage()));
         }
     }
 
     @GetMapping("/import-tasks/{taskId}")
-    @Operation(summary = "Get async import task status")
+    @Operation(summary = "Lấy trạng thái tiến trình nhập file bất đồng bộ")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ImportTask>> getImportTask(@PathVariable String taskId) {
         return importTaskRepository.findById(taskId)
@@ -128,7 +128,7 @@ public class StudentRestController {
     }
 
     @GetMapping("/export")
-    @Operation(summary = "Export student list to Excel file (.xlsx)")
+    @Operation(summary = "Xuất danh sách sinh viên ra file Excel (.xlsx)")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<InputStreamResource> exportExcel() {
         List<StudentResponseDto> list = studentService.getAllForExport();

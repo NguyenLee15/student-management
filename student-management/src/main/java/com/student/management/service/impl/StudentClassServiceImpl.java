@@ -56,7 +56,7 @@ public class StudentClassServiceImpl implements StudentClassService {
     @Transactional(readOnly = true)
     public StudentClassResponseDto getById(String classId) {
         StudentClass sc = studentClassRepository.findById(classId)
-                .orElseThrow(() -> new NotFoundException("Class not found: " + classId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp học: " + classId));
         return StudentClassMapper.toDto(sc);
     }
 
@@ -64,10 +64,10 @@ public class StudentClassServiceImpl implements StudentClassService {
     @Transactional
     public StudentClassResponseDto create(StudentClassRequestDto dto) {
         if (studentClassRepository.existsById(dto.getClassId())) {
-            throw new IllegalArgumentException("Class ID already exists: " + dto.getClassId());
+            throw new IllegalArgumentException("Mã lớp đã tồn tại: " + dto.getClassId());
         }
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
-                .orElseThrow(() -> new NotFoundException("Faculty not found: " + dto.getFacultyId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + dto.getFacultyId()));
         StudentClass sc = StudentClassMapper.toEntity(dto, faculty);
         return StudentClassMapper.toDto(studentClassRepository.save(sc));
     }
@@ -76,9 +76,9 @@ public class StudentClassServiceImpl implements StudentClassService {
     @Transactional
     public StudentClassResponseDto update(String classId, StudentClassRequestDto dto) {
         StudentClass sc = studentClassRepository.findById(classId)
-                .orElseThrow(() -> new NotFoundException("Class not found: " + classId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp học: " + classId));
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
-                .orElseThrow(() -> new NotFoundException("Faculty not found: " + dto.getFacultyId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + dto.getFacultyId()));
         sc.setClassName(dto.getClassName());
         sc.setFaculty(faculty);
         return StudentClassMapper.toDto(studentClassRepository.save(sc));
@@ -88,7 +88,7 @@ public class StudentClassServiceImpl implements StudentClassService {
     @Transactional
     public void delete(String classId) {
         if (!studentClassRepository.existsById(classId)) {
-            throw new NotFoundException("Class not found: " + classId);
+            throw new NotFoundException("Không tìm thấy lớp học: " + classId);
         }
         studentClassRepository.deleteById(classId);
     }
@@ -102,9 +102,9 @@ public class StudentClassServiceImpl implements StudentClassService {
     @Override
     public ByteArrayInputStream exportToExcel(List<StudentClassResponseDto> classes) {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet("Classes");
+            Sheet sheet = workbook.createSheet("Lớp học");
             Row header = sheet.createRow(0);
-            String[] cols = {"Class ID", "Class Name", "Faculty"};
+            String[] cols = {"Mã lớp", "Tên lớp", "Khoa"};
             for (int i = 0; i < cols.length; i++) {
                 header.createCell(i).setCellValue(cols[i]);
             }
@@ -118,8 +118,8 @@ public class StudentClassServiceImpl implements StudentClassService {
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
         } catch (IOException e) {
-            logger.error("Error exporting class excel: ", e);
-            throw new RuntimeException("Error exporting class excel: " + e.getMessage());
+            logger.error("Lỗi khi xuất danh sách class ra file Excel: ", e);
+            throw new RuntimeException("Lỗi khi xuất danh sách class ra file Excel: " + e.getMessage());
         }
     }
 }

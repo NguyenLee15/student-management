@@ -16,29 +16,29 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/analytics")
 @RequiredArgsConstructor
-@Tag(name = "Analytics API", description = "Endpoints for academic performance and statistics analytics")
+@Tag(name = "Analytics API", description = "Thống kê hiệu suất học tập và phân tích dữ liệu")
 public class AnalyticsRestController {
 
     private final AnalyticsService analyticsService;
 
     @GetMapping("/summary")
-    @Operation(summary = "Get high-level institutional summary metrics")
+    @Operation(summary = "Lấy thống kê tổng quan hệ thống")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getSummary() {
-        return ResponseEntity.ok(ApiResponse.success("Analytics summary fetched successfully", analyticsService.getSystemSummary()));
+        return ResponseEntity.ok(ApiResponse.success("Lấy thống kê tổng quan thành công", analyticsService.getSystemSummary()));
     }
 
     @GetMapping("/faculty-distribution")
-    @Operation(summary = "Get student distribution by academic faculty")
+    @Operation(summary = "Lấy phân bố sinh viên theo khoa")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getFacultyDistribution() {
-        return ResponseEntity.ok(ApiResponse.success("Faculty distribution fetched successfully", analyticsService.getFacultyDistribution()));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách phân bố theo khoa thành công", analyticsService.getFacultyDistribution()));
     }
 
     @GetMapping("/gpa-distribution")
-    @Operation(summary = "Get GPA academic classification breakdown")
+    @Operation(summary = "Lấy phân bố xếp loại điểm GPA")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getGpaDistribution() {
-        return ResponseEntity.ok(ApiResponse.success("GPA distribution fetched successfully", analyticsService.getGpaDistribution()));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách phân bố điểm GPA thành công", analyticsService.getGpaDistribution()));
     }
 }

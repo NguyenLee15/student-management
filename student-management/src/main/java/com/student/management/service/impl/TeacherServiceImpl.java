@@ -58,7 +58,7 @@ public class TeacherServiceImpl implements TeacherService {
     @Transactional(readOnly = true)
     public TeacherResponseDto getById(String teacherId) {
         Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new NotFoundException("Teacher not found: " + teacherId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy giảng viên: " + teacherId));
         return TeacherMapper.toDto(teacher);
     }
 
@@ -66,10 +66,10 @@ public class TeacherServiceImpl implements TeacherService {
     @Transactional
     public TeacherResponseDto create(TeacherRequestDto dto) {
         if (teacherRepository.existsById(dto.getTeacherId())) {
-            throw new IllegalArgumentException("Teacher ID already exists: " + dto.getTeacherId());
+            throw new IllegalArgumentException("Mã giảng viên đã tồn tại: " + dto.getTeacherId());
         }
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
-                .orElseThrow(() -> new NotFoundException("Faculty not found: " + dto.getFacultyId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + dto.getFacultyId()));
         Teacher teacher = TeacherMapper.toEntity(dto, faculty);
         return TeacherMapper.toDto(teacherRepository.save(teacher));
     }
@@ -78,9 +78,9 @@ public class TeacherServiceImpl implements TeacherService {
     @Transactional
     public TeacherResponseDto update(String teacherId, TeacherRequestDto dto) {
         Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new NotFoundException("Teacher not found: " + teacherId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy giảng viên: " + teacherId));
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
-                .orElseThrow(() -> new NotFoundException("Faculty not found: " + dto.getFacultyId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + dto.getFacultyId()));
         teacher.setFullName(dto.getFullName());
         teacher.setEmail(dto.getEmail());
         teacher.setFaculty(faculty);
@@ -91,7 +91,7 @@ public class TeacherServiceImpl implements TeacherService {
     @Transactional
     public void delete(String teacherId) {
         if (!teacherRepository.existsById(teacherId)) {
-            throw new NotFoundException("Teacher not found: " + teacherId);
+            throw new NotFoundException("Không tìm thấy giảng viên: " + teacherId);
         }
         teacherRepository.deleteById(teacherId);
     }
@@ -129,8 +129,8 @@ public class TeacherServiceImpl implements TeacherService {
                 }
             }
         } catch (Exception e) {
-            logger.error("Error importing teacher excel: ", e);
-            throw new RuntimeException("Error importing teacher excel: " + e.getMessage());
+            logger.error("Lỗi khi nhập teacher từ file Excel: ", e);
+            throw new RuntimeException("Lỗi khi nhập teacher từ file Excel: " + e.getMessage());
         }
         return list;
     }
@@ -138,9 +138,9 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public ByteArrayInputStream exportToExcel(List<TeacherResponseDto> teachers) {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet("Teachers");
+            Sheet sheet = workbook.createSheet("Giảng viên");
             Row header = sheet.createRow(0);
-            String[] cols = {"Teacher ID", "Full Name", "Email", "Faculty"};
+            String[] cols = {"Mã giảng viên", "Họ và tên", "Email", "Khoa"};
             for (int i = 0; i < cols.length; i++) {
                 header.createCell(i).setCellValue(cols[i]);
             }
@@ -155,8 +155,8 @@ public class TeacherServiceImpl implements TeacherService {
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
         } catch (IOException e) {
-            logger.error("Error exporting teacher excel: ", e);
-            throw new RuntimeException("Error exporting teacher excel: " + e.getMessage());
+            logger.error("Lỗi khi xuất danh sách teacher ra file Excel: ", e);
+            throw new RuntimeException("Lỗi khi xuất danh sách teacher ra file Excel: " + e.getMessage());
         }
     }
 }

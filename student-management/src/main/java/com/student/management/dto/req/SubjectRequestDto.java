@@ -17,26 +17,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SubjectRequestDto {
 
-    @NotBlank(message = "Subject ID cannot be blank")
-    @Size(max = 10, message = "Subject ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã môn học không được để trống")
+    @Size(max = 10, message = "Mã môn học không được vượt quá 10 ký tự")
     private String subjectId;
 
-    @NotBlank(message = "Subject name cannot be blank")
-    @Size(max = 100, message = "Subject name cannot exceed 100 characters")
+    @NotBlank(message = "Tên môn học không được để trống")
+    @Size(max = 100, message = "Tên môn học không được vượt quá 100 ký tự")
     private String subjectName;
 
-    @NotNull(message = "Subject type cannot be null")
+    @NotNull(message = "Loại môn học không được để trống")
     private SubjectType subjectType;
 
-    @NotNull(message = "Tuition per credit cannot be null")
-    @Min(value = 1, message = "Tuition per credit must be greater than 0")
+    @NotNull(message = "Học phí mỗi tín chỉ không được để trống")
+    @Min(value = 1, message = "Học phí mỗi tín chỉ phải lớn hơn 0")
     private Integer tuitionPerCredit;
 
-    @NotNull(message = "Credits cannot be null")
-    @Min(value = 1, message = "Credits must be greater than 0")
+    @NotNull(message = "Số tín chỉ không được để trống")
+    @Min(value = 1, message = "Số tín chỉ phải lớn hơn 0")
     private Integer credits;
 
-    @NotBlank(message = "Faculty ID cannot be blank")
+    @NotBlank(message = "Mã khoa không được để trống")
     private String facultyId;
 
     private String prerequisiteSubjectId;

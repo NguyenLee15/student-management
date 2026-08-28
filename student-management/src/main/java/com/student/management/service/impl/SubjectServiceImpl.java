@@ -82,10 +82,10 @@ public class SubjectServiceImpl implements SubjectService {
     @CacheEvict(value = "subjects", allEntries = true)
     public SubjectResponseDto create(SubjectRequestDto dto) {
         if (subjectRepository.existsById(dto.getSubjectId())) {
-            throw new IllegalArgumentException("Subject ID already exists: " + dto.getSubjectId());
+            throw new IllegalArgumentException("Mã môn học đã tồn tại: " + dto.getSubjectId());
         }
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
-                .orElseThrow(() -> new NotFoundException("Faculty not found: " + dto.getFacultyId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + dto.getFacultyId()));
         
         Subject prerequisiteSubject = null;
         if (dto.getPrerequisiteSubjectId() != null && !dto.getPrerequisiteSubjectId().isBlank()) {
@@ -105,9 +105,9 @@ public class SubjectServiceImpl implements SubjectService {
     @CacheEvict(value = "subjects", allEntries = true)
     public SubjectResponseDto update(String subjectId, SubjectRequestDto dto) {
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new NotFoundException("Subject not found: " + subjectId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy môn học: " + subjectId));
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
-                .orElseThrow(() -> new NotFoundException("Faculty not found: " + dto.getFacultyId()));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + dto.getFacultyId()));
 
         Subject prerequisiteSubject = null;
         if (dto.getPrerequisiteSubjectId() != null && !dto.getPrerequisiteSubjectId().isBlank()) {
@@ -132,7 +132,7 @@ public class SubjectServiceImpl implements SubjectService {
     @CacheEvict(value = "subjects", allEntries = true)
     public void delete(String subjectId) {
         if (!subjectRepository.existsById(subjectId)) {
-            throw new NotFoundException("Subject not found: " + subjectId);
+            throw new NotFoundException("Không tìm thấy môn học: " + subjectId);
         }
         subjectRepository.deleteById(subjectId);
     }
@@ -140,7 +140,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public ByteArrayInputStream exportToExcel(Page<SubjectResponseDto> subjects) {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet("Subjects");
+            Sheet sheet = workbook.createSheet("Môn học");
             Row header = sheet.createRow(0);
             String[] cols = {"Mã Môn Học", "Tên Môn Học", "Loại Học Phần", "Học Phí/Tín Chỉ", "Số Tín Chỉ", "Khoa Quản Lý", "Môn Tiên Quyết"};
             for (int i = 0; i < cols.length; i++) {
@@ -160,8 +160,8 @@ public class SubjectServiceImpl implements SubjectService {
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
         } catch (IOException e) {
-            logger.error("Error exporting subject excel: ", e);
-            throw new RuntimeException("Error exporting subject excel: " + e.getMessage());
+            logger.error("Lỗi khi xuất danh sách subject ra file Excel: ", e);
+            throw new RuntimeException("Lỗi khi xuất danh sách subject ra file Excel: " + e.getMessage());
         }
     }
 }

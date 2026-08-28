@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/faculties")
-@Tag(name = "Faculties API", description = "Endpoints for managing university faculties")
+@Tag(name = "Faculties API", description = "Quản lý khoa trong trường")
 @lombok.RequiredArgsConstructor
 public class FacultyRestController {
 
@@ -37,11 +37,11 @@ public class FacultyRestController {
 
         if (unpaged) {
             List<FacultyResponseDto> list = facultyService.getAll();
-            return ResponseEntity.ok(ApiResponse.success("Faculties fetched successfully", list));
+            return ResponseEntity.ok(ApiResponse.success("Lấy danh sách khoa thành công", list));
         }
 
         Page<FacultyResponseDto> result = facultyService.getAll(PageRequest.of(page, size, Sort.by("facultyId")));
-        return ResponseEntity.ok(ApiResponse.success("Faculties fetched successfully", result));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách khoa thành công", result));
     }
 
     @GetMapping("/{id}")
@@ -58,7 +58,7 @@ public class FacultyRestController {
     public ResponseEntity<ApiResponse<FacultyResponseDto>> create(@Valid @RequestBody FacultyRequestDto dto) {
         FacultyResponseDto created = facultyService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Faculty created successfully", created));
+                .body(ApiResponse.success("Thêm mới khoa thành công", created));
     }
 
     @PutMapping("/{id}")
@@ -68,7 +68,7 @@ public class FacultyRestController {
             @PathVariable String id,
             @Valid @RequestBody FacultyRequestDto dto) {
         FacultyResponseDto updated = facultyService.update(id, dto);
-        return ResponseEntity.ok(ApiResponse.success("Faculty updated successfully", updated));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật khoa thành công", updated));
     }
 
     @DeleteMapping("/{id}")
@@ -76,7 +76,7 @@ public class FacultyRestController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         facultyService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Faculty deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Xóa khoa thành công", null));
     }
 }
 

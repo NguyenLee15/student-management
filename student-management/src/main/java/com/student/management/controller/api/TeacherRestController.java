@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/teachers")
 @RequiredArgsConstructor
-@Tag(name = "Teachers API", description = "Endpoints for managing university teachers/lecturers")
+@Tag(name = "Teachers API", description = "Quản lý giảng viên")
 public class TeacherRestController {
 
     @GetMapping("/export")
-    @Operation(summary = "Export teacher list to Excel file (.xlsx)")
+    @Operation(summary = "Xuất danh sách giảng viên ra file Excel (.xlsx)")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<org.springframework.core.io.InputStreamResource> exportExcel() {
         java.util.List<TeacherResponseDto> list = teacherService.getAll(org.springframework.data.domain.Pageable.unpaged()).getContent();
@@ -36,7 +36,7 @@ public class TeacherRestController {
     private final TeacherService teacherService;
 
     @GetMapping
-    @Operation(summary = "Get all teachers with pagination and search")
+    @Operation(summary = "Lấy danh sách giảng viên có tìm kiếm và phân trang")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Page<TeacherResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -44,37 +44,37 @@ public class TeacherRestController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String facultyId) {
         Page<TeacherResponseDto> result = teacherService.searchAndFilter(keyword, facultyId, PageRequest.of(page, size));
-        return ResponseEntity.ok(ApiResponse.success("Teachers fetched successfully", result));
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách giảng viên thành công", result));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get teacher by ID")
+    @Operation(summary = "Lấy chi tiết giảng viên theo ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<TeacherResponseDto>> getById(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.success(teacherService.getById(id)));
     }
 
     @PostMapping
-    @Operation(summary = "Create teacher")
+    @Operation(summary = "Thêm mới giảng viên")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<TeacherResponseDto>> create(@Valid @RequestBody TeacherRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Teacher created successfully", teacherService.create(dto)));
+                .body(ApiResponse.success("Thêm mới giảng viên thành công", teacherService.create(dto)));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update teacher")
+    @Operation(summary = "Cập nhật giảng viên")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<TeacherResponseDto>> update(@PathVariable String id, @Valid @RequestBody TeacherRequestDto dto) {
-        return ResponseEntity.ok(ApiResponse.success("Teacher updated successfully", teacherService.update(id, dto)));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật giảng viên thành công", teacherService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete teacher")
+    @Operation(summary = "Xóa giảng viên")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         teacherService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success("Teacher deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Xóa giảng viên thành công", null));
     }
 }
 

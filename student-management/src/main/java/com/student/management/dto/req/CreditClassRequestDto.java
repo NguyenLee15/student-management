@@ -19,22 +19,22 @@ public class CreditClassRequestDto {
 
     private String creditClassName;
 
-    @NotBlank(message = "Subject ID is required")
+    @NotBlank(message = "Mã môn học là bắt buộc")
     private String subjectId;
 
-    @NotBlank(message = "Teacher ID is required")
+    @NotBlank(message = "Mã giảng viên là bắt buộc")
     private String teacherId;
 
-    @NotBlank(message = "Classroom ID is required")
+    @NotBlank(message = "Classroom ID là bắt buộc")
     private String classroomId;
 
-    @NotBlank(message = "Academic year ID is required")
+    @NotBlank(message = "Mã năm học là bắt buộc")
     private String academicYearId;
 
-    @NotNull(message = "Semester is required")
+    @NotNull(message = "Học kỳ là bắt buộc")
     private Semester semester;
 
-    @NotNull(message = "Max students is required")
+    @NotNull(message = "Max students là bắt buộc")
     @Min(value = 1, message = "Max students must be at least 1")
     private Integer maxStudents;
 }

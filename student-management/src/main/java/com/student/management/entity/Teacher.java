@@ -24,23 +24,23 @@ public class Teacher extends BaseEntity {
 
     @Id
     @Column(name = "teacher_id", nullable = false, length = 10)
-    @NotBlank(message = "Teacher ID is required")
-    @Size(max = 10, message = "Teacher ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã giảng viên là bắt buộc")
+    @Size(max = 10, message = "Mã giảng viên không được vượt quá 10 ký tự")
     private String teacherId;
 
     @Column(name = "full_name", nullable = false, length = 100)
-    @NotBlank(message = "Teacher name is required")
-    @Size(max = 100, message = "Teacher name cannot exceed 100 characters")
+    @NotBlank(message = "Tên giảng viên là bắt buộc")
+    @Size(max = 100, message = "Tên giảng viên không được vượt quá 100 ký tự")
     private String fullName;
 
     @Column(name = "email", nullable = false, length = 100)
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email là bắt buộc")
+    @Email(message = "Định dạng email không hợp lệ")
     private String email;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "faculty_id", nullable = false)
-    @NotNull(message = "Faculty is required")
+    @NotNull(message = "Khoa là bắt buộc")
     private Faculty faculty;
 }
 

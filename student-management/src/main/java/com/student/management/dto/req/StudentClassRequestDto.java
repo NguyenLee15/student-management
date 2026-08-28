@@ -14,15 +14,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class StudentClassRequestDto {
 
-    @NotBlank(message = "Class ID cannot be blank")
-    @Size(max = 10, message = "Class ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã lớp không được để trống")
+    @Size(max = 10, message = "Mã lớp không được vượt quá 10 ký tự")
     private String classId;
 
-    @NotBlank(message = "Class name cannot be blank")
-    @Size(max = 100, message = "Class name cannot exceed 100 characters")
+    @NotBlank(message = "Tên lớp không được để trống")
+    @Size(max = 100, message = "Tên lớp không được vượt quá 100 ký tự")
     private String className;
 
-    @NotBlank(message = "Faculty ID cannot be blank")
+    @NotBlank(message = "Mã khoa không được để trống")
     private String facultyId;
 }
 

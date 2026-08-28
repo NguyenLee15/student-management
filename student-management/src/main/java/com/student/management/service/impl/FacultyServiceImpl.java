@@ -43,7 +43,7 @@ public class FacultyServiceImpl implements FacultyService {
     @Cacheable(value = "faculties", key = "#facultyId")
     public FacultyResponseDto getById(String facultyId) {
         Faculty faculty = facultyRepository.findById(facultyId)
-                .orElseThrow(() -> new NotFoundException("Faculty not found: " + facultyId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + facultyId));
         return FacultyMapper.toDto(faculty);
     }
 
@@ -52,7 +52,7 @@ public class FacultyServiceImpl implements FacultyService {
     @CacheEvict(value = "faculties", allEntries = true)
     public FacultyResponseDto create(FacultyRequestDto dto) {
         if (facultyRepository.existsById(dto.getFacultyId())) {
-            throw new IllegalArgumentException("Faculty ID already exists: " + dto.getFacultyId());
+            throw new IllegalArgumentException("Mã khoa đã tồn tại: " + dto.getFacultyId());
         }
         Faculty faculty = FacultyMapper.toEntity(dto);
         return FacultyMapper.toDto(facultyRepository.save(faculty));
@@ -63,7 +63,7 @@ public class FacultyServiceImpl implements FacultyService {
     @CacheEvict(value = "faculties", allEntries = true)
     public FacultyResponseDto update(String facultyId, FacultyRequestDto dto) {
         Faculty faculty = facultyRepository.findById(facultyId)
-                .orElseThrow(() -> new NotFoundException("Faculty not found: " + facultyId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + facultyId));
         faculty.setFacultyName(dto.getFacultyName());
         return FacultyMapper.toDto(facultyRepository.save(faculty));
     }
@@ -73,7 +73,7 @@ public class FacultyServiceImpl implements FacultyService {
     @CacheEvict(value = "faculties", allEntries = true)
     public void delete(String facultyId) {
         if (!facultyRepository.existsById(facultyId)) {
-            throw new NotFoundException("Faculty not found: " + facultyId);
+            throw new NotFoundException("Không tìm thấy khoa: " + facultyId);
         }
         facultyRepository.deleteById(facultyId);
     }

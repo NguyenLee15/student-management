@@ -77,13 +77,13 @@ public class JwtTokenProvider {
             return true;
         } catch (ExpiredJwtException e) {
             logger.error("JWT token expired: {}", e.getMessage());
-            throw new RuntimeException("Token has expired", e);
+            throw new RuntimeException("Token đã hết hạn", e);
         } catch (SignatureException e) {
-            logger.error("Invalid JWT signature: {}", e.getMessage());
-            throw new RuntimeException("Invalid token signature", e);
+            logger.error("Chữ ký JWT không hợp lệ: {}", e.getMessage());
+            throw new RuntimeException("Chữ ký token không hợp lệ", e);
         } catch (MalformedJwtException e) {
-            logger.error("Invalid JWT token: {}", e.getMessage());
-            throw new RuntimeException("Invalid token format", e);
+            logger.error("JWT token không hợp lệ: {}", e.getMessage());
+            throw new RuntimeException("Định dạng token không hợp lệ", e);
         } catch (Exception e) {
             logger.error("JWT validation failed: {}", e.getMessage());
             throw new RuntimeException("Token validation failed", e);

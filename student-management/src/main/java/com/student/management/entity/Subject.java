@@ -28,32 +28,32 @@ public class Subject extends BaseEntity {
 
     @Id
     @Column(name = "subject_id", nullable = false, length = 10)
-    @NotBlank(message = "Subject ID is required")
-    @Size(max = 10, message = "Subject ID cannot exceed 10 characters")
+    @NotBlank(message = "Mã môn học là bắt buộc")
+    @Size(max = 10, message = "Mã môn học không được vượt quá 10 ký tự")
     private String subjectId;
 
     @Column(name = "subject_name", nullable = false, length = 100)
-    @NotBlank(message = "Subject name is required")
-    @Size(max = 100, message = "Subject name cannot exceed 100 characters")
+    @NotBlank(message = "Tên môn học là bắt buộc")
+    @Size(max = 100, message = "Tên môn học không được vượt quá 100 ký tự")
     private String subjectName;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "subject_type", nullable = false)
-    @NotNull(message = "Subject type is required")
+    @NotNull(message = "Loại môn học là bắt buộc")
     private SubjectType subjectType;
 
-    @Min(value = 1, message = "Tuition per credit must be greater than 0")
+    @Min(value = 1, message = "Học phí mỗi tín chỉ phải lớn hơn 0")
     @Column(name = "tuition_per_credit", nullable = false)
     @Builder.Default
     private Integer tuitionPerCredit = 450000;
 
-    @Min(value = 1, message = "Credits must be greater than 0")
+    @Min(value = 1, message = "Số tín chỉ phải lớn hơn 0")
     @Column(name = "credits", nullable = false)
     private Integer credits;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "faculty_id", nullable = false)
-    @NotNull(message = "Faculty is required")
+    @NotNull(message = "Khoa là bắt buộc")
     private Faculty faculty;
 
     @ManyToOne(fetch = FetchType.LAZY)
