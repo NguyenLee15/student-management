@@ -14,8 +14,23 @@ import ScheduleModule from '../components/modules/ScheduleModule';
 import GradeModule from '../components/modules/GradeModule';
 import UserModule from '../components/modules/UserModule';
 import AuditLogModule from '../components/modules/AuditLogModule';
-import StudentPortalModule from '../components/modules/StudentPortalModule';
-import TeacherPortalModule from '../components/modules/TeacherPortalModule';
+import { Home, ChevronRight } from 'lucide-react';
+
+const TAB_TITLES = {
+  'overview': { title: 'Bảng Điều Khiển & Phân Tích', group: 'Tổng Quan' },
+  'faculties': { title: 'Quản Lý Khoa & Viện Đào Tạo', group: 'Quản Lý Đào Tạo' },
+  'academic-years': { title: 'Niên Khóa & Khóa Học', group: 'Quản Lý Đào Tạo' },
+  'student-classes': { title: 'Lớp Sinh Viên Hành Chính', group: 'Quản Lý Đào Tạo' },
+  'subjects': { title: 'Môn Học & Chương Trình Đào Tạo', group: 'Quản Lý Đào Tạo' },
+  'classrooms': { title: 'Phòng Học & Giảng Đường', group: 'Quản Lý Đào Tạo' },
+  'credit-classes': { title: 'Lớp Tín Chỉ (Học Phần)', group: 'Giảng Dạy & Học Tập' },
+  'schedules': { title: 'Thời Khóa Biểu & Lịch Học', group: 'Giảng Dạy & Học Tập' },
+  'grades': { title: 'Quản Lý Điểm Số & GPA', group: 'Giảng Dạy & Học Tập' },
+  'students': { title: 'Hồ Sơ & Danh Sách Sinh Viên', group: 'Hồ Sơ Nhân Sự' },
+  'teachers': { title: 'Hồ Sơ & Danh Sách Giảng Viên', group: 'Hồ Sơ Nhân Sự' },
+  'users': { title: 'Tài Khoản & Phân Quyền Hệ Thống', group: 'Hệ Thống & Bảo Mật' },
+  'audit-logs': { title: 'Nhật Ký Hoạt Động (Audit Logs)', group: 'Hệ Thống & Bảo Mật' },
+};
 
 export default function AdminLayout({
   currentUser,
@@ -33,42 +48,11 @@ export default function AdminLayout({
   const [activeTab, setActiveTab] = useState('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const currentTabInfo = TAB_TITLES[activeTab] || { title: 'Quản Trị', group: 'Hệ Thống' };
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
-      {/* 👑 ADMIN TOP BAR WITH ROLE SIMULATOR */}
-      <div className="bg-gradient-to-r from-purple-900/60 via-indigo-950/80 to-purple-900/60 border-b border-purple-500/20 px-6 py-1.5 flex flex-wrap items-center justify-between text-xs">
-        <div className="flex items-center gap-2 text-purple-300 font-semibold">
-          <span>👑 Hệ thống Quản Trị Trung Tâm (Admin Control Center)</span>
-          <span className="hidden sm:inline text-purple-400/60">• Toàn quyền điều hành cơ sở dữ liệu & phân quyền</span>
-        </div>
-
-        {/* 🎭 ROLE SIMULATOR BAR */}
-        <div className="flex items-center gap-2">
-          <span className="text-slate-300 font-medium text-[11px]">👁️ Xem thử góc nhìn:</span>
-          <div className="flex bg-slate-950/80 p-0.5 rounded-lg border border-purple-500/30">
-            <button
-              onClick={() => onRoleSwitch('ROLE_ADMIN')}
-              className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-purple-600 text-white shadow"
-            >
-              Admin
-            </button>
-            <button
-              onClick={() => onRoleSwitch('ROLE_TEACHER')}
-              className="px-2.5 py-0.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-emerald-400 transition"
-            >
-              Giảng Viên
-            </button>
-            <button
-              onClick={() => onRoleSwitch('ROLE_STUDENT')}
-              className="px-2.5 py-0.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-indigo-400 transition"
-            >
-              Sinh Viên
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 🟢 STANDARD ADMIN HEADER */}
+      {/* 🟢 TOP HEADER */}
       <Header
         isBackendConnected={isBackendConnected}
         apiChecking={apiChecking}
@@ -79,19 +63,20 @@ export default function AdminLayout({
         onLogout={onLogout}
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         isMobileMenuOpen={isMobileMenuOpen}
+        onRoleSwitch={onRoleSwitch}
       />
 
       {/* Mobile Backdrop */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-30 bg-slate-950/70 backdrop-blur-sm md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
-      {/* 🚀 MAIN ADMIN BODY */}
+      {/* 🚀 MAIN BODY */}
       <div className="flex-1 flex overflow-hidden">
-        {/* 📱 ADMIN SIDEBAR */}
+        {/* 📱 SIDEBAR */}
         <Sidebar
           activeTab={activeTab}
           onTabChange={(tab) => {
@@ -103,15 +88,22 @@ export default function AdminLayout({
           isMobileMenuOpen={isMobileMenuOpen}
         />
 
-        {/* 📊 MODULE ROUTER */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
-          {activeTab === 'student-portal' && (
-            <StudentPortalModule onNotify={showToast} currentUser={currentUser} />
-          )}
-
-          {activeTab === 'teacher-portal' && (
-            <TeacherPortalModule onNotify={showToast} currentUser={currentUser} />
-          )}
+        {/* 📊 WORKSPACE ROUTER */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6">
+          {/* Breadcrumbs Navigation */}
+          <div className="flex items-center gap-2 text-xs text-slate-400 pb-1">
+            <button 
+              onClick={() => setActiveTab('overview')} 
+              className="flex items-center gap-1 hover:text-indigo-400 transition"
+            >
+              <Home className="w-3.5 h-3.5" />
+              <span>Admin</span>
+            </button>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+            <span className="text-slate-500">{currentTabInfo.group}</span>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+            <span className="font-semibold text-slate-200">{currentTabInfo.title}</span>
+          </div>
 
           {activeTab === 'overview' && (
             <DashboardModule

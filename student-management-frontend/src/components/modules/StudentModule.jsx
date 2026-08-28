@@ -260,7 +260,7 @@ export default function StudentModule({ onNotify, currentUser }) {
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản lý Sinh viên</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Enrollment records, biographical details, and faculty assignments
+            Quản lý hồ sơ lý lịch, phân lớp hành chính và theo dõi tiến độ đào tạo
           </p>
         </div>
 
@@ -281,7 +281,7 @@ export default function StudentModule({ onNotify, currentUser }) {
               className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-cyan-400 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-800 transition shadow-sm"
             >
               <Download className="h-4 w-4" />
-              <span>Export (.xlsx)</span>
+              <span>Xuất Excel</span>
             </button>
           )}
 
@@ -303,7 +303,7 @@ export default function StudentModule({ onNotify, currentUser }) {
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
             type="text"
-            placeholder="Search by student name or student ID (e.g. SV001)..."
+            placeholder="Tìm kiếm theo họ tên hoặc mã sinh viên (VD: SV001)..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition"
@@ -316,7 +316,7 @@ export default function StudentModule({ onNotify, currentUser }) {
             onChange={(e) => { setSelectedFaculty(e.target.value); setPage(0); }}
             className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500 transition"
           >
-            <option value="">All Faculties</option>
+            <option value="">Tất cả các Khoa</option>
             {faculties.map((f) => (
               <option key={f.facultyId} value={f.facultyId}>{f.facultyName || f.facultyId}</option>
             ))}
@@ -327,7 +327,7 @@ export default function StudentModule({ onNotify, currentUser }) {
             onChange={(e) => { setSelectedClass(e.target.value); setPage(0); }}
             className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500 transition"
           >
-            <option value="">All Classes</option>
+            <option value="">Tất cả các Lớp</option>
             {classes.map((c) => (
               <option key={c.classId} value={c.classId}>{c.className || c.classId}</option>
             ))}
@@ -335,7 +335,7 @@ export default function StudentModule({ onNotify, currentUser }) {
 
           <button
             onClick={loadStudents}
-            title="Reload data"
+            title="Tải lại dữ liệu"
             className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
@@ -350,7 +350,7 @@ export default function StudentModule({ onNotify, currentUser }) {
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
                 <th className="px-5 py-3.5">Mã sinh viên</th>
-                <th className="px-5 py-3.5">Full Name & Gender</th>
+                <th className="px-5 py-3.5">Họ và Tên & Giới tính</th>
                 <th className="px-5 py-3.5">Lớp / Khoa</th>
                 <th className="px-5 py-3.5">Niên khóa</th>
                 <th className="px-5 py-3.5">Thông tin liên hệ</th>
@@ -417,7 +417,7 @@ export default function StudentModule({ onNotify, currentUser }) {
                         <>
                           <button
                             onClick={() => handleOpenEdit(st)}
-                            title="Edit Student"
+                            title="Sửa Sinh Viên"
                             className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
                           >
                             <Edit3 className="h-4 w-4" />
@@ -449,17 +449,17 @@ export default function StudentModule({ onNotify, currentUser }) {
         />
       </div>
 
-      {/* ➕ Modal: Add / Edit Student */}
+      {/* ➕ Modal: Add / Sửa Sinh Viên */}
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={isEdit ? `Sửa Sinh viên: ${formData.studentId}` : 'Đăng ký Sinh viên Mới'}
-        subtitle="Provide student biographical and academic enrolment parameters"
+        subtitle="Điền đầy đủ thông tin lý lịch và phân lớp của sinh viên"
       >
         <form onSubmit={handleSaveStudent} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Student ID (Mã Sinh Viên)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Mã Sinh Viên*</label>
               <input
                 type="text"
                 required
@@ -472,7 +472,7 @@ export default function StudentModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Full Name (Họ và Tên)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Họ và Tên*</label>
               <input
                 type="text"
                 required
@@ -486,7 +486,7 @@ export default function StudentModule({ onNotify, currentUser }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Faculty (Khoa)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Khoa*</label>
               <select
                 value={formData.facultyId}
                 onChange={(e) => setFormData({ ...formData, facultyId: e.target.value })}
@@ -499,7 +499,7 @@ export default function StudentModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Class (Lớp học)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Lớp học*</label>
               <select
                 value={formData.classId}
                 onChange={(e) => setFormData({ ...formData, classId: e.target.value })}
@@ -512,7 +512,7 @@ export default function StudentModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Academic Year (Khóa)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Khóa học (Niên khóa)*</label>
               <select
                 value={formData.academicYearId}
                 onChange={(e) => setFormData({ ...formData, academicYearId: e.target.value })}
@@ -538,7 +538,7 @@ export default function StudentModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Phone Number</label>
+              <label className="block text-slate-300 font-semibold mb-1">Số điện thoại</label>
               <input
                 type="text"
                 placeholder="0987654321"
@@ -557,8 +557,8 @@ export default function StudentModule({ onNotify, currentUser }) {
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"
               >
-                <option value="MALE">Male (Nam)</option>
-                <option value="FEMALE">Female (Nữ)</option>
+                <option value="MALE">Nam</option>
+                <option value="FEMALE">Nữ</option>
                 <option value="OTHER">Khác</option>
               </select>
             </div>
@@ -593,8 +593,8 @@ export default function StudentModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showImportModal}
         onClose={() => { if(!importing) { setShowImportModal(false); setImportProgress(null); } }}
-        title="Batch Import Students via Excel"
-        subtitle="Upload an .xlsx file conforming to university schema"
+        title="Nhập Danh Sách Sinh Viên Bằng Excel"
+        subtitle="Tải lên tệp .xlsx theo đúng cấu trúc dữ liệu nhà trường"
         maxWidth="max-w-md"
       >
         <div className="space-y-4">
@@ -604,8 +604,8 @@ export default function StudentModule({ onNotify, currentUser }) {
                 <FileSpreadsheet className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-200">Click to select an Excel spreadsheet</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Supports Microsoft Excel (.xlsx, .xls)</p>
+                <p className="text-xs font-semibold text-slate-200">Nhấp để chọn tệp bảng tính Excel</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Hỗ trợ định dạng Microsoft Excel (.xlsx, .xls)</p>
               </div>
               <input type="file" accept=".xlsx,.xls" onChange={handleFileUpload} className="hidden" />
             </label>
@@ -613,16 +613,16 @@ export default function StudentModule({ onNotify, currentUser }) {
             <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col items-center">
               <div className="mb-4 text-center">
                 <p className="text-sm font-semibold text-slate-200 mb-1">
-                  {importProgress?.status === 'UPLOADING' && "Uploading file..."}
-                  {importProgress?.status === 'PENDING' && "In Queue..."}
-                  {importProgress?.status === 'PROCESSING' && "Processing rows..."}
-                  {importProgress?.status === 'COMPLETED' && "Finished successfully!"}
-                  {importProgress?.status === 'COMPLETED_WITH_ERRORS' && "Finished with errors"}
-                  {importProgress?.status === 'FAILED' && "Import failed"}
+                  {importProgress?.status === 'UPLOADING' && "Đang tải tệp lên..."}
+                  {importProgress?.status === 'PENDING' && "Đang trong hàng đợi..."}
+                  {importProgress?.status === 'PROCESSING' && "Đang xử lý dữ liệu..."}
+                  {importProgress?.status === 'COMPLETED' && "Hoàn tất thành công!"}
+                  {importProgress?.status === 'COMPLETED_WITH_ERRORS' && "Hoàn tất với một số lỗi"}
+                  {importProgress?.status === 'FAILED' && "Nhập tệp thất bại"}
                 </p>
                 {importProgress?.totalRows > 0 && (
                   <p className="text-xs text-slate-400">
-                    Processed {importProgress.processedRows} of {importProgress.totalRows} rows
+                    Đã xử lý {importProgress.processedRows} / {importProgress.totalRows} dòng
                   </p>
                 )}
                 {importProgress?.errorCount > 0 && (
@@ -655,8 +655,8 @@ export default function StudentModule({ onNotify, currentUser }) {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Confirm Student Deletion"
-        message={`Are you sure you want to permanently remove student "${deleteTarget?.fullName}" (ID: ${deleteTarget?.studentId})?`}
+        title="Xác Nhận Xóa Sinh Viên"
+        message={`Bạn có chắc chắn muốn xóa vĩnh viễn sinh viên "${deleteTarget?.fullName}" (ID: ${deleteTarget?.studentId})?`}
       />
     </div>
   );

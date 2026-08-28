@@ -138,7 +138,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Lớp tín chỉ & Đăng ký</h1>
-          <p className="text-xs text-slate-400 mt-1">Section quotas, subject registrations, and student rosters</p>
+          <p className="text-xs text-slate-400 mt-1">Quản lý mở lớp học phần, phân công giảng viên và danh sách sinh viên đăng ký</p>
         </div>
 
         {isAdmin && (

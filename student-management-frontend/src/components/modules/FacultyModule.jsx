@@ -79,7 +79,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Academic Faculties & Schools</h1>
-          <p className="text-xs text-slate-400 mt-1">Colleges, specialized schools, and academic departments</p>
+          <p className="text-xs text-slate-400 mt-1">Quản lý các khoa chuyên môn và viện đào tạo trực thuộc trường</p>
         </div>
 
         {isAdmin && (
@@ -111,7 +111,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
 
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">{f.facultyName}</h3>
-              <p className="text-xs text-slate-400 mt-1">Academic Department</p>
+              <p className="text-xs text-slate-400 mt-1">Khoa chuyên môn</p>
             </div>
 
             <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">

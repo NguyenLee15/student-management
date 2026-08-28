@@ -119,7 +119,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Student Homeroom Classes</h1>
-          <p className="text-xs text-slate-400 mt-1">Administrative student cohort classes grouped by faculty department</p>
+          <p className="text-xs text-slate-400 mt-1">Quản lý các lớp sinh viên hành chính theo từng khoa và cố vấn học tập</p>
         </div>
 
         {isAdmin && (
@@ -236,7 +236,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Affiliated Faculty (Khoa)*</label>
+            <label className="block text-slate-300 font-semibold mb-1">Affiliated Khoa*</label>
             <select
               value={formData.facultyId}
               onChange={(e) => setFormData({ ...formData, facultyId: e.target.value })}

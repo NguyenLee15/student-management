@@ -102,7 +102,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Classrooms & Hall Facilities</h1>
-          <p className="text-xs text-slate-400 mt-1">Campus buildings (A, B, C, D), smart halls, and seat capacities</p>
+          <p className="text-xs text-slate-400 mt-1">Quản lý giảng đường, tòa nhà, phòng thực hành và sức chứa sinh viên</p>
         </div>
 
         {isAdmin && (

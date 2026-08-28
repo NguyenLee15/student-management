@@ -139,7 +139,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Faculty & Lecturers</h1>
-          <p className="text-xs text-slate-400 mt-1">Teaching staff profiles, department assignments, and contacts</p>
+          <p className="text-xs text-slate-400 mt-1">Quản lý hồ sơ giảng viên, học hàm học vị, phân công khoa và liên hệ</p>
         </div>
 
         {isAdmin && (
@@ -172,7 +172,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
             onChange={(e) => { setSelectedFaculty(e.target.value); setPage(0); }}
             className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500 transition"
           >
-            <option value="">All Faculties</option>
+            <option value="">Tất cả các Khoa</option>
             {faculties.map((f) => (
               <option key={f.facultyId} value={f.facultyId}>{f.facultyName || f.facultyId}</option>
             ))}
@@ -295,7 +295,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Full Name (Họ và Tên)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Họ và Tên*</label>
               <input
                 type="text"
                 required

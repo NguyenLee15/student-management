@@ -168,7 +168,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">University Timetable & Schedule</h1>
-          <p className="text-xs text-slate-400 mt-1">Class shifts, weekday slots, lecturer duties, and assigned lecture halls</p>
+          <p className="text-xs text-slate-400 mt-1">Quản lý phân bổ ca học, thứ trong tuần, giảng viên phụ trách và phòng học</p>
         </div>
 
         {isAdmin && (

@@ -151,7 +151,7 @@ export default function GradeModule({ onNotify, currentUser }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Academic Grades & GPA Calculation</h1>
-          <p className="text-xs text-slate-400 mt-1">Attendance, continuous assessments, final exams, letter grades, and 4.0 GPA evaluations</p>
+          <p className="text-xs text-slate-400 mt-1">Quản lý điểm chuyên cần, giữa kỳ, cuối kỳ, điểm chữ và quy đổi GPA thang 4.0</p>
         </div>
 
         {canManage && (

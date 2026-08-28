@@ -2,83 +2,60 @@ import React from 'react';
 import { 
   BarChart3, Users, UserSquare2, Building2, CalendarRange, 
   School, BookOpen, DoorOpen, Layers, CalendarDays, Award, 
-  ShieldAlert, Sparkles, Database, GraduationCap
+  ShieldAlert, Sparkles, FileText, ChevronRight, Activity
 } from 'lucide-react';
 
 export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUser = null, isMobileMenuOpen = false }) {
   const menuSections = [
     {
-      title: 'Cổng Thông Tin Riêng',
+      title: 'TỔNG QUAN',
       items: [
-        { id: 'student-portal', label: 'Cổng Sinh Viên (Portal)', icon: GraduationCap, badge: 'PORTAL', roles: ['ROLE_ADMIN', 'ROLE_STUDENT', 'ROLE_TEACHER'] },
-        { id: 'teacher-portal', label: 'Cổng Giảng Viên (Portal)', icon: UserSquare2, badge: 'PORTAL', roles: ['ROLE_ADMIN', 'ROLE_TEACHER'] },
+        { id: 'overview', label: 'Bảng Điều Khiển', icon: BarChart3, badge: null },
       ]
     },
     {
-      title: 'Tổng quan & Thống kê',
+      title: 'QUẢN LÝ ĐÀO TẠO',
       items: [
-        { id: 'overview', label: 'Bảng điều khiển chung', icon: BarChart3, badge: null },
+        { id: 'faculties', label: 'Khoa & Viện Đào Tạo', icon: Building2, badge: counts.faculties },
+        { id: 'academic-years', label: 'Niên Khóa & Khóa Học', icon: CalendarRange, badge: counts.academicYears },
+        { id: 'student-classes', label: 'Lớp Sinh Viên (HC)', icon: School, badge: counts.classes },
+        { id: 'subjects', label: 'Môn Học & Chương Trình', icon: BookOpen, badge: counts.subjects },
+        { id: 'classrooms', label: 'Phòng Học & Giảng Đường', icon: DoorOpen, badge: counts.classrooms },
       ]
     },
     {
-      title: 'Nhân sự & Tổ chức',
+      title: 'GIẢNG DẠY & HỌC TẬP',
       items: [
-        { id: 'students', label: 'Danh sách Sinh viên', icon: Users, badge: counts.students },
-        { id: 'teachers', label: 'Danh sách Giảng viên', icon: UserSquare2, badge: counts.teachers },
-        { id: 'faculties', label: 'Quản lý Khoa', icon: Building2, badge: counts.faculties },
-        { id: 'academic-years', label: 'Khóa học (Niên khóa)', icon: CalendarRange, badge: counts.academicYears },
-        { id: 'student-classes', label: 'Lớp sinh viên (Hành chính)', icon: School, badge: counts.classes },
+        { id: 'credit-classes', label: 'Lớp Tín Chỉ (Học Phần)', icon: Layers, badge: counts.creditClasses },
+        { id: 'schedules', label: 'Thời Khóa Biểu & Lịch Học', icon: CalendarDays, badge: counts.schedules },
+        { id: 'grades', label: 'Quản Lý Điểm Số & GPA', icon: Award, badge: counts.grades },
       ]
     },
     {
-      title: 'Đào tạo & Cơ sở vật chất',
+      title: 'HỒ SƠ NHÂN SỰ',
       items: [
-        { id: 'subjects', label: 'Môn học & Học phần', icon: BookOpen, badge: counts.subjects },
-        { id: 'classrooms', label: 'Phòng học & Tòa nhà', icon: DoorOpen, badge: counts.classrooms },
-        { id: 'credit-classes', label: 'Lớp tín chỉ (Học phần)', icon: Layers, badge: counts.creditClasses },
-        { id: 'schedules', label: 'Thời khóa biểu & Lịch', icon: CalendarDays, badge: counts.schedules },
+        { id: 'students', label: 'Hồ Sơ Sinh Viên', icon: Users, badge: counts.students },
+        { id: 'teachers', label: 'Hồ Sơ Giảng Viên', icon: UserSquare2, badge: counts.teachers },
       ]
     },
     {
-      title: 'Điểm số & Hệ thống',
+      title: 'HỆ THỐNG & BẢO MẬT',
       items: [
-        { id: 'grades', label: 'Quản lý Điểm số (GPA)', icon: Award, badge: counts.grades, roles: ['ROLE_ADMIN', 'ROLE_TEACHER', 'ROLE_STUDENT'] },
-        { id: 'users', label: 'Tài khoản & Phân quyền', icon: ShieldAlert, badge: counts.users, roles: ['ROLE_ADMIN'] },
-        { id: 'audit-logs', label: 'Nhật ký Hoạt động (Logs)', icon: Layers, badge: null, roles: ['ROLE_ADMIN'] },
+        { id: 'users', label: 'Tài Khoản & Phân Quyền', icon: ShieldAlert, badge: counts.users },
+        { id: 'audit-logs', label: 'Nhật Ký Hoạt Động', icon: FileText, badge: null },
       ]
     }
   ];
 
-  // Helper function to check role
-  const hasAccess = (itemRoles) => {
-    if (!itemRoles) return true; // if no roles specified, everyone has access
-    const normalize = (r) => {
-      if (!r) return null;
-      const s = String(r).toUpperCase();
-      if (s === 'ADMIN' || s === 'ROLE_ADMIN') return 'ROLE_ADMIN';
-      if (s === 'TEACHER' || s === 'ROLE_TEACHER') return 'ROLE_TEACHER';
-      if (s === 'STUDENT' || s === 'ROLE_STUDENT') return 'ROLE_STUDENT';
-      return s;
-    };
-    const userRole = normalize(currentUser?.role || null);
-    return itemRoles.some(r => normalize(r) === userRole);
-  };
-
-  // Filter sections
-  const filteredSections = menuSections.map(section => ({
-    ...section,
-    items: section.items.filter(item => hasAccess(item.roles))
-  })).filter(section => section.items.length > 0);
-
   return (
     <aside 
       aria-label="Main Navigation"
-      className={`w-72 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 p-4 flex flex-col justify-between overflow-y-auto shrink-0 fixed inset-y-0 left-0 z-40 md:static md:flex transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+      className={`w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 p-3.5 flex flex-col justify-between overflow-y-auto shrink-0 fixed inset-y-0 left-0 z-40 md:static md:flex transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
     >
-      <nav className="space-y-6" aria-label="Sidebar Menu">
-        {filteredSections.map((section, sIdx) => (
-          <div key={sIdx} className="space-y-1.5">
-            <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider" aria-hidden="true">
+      <nav className="space-y-5" aria-label="Sidebar Menu">
+        {menuSections.map((section, sIdx) => (
+          <div key={sIdx} className="space-y-1">
+            <p className="px-3 text-[10px] font-bold text-slate-500 tracking-wider uppercase" aria-hidden="true">
               {section.title}
             </p>
             {section.items.map((item) => {
@@ -89,19 +66,19 @@ export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUs
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition group ${
                     isActive
-                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold shadow-lg shadow-indigo-500/20'
-                      : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                      ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/20'
+                      : 'text-slate-400 hover:bg-slate-800/70 hover:text-slate-200'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                    <span>{item.label}</span>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'}`} />
+                    <span className="truncate">{item.label}</span>
                   </div>
-                  {item.badge !== undefined && item.badge !== null && (
-                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
+                  {item.badge !== undefined && item.badge !== null && item.badge > 0 && (
+                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ml-1.5 shrink-0 ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400 group-hover:bg-slate-700'
                     }`}>
                       {item.badge}
                     </span>
@@ -113,15 +90,15 @@ export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUs
         ))}
       </nav>
 
-      {/* Sidebar Footer Info */}
-      <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2 mt-6">
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
-          <Sparkles className="h-4 w-4 text-amber-400" />
-          <span>Spring Boot 3 + React 18</span>
+      {/* Sidebar Footer System Info */}
+      <div className="pt-4 mt-4 border-t border-slate-800/80">
+        <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-emerald-400"></div>
+            <span className="text-[11px] font-semibold text-slate-300">EduPortal v3.5</span>
+          </div>
+          <span className="text-[10px] text-slate-500 font-mono">TiDB Cloud</span>
         </div>
-        <p className="text-[11px] text-slate-400 leading-relaxed">
-          Hệ thống Quản lý Đào tạo Đại học phiên bản mới nhất. Tích hợp JWT, JPA và Vite SPA.
-        </p>
       </div>
     </aside>
   );

@@ -77,7 +77,7 @@ export default function UserModule({ onNotify }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">System Users & Access Roles</h1>
-          <p className="text-xs text-slate-400 mt-1">Authentication credentials, RBAC authority, and administrative privileges</p>
+          <p className="text-xs text-slate-400 mt-1">Quản lý tài khoản người dùng, phân quyền truy cập và bảo mật hệ thống</p>
         </div>
 
         <button

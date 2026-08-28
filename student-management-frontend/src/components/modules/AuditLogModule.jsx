@@ -56,7 +56,7 @@ export default function AuditLogModule({ onNotify }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">System Audit Logs & Security History</h1>
-          <p className="text-xs text-slate-400 mt-1">Immutable chronicle of administrative transactions, mutations, and user accesses</p>
+          <p className="text-xs text-slate-400 mt-1">Lưu vết toàn bộ thao tác thêm, sửa, xóa và truy cập hệ thống theo thời gian thực</p>
         </div>
 
         <button
