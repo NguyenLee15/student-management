@@ -13,6 +13,10 @@ import java.time.LocalDateTime;
 @Builder
 public class PasswordResetToken extends BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(nullable = false, unique = true)
     private String token;
 
@@ -30,4 +34,5 @@ public class PasswordResetToken extends BaseEntity {
         return LocalDateTime.now().isAfter(this.expiresAt);
     }
 }
+
 
