@@ -20,6 +20,7 @@ import java.time.LocalDate;
            columnNames = {"credit_class_id", "subject_id", "semester", "academic_year", "teacher_id", "room_id", "class_shift"}))
 @SQLRestriction("deleted = false")
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -82,4 +83,5 @@ public class SemesterSchedule extends BaseEntity {
         return !endDate.isBefore(startDate);
     }
 }
+
 

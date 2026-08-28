@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "classrooms")
 @SQLRestriction("deleted = false")
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -41,4 +42,5 @@ public class Classroom extends BaseEntity {
     @NotNull(message = "Building is required")
     private Building building;
 }
+
 

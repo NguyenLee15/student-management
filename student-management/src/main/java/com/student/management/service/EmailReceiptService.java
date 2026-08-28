@@ -48,7 +48,7 @@ public class EmailReceiptService {
             helper.setTo(recipientEmail);
             helper.setSubject("✅ Biên lai xác nhận thanh toán học phí thành công - Mã GD: " + transaction.getOrderCode());
 
-            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.of("vi", "VN"));
             String formattedAmount = currencyFormat.format(transaction.getAmount());
             String paidTimeStr = transaction.getPaidAt() != null 
                     ? transaction.getPaidAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))

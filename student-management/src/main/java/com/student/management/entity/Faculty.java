@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "faculties")
 @SQLRestriction("deleted = false")
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,4 +33,5 @@ public class Faculty extends BaseEntity {
     @Size(max = 100, message = "Faculty name cannot exceed 100 characters")
     private String facultyName;
 }
+
 

@@ -19,6 +19,7 @@ import java.time.LocalDate;
 @Table(name = "students")
 @SQLRestriction("deleted = false")
 @Data
+@lombok.EqualsAndHashCode(callSuper = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -59,4 +60,5 @@ public class Student extends BaseEntity {
     @Email(message = "Invalid email format")
     private String email;
 }
+
 

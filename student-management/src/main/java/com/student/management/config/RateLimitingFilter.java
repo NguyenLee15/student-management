@@ -2,7 +2,7 @@ package com.student.management.config;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,11 +24,11 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     private Bucket createNewBucket(String ip, boolean isAuth) {
         if (isAuth) {
             // Auth endpoints: 10 requests / 1 minute
-            Bandwidth limit = Bandwidth.classic(10, Refill.intervally(10, Duration.ofMinutes(1)));
+            Bandwidth limit = Bandwidth.builder().capacity(10).refillIntervally(10, Duration.ofMinutes(1)).build();
             return Bucket.builder().addLimit(limit).build();
         } else {
             // General APIs: 120 requests / 1 minute
-            Bandwidth limit = Bandwidth.classic(120, Refill.intervally(120, Duration.ofMinutes(1)));
+            Bandwidth limit = Bandwidth.builder().capacity(120).refillIntervally(120, Duration.ofMinutes(1)).build();
             return Bucket.builder().addLimit(limit).build();
         }
     }
