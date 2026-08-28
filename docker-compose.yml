@@ -39,6 +39,9 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - JWT_SECRET=super_secret_jwt_key_that_is_at_least_256_bits_long
+      - PAYOS_CLIENT_ID=${PAYOS_CLIENT_ID:-}
+      - PAYOS_API_KEY=${PAYOS_API_KEY:-}
+      - PAYOS_CHECKSUM_KEY=${PAYOS_CHECKSUM_KEY:-}
     ports:
       - "8080:8080"
     depends_on:
