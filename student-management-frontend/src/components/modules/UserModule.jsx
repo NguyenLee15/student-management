@@ -94,10 +94,10 @@ export default function UserModule({ onNotify }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
-                <th className="px-5 py-3.5">Username</th>
+                <th className="px-5 py-3.5">Tên đăng nhập</th>
                 <th className="px-5 py-3.5">Assigned Authority (Role)</th>
-                <th className="px-5 py-3.5">Status</th>
-                <th className="px-5 py-3.5 text-right">Actions</th>
+                <th className="px-5 py-3.5">Trạng thái</th>
+                <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
@@ -127,7 +127,7 @@ export default function UserModule({ onNotify }) {
                   </td>
                   <td className="px-5 py-3.5 text-emerald-400 font-semibold flex items-center gap-1.5 pt-4">
                     <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Active</span>
+                    <span>Hoạt động</span>
                   </td>
                   <td className="px-5 py-3.5 text-right">
                     {u.userName !== 'admin' && (
@@ -219,9 +219,7 @@ export default function UserModule({ onNotify }) {
               type="button"
               onClick={() => setShowModal(false)}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >
-              Cancel
-            </button>
+            >Hủy</button>
             <button
               type="submit"
               className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold shadow-lg shadow-red-600/30 transition"

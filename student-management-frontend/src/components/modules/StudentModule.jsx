@@ -193,7 +193,7 @@ export default function StudentModule({ onNotify, currentUser }) {
       link.remove();
       onNotify('success', 'Excel student report exported successfully!');
     } catch (err) {
-      onNotify('error', 'Failed exporting Excel file.');
+      onNotify('error', 'Xuất file Excel thất bại.');
     }
   };
 
@@ -235,7 +235,7 @@ export default function StudentModule({ onNotify, currentUser }) {
                 onNotify('warning', `Import completed with ${taskData.errorCount} errors.`);
                 loadStudents();
               } else {
-                onNotify('success', 'Imported Excel data successfully!');
+                onNotify('success', 'Nhập dữ liệu Excel thành công!');
                 loadStudents();
                 setTimeout(() => { setShowImportModal(false); setImportProgress(null); }, 2000);
               }
@@ -249,7 +249,7 @@ export default function StudentModule({ onNotify, currentUser }) {
     } catch (err) {
       setImporting(false);
       setImportProgress(null);
-      onNotify('error', err?.response?.data?.message || err?.message || 'Failed to start import');
+      onNotify('error', err?.response?.data?.message || err?.message || 'Lỗi khi bắt đầu nhập file');
     }
   };
 
@@ -258,7 +258,7 @@ export default function StudentModule({ onNotify, currentUser }) {
       {/* Header & Quick Action Buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Student Directory</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản lý Sinh viên</h1>
           <p className="text-xs text-slate-400 mt-1">
             Enrollment records, biographical details, and faculty assignments
           </p>
@@ -271,7 +271,7 @@ export default function StudentModule({ onNotify, currentUser }) {
               className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-emerald-400 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-800 transition shadow-sm"
             >
               <Upload className="h-4 w-4" />
-              <span>Import Excel</span>
+              <span>Nhập Excel</span>
             </button>
           )}
 
@@ -291,7 +291,7 @@ export default function StudentModule({ onNotify, currentUser }) {
               className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 transition active:scale-95"
             >
               <Plus className="h-4 w-4" />
-              <span>New Student</span>
+              <span>Thêm Sinh viên</span>
             </button>
           )}
         </div>
@@ -349,12 +349,12 @@ export default function StudentModule({ onNotify, currentUser }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
-                <th className="px-5 py-3.5">Student ID</th>
+                <th className="px-5 py-3.5">Mã sinh viên</th>
                 <th className="px-5 py-3.5">Full Name & Gender</th>
-                <th className="px-5 py-3.5">Class / Faculty</th>
-                <th className="px-5 py-3.5">Academic Year</th>
-                <th className="px-5 py-3.5">Contact Info</th>
-                <th className="px-5 py-3.5 text-right">Actions</th>
+                <th className="px-5 py-3.5">Lớp / Khoa</th>
+                <th className="px-5 py-3.5">Niên khóa</th>
+                <th className="px-5 py-3.5">Thông tin liên hệ</th>
+                <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
@@ -386,7 +386,7 @@ export default function StudentModule({ onNotify, currentUser }) {
                         </div>
                         <div>
                           <div className="font-semibold text-white">{st.fullName}</div>
-                          <div className="text-[10px] text-slate-400 capitalize">{st.gender?.toLowerCase() || 'Male'}</div>
+                          <div className="text-[10px] text-slate-400 capitalize">{st.gender?.toLowerCase() || 'Nam'}</div>
                         </div>
                       </div>
                     </td>
@@ -424,7 +424,7 @@ export default function StudentModule({ onNotify, currentUser }) {
                           </button>
                           <button
                             onClick={() => setDeleteTarget(st)}
-                            title="Delete Student"
+                            title="Xóa Sinh viên"
                             className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -453,7 +453,7 @@ export default function StudentModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Edit Student: ${formData.studentId}` : 'Register New Student'}
+        title={isEdit ? `Sửa Sinh viên: ${formData.studentId}` : 'Đăng ký Sinh viên Mới'}
         subtitle="Provide student biographical and academic enrolment parameters"
       >
         <form onSubmit={handleSaveStudent} className="space-y-4 text-xs">
@@ -527,7 +527,7 @@ export default function StudentModule({ onNotify, currentUser }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Email Address</label>
+              <label className="block text-slate-300 font-semibold mb-1">Địa chỉ Email</label>
               <input
                 type="email"
                 placeholder="student@gmail.com"
@@ -551,7 +551,7 @@ export default function StudentModule({ onNotify, currentUser }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Gender</label>
+              <label className="block text-slate-300 font-semibold mb-1">Giới tính</label>
               <select
                 value={formData.gender}
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
@@ -559,12 +559,12 @@ export default function StudentModule({ onNotify, currentUser }) {
               >
                 <option value="MALE">Male (Nam)</option>
                 <option value="FEMALE">Female (Nữ)</option>
-                <option value="OTHER">Other</option>
+                <option value="OTHER">Khác</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Date of Birth</label>
+              <label className="block text-slate-300 font-semibold mb-1">Ngày sinh</label>
               <input
                 type="date"
                 value={formData.dateOfBirth}
@@ -579,14 +579,12 @@ export default function StudentModule({ onNotify, currentUser }) {
               type="button"
               onClick={() => setShowModal(false)}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >
-              Cancel
-            </button>
+            >Hủy</button>
             <button
               type="submit"
               className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-600/30 transition"
             >
-              {isEdit ? 'Save Changes' : 'Create Student'}
+              {isEdit ? 'Lưu thay đổi' : 'Thêm Sinh viên'}
             </button>
           </div>
         </form>

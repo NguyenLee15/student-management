@@ -226,8 +226,8 @@ export default function ScheduleModule({ onNotify, currentUser }) {
                 <th className="px-5 py-3.5">Course / Subject</th>
                 <th className="px-5 py-3.5">Assigned Lecturer</th>
                 <th className="px-5 py-3.5">Lecture Hall</th>
-                <th className="px-5 py-3.5">Semester</th>
-                <th className="px-5 py-3.5 text-right">Actions</th>
+                <th className="px-5 py-3.5">Học kỳ</th>
+                <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
@@ -379,14 +379,12 @@ export default function ScheduleModule({ onNotify, currentUser }) {
               type="button"
               onClick={() => setShowModal(false)}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >
-              Cancel
-            </button>
+            >Hủy</button>
             <button
               type="submit"
               className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold shadow-lg shadow-teal-600/30 transition"
             >
-              {isEdit ? 'Save Changes' : 'Schedule Class'}
+              {isEdit ? 'Lưu thay đổi' : 'Schedule Class'}
             </button>
           </div>
         </form>

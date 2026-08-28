@@ -207,7 +207,7 @@ export default function GradeModule({ onNotify, currentUser }) {
                 <th className="px-5 py-3.5">Final Exam</th>
                 <th className="px-5 py-3.5">Final Score (10)</th>
                 <th className="px-5 py-3.5">Letter Grade</th>
-                <th className="px-5 py-3.5 text-right">Actions</th>
+                <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
@@ -350,14 +350,12 @@ export default function GradeModule({ onNotify, currentUser }) {
               type="button"
               onClick={() => setShowModal(false)}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >
-              Cancel
-            </button>
+            >Hủy</button>
             <button
               type="submit"
               className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-lg shadow-purple-600/30 transition"
             >
-              {isEdit ? 'Save Changes' : 'Record Grade'}
+              {isEdit ? 'Lưu thay đổi' : 'Record Grade'}
             </button>
           </div>
         </form>

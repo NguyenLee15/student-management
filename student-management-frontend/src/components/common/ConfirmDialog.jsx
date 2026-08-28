@@ -2,7 +2,7 @@ import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 import Modal from './Modal';
 
-export default function ConfirmDialog({ isOpen, onClose, onConfirm, title = 'Confirm Action', message, confirmText = 'Delete', isDanger = true }) {
+export default function ConfirmDialog({ isOpen, onClose, onConfirm, title = 'Confirm Action', message, confirmText = 'Xóa', isDanger = true }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="max-w-md">
       <div className="space-y-4">
@@ -20,9 +20,7 @@ export default function ConfirmDialog({ isOpen, onClose, onConfirm, title = 'Con
             type="button"
             onClick={onClose}
             className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
-          >
-            Cancel
-          </button>
+          >Hủy</button>
           <button
             type="button"
             onClick={() => {

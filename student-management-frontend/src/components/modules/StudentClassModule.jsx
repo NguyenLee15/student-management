@@ -128,7 +128,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
             className="flex items-center gap-2 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-sky-600/30 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            <span>New Class</span>
+            <span>Thêm Lớp</span>
           </button>
         )}
       </div>
@@ -253,14 +253,12 @@ export default function StudentClassModule({ onNotify, currentUser }) {
               type="button"
               onClick={() => setShowModal(false)}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >
-              Cancel
-            </button>
+            >Hủy</button>
             <button
               type="submit"
               className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold shadow-lg shadow-sky-600/30 transition"
             >
-              {isEdit ? 'Save Changes' : 'Create Class'}
+              {isEdit ? 'Lưu thay đổi' : 'Create Class'}
             </button>
           </div>
         </form>

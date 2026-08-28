@@ -88,7 +88,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
             className="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-amber-600/30 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            <span>New Faculty</span>
+            <span>Thêm Khoa</span>
           </button>
         )}
       </div>
@@ -115,7 +115,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
             </div>
 
             <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Department Status: <span className="text-emerald-400 font-semibold">Active</span></span>
+              <span className="text-slate-400">Department Status: <span className="text-emerald-400 font-semibold">Hoạt động</span></span>
               {isAdmin && (
                 <div className="flex items-center gap-1">
                   <button
@@ -175,14 +175,12 @@ export default function FacultyModule({ onNotify, currentUser }) {
               type="button"
               onClick={() => setShowModal(false)}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >
-              Cancel
-            </button>
+            >Hủy</button>
             <button
               type="submit"
               className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold shadow-lg shadow-amber-600/30 transition"
             >
-              {isEdit ? 'Save Changes' : 'Create Faculty'}
+              {isEdit ? 'Lưu thay đổi' : 'Thêm Khoa'}
             </button>
           </div>
         </form>
@@ -192,7 +190,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete Faculty"
+        title="Xóa Khoa"
         message={`Are you sure you want to remove faculty "${deleteTarget?.facultyName}" (ID: ${deleteTarget?.facultyId})?`}
       />
     </div>

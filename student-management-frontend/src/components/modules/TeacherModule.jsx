@@ -195,10 +195,10 @@ export default function TeacherModule({ onNotify, currentUser }) {
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
                 <th className="px-5 py-3.5">Lecturer ID</th>
-                <th className="px-5 py-3.5">Full Name</th>
+                <th className="px-5 py-3.5">Họ và tên</th>
                 <th className="px-5 py-3.5">Department / Faculty</th>
                 <th className="px-5 py-3.5">Official Email</th>
-                <th className="px-5 py-3.5 text-right">Actions</th>
+                <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
@@ -248,7 +248,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
                           </button>
                           <button
                             onClick={() => setDeleteTarget(t)}
-                            title="Delete Teacher"
+                            title="Xóa Giảng viên"
                             className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -339,14 +339,12 @@ export default function TeacherModule({ onNotify, currentUser }) {
               type="button"
               onClick={() => setShowModal(false)}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >
-              Cancel
-            </button>
+            >Hủy</button>
             <button
               type="submit"
               className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-600/30 transition"
             >
-              {isEdit ? 'Save Changes' : 'Create Lecturer'}
+              {isEdit ? 'Lưu thay đổi' : 'Create Lecturer'}
             </button>
           </div>
         </form>

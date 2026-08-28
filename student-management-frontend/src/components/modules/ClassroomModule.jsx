@@ -195,7 +195,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Edit Room: ${formData.roomId}` : 'Register New Classroom'}
+        title={isEdit ? `Edit Room: ${formData.roomId}` : 'Thêm phòng học'}
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -259,14 +259,12 @@ export default function ClassroomModule({ onNotify, currentUser }) {
               type="button"
               onClick={() => setShowModal(false)}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >
-              Cancel
-            </button>
+            >Hủy</button>
             <button
               type="submit"
               className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold shadow-lg shadow-rose-600/30 transition"
             >
-              {isEdit ? 'Save Changes' : 'Create Classroom'}
+              {isEdit ? 'Lưu thay đổi' : 'Tạo phòng học'}
             </button>
           </div>
         </form>
@@ -276,7 +274,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete Classroom"
+        title="Xóa phòng học"
         message={`Are you sure you want to remove classroom "${deleteTarget?.roomName}" (ID: ${deleteTarget?.roomId})?`}
       />
     </div>

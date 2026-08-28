@@ -113,7 +113,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
             </div>
 
             <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Status: <span className="text-emerald-400 font-semibold">Active</span></span>
+              <span className="text-slate-400">Status: <span className="text-emerald-400 font-semibold">Hoạt động</span></span>
               {isAdmin && (
                 <div className="flex items-center gap-1">
                   <button
@@ -139,7 +139,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Edit Cohort: ${formData.academicYearId}` : 'Register Academic Year Cohort'}
+        title={isEdit ? `Edit Cohort: ${formData.academicYearId}` : 'Thêm niên khóa'}
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
@@ -172,14 +172,12 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
               type="button"
               onClick={() => setShowModal(false)}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >
-              Cancel
-            </button>
+            >Hủy</button>
             <button
               type="submit"
               className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-lg shadow-violet-600/30 transition"
             >
-              {isEdit ? 'Save Changes' : 'Create Cohort'}
+              {isEdit ? 'Lưu thay đổi' : 'Create Cohort'}
             </button>
           </div>
         </form>
@@ -189,7 +187,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete Academic Year"
+        title="Xóa niên khóa"
         message={`Are you sure you want to remove cohort "${deleteTarget?.academicYearName}" (ID: ${deleteTarget?.academicYearId})?`}
       />
     </div>

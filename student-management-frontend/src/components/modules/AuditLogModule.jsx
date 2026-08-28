@@ -74,7 +74,7 @@ export default function AuditLogModule({ onNotify }) {
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
                 <th className="px-5 py-3.5">Timestamp</th>
-                <th className="px-5 py-3.5">Action</th>
+                <th className="px-5 py-3.5">Thao tác</th>
                 <th className="px-5 py-3.5">Entity</th>
                 <th className="px-5 py-3.5">Entity ID</th>
                 <th className="px-5 py-3.5">Details</th>

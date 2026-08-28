@@ -137,7 +137,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Credit Classes & Course Enrolment</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Lớp tín chỉ & Đăng ký</h1>
           <p className="text-xs text-slate-400 mt-1">Section quotas, subject registrations, and student rosters</p>
         </div>
 
@@ -147,7 +147,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
             className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            <span>New Credit Class</span>
+            <span>Lớp tín chỉ mới</span>
           </button>
         )}
       </div>
@@ -213,7 +213,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title="Open New Credit Class Section"
+        title="Mở lớp tín chỉ mới"
         subtitle="Associate course subject with student homeroom cohort"
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
@@ -276,9 +276,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
               type="button"
               onClick={() => setShowModal(false)}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >
-              Cancel
-            </button>
+            >Hủy</button>
             <button
               type="submit"
               className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg shadow-blue-600/30 transition"
