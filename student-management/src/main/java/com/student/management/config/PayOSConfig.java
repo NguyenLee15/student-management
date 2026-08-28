@@ -29,8 +29,10 @@ public class PayOSConfig {
     @jakarta.annotation.PostConstruct
     public void validateConfig() {
         if (!isConfigured()) {
-            log.error("CRITICAL CONFIG ERROR: PayOS keys (client-id, api-key, checksum-key) must be provided in application.properties!");
-            throw new IllegalStateException("Missing PayOS configuration. Application cannot start.");
+            log.warn("=========================================================");
+            log.warn("WARNING: PayOS keys (client-id, api-key, checksum-key) are MISSING!");
+            log.warn("Payment features will fail, but application will start.");
+            log.warn("=========================================================");
         }
     }
 
