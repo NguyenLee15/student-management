@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 public class Classroom extends BaseEntity {
 
     @Id
-    @Column(name = "room_id", nullable = false, length = 10)
+    @Column(name = "classroom_id", nullable = false, length = 10)
     @NotBlank(message = "Room ID is required")
     @Size(max = 10, message = "Room ID cannot exceed 10 characters")
     private String roomId;

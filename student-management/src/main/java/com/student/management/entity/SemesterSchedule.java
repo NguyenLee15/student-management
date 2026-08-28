@@ -47,7 +47,7 @@ public class SemesterSchedule extends BaseEntity {
     private Teacher teacher;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
+    @JoinColumn(name = "classroom_id", nullable = false)
     @NotNull(message = "Classroom is required")
     private Classroom classroom;
 
