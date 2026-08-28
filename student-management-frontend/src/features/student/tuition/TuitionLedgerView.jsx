@@ -47,7 +47,7 @@ export default function TuitionLedgerView() {
         setPayAmount(inv.remainingAmount || 0);
       }
     } catch (err) {
-      console.error('Failed to load tuition invoice', err);
+      console.error('Lỗi khi tải hóa đơn học phí', err);
       setErrorMsg('Không tìm thấy thông tin hóa đơn học phí cho học kỳ này.');
     } finally {
       setLoading(false);
@@ -69,7 +69,7 @@ export default function TuitionLedgerView() {
       }
       await loadInvoice();
     } catch (err) {
-      console.error('Sync status error', err);
+      console.error('Lỗi khi đồng bộ trạng thái giao dịch', err);
     } finally {
       setIsSyncing(false);
     }
@@ -113,7 +113,7 @@ export default function TuitionLedgerView() {
       setIsPayModalOpen(false);
       await loadInvoice();
     } catch (err) {
-      console.error('Payment error', err);
+      console.error('Lỗi khi khởi tạo thanh toán', err);
       setErrorMsg(err.response?.data?.message || 'Giao dịch thanh toán thất bại.');
     } finally {
       setIsPaying(false);

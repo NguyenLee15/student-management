@@ -134,7 +134,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Academic Subjects & Modules</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Academic Học Phầns & Modules</h1>
           <p className="text-xs text-slate-400 mt-1">Quản lý chương trình đào tạo, số tín chỉ, học phí và môn học tiên quyết</p>
         </div>
 

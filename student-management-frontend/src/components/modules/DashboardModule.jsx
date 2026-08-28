@@ -264,7 +264,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
         </div>
       </div>
 
-      {/* Bar Chart: Academic Classification Distribution */}
+      {/* Bar Chart: Xếp Loại Học Lực Distribution */}
       <div className="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 space-y-4">
         <div className="flex items-center justify-between">
           <div>

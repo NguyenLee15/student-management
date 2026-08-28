@@ -173,7 +173,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-sm text-white tracking-tight">CỔNG THÔNG TIN GIẢNG VIÊN</span>
               <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                TEACHER PORTAL
+                CỔNG GIẢNG VIÊN
               </span>
             </div>
             <p className="hidden sm:block text-[11px] text-slate-400">Hệ thống Quản lý Giảng dạy & Chấm điểm</p>

@@ -9,11 +9,11 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
 
   useEffect(() => {
     if (isOpen && student) {
-      loadStudentGrades();
+      loadStudentsGrades();
     }
   }, [isOpen, student]);
 
-  const loadStudentGrades = async () => {
+  const loadStudentsGrades = async () => {
     if (!student) return;
     setLoading(true);
     try {
@@ -62,8 +62,8 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Official Academic Transcript: ${student.fullName}`}
-      subtitle={`Student ID: ${student.studentId} • Class: ${student.classId || student.className || 'CNTT1'} • Faculty: ${student.facultyName || student.facultyId || 'Khoa CNTT'}`}
+      title={`Bảng Điểm Học Tập Chính Thức: ${student.fullName}`}
+      subtitle={`Sinh Viên ID: ${student.studentId} • Class: ${student.classId || student.className || 'CNTT1'} • Faculty: ${student.facultyName || student.facultyId || 'Khoa CNTT'}`}
       maxWidth="max-w-3xl"
     >
       <div className="space-y-5 text-xs">
@@ -71,7 +71,7 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
         {/* Top Summary Banner */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-900 border border-slate-800">
           <div>
-            <span className="text-slate-400 text-[11px]">Cumulative GPA (Thang 4)</span>
+            <span className="text-slate-400 text-[11px]">Điểm Trung Bình Tích Lũy (GPA Thang 4)</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
               <span className="text-2xl font-extrabold text-white">{gpa4.toFixed(2)}</span>
               <span className="text-[11px] text-slate-500">/ 4.00</span>
@@ -79,7 +79,7 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
           </div>
 
           <div>
-            <span className="text-slate-400 text-[11px]">Cumulative Average (Thang 10)</span>
+            <span className="text-slate-400 text-[11px]">Điểm Trung Bình Tích Lũy (Thang 10)</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">
               <span className="text-2xl font-extrabold text-indigo-400">{avg10.toFixed(1)}</span>
               <span className="text-[11px] text-slate-500">/ 10.0</span>
@@ -87,7 +87,7 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
           </div>
 
           <div>
-            <span className="text-slate-400 text-[11px]">Academic Classification</span>
+            <span className="text-slate-400 text-[11px]">Xếp Loại Học Lực</span>
             <div className="mt-1">
               <span className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${rank.color}`}>
                 {rank.text}
@@ -101,19 +101,19 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
-                <th className="px-4 py-3">Subject / Course</th>
-                <th className="px-4 py-3">Attendance</th>
-                <th className="px-4 py-3">Midterm</th>
-                <th className="px-4 py-3">Final Exam</th>
-                <th className="px-4 py-3">Total (10)</th>
-                <th className="px-4 py-3 text-right">Letter Grade</th>
+                <th className="px-4 py-3">Học Phần / Course</th>
+                <th className="px-4 py-3">Chuyên Cần (10%)</th>
+                <th className="px-4 py-3">Giữa Kỳ (30%)</th>
+                <th className="px-4 py-3">Cuối Kỳ (60%)</th>
+                <th className="px-4 py-3">Tổng Kết (10)</th>
+                <th className="px-4 py-3 text-right">Điểm Chữ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {grades.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-4 py-6 text-center text-slate-500">
-                    {loading ? 'Fetching transcript from server...' : 'No graded courses found for this student.'}
+                    {loading ? 'Đang tải dữ liệu bảng điểm từ máy chủ...' : 'Chưa có dữ liệu điểm học phần nào cho sinh viên này.'}
                   </td>
                 </tr>
               ) : (
@@ -153,7 +153,7 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-lg shadow-indigo-600/20"
           >
             <Printer className="h-4 w-4" />
-            <span>Print Official Transcript</span>
+            <span>In Bảng Điểm A4</span>
           </button>
         </div>
       </div>

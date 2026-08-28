@@ -118,7 +118,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
       setShowModal(false);
       loadTeachers();
     } catch (err) {
-      onNotify('error', err?.message || 'Error saving teacher');
+      onNotify('error', err?.message || 'Lỗi khi lưu giảng viên');
     }
   };
 
@@ -129,7 +129,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
       onNotify('success', `Teacher ${deleteTarget.teacherId} deleted successfully!`);
       loadTeachers();
     } catch (err) {
-      onNotify('error', err?.message || 'Error deleting teacher');
+      onNotify('error', err?.message || 'Lỗi khi xóa giảng viên');
     }
   };
 
@@ -138,7 +138,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Faculty & Lecturers</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Hồ Sơ Cán Bộ & Giảng Viên</h1>
           <p className="text-xs text-slate-400 mt-1">Quản lý hồ sơ giảng viên, học hàm học vị, phân công khoa và liên hệ</p>
         </div>
 
@@ -148,7 +148,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
             className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/30 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            <span>New Lecturer</span>
+            <span>Thêm Giảng Viên Mới</span>
           </button>
         )}
       </div>
@@ -159,7 +159,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
             type="text"
-            placeholder="Search lecturer by name or ID (e.g. GV001)..."
+            placeholder="Tìm theo tên hoặc mã giảng viên (VD: GV001)..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition"
@@ -180,7 +180,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
 
           <button
             onClick={loadTeachers}
-            title="Refresh"
+            title="Làm mới"
             className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
@@ -194,10 +194,10 @@ export default function TeacherModule({ onNotify, currentUser }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
-                <th className="px-5 py-3.5">Lecturer ID</th>
+                <th className="px-5 py-3.5">Mã Giảng Viên</th>
                 <th className="px-5 py-3.5">Họ và tên</th>
-                <th className="px-5 py-3.5">Department / Faculty</th>
-                <th className="px-5 py-3.5">Official Email</th>
+                <th className="px-5 py-3.5">Khoa / Viện Đào Tạo</th>
+                <th className="px-5 py-3.5">Email Công Vụ</th>
                 <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
@@ -241,7 +241,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
                         <>
                           <button
                             onClick={() => handleOpenEdit(t)}
-                            title="Edit Teacher"
+                            title="Sửa Giảng Viên"
                             className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-slate-800 transition"
                           >
                             <Edit3 className="h-4 w-4" />
@@ -276,8 +276,8 @@ export default function TeacherModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Edit Lecturer: ${formData.teacherId}` : 'Register New Faculty Member'}
-        subtitle="Specify academic credentials and faculty department affiliation"
+        title={isEdit ? `Sửa Giảng Viên: ${formData.teacherId}` : 'Register Thêm Khoa Mới Member'}
+        subtitle="Nhập học vị, học hàm và khoa công tác"
       >
         <form onSubmit={handleSaveTeacher} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -287,7 +287,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
                 type="text"
                 required
                 disabled={isEdit}
-                placeholder="e.g. GV001"
+                placeholder="VD: GV001"
                 value={formData.teacherId}
                 onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500 disabled:opacity-50"
@@ -299,7 +299,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
               <input
                 type="text"
                 required
-                placeholder="e.g. TS. Nguyen Van Thuc"
+                placeholder="VD: TS. Nguyễn Văn Thức"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500"
@@ -309,7 +309,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Department (Khoa)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Khoa Chủ Quản*</label>
               <select
                 value={formData.facultyId}
                 onChange={(e) => setFormData({ ...formData, facultyId: e.target.value })}
@@ -322,7 +322,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Official Email*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Email Công Vụ*</label>
               <input
                 type="email"
                 required
@@ -344,7 +344,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
               type="submit"
               className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-600/30 transition"
             >
-              {isEdit ? 'Lưu thay đổi' : 'Create Lecturer'}
+              {isEdit ? 'Lưu thay đổi' : 'Thêm Giảng Viên'}
             </button>
           </div>
         </form>
@@ -355,8 +355,8 @@ export default function TeacherModule({ onNotify, currentUser }) {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete Lecturer"
-        message={`Are you sure you want to remove lecturer "${deleteTarget?.fullName}" (ID: ${deleteTarget?.teacherId})?`}
+        title="Xóa Giảng Viên"
+        message={`Bạn có chắc chắn muốn xóa giảng viên "${deleteTarget?.fullName}" (ID: ${deleteTarget?.teacherId})?`}
       />
     </div>
   );

@@ -200,7 +200,7 @@ export default function App() {
 
   return (
     <>
-      {/* 🎓 RENDER STUDENT PORTAL WORKSPACE */}
+      {/* 🎓 RENDER CỔNG SINH VIÊN WORKSPACE */}
       {effectiveRole === 'ROLE_STUDENT' && (
         <StudentLayout
           currentUser={currentUser}
@@ -210,7 +210,7 @@ export default function App() {
         />
       )}
 
-      {/* 👨‍🏫 RENDER TEACHER PORTAL WORKSPACE */}
+      {/* 👨‍🏫 RENDER CỔNG GIẢNG VIÊN WORKSPACE */}
       {effectiveRole === 'ROLE_TEACHER' && (
         <TeacherLayout
           currentUser={currentUser}

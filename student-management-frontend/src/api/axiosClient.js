@@ -104,7 +104,7 @@ axiosClient.interceptors.response.use(
     if (status === 403) {
       console.warn('Forbidden access.');
       window.dispatchEvent(new CustomEvent('auth:forbidden', { detail: message }));
-      return Promise.reject({ status, message: 'You do not have permission to perform this action.', raw: error });
+      return Promise.reject({ status, message: 'Bạn không có quyền thực hiện thao tác này.', raw: error });
     }
 
     if (status === 429) {
@@ -112,7 +112,7 @@ axiosClient.interceptors.response.use(
       window.dispatchEvent(new CustomEvent('auth:ratelimit', { 
         detail: message || 'Too many requests. Please wait a moment before trying again.' 
       }));
-      return Promise.reject({ status, message: 'Too many requests (Rate limit exceeded).', raw: error });
+      return Promise.reject({ status, message: 'Quá nhiều yêu cầu! Vui lòng thao tác chậm lại.', raw: error });
     }
     
     return Promise.reject({ status, message, raw: error });

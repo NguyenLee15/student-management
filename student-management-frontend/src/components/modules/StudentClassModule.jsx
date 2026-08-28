@@ -91,10 +91,10 @@ export default function StudentClassModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await studentClassApi.update(formData.classId, formData);
-        onNotify('success', `Class ${formData.classId} updated!`);
+        onNotify('success', `Class ${formData.classId} đã được cập nhật thành công!`);
       } else {
         await studentClassApi.create(formData);
-        onNotify('success', `Class ${formData.classId} created!`);
+        onNotify('success', `Class ${formData.classId} đã được tạo thành công!`);
       }
       setShowModal(false);
       loadClasses();
@@ -107,7 +107,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await studentClassApi.delete(deleteTarget.classId);
-      onNotify('success', `Class ${deleteTarget.classId} deleted!`);
+      onNotify('success', `Class ${deleteTarget.classId} đã được xóa thành công!`);
       loadClasses();
     } catch (err) {
       onNotify('error', err?.message || 'Error deleting student class');
@@ -118,7 +118,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Student Homeroom Classes</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Sinh Viên Homeroom Classes</h1>
           <p className="text-xs text-slate-400 mt-1">Quản lý các lớp sinh viên hành chính theo từng khoa và cố vấn học tập</p>
         </div>
 
@@ -139,7 +139,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
           onChange={(e) => { setSelectedFaculty(e.target.value); setPage(0); }}
           className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-sky-500 transition"
         >
-          <option value="">All Academic Faculties</option>
+          <option value="">Tất Cả Các Khoa</option>
           {faculties.map((f) => (
             <option key={f.facultyId} value={f.facultyId}>{f.facultyName || f.facultyId}</option>
           ))}
@@ -174,7 +174,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
             </div>
 
             <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Status: <span className="text-emerald-400">Enrolled</span></span>
+              <span className="text-slate-400 font-medium">Trạng thái: <span className="text-emerald-400">Đang hoạt động</span></span>
               {isAdmin && (
                 <div className="flex items-center gap-1">
                   <button
@@ -207,7 +207,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Edit Class: ${formData.classId}` : 'Create Student Class'}
+        title={isEdit ? `Sửa Lớp: ${formData.classId}` : 'Create Sinh Viên Class'}
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
@@ -216,7 +216,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
               type="text"
               required
               disabled={isEdit}
-              placeholder="e.g. CNTT1-K65"
+              placeholder="VD: CNTT1-K65"
               value={formData.classId}
               onChange={(e) => setFormData({ ...formData, classId: e.target.value })}
               className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-sky-500 disabled:opacity-50"
@@ -236,7 +236,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Affiliated Khoa*</label>
+            <label className="block text-slate-300 font-semibold mb-1">Khoa Chủ Quản*</label>
             <select
               value={formData.facultyId}
               onChange={(e) => setFormData({ ...formData, facultyId: e.target.value })}
@@ -258,7 +258,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
               type="submit"
               className="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold shadow-lg shadow-sky-600/30 transition"
             >
-              {isEdit ? 'Lưu thay đổi' : 'Create Class'}
+              {isEdit ? 'Lưu thay đổi' : 'Thêm Lớp'}
             </button>
           </div>
         </form>
@@ -268,7 +268,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete Class"
+        title="Xóa Lớp Hành Chính"
         message={`Are you sure you want to remove class "${deleteTarget?.className}" (ID: ${deleteTarget?.classId})?`}
       />
     </div>

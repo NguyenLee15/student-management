@@ -26,7 +26,7 @@ export default function MatrixTimetableView() {
       const res = await studentPortalApi.getMyTimetable(selectedSemester);
       setTimetable(res.data || []);
     } catch (err) {
-      console.error('Failed to load timetable', err);
+      console.error('Lỗi khi tải thời khóa biểu', err);
     } finally {
       setLoading(false);
     }

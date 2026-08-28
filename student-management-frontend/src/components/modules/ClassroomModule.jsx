@@ -74,15 +74,15 @@ export default function ClassroomModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await classroomApi.update(formData.roomId, formData);
-        onNotify('success', `Classroom ${formData.roomId} updated!`);
+        onNotify('success', `Classroom ${formData.roomId} đã được cập nhật thành công!`);
       } else {
         await classroomApi.create(formData);
-        onNotify('success', `Classroom ${formData.roomId} created!`);
+        onNotify('success', `Classroom ${formData.roomId} đã được tạo thành công!`);
       }
       setShowModal(false);
       loadClassrooms();
     } catch (err) {
-      onNotify('error', err?.message || 'Error saving classroom');
+      onNotify('error', err?.message || 'Lỗi khi lưu phòng học');
     }
   };
 
@@ -90,10 +90,10 @@ export default function ClassroomModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await classroomApi.delete(deleteTarget.roomId);
-      onNotify('success', `Classroom ${deleteTarget.roomId} deleted!`);
+      onNotify('success', `Classroom ${deleteTarget.roomId} đã được xóa thành công!`);
       loadClassrooms();
     } catch (err) {
-      onNotify('error', err?.message || 'Error deleting classroom');
+      onNotify('error', err?.message || 'Lỗi khi xóa phòng học');
     }
   };
 
@@ -101,7 +101,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Classrooms & Hall Facilities</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản Lý Phòng Học & Giảng Đường</h1>
           <p className="text-xs text-slate-400 mt-1">Quản lý giảng đường, tòa nhà, phòng thực hành và sức chứa sinh viên</p>
         </div>
 
@@ -111,7 +111,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
             className="flex items-center gap-2 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-rose-600/30 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            <span>New Classroom</span>
+            <span>Thêm Phòng Học Mới</span>
           </button>
         )}
       </div>
@@ -122,7 +122,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
           onChange={(e) => { setSelectedBuilding(e.target.value); setPage(0); }}
           className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-rose-500 transition"
         >
-          <option value="">All Campus Buildings</option>
+          <option value="">Tất Cả Các Tòa Nhà</option>
           <option value="BUILDING_A">Building A (Tòa A)</option>
           <option value="BUILDING_B">Building B (Tòa B)</option>
           <option value="BUILDING_C">Building C (Tòa C)</option>
@@ -195,7 +195,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Edit Room: ${formData.roomId}` : 'Thêm phòng học'}
+        title={isEdit ? `Sửa Phòng Học: ${formData.roomId}` : 'Thêm phòng học'}
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -205,7 +205,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
                 type="text"
                 required
                 disabled={isEdit}
-                placeholder="e.g. A101, B202"
+                placeholder="VD: A101, B202"
                 value={formData.roomId}
                 onChange={(e) => setFormData({ ...formData, roomId: e.target.value })}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-rose-500 disabled:opacity-50"
@@ -213,7 +213,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Room Name (Tên Phòng)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Tên Phòng Học*</label>
               <input
                 type="text"
                 required
@@ -227,7 +227,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Building (Tòa Nhà)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Tòa Nhà*</label>
               <select
                 value={formData.building}
                 onChange={(e) => setFormData({ ...formData, building: e.target.value })}

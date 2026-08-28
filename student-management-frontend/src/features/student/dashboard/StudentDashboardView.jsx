@@ -22,7 +22,7 @@ export default function StudentDashboardView({ onNavigateTab }) {
       const res = await studentPortalApi.getMyOverview();
       setOverview(res.data);
     } catch (err) {
-      console.error('Failed to load overview', err);
+      console.error('Lỗi khi tải dữ liệu tổng quan', err);
     } finally {
       setLoading(false);
     }

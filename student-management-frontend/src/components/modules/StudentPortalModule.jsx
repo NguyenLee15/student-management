@@ -19,8 +19,8 @@ const WEEKDAYS = [
 export default function StudentPortalModule({ onNotify, currentUser }) {
   const [activeSubTab, setActiveSubTab] = useState('transcript'); // transcript | timetable | registration
   const [currentStudentId, setCurrentStudentId] = useState(currentUser?.studentId || '');
-  const [studentList, setStudentList] = useState([]);
-  const [studentInfo, setStudentInfo] = useState(null);
+  const [studentList, setStudentsList] = useState([]);
+  const [studentInfo, setStudentsInfo] = useState(null);
 
   // Data states
   const [grades, setGrades] = useState([]);
@@ -35,7 +35,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
 
   useEffect(() => {
     if (currentStudentId) {
-      loadStudentPortalData();
+      loadStudentsPortalData();
     }
   }, [currentStudentId, activeSubTab]);
 
@@ -44,7 +44,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
       const res = await studentApi.getAll({ page: 0, size: 50 });
       const d = res.data || res;
       const list = Array.isArray(d) ? d : (d.content || []);
-      setStudentList(list);
+      setStudentsList(list);
       if (list.length > 0 && !currentUser?.studentId) {
         setCurrentStudentId(list[0].studentId);
       }
@@ -53,12 +53,12 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
     }
   };
 
-  const loadStudentPortalData = async () => {
+  const loadStudentsPortalData = async () => {
     setLoading(true);
     try {
       // Find current student info
       const found = studentList.find(s => s.studentId === currentStudentId);
-      setStudentInfo(found || { studentId: currentStudentId, fullName: 'Unknown Student' });
+      setStudentsInfo(found || { studentId: currentStudentId, fullName: 'Unknown Sinh Viên' });
 
       if (activeSubTab === 'transcript') {
         const res = await gradeApi.getAll({ studentId: currentStudentId, size: 100 });
@@ -119,7 +119,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
     try {
       await creditClassApi.addStudent(creditClassId, currentStudentId);
       onNotify('success', `Đã đăng ký thành công lớp tín chỉ #${creditClassId}!`);
-      loadStudentPortalData();
+      loadStudentsPortalData();
     } catch (err) {
       onNotify('error', err?.message || 'Không thể đăng ký môn học.');
     } finally {
@@ -132,7 +132,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
     try {
       await creditClassApi.removeStudent(creditClassId, currentStudentId);
       onNotify('info', `Đã hủy đăng ký lớp tín chỉ #${creditClassId}.`);
-      loadStudentPortalData();
+      loadStudentsPortalData();
     } catch (err) {
       onNotify('error', err?.message || 'Không thể hủy môn học.');
     } finally {
@@ -142,7 +142,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
 
   return (
     <div className="space-y-6">
-      {/* Portal Top Header & Student Selector */}
+      {/* Portal Top Header & Sinh Viên Selector */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900">
         <div className="flex items-center gap-4">
           <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-indigo-500/30">
@@ -259,7 +259,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
                 <p className="text-xs text-slate-400">Danh sách điểm thành phần và điểm tổng kết các học phần</p>
               </div>
               <button
-                onClick={loadStudentPortalData}
+                onClick={loadStudentsPortalData}
                 className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
@@ -403,7 +403,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
               <p className="text-xs text-slate-400">Học kỳ 1 (2025 - 2026) • Chọn lớp phù hợp với kế hoạch học tập</p>
             </div>
             <button
-              onClick={loadStudentPortalData}
+              onClick={loadStudentsPortalData}
               className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />

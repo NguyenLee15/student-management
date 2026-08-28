@@ -39,13 +39,13 @@ export default function AuditLogModule({ onNotify }) {
   const getActionBadge = (action) => {
     switch (action) {
       case 'CREATE':
-        return <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">CREATE</span>;
+        return <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">THÊM MỚI</span>;
       case 'UPDATE':
-        return <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">UPDATE</span>;
+        return <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">CẬP NHẬT</span>;
       case 'DELETE':
-        return <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20">DELETE</span>;
+        return <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20">XÓA</span>;
       case 'LOGIN':
-        return <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">LOGIN</span>;
+        return <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">ĐĂNG NHẬP</span>;
       default:
         return <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-slate-800 text-slate-300">{action}</span>;
     }
@@ -55,7 +55,7 @@ export default function AuditLogModule({ onNotify }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">System Audit Logs & Security History</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Nhật Ký Kiểm Tra & Lịch Sử Hoạt Động</h1>
           <p className="text-xs text-slate-400 mt-1">Lưu vết toàn bộ thao tác thêm, sửa, xóa và truy cập hệ thống theo thời gian thực</p>
         </div>
 
@@ -64,7 +64,7 @@ export default function AuditLogModule({ onNotify }) {
           className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
-          <span>Refresh Timeline</span>
+          <span>Làm Mới Nhật Ký</span>
         </button>
       </div>
 
@@ -73,12 +73,12 @@ export default function AuditLogModule({ onNotify }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
-                <th className="px-5 py-3.5">Timestamp</th>
+                <th className="px-5 py-3.5">Thời Gian</th>
                 <th className="px-5 py-3.5">Thao tác</th>
-                <th className="px-5 py-3.5">Entity</th>
-                <th className="px-5 py-3.5">Entity ID</th>
-                <th className="px-5 py-3.5">Details</th>
-                <th className="px-5 py-3.5 text-right">Performed By</th>
+                <th className="px-5 py-3.5">Đối Tượng</th>
+                <th className="px-5 py-3.5">Mã Đối Tượng</th>
+                <th className="px-5 py-3.5">Chi Tiết Thao Tác</th>
+                <th className="px-5 py-3.5 text-right">Người Thực Hiện</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">

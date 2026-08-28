@@ -78,11 +78,11 @@ export default function CreditClassModule({ onNotify, currentUser }) {
     e.preventDefault();
     try {
       await creditClassApi.create(formData);
-      onNotify('success', 'Credit class created successfully!');
+      onNotify('success', 'Mở lớp tín chỉ thành công!');
       setShowModal(false);
       loadCreditClasses();
     } catch (err) {
-      onNotify('error', err?.message || 'Error creating credit class');
+      onNotify('error', err?.message || 'Lỗi khi mở lớp tín chỉ');
     }
   };
 
@@ -103,11 +103,11 @@ export default function CreditClassModule({ onNotify, currentUser }) {
     if (!newStudentId || !selectedClass) return;
     try {
       await creditClassApi.addStudent(selectedClass.creditClassId, newStudentId.trim());
-      onNotify('success', `Student ${newStudentId} added to credit class!`);
+      onNotify('success', `Sinh Viên ${newStudentId} đã được thêm vào lớp tín chỉ!`);
       setNewStudentId('');
       handleViewStudents(selectedClass);
     } catch (err) {
-      onNotify('error', err?.message || 'Error adding student');
+      onNotify('error', err?.message || 'Lỗi khi thêm sinh viên');
     }
   };
 
@@ -115,10 +115,10 @@ export default function CreditClassModule({ onNotify, currentUser }) {
     if (!selectedClass) return;
     try {
       await creditClassApi.removeStudent(selectedClass.creditClassId, studentId);
-      onNotify('success', `Student ${studentId} removed from credit class!`);
+      onNotify('success', `Sinh Viên ${studentId} đã được xóa khỏi lớp tín chỉ!`);
       handleViewStudents(selectedClass);
     } catch (err) {
-      onNotify('error', err?.message || 'Error removing student');
+      onNotify('error', err?.message || 'Lỗi khi xóa sinh viên');
     }
   };
 
@@ -126,10 +126,10 @@ export default function CreditClassModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await creditClassApi.delete(deleteTarget.creditClassId);
-      onNotify('success', `Credit Class ${deleteTarget.creditClassId} deleted!`);
+      onNotify('success', `Credit Class ${deleteTarget.creditClassId} đã được xóa thành công!`);
       loadCreditClasses();
     } catch (err) {
-      onNotify('error', err?.message || 'Error deleting credit class');
+      onNotify('error', err?.message || 'Lỗi khi hủy lớp tín chỉ');
     }
   };
 
@@ -176,11 +176,11 @@ export default function CreditClassModule({ onNotify, currentUser }) {
 
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-800/80 text-xs">
               <div>
-                <span className="text-slate-500">Enrolled Students</span>
+                <span className="text-slate-500">Sinh Viên Đã Đăng Ký</span>
                 <p className="text-lg font-bold text-emerald-400">{cc.enrolledStudentsCount || cc.students?.length || 0}</p>
               </div>
               <div>
-                <span className="text-slate-500">Min / Max Quota</span>
+                <span className="text-slate-500">Sĩ Số Tối Thiểu / Tối Đa</span>
                 <p className="text-lg font-bold text-slate-300">{cc.minStudents || 15} - {cc.maxStudents || 60}</p>
               </div>
             </div>
@@ -193,7 +193,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-500/20 transition"
                   >
                     <Users className="h-3.5 w-3.5" />
-                    <span>Manage Roster</span>
+                    <span>Quản Lý Sĩ Số</span>
                   </button>
 
                   <button
@@ -214,12 +214,12 @@ export default function CreditClassModule({ onNotify, currentUser }) {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title="Mở lớp tín chỉ mới"
-        subtitle="Associate course subject with student homeroom cohort"
+        subtitle="Gắn môn học với giảng viên và thời gian tổ chức"
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Subject (Học Phần)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Học Phần (Học Phần)*</label>
               <select
                 value={formData.subjectId}
                 onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
@@ -247,7 +247,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Minimum Enrolment Quota</label>
+              <label className="block text-slate-300 font-semibold mb-1">Sĩ Số Tối Thiểu</label>
               <input
                 type="number"
                 min="5"
@@ -259,7 +259,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Maximum Enrolment Capacity</label>
+              <label className="block text-slate-300 font-semibold mb-1">Sĩ Số Tối Đa</label>
               <input
                 type="number"
                 min="10"
@@ -287,11 +287,11 @@ export default function CreditClassModule({ onNotify, currentUser }) {
         </form>
       </Modal>
 
-      {/* Modal Manage Roster */}
+      {/* Modal Quản Lý Sĩ Số */}
       <Modal
         isOpen={showStudentsModal}
         onClose={() => setShowStudentsModal(false)}
-        title={`Student Roster: ${selectedClass?.subjectName || selectedClass?.subjectId}`}
+        title={`Sinh Viên Roster: ${selectedClass?.subjectName || selectedClass?.subjectId}`}
         subtitle={`Section ID: ${selectedClass?.creditClassId} | Total: ${enrolledStudents.length} registered students`}
         maxWidth="max-w-xl"
       >
@@ -300,7 +300,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
             <input
               type="text"
               required
-              placeholder="Enter Student ID to enrol (e.g. SV001)..."
+              placeholder="Nhập mã SV để thêm vào lớp (VD: SV001)..."
               value={newStudentId}
               onChange={(e) => setNewStudentId(e.target.value)}
               className="flex-1 px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500"
@@ -310,13 +310,13 @@ export default function CreditClassModule({ onNotify, currentUser }) {
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow-sm"
             >
               <UserPlus className="h-4 w-4" />
-              <span>Enrol</span>
+              <span>Ghi Danh</span>
             </button>
           </form>
 
           <div className="max-h-64 overflow-y-auto space-y-2 border border-slate-800 rounded-xl p-2 bg-slate-950/50">
             {enrolledStudents.length === 0 ? (
-              <p className="text-center py-6 text-slate-500">No students currently enrolled in this section.</p>
+              <p className="text-center py-6 text-slate-500">Chưa có sinh viên nào đăng ký lớp tín chỉ này.</p>
             ) : (
               enrolledStudents.map((st) => (
                 <div key={st.studentId} className="flex items-center justify-between p-2.5 rounded-lg bg-slate-900 border border-slate-800">
@@ -346,7 +346,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete Credit Class Section"
+        title="Hủy Lớp Tín Chỉ"
         message={`Are you sure you want to remove this credit class section (ID: ${deleteTarget?.creditClassId})?`}
       />
     </div>

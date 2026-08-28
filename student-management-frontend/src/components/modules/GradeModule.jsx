@@ -20,7 +20,7 @@ export default function GradeModule({ onNotify, currentUser }) {
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
 
-  const [studentSearch, setStudentSearch] = useState('');
+  const [studentSearch, setStudentsSearch] = useState('');
   const [selectedSemester, setSelectedSemester] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -123,7 +123,7 @@ export default function GradeModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await gradeApi.update(formData.gradeId, formData);
-        onNotify('success', `Grade record #${formData.gradeId} updated!`);
+        onNotify('success', `Grade record #${formData.gradeId} đã được cập nhật thành công!`);
       } else {
         await gradeApi.create(formData);
         onNotify('success', `Grade score registered for student ${formData.studentId}!`);
@@ -142,7 +142,7 @@ export default function GradeModule({ onNotify, currentUser }) {
       onNotify('success', `Grade record #${deleteTarget.gradeId} removed!`);
       loadGrades();
     } catch (err) {
-      onNotify('error', err?.message || 'Error deleting grade');
+      onNotify('error', err?.message || 'Lỗi khi xóa điểm');
     }
   };
 
@@ -150,7 +150,7 @@ export default function GradeModule({ onNotify, currentUser }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Academic Grades & GPA Calculation</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản Lý Điểm Số & Đánh Giá GPA</h1>
           <p className="text-xs text-slate-400 mt-1">Quản lý điểm chuyên cần, giữa kỳ, cuối kỳ, điểm chữ và quy đổi GPA thang 4.0</p>
         </div>
 
@@ -160,7 +160,7 @@ export default function GradeModule({ onNotify, currentUser }) {
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-purple-600/30 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            <span>New Grade Entry</span>
+            <span>Nhập Điểm Mới</span>
           </button>
         )}
       </div>
@@ -169,9 +169,9 @@ export default function GradeModule({ onNotify, currentUser }) {
       <div className="glass-card p-4 rounded-2xl border border-slate-800 flex flex-wrap items-center gap-3">
         <input
           type="text"
-          placeholder="Filter by Student ID (e.g. SV001)..."
+          placeholder="Tìm theo mã sinh viên (VD: SV001)..."
           value={studentSearch}
-          onChange={(e) => setStudentSearch(e.target.value)}
+          onChange={(e) => setStudentsSearch(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { setPage(0); loadGrades(); } }}
           className="px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-purple-500 min-w-[220px]"
         />
@@ -181,7 +181,7 @@ export default function GradeModule({ onNotify, currentUser }) {
           onChange={(e) => { setSelectedSemester(e.target.value); setPage(0); }}
           className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-purple-500"
         >
-          <option value="">All Semesters</option>
+          <option value="">Tất Cả Các Học Kỳ</option>
           <option value="SEMESTER_1">Semester 1 (Học kỳ 1)</option>
           <option value="SEMESTER_2">Semester 2 (Học kỳ 2)</option>
         </select>
@@ -200,13 +200,13 @@ export default function GradeModule({ onNotify, currentUser }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
-                <th className="px-5 py-3.5">Student</th>
-                <th className="px-5 py-3.5">Subject</th>
-                <th className="px-5 py-3.5">Attendance</th>
-                <th className="px-5 py-3.5">Midterm</th>
-                <th className="px-5 py-3.5">Final Exam</th>
-                <th className="px-5 py-3.5">Final Score (10)</th>
-                <th className="px-5 py-3.5">Letter Grade</th>
+                <th className="px-5 py-3.5">Sinh Viên</th>
+                <th className="px-5 py-3.5">Học Phần</th>
+                <th className="px-5 py-3.5">Chuyên Cần (10%)</th>
+                <th className="px-5 py-3.5">Giữa Kỳ (30%)</th>
+                <th className="px-5 py-3.5">Cuối Kỳ (60%)</th>
+                <th className="px-5 py-3.5">Tổng Kết (Thang 10)</th>
+                <th className="px-5 py-3.5">Điểm Chữ</th>
                 <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
             </thead>
@@ -278,7 +278,7 @@ export default function GradeModule({ onNotify, currentUser }) {
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Student (Sinh Viên)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Sinh Viên (Sinh Viên)*</label>
               <select
                 value={formData.studentId}
                 onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
@@ -291,7 +291,7 @@ export default function GradeModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Course Subject (Môn Học)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Course Học Phần (Môn Học)*</label>
               <select
                 value={formData.subjectId}
                 onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
@@ -306,7 +306,7 @@ export default function GradeModule({ onNotify, currentUser }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Attendance Score (Chuyên cần)</label>
+              <label className="block text-slate-300 font-semibold mb-1">Chuyên Cần (10%) Score (Chuyên cần)</label>
               <input
                 type="number"
                 step="0.1"
@@ -319,7 +319,7 @@ export default function GradeModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Midterm Assessment (Thường xuyên)</label>
+              <label className="block text-slate-300 font-semibold mb-1">Giữa Kỳ (30%) Assessment (Thường xuyên)</label>
               <input
                 type="number"
                 step="0.1"
@@ -332,7 +332,7 @@ export default function GradeModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Final Exam Score (Thi kết thúc)</label>
+              <label className="block text-slate-300 font-semibold mb-1">Cuối Kỳ (60%) Score (Thi kết thúc)</label>
               <input
                 type="number"
                 step="0.1"
@@ -365,7 +365,7 @@ export default function GradeModule({ onNotify, currentUser }) {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete Grade Record"
+        title="Xóa Bản Ghi Điểm"
         message={`Are you sure you want to remove grade record #${deleteTarget?.gradeId}?`}
       />
     </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 import Modal from './Modal';
 
-export default function ConfirmDialog({ isOpen, onClose, onConfirm, title = 'Confirm Action', message, confirmText = 'Xóa', isDanger = true }) {
+export default function ConfirmDialog({ isOpen, onClose, onConfirm, title = 'Xác Nhận Thao Tác', message, confirmText = 'Xóa', isDanger = true }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="max-w-md">
       <div className="space-y-4">

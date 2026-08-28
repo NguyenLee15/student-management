@@ -41,7 +41,7 @@ export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin })
               </div>
               <div>
                 <span className="font-black text-lg tracking-tight bg-gradient-to-r from-white via-blue-100 to-slate-300 bg-clip-text text-transparent">
-                  EduPortal AI
+                  EduPortal
                 </span>
                 <span className="hidden sm:inline-block ml-2 px-2 py-0.5 bg-blue-500/20 text-blue-300 text-[10px] font-bold rounded-full border border-blue-400/30">
                   Cổng Sinh Viên
@@ -86,27 +86,26 @@ export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin })
         </div>
       </header>
 
-      {/* Mobile Backdrop */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
       {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col md:flex-row gap-6 w-full">
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex gap-6">
+        {/* Mobile Menu Backdrop */}
+        {isMobileMenuOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
         {/* Sidebar Navigation */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 p-4 pt-20 md:pt-0 md:static md:w-60 md:block md:border-none md:p-0 md:bg-transparent transition-transform duration-200 ${
-            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 p-4 transform transition-transform duration-200 ease-in-out md:static md:translate-x-0 md:bg-transparent md:border-0 md:p-0 ${
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
-          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+          <div className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
-
               return (
                 <button
                   key={item.id}
@@ -114,7 +113,7 @@ export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin })
                     setActiveTab(item.id);
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between p-3 rounded-xl text-xs font-bold transition-all ${
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-xs transition-all ${
                     isActive
                       ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'

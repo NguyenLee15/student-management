@@ -54,7 +54,7 @@ export default function CourseRegistrationView() {
       const enrollmentsRes = await studentRegistrationApi.getMyEnrollments(currentSemesterId);
       setMyEnrollments(enrollmentsRes.data || []);
     } catch (err) {
-      console.error('Failed to load registration data', err);
+      console.error('Lỗi khi tải danh sách môn học đăng ký', err);
       setErrorMessage(err.response?.data?.message || 'Không thể tải dữ liệu đợt đăng ký tín chỉ.');
     } finally {
       setLoading(false);
@@ -67,7 +67,7 @@ export default function CourseRegistrationView() {
       const res = await studentRegistrationApi.validateCart(classIds);
       setValidationResult(res.data);
     } catch (err) {
-      console.error('Validation error', err);
+      console.error('Lỗi kiểm tra điều kiện tiên quyết', err);
     }
   };
 
@@ -98,7 +98,7 @@ export default function CourseRegistrationView() {
       setIsCartOpen(false);
       await loadRegistrationData();
     } catch (err) {
-      console.error('Batch registration failed', err);
+      console.error('Đăng ký học phần thất bại', err);
       const errorData = err.response?.data;
       setErrorMessage(errorData?.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại điều kiện giỏ môn học.');
       if (errorData?.details) {

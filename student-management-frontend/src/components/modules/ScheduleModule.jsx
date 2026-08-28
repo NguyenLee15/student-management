@@ -167,7 +167,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">University Timetable & Schedule</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản Lý Thời Khóa Biểu & Lịch Học</h1>
           <p className="text-xs text-slate-400 mt-1">Quản lý phân bổ ca học, thứ trong tuần, giảng viên phụ trách và phòng học</p>
         </div>
 
@@ -177,7 +177,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
             className="flex items-center gap-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-teal-600/30 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            <span>New Schedule Slot</span>
+            <span>Thêm Lịch Học Mới Slot</span>
           </button>
         )}
       </div>
@@ -189,7 +189,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
           onChange={(e) => { setSelectedSemester(e.target.value); setPage(0); }}
           className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-teal-500 transition"
         >
-          <option value="">All Semesters (Tất cả học kỳ)</option>
+          <option value="">Tất Cả Các Học Kỳ (Tất cả học kỳ)</option>
           <option value="SEMESTER_1">Học kỳ 1 (Fall Semester)</option>
           <option value="SEMESTER_2">Học kỳ 2 (Spring Semester)</option>
           <option value="SEMESTER_SUMMER">Học kỳ Phụ (Summer)</option>
@@ -222,10 +222,10 @@ export default function ScheduleModule({ onNotify, currentUser }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
-                <th className="px-5 py-3.5">Weekday & Shift</th>
-                <th className="px-5 py-3.5">Course / Subject</th>
-                <th className="px-5 py-3.5">Assigned Lecturer</th>
-                <th className="px-5 py-3.5">Lecture Hall</th>
+                <th className="px-5 py-3.5">Thứ Trong Tuần & Ca Học</th>
+                <th className="px-5 py-3.5">Course / Học Phần</th>
+                <th className="px-5 py-3.5">Giảng Viên Phụ Trách</th>
+                <th className="px-5 py-3.5">Phòng Học / Giảng Đường</th>
                 <th className="px-5 py-3.5">Học kỳ</th>
                 <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
@@ -299,7 +299,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Credit Class Section*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Lớp Tín Chỉ*</label>
               <select
                 value={formData.creditClassId}
                 onChange={(e) => setFormData({ ...formData, creditClassId: parseInt(e.target.value) || e.target.value })}
@@ -314,7 +314,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Lecturer In Charge*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Giảng Viên Phụ Trách*</label>
               <select
                 value={formData.teacherId}
                 onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
@@ -329,7 +329,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Lecture Hall Room*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Phòng Học / Giảng Đường*</label>
               <select
                 value={formData.roomId}
                 onChange={(e) => setFormData({ ...formData, roomId: e.target.value })}
@@ -394,7 +394,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete Timetable Slot"
+        title="Xóa Lịch Học"
         message={`Are you sure you want to remove timetable slot #${deleteTarget?.scheduleId}?`}
       />
     </div>

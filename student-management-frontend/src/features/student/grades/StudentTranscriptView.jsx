@@ -21,7 +21,7 @@ export default function StudentTranscriptView() {
       setGrades(gradeRes.data?.content || gradeRes.data || []);
       setOverview(overRes.data);
     } catch (err) {
-      console.error('Failed to load transcript data', err);
+      console.error('Lỗi khi tải dữ liệu bảng điểm', err);
     } finally {
       setLoading(false);
     }
@@ -90,7 +90,7 @@ export default function StudentTranscriptView() {
           </h2>
         </div>
 
-        {/* Student Profile Overview */}
+        {/* Sinh Viên Profile Overview */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
           <div>
             <span className="text-slate-400 block">Họ và tên:</span>

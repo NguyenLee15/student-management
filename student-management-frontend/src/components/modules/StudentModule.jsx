@@ -158,10 +158,10 @@ export default function StudentModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await studentApi.update(formData.studentId, formData);
-        onNotify('success', `Student ${formData.studentId} updated successfully!`);
+        onNotify('success', `Sinh Viên ${formData.studentId} updated successfully!`);
       } else {
         await studentApi.create(formData);
-        onNotify('success', `Student ${formData.studentId} created successfully!`);
+        onNotify('success', `Sinh Viên ${formData.studentId} created successfully!`);
       }
       setShowModal(false);
       loadStudents();
@@ -174,7 +174,7 @@ export default function StudentModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await studentApi.delete(deleteTarget.studentId);
-      onNotify('success', `Student ${deleteTarget.studentId} deleted successfully!`);
+      onNotify('success', `Sinh Viên ${deleteTarget.studentId} deleted successfully!`);
       loadStudents();
     } catch (err) {
       onNotify('error', err?.message || 'Error deleting student');
@@ -187,7 +187,7 @@ export default function StudentModule({ onNotify, currentUser }) {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Students_List_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      link.setAttribute('download', `Sinh Viêns_List_${new Date().toISOString().slice(0, 10)}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -343,7 +343,7 @@ export default function StudentModule({ onNotify, currentUser }) {
         </div>
       </div>
 
-      {/* Main Student Data Table */}
+      {/* Main Sinh Viên Data Table */}
       <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
@@ -408,7 +408,7 @@ export default function StudentModule({ onNotify, currentUser }) {
                     <td className="px-5 py-3.5 text-right space-x-1">
                       <button
                         onClick={() => setTranscriptStudent(st)}
-                        title="View Official Transcript & GPA"
+                        title="Xem Bảng Điểm & GPA Chi Tiết"
                         className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition"
                       >
                         <Award className="h-4 w-4" />
@@ -464,7 +464,7 @@ export default function StudentModule({ onNotify, currentUser }) {
                 type="text"
                 required
                 disabled={isEdit}
-                placeholder="e.g. SV001"
+                placeholder="VD: SV001"
                 value={formData.studentId}
                 onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
@@ -476,7 +476,7 @@ export default function StudentModule({ onNotify, currentUser }) {
               <input
                 type="text"
                 required
-                placeholder="e.g. Nguyen Van An"
+                placeholder="VD: Nguyễn Văn An"
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"

@@ -50,15 +50,15 @@ export default function FacultyModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await facultyApi.update(formData.facultyId, formData);
-        onNotify('success', `Faculty ${formData.facultyId} updated!`);
+        onNotify('success', `Faculty ${formData.facultyId} đã được cập nhật thành công!`);
       } else {
         await facultyApi.create(formData);
-        onNotify('success', `Faculty ${formData.facultyId} created!`);
+        onNotify('success', `Faculty ${formData.facultyId} đã được tạo thành công!`);
       }
       setShowModal(false);
       loadFaculties();
     } catch (err) {
-      onNotify('error', err?.message || 'Error saving faculty');
+      onNotify('error', err?.message || 'Lỗi khi lưu khoa');
     }
   };
 
@@ -66,10 +66,10 @@ export default function FacultyModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await facultyApi.delete(deleteTarget.facultyId);
-      onNotify('success', `Faculty ${deleteTarget.facultyId} deleted!`);
+      onNotify('success', `Faculty ${deleteTarget.facultyId} đã được xóa thành công!`);
       loadFaculties();
     } catch (err) {
-      onNotify('error', err?.message || 'Error deleting faculty');
+      onNotify('error', err?.message || 'Lỗi khi xóa khoa');
     }
   };
 
@@ -78,7 +78,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Academic Faculties & Schools</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản Lý Khoa & Viện Đào Tạo</h1>
           <p className="text-xs text-slate-400 mt-1">Quản lý các khoa chuyên môn và viện đào tạo trực thuộc trường</p>
         </div>
 
@@ -115,7 +115,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
             </div>
 
             <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Department Status: <span className="text-emerald-400 font-semibold">Hoạt động</span></span>
+              <span className="text-slate-400">Trạng Thái Khoa: <span className="text-emerald-400 font-semibold">Hoạt động</span></span>
               {isAdmin && (
                 <div className="flex items-center gap-1">
                   <button
@@ -141,8 +141,8 @@ export default function FacultyModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Edit Faculty: ${formData.facultyId}` : 'Create Academic Faculty'}
-        subtitle="Specify official department code and title"
+        title={isEdit ? `Sửa Khoa: ${formData.facultyId}` : 'Create Academic Faculty'}
+        subtitle="Nhập mã khoa, tên khoa và thông tin lãnh đạo"
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
@@ -151,7 +151,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
               type="text"
               required
               disabled={isEdit}
-              placeholder="e.g. CNTT, DTVT, QTKD"
+              placeholder="VD: CNTT, DTVT, QTKD"
               value={formData.facultyId}
               onChange={(e) => setFormData({ ...formData, facultyId: e.target.value })}
               className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500 disabled:opacity-50"

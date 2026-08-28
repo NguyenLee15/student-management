@@ -57,7 +57,7 @@ export default function UserModule({ onNotify }) {
       setShowModal(false);
       loadUsers();
     } catch (err) {
-      onNotify('error', err?.message || 'Error creating user account');
+      onNotify('error', err?.message || 'Lỗi khi tạo tài khoản');
     }
   };
 
@@ -65,10 +65,10 @@ export default function UserModule({ onNotify }) {
     if (!deleteTarget) return;
     try {
       await userApi.delete(deleteTarget.userName);
-      onNotify('success', `User ${deleteTarget.userName} deleted!`);
+      onNotify('success', `User ${deleteTarget.userName} đã được xóa thành công!`);
       loadUsers();
     } catch (err) {
-      onNotify('error', err?.message || 'Error deleting user');
+      onNotify('error', err?.message || 'Lỗi khi xóa tài khoản');
     }
   };
 
@@ -76,7 +76,7 @@ export default function UserModule({ onNotify }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">System Users & Access Roles</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản Lý Tài Khoản & Phân Quyền Người Dùng</h1>
           <p className="text-xs text-slate-400 mt-1">Quản lý tài khoản người dùng, phân quyền truy cập và bảo mật hệ thống</p>
         </div>
 
@@ -85,7 +85,7 @@ export default function UserModule({ onNotify }) {
           className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-red-600/30 transition active:scale-95"
         >
           <Plus className="h-4 w-4" />
-          <span>New User Account</span>
+          <span>Tạo Tài Khoản Mới</span>
         </button>
       </div>
 
@@ -95,7 +95,7 @@ export default function UserModule({ onNotify }) {
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
                 <th className="px-5 py-3.5">Tên đăng nhập</th>
-                <th className="px-5 py-3.5">Assigned Authority (Role)</th>
+                <th className="px-5 py-3.5">Quyền Hạn (Role)</th>
                 <th className="px-5 py-3.5">Trạng thái</th>
                 <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
@@ -133,7 +133,7 @@ export default function UserModule({ onNotify }) {
                     {u.userName !== 'admin' && (
                       <button
                         onClick={() => setDeleteTarget(u)}
-                        title="Delete user"
+                        title="Xóa người dùng"
                         className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -158,17 +158,17 @@ export default function UserModule({ onNotify }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title="Create System User Account"
-        subtitle="Specify credentials and Spring Security role assignment"
+        title="Tạo Tài Khoản Người Dùng Mới"
+        subtitle="Nhập tên đăng nhập, mật khẩu và phân quyền truy cập"
         maxWidth="max-w-md"
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Username*</label>
+            <label className="block text-slate-300 font-semibold mb-1">Tên Đăng Nhập*</label>
             <input
               type="text"
               required
-              placeholder="e.g. lecturer_john"
+              placeholder="VD: giangvien_an"
               value={formData.userName}
               onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
               className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-red-500"
@@ -176,7 +176,7 @@ export default function UserModule({ onNotify }) {
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Password (BCrypt encoded)*</label>
+            <label className="block text-slate-300 font-semibold mb-1">Mật Khẩu Khởi Tạo*</label>
             <input
               type="password"
               required
@@ -188,7 +188,7 @@ export default function UserModule({ onNotify }) {
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Security Role*</label>
+            <label className="block text-slate-300 font-semibold mb-1">Vai Trò Phân Quyền*</label>
             <select
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
@@ -202,11 +202,11 @@ export default function UserModule({ onNotify }) {
 
           {formData.role === 'ROLE_STUDENT' && (
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Associated Student ID (Mã SV)*</label>
+              <label className="block text-slate-300 font-semibold mb-1">Associated Sinh Viên ID (Mã SV)*</label>
               <input
                 type="text"
                 required
-                placeholder="e.g. SV20210001"
+                placeholder="VD: SV20210001"
                 value={formData.studentId || ''}
                 onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-red-500"
@@ -224,7 +224,7 @@ export default function UserModule({ onNotify }) {
               type="submit"
               className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold shadow-lg shadow-red-600/30 transition"
             >
-              Create Account
+              Tạo Tài Khoản
             </button>
           </div>
         </form>
@@ -234,8 +234,8 @@ export default function UserModule({ onNotify }) {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete User Account"
-        message={`Are you sure you want to permanently delete user account "${deleteTarget?.userName}"?`}
+        title="Xóa Tài Khoản Người Dùng"
+        message={`Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản "${deleteTarget?.userName}"?`}
       />
     </div>
   );

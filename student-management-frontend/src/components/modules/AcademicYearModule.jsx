@@ -50,15 +50,15 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
     try {
       if (isEdit) {
         await academicYearApi.update(formData.academicYearId, formData);
-        onNotify('success', `Academic Year ${formData.academicYearId} updated!`);
+        onNotify('success', `Academic Year ${formData.academicYearId} đã được cập nhật thành công!`);
       } else {
         await academicYearApi.create(formData);
-        onNotify('success', `Academic Year ${formData.academicYearId} created!`);
+        onNotify('success', `Academic Year ${formData.academicYearId} đã được tạo thành công!`);
       }
       setShowModal(false);
       loadYears();
     } catch (err) {
-      onNotify('error', err?.message || 'Error saving academic year');
+      onNotify('error', err?.message || 'Lỗi khi lưu niên khóa');
     }
   };
 
@@ -66,10 +66,10 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
     if (!deleteTarget) return;
     try {
       await academicYearApi.delete(deleteTarget.academicYearId);
-      onNotify('success', `Academic Year ${deleteTarget.academicYearId} deleted!`);
+      onNotify('success', `Academic Year ${deleteTarget.academicYearId} đã được xóa thành công!`);
       loadYears();
     } catch (err) {
-      onNotify('error', err?.message || 'Error deleting academic year');
+      onNotify('error', err?.message || 'Lỗi khi xóa niên khóa');
     }
   };
 
@@ -77,7 +77,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Academic Cohorts & Years</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản Lý Niên Khóa & Khóa Học</h1>
           <p className="text-xs text-slate-400 mt-1">Quản lý các khóa tuyển sinh (K63, K64, K65, K66...) và thời gian đào tạo</p>
         </div>
 
@@ -87,7 +87,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
             className="flex items-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-violet-600/30 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            <span>New Academic Year</span>
+            <span>Thêm Niên Khóa Mới</span>
           </button>
         )}
       </div>
@@ -113,7 +113,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
             </div>
 
             <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Status: <span className="text-emerald-400 font-semibold">Hoạt động</span></span>
+              <span className="text-slate-400">Trạng thái: <span className="text-emerald-400 font-semibold">Đang hoạt động</span></span>
               {isAdmin && (
                 <div className="flex items-center gap-1">
                   <button
@@ -139,7 +139,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Edit Cohort: ${formData.academicYearId}` : 'Thêm niên khóa'}
+        title={isEdit ? `Sửa Niên Khóa: ${formData.academicYearId}` : 'Thêm niên khóa'}
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
@@ -148,7 +148,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
               type="text"
               required
               disabled={isEdit}
-              placeholder="e.g. K65, K66"
+              placeholder="VD: K65, K66"
               value={formData.academicYearId}
               onChange={(e) => setFormData({ ...formData, academicYearId: e.target.value })}
               className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-violet-500 disabled:opacity-50"
@@ -177,7 +177,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
               type="submit"
               className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-lg shadow-violet-600/30 transition"
             >
-              {isEdit ? 'Lưu thay đổi' : 'Create Cohort'}
+              {isEdit ? 'Lưu thay đổi' : 'Thêm Niên Khóa'}
             </button>
           </div>
         </form>
