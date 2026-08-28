@@ -12,15 +12,13 @@ import com.student.management.repository.SemesterScheduleRepository;
 import com.student.management.repository.StudentRepository;
 import com.student.management.service.StudentPortalService;
 import com.student.management.service.TuitionService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j

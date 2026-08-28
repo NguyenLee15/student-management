@@ -5,8 +5,6 @@ import com.student.management.dto.resp.RegistrationBatchResponseDto;
 import com.student.management.dto.resp.RegistrationPeriodResponseDto;
 import com.student.management.entity.*;
 import com.student.management.enums.EnrollmentStatus;
-import com.student.management.exception.BusinessException;
-import com.student.management.exception.ErrorCode;
 import com.student.management.repository.*;
 import com.student.management.service.impl.CourseRegistrationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

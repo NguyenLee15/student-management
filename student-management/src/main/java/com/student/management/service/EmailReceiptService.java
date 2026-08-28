@@ -3,7 +3,6 @@ package com.student.management.service;
 import com.student.management.entity.PaymentTransaction;
 import com.student.management.entity.Student;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

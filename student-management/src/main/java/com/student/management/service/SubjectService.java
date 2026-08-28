@@ -4,7 +4,6 @@ import com.student.management.dto.req.SubjectRequestDto;
 import com.student.management.dto.resp.SubjectResponseDto;
 import com.student.management.enums.SubjectType;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;

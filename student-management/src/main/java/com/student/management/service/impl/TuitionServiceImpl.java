@@ -12,13 +12,12 @@ import com.student.management.exception.BusinessException;
 import com.student.management.exception.ErrorCode;
 import com.student.management.repository.*;
 import com.student.management.service.TuitionService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -30,9 +29,6 @@ public class TuitionServiceImpl implements TuitionService {
 
     private final TuitionInvoiceRepository tuitionInvoiceRepository;
     private final TuitionItemRepository tuitionItemRepository;
-    private final TuitionPaymentRepository tuitionPaymentRepository;
-    private final StudentRepository studentRepository;
-    private final SemesterRepository semesterRepository;
 
     @Override
     @Transactional(readOnly = true)

@@ -13,17 +13,16 @@ import com.student.management.service.CourseRegistrationService;
 import com.student.management.service.RegistrationPeriodService;
 import com.student.management.service.TuitionPolicyService;
 import com.student.management.service.TuitionService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+import java.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
