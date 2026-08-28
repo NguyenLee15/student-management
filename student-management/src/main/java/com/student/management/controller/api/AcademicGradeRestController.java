@@ -26,14 +26,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/academic-grades")
 @RequiredArgsConstructor
-@Tag(name = "Academic Grades API", description = "Quản lý điểm học tập sinh viên và bảng điểm theo Thông tư 08")
+@Tag(name = "API Quản Lý Điểm Số", description = "Quản lý điểm học tập sinh viên và bảng điểm theo Thông tư 08")
 public class AcademicGradeRestController {
 
     private final AcademicGradeService academicGradeService;
     private final SecurityService securityService;
 
     @GetMapping
-    @Operation(summary = "Get all academic grades with filters and pagination")
+    @Operation(summary = "Lấy danh sách điểm số theo bộ lọc và phân trang")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Page<AcademicGradeResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -56,7 +56,7 @@ public class AcademicGradeRestController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get grade by ID")
+    @Operation(summary = "Lấy thông tin điểm số theo ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> getById(@PathVariable Integer id) {
         AcademicGradeResponseDto grade = academicGradeService.getById(id);
@@ -67,17 +67,17 @@ public class AcademicGradeRestController {
     }
 
     @GetMapping("/transcript/{studentId}")
-    @Operation(summary = "Get full student academic transcript according to Circular 08/2021/TT-BGDDT")
+    @Operation(summary = "Lấy bảng điểm học tập đầy đủ của sinh viên theo Thông tư 08/2021/TT-BGDĐT")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<TranscriptResponseDto>> getTranscript(@PathVariable String studentId) {
         if (securityService.isStudentRole() && !studentId.equals(securityService.getCurrentStudentId())) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không có quyền xem bảng điểm của sinh viên khác.");
         }
-        return ResponseEntity.ok(ApiResponse.success("Transcript calculated successfully", academicGradeService.getTranscriptByStudentId(studentId)));
+        return ResponseEntity.ok(ApiResponse.success("Tính toán bảng điểm thành công", academicGradeService.getTranscriptByStudentId(studentId)));
     }
 
     @PostMapping
-    @Operation(summary = "Create grade")
+    @Operation(summary = "Nhập điểm mới")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> create(@Valid @RequestBody AcademicGradeRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -85,14 +85,14 @@ public class AcademicGradeRestController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update grade")
+    @Operation(summary = "Cập nhật điểm")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> update(@PathVariable Integer id, @Valid @RequestBody AcademicGradeUpdateDto dto) {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật Grade thành công", academicGradeService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete grade")
+    @Operation(summary = "Xóa bản ghi điểm")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Integer id) {
         academicGradeService.delete(id);

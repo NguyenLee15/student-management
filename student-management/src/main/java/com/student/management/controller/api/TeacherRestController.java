@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/teachers")
 @RequiredArgsConstructor
-@Tag(name = "Teachers API", description = "Quản lý giảng viên")
+@Tag(name = "API Quản Lý Giảng Viên", description = "Quản lý giảng viên")
 public class TeacherRestController {
 
     @GetMapping("/export")

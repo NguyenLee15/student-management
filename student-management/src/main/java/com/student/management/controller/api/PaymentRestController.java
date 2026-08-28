@@ -22,7 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
-@Tag(name = "Payment API", description = "Cổng thanh toán học phí VietQR PayOS & Webhook xử lý giao dịch")
+@Tag(name = "API Thanh Toán & Học Phí", description = "Cổng thanh toán học phí VietQR PayOS & Webhook xử lý giao dịch")
 public class PaymentRestController {
 
     private final PayOSService payOSService;

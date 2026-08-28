@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/academic-years")
 @RequiredArgsConstructor
-@Tag(name = "Academic Years API", description = "Quản lý niên khóa / năm học")
+@Tag(name = "API Quản Lý Niên Khóa", description = "Quản lý niên khóa / năm học")
 public class AcademicYearRestController {
 
     private final AcademicYearService academicYearService;
 
     @GetMapping
-    @Operation(summary = "Get all academic years with pagination")
+    @Operation(summary = "Lấy danh sách niên khóa phân trang")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Page<AcademicYearResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -35,14 +35,14 @@ public class AcademicYearRestController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get academic year by ID")
+    @Operation(summary = "Lấy thông tin niên khóa theo ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<AcademicYearResponseDto>> getById(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.success(academicYearService.getById(id)));
     }
 
     @PostMapping
-    @Operation(summary = "Create academic year")
+    @Operation(summary = "Thêm niên khóa mới")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<AcademicYearResponseDto>> create(@Valid @RequestBody AcademicYearRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -50,14 +50,14 @@ public class AcademicYearRestController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update academic year")
+    @Operation(summary = "Cập nhật niên khóa")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<AcademicYearResponseDto>> update(@PathVariable String id, @Valid @RequestBody AcademicYearRequestDto dto) {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật Academic year thành công", academicYearService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete academic year")
+    @Operation(summary = "Xóa niên khóa")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         academicYearService.delete(id);

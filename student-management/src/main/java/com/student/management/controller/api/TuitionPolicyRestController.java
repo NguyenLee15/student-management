@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/tuition-policies")
 @RequiredArgsConstructor
-@Tag(name = "Tuition Policies API", description = "Quản lý định mức biểu phí học phí theo tín chỉ")
+@Tag(name = "API Chính Sách Học Phí", description = "Quản lý định mức biểu phí học phí theo tín chỉ")
 public class TuitionPolicyRestController {
 
     private final TuitionPolicyService tuitionPolicyService;

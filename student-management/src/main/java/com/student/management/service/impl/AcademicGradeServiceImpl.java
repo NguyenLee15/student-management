@@ -91,7 +91,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy môn học: " + dto.getSubjectId()));
 
         if (academicGradeRepository.findExistingGrade(dto.getStudentId(), dto.getSubjectId(), dto.getSemester(), dto.getAcademicYear(), dto.getStudyPhase()).isPresent()) {
-            throw new IllegalArgumentException("Grade already exists for this subject, semester, academic year, and phase.");
+            throw new IllegalArgumentException("Điểm số đã tồn tại cho môn học, học kỳ, niên khóa và giai đoạn này.");
         }
 
         // Tự động quy đổi điểm chuẩn Thông tư 08/2021/TT-BGDĐT nếu chưa điền
@@ -167,7 +167,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
                 try {
                     list.add(create(dto));
                 } catch (Exception e) {
-                    throw new RuntimeException("Error in row " + i + ": " + e.getMessage(), e);
+                    throw new RuntimeException("Lỗi tại dòng " + i + ": " + e.getMessage(), e);
                 }
             }
         } catch (Exception e) {

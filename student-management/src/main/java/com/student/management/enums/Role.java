@@ -27,6 +27,6 @@ public enum Role {
                 return r;
             }
         }
-        throw new IllegalArgumentException("No enum constant for role: " + role);
+        throw new IllegalArgumentException("Không tìm thấy quyền phù hợp cho vai trò: " + role);
     }
 }

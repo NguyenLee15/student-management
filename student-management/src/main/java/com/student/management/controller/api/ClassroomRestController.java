@@ -20,13 +20,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/classrooms")
 @RequiredArgsConstructor
-@Tag(name = "Classrooms API", description = "Quản lý phòng học và giảng đường")
+@Tag(name = "API Quản Lý Phòng Học", description = "Quản lý phòng học và giảng đường")
 public class ClassroomRestController {
 
     private final ClassroomService classroomService;
 
     @GetMapping
-    @Operation(summary = "Get all classrooms with pagination and filters")
+    @Operation(summary = "Lấy danh sách phòng học có phân trang và lọc")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Page<ClassroomResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -38,14 +38,14 @@ public class ClassroomRestController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get classroom by ID")
+    @Operation(summary = "Lấy thông tin phòng học theo ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<ClassroomResponseDto>> getById(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.success(classroomService.getById(id)));
     }
 
     @PostMapping
-    @Operation(summary = "Create classroom")
+    @Operation(summary = "Thêm phòng học mới")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ClassroomResponseDto>> create(@Valid @RequestBody ClassroomRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -53,14 +53,14 @@ public class ClassroomRestController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update classroom")
+    @Operation(summary = "Cập nhật phòng học")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ClassroomResponseDto>> update(@PathVariable String id, @Valid @RequestBody ClassroomRequestDto dto) {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật phòng học thành công", classroomService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete classroom")
+    @Operation(summary = "Xóa phòng học")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         classroomService.delete(id);

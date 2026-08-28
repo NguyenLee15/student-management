@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/faculties")
-@Tag(name = "Faculties API", description = "Quản lý khoa trong trường")
+@Tag(name = "API Quản Lý Khoa & Viện Đào Tạo", description = "Quản lý khoa trong trường")
 @lombok.RequiredArgsConstructor
 public class FacultyRestController {
 
@@ -45,7 +45,7 @@ public class FacultyRestController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get faculty details by ID")
+    @Operation(summary = "Lấy thông tin chi tiết khoa theo ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<FacultyResponseDto>> getById(@PathVariable String id) {
         FacultyResponseDto dto = facultyService.getById(id);
@@ -53,7 +53,7 @@ public class FacultyRestController {
     }
 
     @PostMapping
-    @Operation(summary = "Create a new faculty")
+    @Operation(summary = "Thêm khoa đào tạo mới")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<FacultyResponseDto>> create(@Valid @RequestBody FacultyRequestDto dto) {
         FacultyResponseDto created = facultyService.create(dto);
@@ -62,7 +62,7 @@ public class FacultyRestController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update an existing faculty")
+    @Operation(summary = "Cập nhật thông tin khoa đào tạo")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<FacultyResponseDto>> update(
             @PathVariable String id,
@@ -72,7 +72,7 @@ public class FacultyRestController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a faculty by ID")
+    @Operation(summary = "Xóa khoa đào tạo theo ID")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         facultyService.delete(id);

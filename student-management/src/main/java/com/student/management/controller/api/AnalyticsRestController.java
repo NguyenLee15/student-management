@@ -16,7 +16,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/analytics")
 @RequiredArgsConstructor
-@Tag(name = "Analytics API", description = "Thống kê hiệu suất học tập và phân tích dữ liệu")
+@Tag(name = "API Thống Kê & Báo Cáo", description = "Thống kê hiệu suất học tập và phân tích dữ liệu")
 public class AnalyticsRestController {
 
     private final AnalyticsService analyticsService;

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/subjects")
 @RequiredArgsConstructor
-@Tag(name = "Subjects API", description = "Quản lý môn học / học phần")
+@Tag(name = "API Quản Lý Môn Học", description = "Quản lý môn học / học phần")
 public class SubjectRestController {
 
     @GetMapping("/export")

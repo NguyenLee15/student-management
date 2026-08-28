@@ -22,14 +22,14 @@ import org.springframework.data.domain.PageRequest;
 @RestController
 @RequestMapping("/api/v1/credit-classes")
 @RequiredArgsConstructor
-@Tag(name = "Credit Classes API", description = "Quản lý lớp tín chỉ và đăng ký học phần đồng thời")
+@Tag(name = "API Quản Lý Lớp Tín Chỉ", description = "Quản lý lớp tín chỉ và đăng ký học phần đồng thời")
 public class CreditClassRestController {
 
     private final CreditClassService creditClassService;
     private final SecurityService securityService;
 
     @GetMapping
-    @Operation(summary = "Get all credit classes with pagination and search")
+    @Operation(summary = "Lấy danh sách lớp tín chỉ có phân trang và tìm kiếm")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<Object>> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -45,14 +45,14 @@ public class CreditClassRestController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get credit class by ID")
+    @Operation(summary = "Lấy thông tin lớp tín chỉ theo ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<CreditClassResponseDto>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(creditClassService.getById(id)));
     }
 
     @PostMapping
-    @Operation(summary = "Create credit class")
+    @Operation(summary = "Mở lớp tín chỉ mới")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<CreditClassResponseDto>> create(@Valid @RequestBody CreditClassRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -60,14 +60,14 @@ public class CreditClassRestController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update credit class")
+    @Operation(summary = "Cập nhật lớp tín chỉ")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<CreditClassResponseDto>> update(@PathVariable Long id, @Valid @RequestBody CreditClassRequestDto dto) {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật lớp tín chỉ thành công", creditClassService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete credit class")
+    @Operation(summary = "Hủy lớp tín chỉ")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         creditClassService.delete(id);

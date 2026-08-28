@@ -23,7 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/students/registration")
 @RequiredArgsConstructor
-@Tag(name = "Student Course Registration API", description = "Endpoints phục vụ Đăng ký học phần tín chỉ cho Sinh viên")
+@Tag(name = "API Đăng Ký Môn Học Sinh Viên", description = "Endpoints phục vụ Đăng ký học phần tín chỉ cho Sinh viên")
 public class StudentRegistrationRestController {
 
     private final CourseRegistrationService courseRegistrationService;

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/semester-schedules")
 @RequiredArgsConstructor
-@Tag(name = "Semester Schedules API", description = "Quản lý thời khóa biểu và lịch trình học kỳ")
+@Tag(name = "API Thời Khóa Biểu Học Kỳ", description = "Quản lý thời khóa biểu và lịch trình học kỳ")
 public class SemesterScheduleRestController {
 
     private final SemesterScheduleService semesterScheduleService;

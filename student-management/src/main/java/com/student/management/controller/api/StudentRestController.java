@@ -30,7 +30,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/students")
-@Tag(name = "Students API", description = "Quản lý sinh viên, tìm kiếm lọc và nhập/xuất Excel")
+@Tag(name = "API Quản Lý Sinh Viên", description = "Quản lý sinh viên, tìm kiếm lọc và nhập/xuất Excel")
 @lombok.RequiredArgsConstructor
 public class StudentRestController {
 
@@ -110,7 +110,7 @@ public class StudentRestController {
             java.util.Map<String, String> data = new java.util.HashMap<>();
             data.put("taskId", taskId);
             
-            return ResponseEntity.accepted().body(ApiResponse.success("Excel import started asynchronously", data));
+            return ResponseEntity.accepted().body(ApiResponse.success("Quá trình nhập dữ liệu Excel đã được bắt đầu xử lý bất đồng bộ", data));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Lỗi đọc file: " + e.getMessage()));

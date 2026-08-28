@@ -30,7 +30,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@Tag(name = "Authentication API", description = "Đăng nhập, Đăng ký và Xác thực JWT")
+@Tag(name = "API Xác Thực & Đăng Nhập", description = "Đăng nhập, Đăng ký và Xác thực JWT")
 public class AuthRestController {
 
     private final AuthenticationManager authenticationManager;

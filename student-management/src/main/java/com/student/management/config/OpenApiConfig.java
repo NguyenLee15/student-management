@@ -19,7 +19,7 @@ public class OpenApiConfig {
         final String securitySchemeName = "bearerAuth";
         return new OpenAPI()
                 .info(new Info()
-                        .title("Student Management RESTful API")
+                        .title("Hệ Thống RESTful API Quản Lý Đào Tạo & Sinh Viên")
                         .version("1.0.0")
                         .description("Hệ thống Quản lý Sinh viên & Đào tạo — Edulive Toàn Cầu Portfolio Project")
                         .contact(new Contact()

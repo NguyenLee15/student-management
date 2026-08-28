@@ -91,7 +91,7 @@ public class SecurityConfig {
             User user = userRepository.findByUserName(username)
                 .orElseThrow(() -> {
                     logger.error("User not found: {}", username);
-                    return new UsernameNotFoundException("User not found with username: " + username);
+                    return new UsernameNotFoundException("Không tìm thấy người dùng với tên đăng nhập: " + username);
                 });
             logger.debug("Found user: {}, role: {}", user.getUserName(), user.getRole());
             return org.springframework.security.core.userdetails.User

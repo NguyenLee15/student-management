@@ -32,7 +32,7 @@ public class JwtTokenProvider {
     @PostConstruct
     public void init() {
         if (secretKeyString == null || secretKeyString.trim().length() < 64) {
-            throw new IllegalArgumentException("CRITICAL CONFIG ERROR: JWT_SECRET must be at least 64 characters long for HS512.");
+            throw new IllegalArgumentException("LỖI CẤU HÌNH NGHIÊM TRỌNG: JWT_SECRET phải có độ dài ít nhất 64 ký tự cho thuật toán HS512.");
         }
         // Khởi tạo khóa bí mật từ chuỗi secretKeyString
         this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
@@ -86,7 +86,7 @@ public class JwtTokenProvider {
             throw new RuntimeException("Định dạng token không hợp lệ", e);
         } catch (Exception e) {
             logger.error("JWT validation failed: {}", e.getMessage());
-            throw new RuntimeException("Token validation failed", e);
+            throw new RuntimeException("Xác thực token JWT thất bại", e);
         }
     }
 

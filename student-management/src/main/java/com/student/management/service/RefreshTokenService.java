@@ -45,10 +45,10 @@ public class RefreshTokenService {
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.delete(token);
-            throw new RuntimeException("Refresh token was expired. Please make a new signin request");
+            throw new RuntimeException("Phiên làm việc đã hết hạn (Refresh token expired). Vui lòng đăng nhập lại.");
         }
         if (token.isRevoked()) {
-            throw new RuntimeException("Refresh token was revoked. Please make a new signin request");
+            throw new RuntimeException("Phiên làm việc đã bị thu hồi (Refresh token revoked). Vui lòng đăng nhập lại.");
         }
         return token;
     }

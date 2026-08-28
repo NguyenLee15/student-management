@@ -22,7 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/classes")
-@Tag(name = "Student Classes API", description = "Quản lý lớp học sinh viên")
+@Tag(name = "API Quản Lý Lớp Sinh Viên Hành Chính", description = "Quản lý lớp học sinh viên")
 @PreAuthorize("hasRole('ADMIN')")
 @lombok.RequiredArgsConstructor
 public class StudentClassRestController {

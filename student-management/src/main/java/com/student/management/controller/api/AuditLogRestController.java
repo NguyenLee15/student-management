@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/audit-logs")
 @RequiredArgsConstructor
-@Tag(name = "Audit Log API", description = "Lịch sử hoạt động hệ thống")
+@Tag(name = "API Nhật Ký Hoạt Động", description = "Lịch sử hoạt động hệ thống")
 public class AuditLogRestController {
 
     private final AuditLogService auditLogService;
 
     @GetMapping
-    @Operation(summary = "Get audit logs with pagination and filters")
+    @Operation(summary = "Lấy danh sách nhật ký hoạt động có phân trang và lọc")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<AuditLog>>> getAuditLogs(
             @RequestParam(defaultValue = "0") int page,

@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/students/portal/me")
 @RequiredArgsConstructor
-@Tag(name = "Student Portal API", description = "Cổng thông tin cá nhân sinh viên (Tiến độ học tập, TKB, Học phí)")
+@Tag(name = "API Cổng Thông Tin Sinh Viên", description = "Cổng thông tin cá nhân sinh viên (Tiến độ học tập, TKB, Học phí)")
 public class StudentPortalRestController {
 
     private final StudentPortalService studentPortalService;

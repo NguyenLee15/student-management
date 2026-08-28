@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/registration-periods")
 @RequiredArgsConstructor
-@Tag(name = "Registration Periods API", description = "Quản lý các đợt đăng ký tín chỉ học phần")
+@Tag(name = "API Đợt Đăng Ký Học Phần", description = "Quản lý các đợt đăng ký tín chỉ học phần")
 public class RegistrationPeriodRestController {
 
     private final RegistrationPeriodService registrationPeriodService;
