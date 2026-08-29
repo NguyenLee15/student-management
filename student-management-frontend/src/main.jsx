@@ -14,7 +14,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("Uncaught React Error:", error, errorInfo);
+    console.error("Lỗi React không mong muốn:", error, errorInfo);
     this.setState({ errorInfo });
   }
 

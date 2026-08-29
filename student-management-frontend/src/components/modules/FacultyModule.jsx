@@ -28,7 +28,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
       const data = res.data || res;
       setFaculties(Array.isArray(data) ? data : data.content || []);
     } catch (err) {
-      console.warn('Failed loading faculties', err);
+      console.warn('Lỗi khi tải danh sách khoa', err);
     } finally {
       setLoading(false);
     }

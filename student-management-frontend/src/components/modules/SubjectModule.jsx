@@ -50,7 +50,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
       const d = res.data || res;
       setFaculties(Array.isArray(d) ? d : d.content || []);
     } catch (e) {
-      console.warn('Faculties load err', e);
+      console.warn('Lỗi khi tải danh sách khoa', e);
     }
   };
 
@@ -74,7 +74,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
         setTotalElements(d.length);
       }
     } catch (err) {
-      console.warn('Err load subjects', err);
+      console.warn('Lỗi khi tải danh sách môn học', err);
     } finally {
       setLoading(false);
     }

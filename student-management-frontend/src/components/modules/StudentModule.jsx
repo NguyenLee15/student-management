@@ -87,7 +87,7 @@ export default function StudentModule({ onNotify, currentUser }) {
         setAcademicYears(Array.isArray(d) ? d : d.content || []);
       }
     } catch (e) {
-      console.error('Failed loading metadata', e);
+      console.error('Lỗi khi tải danh mục', e);
     }
   };
 
@@ -114,7 +114,7 @@ export default function StudentModule({ onNotify, currentUser }) {
         setTotalElements(pageData.length);
       }
     } catch (err) {
-      console.warn('Backend not responding or empty, using local cache', err);
+      console.warn('Máy chủ backend không phản hồi hoặc đang trống', err);
     } finally {
       setLoading(false);
     }
@@ -259,7 +259,7 @@ export default function StudentModule({ onNotify, currentUser }) {
             }
           }
         } catch (pollErr) {
-          console.error("Polling error:", pollErr);
+          console.error("Lỗi tiến trình:", pollErr);
         }
       }, 2000);
       

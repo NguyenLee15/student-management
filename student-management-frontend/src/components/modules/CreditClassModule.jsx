@@ -48,7 +48,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
         setClasses(Array.isArray(d) ? d : d.content || []);
       }
     } catch (e) {
-      console.warn('Err load deps', e);
+      console.warn('Lỗi khi tải danh mục phụ thuộc', e);
     }
   };
 
@@ -59,7 +59,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
       const d = res.data || res;
       setCreditClasses(Array.isArray(d) ? d : d.content || []);
     } catch (err) {
-      console.warn('Err load credit classes', err);
+      console.warn('Lỗi khi tải lớp tín chỉ', err);
     } finally {
       setLoading(false);
     }

@@ -55,7 +55,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
         }
       }
     } catch (e) {
-      console.warn('Err load teachers', e);
+      console.warn('Lỗi khi tải danh sách giảng viên', e);
     }
   };
 
@@ -83,7 +83,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       const allSch = Array.isArray(schData) ? schData : (schData.content || []);
       setSchedules(allSch.filter(s => s.teacherId === currentTeacherId || s.teacherName?.includes(teacherInfo?.fullName)));
     } catch (err) {
-      console.warn('Err load teacher data', err);
+      console.warn('Lỗi khi tải dữ liệu giảng viên', err);
     } finally {
       setLoading(false);
     }
@@ -107,7 +107,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       });
       setGradeSheet(initialGrades);
     } catch (e) {
-      console.warn('Err load students for class', e);
+      console.warn('Lỗi khi tải sinh viên của lớp', e);
     }
   };
 
@@ -167,7 +167,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <div className="h-10 w-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-emerald-500/30 hidden sm:flex">
+          <div className="h-10 w-10 rounded-xl bg-emerald-600 items-center justify-center text-white font-black text-lg shadow-lg shadow-emerald-500/30 hidden sm:flex">
             👨‍🏫
           </div>
           <div>

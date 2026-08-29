@@ -33,8 +33,10 @@ export default function Header({
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white hidden sm:flex">
-            <GraduationCap className="h-4 w-4" />
+          <div className="hidden sm:block">
+            <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
+              <GraduationCap className="h-4 w-4" />
+            </div>
           </div>
           <div>
             <div className="flex items-center gap-2">

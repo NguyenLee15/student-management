@@ -34,7 +34,7 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
       const list = Array.isArray(d) ? d : (d.content || []);
       setTeacherList(list);
     } catch (e) {
-      console.warn('Err load teachers', e);
+      console.warn('Lỗi khi tải danh sách giảng viên', e);
     }
   };
 
@@ -55,7 +55,7 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
         handleSelectClass(all[0]);
       }
     } catch (err) {
-      console.warn('Err load teacher classes', err);
+      console.warn('Lỗi khi tải lớp của giảng viên', err);
     } finally {
       setLoading(false);
     }
@@ -81,7 +81,7 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
       });
       setGradeSheet(initialGrades);
     } catch (e) {
-      console.warn('Err load class students', e);
+      console.warn('Lỗi khi tải sinh viên trong lớp', e);
     }
   };
 

@@ -39,7 +39,7 @@ export default function UserModule({ onNotify }) {
         setTotalElements(d.length);
       }
     } catch (err) {
-      console.warn('Err load users', err);
+      console.warn('Lỗi khi tải danh sách người dùng', err);
     } finally {
       setLoading(false);
     }

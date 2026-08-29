@@ -47,7 +47,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
         setTotalElements(d.length);
       }
     } catch (err) {
-      console.warn('Err load classrooms', err);
+      console.warn('Lỗi khi tải phòng học', err);
     } finally {
       setLoading(false);
     }

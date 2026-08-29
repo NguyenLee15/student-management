@@ -87,7 +87,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
         setAnalyticsError('Không thể tải số liệu phân tích từ máy chủ.');
       }
     } catch (err) {
-      console.warn('Err load real analytics', err);
+      console.warn('Lỗi khi tải phân tích tổng quan', err);
       setAnalyticsError('Lỗi kết nối máy chủ khi tải số liệu tổng quan.');
     } finally {
       setLoading(false);

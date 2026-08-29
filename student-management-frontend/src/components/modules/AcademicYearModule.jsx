@@ -28,7 +28,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
       const data = res.data || res;
       setYears(Array.isArray(data) ? data : data.content || []);
     } catch (err) {
-      console.warn('Failed loading academic years', err);
+      console.warn('Lỗi khi tải niên khóa', err);
     } finally {
       setLoading(false);
     }

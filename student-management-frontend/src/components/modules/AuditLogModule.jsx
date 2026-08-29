@@ -31,7 +31,7 @@ export default function AuditLogModule({ onNotify }) {
         setTotalElements(d.length);
       }
     } catch (err) {
-      console.warn('Err load audit logs', err);
+      console.warn('Lỗi khi tải nhật ký kiểm toán', err);
     } finally {
       setLoading(false);
     }

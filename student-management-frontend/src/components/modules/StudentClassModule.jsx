@@ -39,7 +39,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
       const d = res.data || res;
       setFaculties(Array.isArray(d) ? d : d.content || []);
     } catch (e) {
-      console.warn('Err load faculties', e);
+      console.warn('Lỗi khi tải danh sách khoa', e);
     }
   };
 
@@ -62,7 +62,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
         setTotalElements(d.length);
       }
     } catch (err) {
-      console.warn('Err load classes', err);
+      console.warn('Lỗi khi tải danh sách lớp', err);
     } finally {
       setLoading(false);
     }

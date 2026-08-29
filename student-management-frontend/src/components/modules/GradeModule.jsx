@@ -63,7 +63,7 @@ export default function GradeModule({ onNotify, currentUser }) {
         setSubjects(Array.isArray(d) ? d : d.content || []);
       }
     } catch (e) {
-      console.warn('Err load grade dependencies', e);
+      console.warn('Lỗi khi tải dữ liệu cấu hình điểm', e);
     }
   };
 
@@ -87,7 +87,7 @@ export default function GradeModule({ onNotify, currentUser }) {
         setTotalElements(d.length);
       }
     } catch (err) {
-      console.warn('Err load grades', err);
+      console.warn('Lỗi khi tải bảng điểm', err);
     } finally {
       setLoading(false);
     }

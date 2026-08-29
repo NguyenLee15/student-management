@@ -102,13 +102,13 @@ axiosClient.interceptors.response.use(
       });
     }
     if (status === 403) {
-      console.warn('Forbidden access.');
+      console.warn('Từ chối truy cập (403): Không đủ quyền.');
       window.dispatchEvent(new CustomEvent('auth:forbidden', { detail: message }));
       return Promise.reject({ status, message: 'Bạn không có quyền thực hiện thao tác này.', raw: error });
     }
 
     if (status === 429) {
-      console.warn('Rate limit exceeded.');
+      console.warn('Vượt quá giới hạn yêu cầu (429): Thao tác quá nhanh.');
       window.dispatchEvent(new CustomEvent('auth:ratelimit', { 
         detail: message || 'Quá nhiều yêu cầu! Vui lòng thao tác chậm lại.' 
       }));
@@ -123,7 +123,7 @@ axiosClient.interceptors.response.use(
 );
 
 const handleLogout = () => {
-  console.warn('Session expired or unauthorized. Please re-login.');
+  console.warn('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
   setMemoryToken(null);
   localStorage.removeItem('user_info');
   window.dispatchEvent(new Event('auth:unauthorized'));

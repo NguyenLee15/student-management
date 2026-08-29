@@ -153,7 +153,7 @@ export default function App() {
         showToast('success', 'Đã kết nối thành công máy chủ Backend');
       }
     } catch (err) {
-      console.warn('Backend is down or unreachable', err);
+      console.warn('Máy chủ backend không phản hồi hoặc mất kết nối', err);
       setIsBackendConnected(false);
       setIsInitializingAuth(false);
     } finally {

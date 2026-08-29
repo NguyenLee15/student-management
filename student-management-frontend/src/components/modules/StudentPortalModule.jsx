@@ -50,7 +50,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
         setCurrentStudentId(list[0].studentId);
       }
     } catch (e) {
-      console.warn('Err load students', e);
+      console.warn('Lỗi khi tải danh sách sinh viên', e);
     }
   };
 
@@ -75,7 +75,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
         setCreditClasses(Array.isArray(d) ? d : (d.content || []));
       }
     } catch (err) {
-      console.warn('Err load portal data', err);
+      console.warn('Lỗi khi tải dữ liệu cổng cá nhân', err);
     } finally {
       setLoading(false);
     }

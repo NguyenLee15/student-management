@@ -68,7 +68,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
         setClassrooms(Array.isArray(d) ? d : d.content || []);
       }
     } catch (e) {
-      console.warn('Err load schedule dependencies', e);
+      console.warn('Lỗi khi tải dữ liệu lịch học', e);
     }
   };
 
@@ -92,7 +92,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
         setTotalElements(d.length);
       }
     } catch (err) {
-      console.warn('Err load schedules', err);
+      console.warn('Lỗi khi tải lịch học', err);
     } finally {
       setLoading(false);
     }

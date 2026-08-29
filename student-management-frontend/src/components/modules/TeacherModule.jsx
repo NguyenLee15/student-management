@@ -50,7 +50,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
       const d = res.data || res;
       setFaculties(Array.isArray(d) ? d : d.content || []);
     } catch (e) {
-      console.warn('Faculties load err', e);
+      console.warn('Lỗi khi tải danh sách khoa', e);
     }
   };
 
@@ -74,7 +74,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
         setTotalElements(pageData.length);
       }
     } catch (err) {
-      console.warn('Failed loading teachers', err);
+      console.warn('Lỗi khi tải danh sách giảng viên', err);
     } finally {
       setLoading(false);
     }
