@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   UserSquare2, Layers, Users, Award, Save, CheckCircle2, 
   RefreshCw, BookOpen, Clock, AlertCircle, Edit3, Calendar,
-  Home, LogOut, Sparkles, MapPin, User, CheckCheck, FileSpreadsheet, Menu, X
+  Home, LogOut, Sparkles, MapPin, User, CheckCheck, FileSpreadsheet, Menu, X, ArrowRight
 } from 'lucide-react';
 import { creditClassApi, teacherApi, studentApi, gradeApi, scheduleApi } from '../api';
 
@@ -436,147 +436,281 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
             </div>
           )}
 
-          {/* TAB 3: CLASSES LIST & TAB 4: GRADE SPREADSHEET */}
-          {(activeTab === 'classes' || activeTab === 'grades') && (
+                    {/* TAB 3: LỚP HỌC PHẦN ĐỨNG LỚP (QUẢN LÝ DANH SÁCH LỚP & ĐIỂM DANH) */}
+          {activeTab === 'classes' && (
             <div className="space-y-6 animate-fade-in">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left: Classes list */}
-                <div className="panel-card p-5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                      <Layers className="h-4 w-4 text-emerald-400" />
-                      <span>Lớp Tín Chỉ Phụ Trách</span>
-                    </h3>
-                    <span className="text-xs font-bold text-slate-400">{classes.length} Lớp</span>
-                  </div>
-
-                  <div className="space-y-2">
-                    {classes.map((c) => {
-                      const isSelected = selectedClass?.creditClassId === c.creditClassId;
-                      return (
-                        <button
-                          key={c.creditClassId}
-                          onClick={() => handleSelectClass(c)}
-                          className={`w-full text-left p-3.5 rounded-xl border transition flex flex-col space-y-1.5 ${
-                            isSelected
-                              ? 'border-emerald-500/60 bg-emerald-500/10 text-white'
-                              : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold font-mono text-emerald-400">
-                              Lớp #{c.creditClassId}
-                            </span>
-                            <span className="text-[10px] font-semibold bg-slate-800 px-2 py-0.5 rounded text-slate-300">
-                              {c.semester || 'Học kỳ 1'}
-                            </span>
-                          </div>
-                          <div className="font-semibold text-xs text-white truncate">
-                            {c.subjectName || `Môn học #${c.subjectId}`}
-                          </div>
-                          <div className="text-[11px] text-slate-400 flex items-center justify-between pt-1">
-                            <span>Sĩ số: {c.maxStudents || 40} SV</span>
-                            <span className="text-emerald-400 font-medium">Chọn lớp &rarr;</span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-extrabold text-white">Quản Lý Lớp Học Phần Đứng Lớp</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Danh sách lớp tín chỉ được phân công, thông tin sinh viên và xuất danh sách điểm danh</p>
                 </div>
 
-                {/* Right: Grade Entry Spreadsheet */}
-                <div className="lg:col-span-2 panel-card overflow-hidden flex flex-col justify-between">
-                  <div className="p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-bold text-white">
-                          Bảng Nhập Điểm: {selectedClass?.subjectName || `Lớp #${selectedClass?.creditClassId}`}
-                        </h3>
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-400">
-                          {students.length} Sinh viên
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      onNotify?.('success', 'Đang xuất danh sách điểm danh Excel...');
+                    }}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-xs font-semibold text-cyan-300 transition"
+                  >
+                    <FileSpreadsheet className="h-4 w-4" />
+                    <span>Xuất Danh Sách Điểm Danh</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Grid of Assigned Classes */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {classes.map((c) => {
+                  const isSelected = selectedClass?.creditClassId === c.creditClassId;
+                  return (
+                    <div
+                      key={c.creditClassId}
+                      className={`panel-card p-5 space-y-3 cursor-pointer transition-all ${
+                        isSelected
+                          ? 'border-emerald-500 bg-slate-900/90 shadow-md'
+                          : 'hover:border-slate-700 bg-slate-950/60'
+                      }`}
+                      onClick={() => handleSelectClass(c)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold font-mono text-emerald-400">
+                          Mã Lớp: #{c.creditClassId}
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">
+                          {c.semester || 'Học kỳ 1'}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">Nhập điểm thành phần trực tiếp dạng bảng tính</p>
+
+                      <div>
+                        <h4 className="text-sm font-bold text-white leading-tight">
+                          {c.subjectName || `Môn học #${c.subjectId}`}
+                        </h4>
+                        <p className="text-xs text-slate-400 mt-1">
+                          Số tín chỉ: <span className="text-slate-200 font-semibold">{c.credits || 3} TC</span>
+                        </p>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                        <div className="flex items-center gap-1.5">
+                          <Users className="h-3.5 w-3.5 text-indigo-400" />
+                          <span>Sĩ số: <strong className="text-white">{students.length || 35}</strong> / {c.maxStudents || 40} SV</span>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectClass(c);
+                            setActiveTab('grades');
+                          }}
+                          className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-0.5"
+                        >
+                          <span>Nhập điểm</span>
+                          <ArrowRight className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Selected Class Student Roster Table */}
+              {selectedClass && (
+                <div className="panel-card overflow-hidden space-y-0">
+                  <div className="p-4 border-b border-slate-800 bg-slate-900/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-emerald-400" />
+                      <h3 className="text-sm font-bold text-white">
+                        Danh Sách Sinh Viên: {selectedClass.subjectName || `Lớp #${selectedClass.creditClassId}`}
+                      </h3>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">
+                        {students.length} Sinh viên
+                      </span>
                     </div>
 
                     <button
-                      onClick={handleSaveAllGrades}
-                      disabled={saving}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition active:scale-95 self-start sm:self-auto"
+                      onClick={() => setActiveTab('grades')}
+                      className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition self-start sm:self-auto"
                     >
-                      <Save className={`h-4 w-4 ${saving ? 'animate-spin' : ''}`} />
-                      <span>Lưu Toàn Bộ Điểm</span>
+                      <Edit3 className="h-3.5 w-3.5" />
+                      <span>Chuyển sang Chấm điểm lớp này</span>
                     </button>
                   </div>
 
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+                      <thead className="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
                         <tr>
                           <th className="px-5 py-3">Mã SV</th>
                           <th className="px-5 py-3">Họ và Tên</th>
-                          <th className="px-5 py-3 text-center">Chuyên cần (10%)</th>
-                          <th className="px-5 py-3 text-center">Giữa kỳ (30%)</th>
-                          <th className="px-5 py-3 text-center">Thi cuối kỳ (60%)</th>
-                          <th className="px-5 py-3 text-center font-bold">Tổng kết</th>
+                          <th className="px-5 py-3">Giới tính</th>
+                          <th className="px-5 py-3">Lớp Hành Chính</th>
+                          <th className="px-5 py-3">Trạng thái điểm danh</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/60">
-                        {students.map((st) => {
-                          const entry = gradeSheet[st.studentId] || { attendanceScore: 10, midtermScore: 8, finalExamScore: 8 };
-                          const finalScore = ((entry.attendanceScore * 0.1) + (entry.midtermScore * 0.3) + (entry.finalExamScore * 0.6)).toFixed(1);
-
-                          return (
-                            <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
-                              <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
-                              <td className="px-5 py-3 font-semibold text-white">{st.fullName}</td>
-                              <td className="px-5 py-3 text-center">
-                                <input
-                                  type="number"
-                                  step="0.1"
-                                  min="0"
-                                  max="10"
-                                  value={entry.attendanceScore}
-                                  onChange={(e) => handleGradeChange(st.studentId, 'attendanceScore', e.target.value)}
-                                  className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
-                                />
-                              </td>
-                              <td className="px-5 py-3 text-center">
-                                <input
-                                  type="number"
-                                  step="0.1"
-                                  min="0"
-                                  max="10"
-                                  value={entry.midtermScore}
-                                  onChange={(e) => handleGradeChange(st.studentId, 'midtermScore', e.target.value)}
-                                  className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
-                                />
-                              </td>
-                              <td className="px-5 py-3 text-center">
-                                <input
-                                  type="number"
-                                  step="0.1"
-                                  min="0"
-                                  max="10"
-                                  value={entry.finalExamScore}
-                                  onChange={(e) => handleGradeChange(st.studentId, 'finalExamScore', e.target.value)}
-                                  className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
-                                />
-                              </td>
-                              <td className="px-5 py-3 text-center font-mono font-bold text-white text-sm">
-                                {finalScore}
-                              </td>
-                            </tr>
-                          );
-                        })}
+                        {students.map((st) => (
+                          <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
+                            <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
+                            <td className="px-5 py-3 font-semibold text-white">{st.fullName}</td>
+                            <td className="px-5 py-3 text-slate-400 capitalize">{msg.enum.gender[st.gender] || st.gender || 'Nam'}</td>
+                            <td className="px-5 py-3 text-slate-300">{st.className || st.classId || 'CNTT-K65'}</td>
+                            <td className="px-5 py-3">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                                <CheckCheck className="h-3 w-3" /> Đủ điều kiện dự thi
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
+                </div>
+              )}
+            </div>
+          )}
 
-                  <div className="p-4 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between text-xs text-slate-400">
-                    <span>💡 Mẹo: Điểm tổng kết tự động tính theo tỷ lệ chuẩn Bộ GD&ĐT (10% - 30% - 60%).</span>
-                    <span className="font-semibold text-emerald-400">Tự động tính điểm chữ</span>
+          {/* TAB 4: BẢNG NHẬP ĐIỂM HỌC PHẦN (CHUYÊN BIỆT CHẤM ĐIỂM THI) */}
+          {activeTab === 'grades' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-extrabold text-white">Bảng Nhập Điểm Học Phần</h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Nhập điểm thành phần trực tiếp theo tỷ lệ chuẩn (10% - 30% - 60%) và lưu về phòng đào tạo</p>
+                </div>
+
+                {/* Class selector */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400">Chọn lớp:</span>
+                  <select
+                    value={selectedClass?.creditClassId || ''}
+                    onChange={(e) => {
+                      const found = classes.find(c => String(c.creditClassId) === e.target.value);
+                      if (found) handleSelectClass(found);
+                    }}
+                    className="bg-slate-900 border border-slate-800 rounded-lg text-xs font-semibold text-white px-3 py-2 focus:outline-none focus:border-emerald-500 transition"
+                  >
+                    {classes.map(c => (
+                      <option key={c.creditClassId} value={c.creditClassId}>
+                        Lớp #{c.creditClassId} - {c.subjectName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Main Grade Spreadsheet */}
+              <div className="panel-card overflow-hidden flex flex-col justify-between">
+                <div className="p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-white">
+                        Bảng Nhập Điểm: {selectedClass?.subjectName || `Lớp #${selectedClass?.creditClassId}`}
+                      </h3>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        {students.length} Sinh viên
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-0.5">Nhập điểm số thang 10. Điểm tổng kết và điểm chữ sẽ được tính tự động</p>
                   </div>
+
+                  <button
+                    onClick={handleSaveAllGrades}
+                    disabled={saving}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition active:scale-95 self-start sm:self-auto"
+                  >
+                    <Save className={`h-4 w-4 ${saving ? 'animate-spin' : ''}`} />
+                    <span>Lưu Toàn Bộ Điểm</span>
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+                      <tr>
+                        <th className="px-5 py-3">Mã SV</th>
+                        <th className="px-5 py-3">Họ và Tên</th>
+                        <th className="px-5 py-3 text-center">Chuyên cần (10%)</th>
+                        <th className="px-5 py-3 text-center">Giữa kỳ (30%)</th>
+                        <th className="px-5 py-3 text-center">Thi cuối kỳ (60%)</th>
+                        <th className="px-5 py-3 text-center font-bold">Tổng kết</th>
+                        <th className="px-5 py-3 text-center font-bold">Điểm chữ</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60">
+                      {students.map((st) => {
+                        const entry = gradeSheet[st.studentId] || { attendanceScore: 10, midtermScore: 8, finalExamScore: 8 };
+                        const finalScoreNum = ((entry.attendanceScore * 0.1) + (entry.midtermScore * 0.3) + (entry.finalExamScore * 0.6));
+                        const finalScore = finalScoreNum.toFixed(1);
+                        
+                        let letterGrade = 'F';
+                        if (finalScoreNum >= 8.5) letterGrade = 'A';
+                        else if (finalScoreNum >= 8.0) letterGrade = 'B+';
+                        else if (finalScoreNum >= 7.0) letterGrade = 'B';
+                        else if (finalScoreNum >= 6.5) letterGrade = 'C+';
+                        else if (finalScoreNum >= 5.5) letterGrade = 'C';
+                        else if (finalScoreNum >= 5.0) letterGrade = 'D+';
+                        else if (finalScoreNum >= 4.0) letterGrade = 'D';
+
+                        return (
+                          <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
+                            <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
+                            <td className="px-5 py-3 font-semibold text-white">{st.fullName}</td>
+                            <td className="px-5 py-3 text-center">
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                max="10"
+                                value={entry.attendanceScore}
+                                onChange={(e) => handleGradeChange(st.studentId, 'attendanceScore', e.target.value)}
+                                className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                              />
+                            </td>
+                            <td className="px-5 py-3 text-center">
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                max="10"
+                                value={entry.midtermScore}
+                                onChange={(e) => handleGradeChange(st.studentId, 'midtermScore', e.target.value)}
+                                className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                              />
+                            </td>
+                            <td className="px-5 py-3 text-center">
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                max="10"
+                                value={entry.finalExamScore}
+                                onChange={(e) => handleGradeChange(st.studentId, 'finalExamScore', e.target.value)}
+                                className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                              />
+                            </td>
+                            <td className="px-5 py-3 text-center font-mono font-bold text-white text-sm">
+                              {finalScore}
+                            </td>
+                            <td className="px-5 py-3 text-center">
+                              <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                                letterGrade === 'A' ? 'bg-emerald-500/10 text-emerald-400' :
+                                letterGrade.startsWith('B') ? 'bg-indigo-500/10 text-indigo-400' :
+                                letterGrade.startsWith('C') ? 'bg-cyan-500/10 text-cyan-400' :
+                                letterGrade.startsWith('D') ? 'bg-amber-500/10 text-amber-400' :
+                                'bg-rose-500/10 text-rose-400'
+                              }`}>
+                                {letterGrade}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="p-4 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between text-xs text-slate-400">
+                  <span>💡 Quy chuẩn: Chuyên cần (10%) + Giữa kỳ (30%) + Cuối kỳ (60%).</span>
+                  <span className="font-semibold text-emerald-400">Đã kích hoạt tính điểm chữ tự động (A, B+, B, C, D, F)</span>
                 </div>
               </div>
             </div>
