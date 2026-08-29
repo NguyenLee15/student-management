@@ -16,7 +16,6 @@ export default function App() {
   const isResetPasswordPath = typeof window !== 'undefined' && window.location.pathname === '/reset-password';
 
   const [isBackendConnected, setIsBackendConnected] = useState(false);
-  const [apiChecking, setApiChecking] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [isInitializingAuth, setIsInitializingAuth] = useState(!!localStorage.getItem('user_info') && !isResetPasswordPath);
 
@@ -30,6 +29,7 @@ export default function App() {
       return null;
     }
   });
+  const [apiChecking, setApiChecking] = useState(false);
 
   // Admin Simulator Perspective (cho phép Admin xem thử giao diện Sinh viên / Giảng viên)
   const [simulatedRole, setSimulatedRole] = useState(null);
@@ -77,7 +77,7 @@ export default function App() {
       setShowLoginModal(true);
       showToast('error', 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
     };
-    
+
     // Listen for forbidden 403 events from axiosClient
     const handleForbidden = (e) => {
       showToast('error', e.detail || 'Truy cập bị từ chối: Bạn không có quyền thực hiện thao tác này.');
@@ -91,7 +91,7 @@ export default function App() {
     window.addEventListener('auth:unauthorized', handleUnauthorized);
     window.addEventListener('auth:forbidden', handleForbidden);
     window.addEventListener('auth:ratelimit', handleRateLimit);
-    
+
     return () => {
       window.removeEventListener('auth:unauthorized', handleUnauthorized);
       window.removeEventListener('auth:forbidden', handleForbidden);
@@ -172,7 +172,7 @@ export default function App() {
     try {
       await authApi.logout();
     } catch (e) {
-      console.warn("Lỗi khi logout:", e);
+      console.warn('Lỗi khi logout:', e);
     }
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('user_info');
@@ -192,8 +192,8 @@ export default function App() {
 
   if (isInitializingAuth) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-950">
-        <div className="flex flex-col items-center gap-4 text-indigo-400">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
           <span className="text-sm font-medium text-slate-300">Đang khởi tạo hệ sinh thái đào tạo...</span>
         </div>
@@ -253,7 +253,9 @@ export default function App() {
       {/* 🔐 AUTH LOGIN MODAL */}
       <LoginModal
         isOpen={showLoginModal || !currentUser}
-        onClose={() => { if (currentUser) setShowLoginModal(false); }}
+        onClose={() => {
+          if (currentUser) setShowLoginModal(false);
+        }}
         onLoginSuccess={handleLoginSuccess}
       />
     </>
