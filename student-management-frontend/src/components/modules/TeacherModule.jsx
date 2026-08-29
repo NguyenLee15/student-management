@@ -108,6 +108,18 @@ export default function TeacherModule({ onNotify, currentUser }) {
 
   const handleSaveTeacher = async (e) => {
     e.preventDefault();
+    if (!formData.teacherId?.trim()) {
+      onNotify('error', 'Mã giảng viên không được để trống.');
+      return;
+    }
+    if (!formData.fullName?.trim() || formData.fullName.trim().length < 2) {
+      onNotify('error', 'Họ và tên giảng viên phải có ít nhất 2 ký tự.');
+      return;
+    }
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      onNotify('error', 'Địa chỉ email không đúng định dạng.');
+      return;
+    }
     try {
       if (isEdit) {
         await teacherApi.update(formData.teacherId, formData);

@@ -156,6 +156,22 @@ export default function StudentModule({ onNotify, currentUser }) {
 
   const handleSaveStudent = async (e) => {
     e.preventDefault();
+    if (!formData.studentId?.trim()) {
+      onNotify('error', 'Mã sinh viên không được để trống.');
+      return;
+    }
+    if (!formData.fullName?.trim() || formData.fullName.trim().length < 2) {
+      onNotify('error', 'Họ và tên sinh viên phải có ít nhất 2 ký tự.');
+      return;
+    }
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      onNotify('error', 'Địa chỉ email không đúng định dạng.');
+      return;
+    }
+    if (formData.phoneNumber && !/^[0-9]{9,11}$/.test(formData.phoneNumber.trim())) {
+      onNotify('error', 'Số điện thoại phải từ 9 đến 11 chữ số.');
+      return;
+    }
     try {
       if (isEdit) {
         await studentApi.update(formData.studentId, formData);

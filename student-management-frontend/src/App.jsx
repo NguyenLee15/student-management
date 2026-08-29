@@ -13,14 +13,12 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import { authApi, studentApi, teacherApi, facultyApi, subjectApi } from './api';
 
 export default function App() {
-  if (window.location.pathname === '/reset-password') {
-    return <ResetPasswordPage />;
-  }
+  const isResetPasswordPath = typeof window !== 'undefined' && window.location.pathname === '/reset-password';
 
   const [isBackendConnected, setIsBackendConnected] = useState(false);
   const [apiChecking, setApiChecking] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [isInitializingAuth, setIsInitializingAuth] = useState(!!localStorage.getItem('user_info'));
+  const [isInitializingAuth, setIsInitializingAuth] = useState(!!localStorage.getItem('user_info') && !isResetPasswordPath);
 
   // Authentication State
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -188,12 +186,16 @@ export default function App() {
     showToast('info', `Đã chuyển sang: ${msg.enum.role[role] || role}`);
   };
 
+  if (isResetPasswordPath) {
+    return <ResetPasswordPage />;
+  }
+
   if (isInitializingAuth) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-slate-950">
-        <div className="flex flex-col items-center gap-4 text-emerald-500">
-          <Loader2 className="w-8 h-8 animate-spin" />
-          <span className="text-sm font-semibold">Đang xác thực phiên làm việc...</span>
+        <div className="flex flex-col items-center gap-4 text-indigo-400">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          <span className="text-sm font-medium text-slate-300">Đang khởi tạo hệ sinh thái đào tạo...</span>
         </div>
       </div>
     );

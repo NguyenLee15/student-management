@@ -25,7 +25,7 @@ export default function Toast({ toast, onClose }) {
         <div className="text-xs font-medium pr-2">
           {toast.message}
         </div>
-        <button onClick={onClose} className="text-slate-400 hover:text-white transition p-1">
+        <button onClick={onClose} aria-label="Đóng thông báo" className="text-slate-400 hover:text-white transition p-1">
           <X className="h-3.5 w-3.5" />
         </button>
       </div>

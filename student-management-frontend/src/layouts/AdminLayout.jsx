@@ -115,7 +115,7 @@ export default function AdminLayout({
           )}
 
           {activeTab === 'students' && (
-            <Sinh ViênModule onNotify={showToast} currentUser={currentUser} />
+            <StudentModule onNotify={showToast} currentUser={currentUser} />
           )}
 
           {activeTab === 'teachers' && (
@@ -131,7 +131,7 @@ export default function AdminLayout({
           )}
 
           {activeTab === 'student-classes' && (
-            <Sinh ViênClassModule onNotify={showToast} currentUser={currentUser} />
+            <StudentClassModule onNotify={showToast} currentUser={currentUser} />
           )}
 
           {activeTab === 'subjects' && (

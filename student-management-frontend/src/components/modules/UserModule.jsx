@@ -52,6 +52,18 @@ export default function UserModule({ onNotify }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!formData.userName?.trim() || formData.userName.trim().length < 3) {
+      onNotify('error', 'Tên đăng nhập phải có ít nhất 3 ký tự.');
+      return;
+    }
+    if (!formData.password || formData.password.length < 6) {
+      onNotify('error', 'Mật khẩu phải có ít nhất 6 ký tự.');
+      return;
+    }
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      onNotify('error', 'Địa chỉ email không đúng định dạng.');
+      return;
+    }
     try {
       await userApi.create(formData);
       onNotify('success', msg.success.created('tài khoản', formData.userName));
