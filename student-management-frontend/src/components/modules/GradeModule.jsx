@@ -167,7 +167,7 @@ export default function GradeModule({ onNotify, currentUser }) {
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-card p-4 rounded-2xl border border-slate-800 flex flex-wrap items-center gap-3">
+      <div className="panel-card p-4 flex flex-wrap items-center gap-3">
         <input
           type="text"
           placeholder="Tìm theo mã sinh viên (VD: SV001)..."
@@ -196,7 +196,7 @@ export default function GradeModule({ onNotify, currentUser }) {
       </div>
 
       {/* Grade Table */}
-      <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+      <div className="panel-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">

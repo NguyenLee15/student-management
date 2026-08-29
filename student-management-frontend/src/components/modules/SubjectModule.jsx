@@ -150,7 +150,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
         )}
       </div>
 
-      <div className="glass-card p-4 rounded-2xl border border-slate-800 flex flex-wrap items-center gap-3">
+      <div className="panel-card p-4 flex flex-wrap items-center gap-3">
         <select
           value={selectedType}
           onChange={(e) => { setSelectedType(e.target.value); setPage(0); }}
@@ -183,7 +183,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
         </button>
       </div>
 
-      <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+      <div className="panel-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">

@@ -167,7 +167,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="glass-card p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-center gap-3">
+      <div className="panel-card p-4 flex flex-col md:flex-row items-center gap-3">
         <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
@@ -202,7 +202,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
       </div>
 
       {/* Table */}
-      <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+      <div className="panel-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
@@ -237,7 +237,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
                     <td className="px-5 py-3.5 font-bold text-emerald-400 font-mono">{t.teacherId}</td>
                     <td className="px-5 py-3.5 font-semibold text-white">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center font-bold text-white text-xs shadow-md">
+                        <div className="h-8 w-8 rounded-full bg-slate-800 text-emerald-400 border border-slate-700 flex items-center justify-center font-bold text-white text-xs shadow-md">
                           {t.fullName?.charAt(0) || 'G'}
                         </div>
                         <span>{t.fullName}</span>

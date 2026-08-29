@@ -97,7 +97,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
         {years.map((y) => (
           <div
             key={y.academicYearId}
-            className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4 hover:border-violet-500/40 transition group"
+            className="panel-card p-6 space-y-4 hover:border-violet-500/40 transition group"
           >
             <div className="flex items-center justify-between">
               <div className="p-3 rounded-xl bg-violet-500/10 text-violet-400 group-hover:scale-105 transition">

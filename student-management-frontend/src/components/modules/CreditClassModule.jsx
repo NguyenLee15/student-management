@@ -157,7 +157,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
         {creditClasses.map((cc) => (
           <div
             key={cc.creditClassId}
-            className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4 hover:border-blue-500/40 transition group"
+            className="panel-card p-6 space-y-4 hover:border-blue-500/40 transition group"
           >
             <div className="flex items-center justify-between">
               <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 group-hover:scale-105 transition">

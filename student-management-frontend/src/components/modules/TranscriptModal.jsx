@@ -70,7 +70,7 @@ export default function TranscriptModal({ isOpen, onClose, student }) {
       <div className="space-y-5 text-xs">
         
         {/* Top Summary Banner */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-900 border border-slate-800">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-slate-900 border border-slate-800">
           <div>
             <span className="text-slate-400 text-[11px]">Điểm Trung Bình Tích Lũy (GPA Thang 4)</span>
             <div className="flex items-baseline gap-1.5 mt-0.5">

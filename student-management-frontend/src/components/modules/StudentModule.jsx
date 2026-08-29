@@ -305,7 +305,7 @@ export default function StudentModule({ onNotify, currentUser }) {
           {isAdmin && (
             <button
               onClick={handleOpenCreate}
-              className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 transition active:scale-95"
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-sm transition active:scale-95"
             >
               <Plus className="h-4 w-4" />
               <span>Thêm Sinh viên</span>
@@ -315,7 +315,7 @@ export default function StudentModule({ onNotify, currentUser }) {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="glass-card p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-center gap-3">
+      <div className="panel-card p-4 flex flex-col md:flex-row items-center gap-3">
         <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
@@ -361,7 +361,7 @@ export default function StudentModule({ onNotify, currentUser }) {
       </div>
 
       {/* Main Sinh Viên Data Table */}
-      <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+      <div className="panel-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
@@ -398,7 +398,7 @@ export default function StudentModule({ onNotify, currentUser }) {
                     <td className="px-5 py-3.5 font-bold text-indigo-400 font-mono">{st.studentId}</td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center font-bold text-white text-xs shadow-md">
+                        <div className="h-8 w-8 rounded-full bg-slate-800 text-indigo-400 border border-slate-700 flex items-center justify-center font-bold text-white text-xs shadow-md">
                           {st.fullName?.charAt(0) || 'S'}
                         </div>
                         <div>
@@ -616,7 +616,7 @@ export default function StudentModule({ onNotify, currentUser }) {
       >
         <div className="space-y-4">
           {!importing && !importProgress ? (
-            <label className="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-2xl p-8 text-center space-y-3 cursor-pointer transition block bg-slate-950/60">
+            <label className="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-8 text-center space-y-3 cursor-pointer transition block bg-slate-950/60">
               <div className="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center">
                 <FileSpreadsheet className="h-6 w-6" />
               </div>
@@ -627,7 +627,7 @@ export default function StudentModule({ onNotify, currentUser }) {
               <input type="file" accept=".xlsx,.xls" onChange={handleFileUpload} className="hidden" />
             </label>
           ) : (
-            <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col items-center">
+            <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 flex flex-col items-center">
               <div className="mb-4 text-center">
                 <p className="text-sm font-semibold text-slate-200 mb-1">
                   {importProgress?.status === 'UPLOADING' && "Đang tải tệp lên..."}

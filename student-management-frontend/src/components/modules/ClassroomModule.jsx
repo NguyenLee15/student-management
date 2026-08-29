@@ -117,7 +117,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
         )}
       </div>
 
-      <div className="glass-card p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+      <div className="panel-card p-4 flex items-center justify-between">
         <select
           value={selectedBuilding}
           onChange={(e) => { setSelectedBuilding(e.target.value); setPage(0); }}
@@ -142,7 +142,7 @@ export default function ClassroomModule({ onNotify, currentUser }) {
         {classrooms.map((c) => (
           <div
             key={c.roomId}
-            className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4 hover:border-rose-500/40 transition group"
+            className="panel-card p-6 space-y-4 hover:border-rose-500/40 transition group"
           >
             <div className="flex items-center justify-between">
               <div className="p-3 rounded-xl bg-rose-500/10 text-rose-400 group-hover:scale-105 transition">

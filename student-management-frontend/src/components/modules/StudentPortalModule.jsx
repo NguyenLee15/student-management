@@ -144,9 +144,9 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
   return (
     <div className="space-y-6">
       {/* Portal Top Header & Sinh Viên Selector */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 panel-card p-6 bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900">
         <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-indigo-500/30">
+          <div className="h-14 w-14 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-indigo-500/30">
             {studentInfo?.fullName ? studentInfo.fullName.charAt(0) : 'S'}
           </div>
           <div>
@@ -227,25 +227,25 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
         <div className="space-y-6">
           {/* GPA Summary KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass-card p-4 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-1">
+            <div className="panel-card p-4 bg-slate-900/60 space-y-1">
               <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">GPA Tích Lũy (Hệ 4.0)</span>
               <div className="text-2xl font-black text-indigo-400">{gpaSummary.gpa4} / 4.0</div>
               <p className="text-[10px] text-slate-500">Chuẩn thang điểm tín chỉ</p>
             </div>
 
-            <div className="glass-card p-4 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-1">
+            <div className="panel-card p-4 bg-slate-900/60 space-y-1">
               <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">GPA Tích Lũy (Hệ 10)</span>
               <div className="text-2xl font-black text-emerald-400">{gpaSummary.gpa10} / 10.0</div>
               <p className="text-[10px] text-slate-500">Trung bình chung học tập</p>
             </div>
 
-            <div className="glass-card p-4 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-1">
+            <div className="panel-card p-4 bg-slate-900/60 space-y-1">
               <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Xếp Loại Học Lực</span>
               <div className="text-2xl font-black text-amber-400">{gpaSummary.rank}</div>
               <p className="text-[10px] text-slate-500">Dựa trên kết quả học kỳ</p>
             </div>
 
-            <div className="glass-card p-4 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-1">
+            <div className="panel-card p-4 bg-slate-900/60 space-y-1">
               <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Số Môn Đã Học</span>
               <div className="text-2xl font-black text-cyan-400">{grades.length} Môn</div>
               <p className="text-[10px] text-slate-500">Ước tính {gpaSummary.totalCredits} tín chỉ</p>
@@ -253,7 +253,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
           </div>
 
           {/* Detailed Grades Table */}
-          <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+          <div className="panel-card overflow-hidden shadow-sm">
             <div className="p-4 border-b border-slate-800 flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-white">Kết Quả Học Tập Chi Tiết</h3>
@@ -342,7 +342,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
             {WEEKDAYS.map((day) => {
               const daySchedules = schedules.filter(s => s.dayOfWeek === day.key);
               return (
-                <div key={day.key} className="glass-card rounded-2xl border border-slate-800 overflow-hidden flex flex-col">
+                <div key={day.key} className="panel-card overflow-hidden flex flex-col">
                   <div className="bg-slate-900/90 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
                     <span className="font-bold text-xs text-white">{day.label}</span>
                     <span className="text-[10px] font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">
@@ -398,7 +398,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
       {/* SUBTAB 3: COURSE / CREDIT CLASS REGISTRATION */}
       {activeSubTab === 'registration' && (
         <div className="space-y-4">
-          <div className="glass-card p-4 rounded-2xl border border-slate-800 flex items-center justify-between bg-slate-900/60">
+          <div className="panel-card p-4 flex items-center justify-between bg-slate-900/60">
             <div>
               <h3 className="text-sm font-bold text-white">Đăng Ký Học Phần & Lớp Tín Chỉ Trực Tuyến</h3>
               <p className="text-xs text-slate-400">Học kỳ 1 (2025 - 2026) • Chọn lớp phù hợp với kế hoạch học tập</p>
@@ -424,7 +424,7 @@ export default function StudentPortalModule({ onNotify, currentUser }) {
               return (
                 <div
                   key={cc.creditClassId}
-                  className={`glass-card p-5 rounded-2xl border transition flex flex-col justify-between space-y-4 ${
+                  className={`panel-card p-5 rounded-xl border transition flex flex-col justify-between space-y-4 ${
                     isEnrolled
                       ? 'border-indigo-500/50 bg-indigo-950/20'
                       : 'border-slate-800 bg-slate-900/40'

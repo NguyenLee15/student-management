@@ -124,9 +124,9 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-emerald-950/30 to-slate-900">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 panel-card p-6 bg-gradient-to-r from-slate-900 via-emerald-950/30 to-slate-900">
         <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-emerald-500/30">
+          <div className="h-14 w-14 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-emerald-500/30">
             {teacherInfo?.fullName ? teacherInfo.fullName.charAt(0) : 'T'}
           </div>
           <div>
@@ -166,7 +166,7 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
       {/* Main Content Layout: Left Class list, Right Grade Sheet */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Classes list */}
-        <div className="glass-card p-5 rounded-2xl border border-slate-800 space-y-4">
+        <div className="panel-card p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Layers className="h-4 w-4 text-emerald-400" />
@@ -210,7 +210,7 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
         </div>
 
         {/* Right: Grade Entry Sheet */}
-        <div className="lg:col-span-2 glass-card rounded-2xl border border-slate-800 overflow-hidden flex flex-col justify-between">
+        <div className="lg:col-span-2 panel-card overflow-hidden flex flex-col justify-between">
           <div className="p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60">
             <div>
               <div className="flex items-center gap-2">

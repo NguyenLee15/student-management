@@ -99,7 +99,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
         {faculties.map((f) => (
           <div
             key={f.facultyId}
-            className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4 hover:border-amber-500/40 transition group"
+            className="panel-card p-6 space-y-4 hover:border-amber-500/40 transition group"
           >
             <div className="flex items-center justify-between">
               <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 group-hover:scale-105 transition">
