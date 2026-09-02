@@ -253,6 +253,7 @@ export default function App() {
       {/* 🔐 AUTH LOGIN MODAL */}
       <LoginModal
         isOpen={showLoginModal || !currentUser}
+        currentUser={currentUser}
         onClose={() => {
           if (currentUser) setShowLoginModal(false);
         }}
