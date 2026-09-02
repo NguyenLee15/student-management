@@ -5,6 +5,7 @@
 3. **BÁO CÁO PHẢI CÓ BẰNG CHỨNG**: Mọi báo cáo "đã hoàn thành X" phải kèm bằng chứng cụ thể (log, output, đường dẫn file, kết quả lệnh...). Không có bằng chứng = không được báo là đã làm.
 4. **PHÂN BIỆT RÕ "ĐÃ LÀM" vs "DỰ ĐỊNH LÀM"**: Không được dùng ngôn ngữ mập mờ khiến người đọc hiểu nhầm việc chưa xong là đã xong.
 5. **BÁO LỖI THẬT**: Nếu gặp lỗi, thất bại, hoặc không làm được — phải báo cáo đúng lỗi đó, không che giấu, không làm giảm nhẹ mức độ nghiêm trọng.
+6. **TỰ ĐỘNG KIỂM TRA LỖI SAU MỖI LẦN CODE (AUTOMATED VERIFICATION)**: Sau bất kỳ lần viết hoặc sửa mã nguồn nào, PHẢI tự động chạy lệnh kiểm tra lỗi cú pháp và build (`npm run check`, `npm run build` đối với Frontend, `mvn test` đối với Backend). TUYỆT ĐỐI không được kết thúc lượt hoặc báo hoàn thành khi chưa tự động chạy lệnh kiểm tra và xác nhận 0 lỗi.
 
 ---
 
