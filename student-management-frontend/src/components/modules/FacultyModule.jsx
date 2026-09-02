@@ -121,13 +121,13 @@ export default function FacultyModule({ onNotify, currentUser }) {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleOpenEdit(f)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition"
+                    className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500 transition"
                   >
                     <Edit3 className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setDeleteTarget(f)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                    className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

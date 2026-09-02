@@ -103,7 +103,7 @@ export default function UserModule({ onNotify }) {
       </div>
 
       <div className="panel-card overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" aria-live="polite">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
@@ -147,7 +147,7 @@ export default function UserModule({ onNotify }) {
                       <button
                         onClick={() => setDeleteTarget(u)}
                         title="Xóa người dùng"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                        className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

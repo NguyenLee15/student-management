@@ -235,7 +235,7 @@ export default function TeacherPortalModule({ onNotify, currentUser }) {
           </div>
 
           {/* Spreadsheet Table */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" aria-live="polite">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
                 <tr>

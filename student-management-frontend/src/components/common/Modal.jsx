@@ -27,7 +27,7 @@ export default function Modal({ isOpen, onClose, title, subtitle, children, maxW
       aria-labelledby="modal-title"
     >
       <div 
-        className={`glass-card w-full ${maxWidth} max-h-[90vh] flex flex-col my-8 p-6 rounded-2xl border border-slate-700/80 shadow-2xl space-y-5 transform transition-all animate-scale-up`}
+        className={`panel-card w-full ${maxWidth} max-h-[90vh] flex flex-col my-8 p-6 rounded-2xl border border-slate-700/80 shadow-2xl space-y-5 transform transition-all animate-scale-up`}
       >
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 shrink-0">
@@ -39,7 +39,7 @@ export default function Modal({ isOpen, onClose, title, subtitle, children, maxW
             onClick={onClose} 
             aria-label="Đóng cửa sổ"
             title="Đóng (ESC)"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition focus-visible:ring-2 focus-visible:ring-indigo-500"
+            className="inline-flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 active:scale-95 transition focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <X className="h-5 w-5" />
           </button>

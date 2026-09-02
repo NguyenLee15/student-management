@@ -362,7 +362,7 @@ export default function StudentModule({ onNotify, currentUser }) {
 
       {/* Main Sinh Viên Data Table */}
       <div className="panel-card overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" aria-live="polite">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
               <tr>
@@ -426,7 +426,7 @@ export default function StudentModule({ onNotify, currentUser }) {
                       <button
                         onClick={() => setTranscriptStudent(st)}
                         title="Xem Bảng Điểm & GPA Chi Tiết"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition"
+                        className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500 transition"
                       >
                         <Award className="h-4 w-4" />
                       </button>
@@ -435,14 +435,14 @@ export default function StudentModule({ onNotify, currentUser }) {
                           <button
                             onClick={() => handleOpenEdit(st)}
                             title="Sửa Sinh Viên"
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
+                            className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-indigo-500 transition"
                           >
                             <Edit3 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => setDeleteTarget(st)}
                             title="Xóa Sinh viên"
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                            className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>

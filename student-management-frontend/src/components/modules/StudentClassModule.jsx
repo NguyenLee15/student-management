@@ -186,7 +186,7 @@ export default function StudentClassModule({ onNotify, currentUser }) {
                   </button>
                   <button
                     onClick={() => setDeleteTarget(c)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                    className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
