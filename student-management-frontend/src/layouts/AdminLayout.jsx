@@ -111,6 +111,7 @@ export default function AdminLayout({
               faculties={facultiesList}
               onNavigate={(tab) => setActiveTab(tab)}
               currentUser={currentUser}
+              isBackendConnected={isBackendConnected}
             />
           )}
 
