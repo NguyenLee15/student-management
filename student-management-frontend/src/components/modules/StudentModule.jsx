@@ -402,14 +402,14 @@ export default function StudentModule({ onNotify, currentUser }) {
                           {st.fullName?.charAt(0) || 'S'}
                         </div>
                         <div>
-                          <div className="font-semibold text-white">{st.fullName}</div>
+                          <div className="font-semibold text-white truncate max-w-[180px] sm:max-w-[260px]" title={st.fullName}>{st.fullName}</div>
                           <div className="text-[10px] text-slate-400 capitalize">{msg.enum.gender[st.gender] || st.gender || 'Nam'}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-3.5 text-slate-300">
                       <div>
-                        <div className="font-medium text-slate-200">{st.className || st.classId || ''}</div>
+                        <div className="font-medium text-slate-200 truncate max-w-[140px]" title={st.className || st.classId}>{st.className || st.classId || ''}</div>
                         <div className="text-[10px] text-slate-500">{st.facultyName || st.facultyId || 'Chưa phân khoa'}</div>
                       </div>
                     </td>
@@ -418,7 +418,7 @@ export default function StudentModule({ onNotify, currentUser }) {
                     </td>
                     <td className="px-5 py-3.5 text-slate-400">
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] text-slate-300">{st.email || '—'}</span>
+                        <span className="text-[11px] text-slate-300 truncate max-w-[160px]" title={st.email}>{st.email || '—'}</span>
                         <span className="text-[10px] text-slate-500 font-mono">{st.phoneNumber || '—'}</span>
                       </div>
                     </td>

@@ -114,6 +114,16 @@ axiosClient.interceptors.response.use(
       }));
       return Promise.reject({ status, message: 'Quá nhiều yêu cầu! Vui lòng thao tác chậm lại.', raw: error });
     }
+
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      console.warn('Yêu cầu hết thời gian chờ (Timeout).');
+      return Promise.reject({ status: 408, message: 'Kết nối mạng quá hạn hoặc máy chủ phản hồi chậm. Vui lòng thử lại.', raw: error });
+    }
+
+    if (!error.response) {
+      console.warn('Mất kết nối mạng hoặc máy chủ không phản hồi.');
+      return Promise.reject({ status: 0, message: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra đường truyền mạng.', raw: error });
+    }
     
     // Import msg dynamically if needed, or just safe fallback
     const hasVietnamese = /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i.test(message);

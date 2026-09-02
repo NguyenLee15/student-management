@@ -550,7 +550,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                         {students.map((st) => (
                           <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
                             <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
-                            <td className="px-5 py-3 font-semibold text-white">{st.fullName}</td>
+                            <td className="px-5 py-3 font-semibold text-white truncate max-w-[180px] sm:max-w-[240px]" title={st.fullName}>{st.fullName}</td>
                             <td className="px-5 py-3 text-slate-400 capitalize">{msg.enum.gender[st.gender] || st.gender || 'Nam'}</td>
                             <td className="px-5 py-3 text-slate-300">{st.className || st.classId || 'CNTT-K65'}</td>
                             <td className="px-5 py-3">
@@ -653,7 +653,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                         return (
                           <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
                             <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
-                            <td className="px-5 py-3 font-semibold text-white">{st.fullName}</td>
+                            <td className="px-5 py-3 font-semibold text-white truncate max-w-[180px] sm:max-w-[240px]" title={st.fullName}>{st.fullName}</td>
                             <td className="px-5 py-3 text-center">
                               <input
                                 type="number"
