@@ -31,6 +31,12 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
     loadHealth();
   }, []);
 
+  const getHealthBadgeClass = (val) => {
+    if (val === 'UP') return 'font-semibold text-emerald-400 font-mono text-[11px]';
+    if (val === 'DISCONNECTED' || val === 'OFFLINE') return 'font-semibold text-rose-400 font-mono text-[11px]';
+    return 'font-semibold text-amber-400 font-mono text-[11px]';
+  };
+
   const loadHealth = async () => {
     setHealthLoading(true);
     const start = Date.now();
@@ -38,10 +44,11 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
       const res = await systemApi.getHealth();
       const latency = Date.now() - start;
       const d = res?.data || res;
+      const isUp = d?.status === 'UP';
       setHealthData({
-        status: d?.status || 'UP',
-        db: d?.components?.db?.status || 'UP',
-        disk: d?.components?.diskSpace?.status || 'UP',
+        status: isUp ? 'UP' : (d?.status || 'OFFLINE'),
+        db: d?.components?.db?.status || (isUp ? 'UP' : 'DISCONNECTED'),
+        disk: d?.components?.diskSpace?.status || (isUp ? 'UP' : 'UNKNOWN'),
         pingTime: `${latency}ms`,
       });
     } catch {
@@ -427,7 +434,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
                 <Database className="h-3.5 w-3.5 text-indigo-400" />
                 <span>Cơ sở dữ liệu TiDB</span>
               </div>
-              <span className="font-semibold text-emerald-400">{msg.enum.healthStatus[healthData.db] || healthData.db}</span>
+              <span className={getHealthBadgeClass(healthData.db)}>{msg.enum.healthStatus[healthData.db] || healthData.db}</span>
             </div>
 
             <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80 flex items-center justify-between">
@@ -435,7 +442,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
                 <HardDrive className="h-3.5 w-3.5 text-emerald-400" />
                 <span>Dung lượng lưu trữ</span>
               </div>
-              <span className="font-semibold text-emerald-400">{msg.enum.healthStatus[healthData.disk] || healthData.disk}</span>
+              <span className={getHealthBadgeClass(healthData.disk)}>{msg.enum.healthStatus[healthData.disk] || healthData.disk}</span>
             </div>
 
             <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80 flex items-center justify-between">
@@ -443,7 +450,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
                 <ShieldCheck className="h-3.5 w-3.5 text-amber-400" />
                 <span>Bảo vệ Rate Limit</span>
               </div>
-              <span className="font-semibold text-slate-300">24/7 BẢO VỆ</span>
+              <span className="font-semibold text-slate-300 font-mono text-[11px]">24/7 BẢO VỆ</span>
             </div>
           </div>
         </div>

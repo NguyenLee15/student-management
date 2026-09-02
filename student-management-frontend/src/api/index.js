@@ -145,8 +145,18 @@ export const auditLogApi = {
 
 // 15. System Monitoring & Actuator API
 export const systemApi = {
-  getHealth: () => axiosClient.get('/actuator/health'),
-  getPrometheus: () => axiosClient.get('/actuator/prometheus'),
+  getHealth: () => {
+    const raw = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    const root = raw.replace(/\/api\/v1\/?$/, '');
+    const url = (root ? root : '') + '/actuator/health';
+    return axios.get(url, { withCredentials: true, timeout: 5000 });
+  },
+  getPrometheus: () => {
+    const raw = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    const root = raw.replace(/\/api\/v1\/?$/, '');
+    const url = (root ? root : '') + '/actuator/prometheus';
+    return axios.get(url, { withCredentials: true, timeout: 5000 });
+  },
 };
 
 // 16. Registration Periods API
