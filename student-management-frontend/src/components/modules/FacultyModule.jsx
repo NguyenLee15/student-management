@@ -1,6 +1,6 @@
 import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, Building2, RefreshCw, Layers } from 'lucide-react';
+import { Plus, Edit3, Trash2, Building2, RefreshCw } from 'lucide-react';
 import { facultyApi } from '../../api';
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
@@ -85,15 +85,25 @@ export default function FacultyModule({ onNotify, currentUser }) {
           <p className="text-xs text-slate-400 mt-1">Quản lý các khoa chuyên môn và viện đào tạo trực thuộc trường</p>
         </div>
 
-        {isAdmin && (
+        <div className="flex items-center gap-2.5">
           <button
-            onClick={handleOpenCreate}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95"
+            onClick={loadFaculties}
+            title="Làm mới"
+            className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition active:scale-95"
           >
-            <Plus className="h-4 w-4" />
-            <span>Thêm Khoa Mới</span>
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
           </button>
-        )}
+
+          {isAdmin && (
+            <button
+              onClick={handleOpenCreate}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Thêm Khoa Mới</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Grid of Faculties */}
@@ -141,12 +151,14 @@ export default function FacultyModule({ onNotify, currentUser }) {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleOpenEdit(f)}
+                      title="Chỉnh sửa"
                       className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500 transition"
                     >
                       <Edit3 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setDeleteTarget(f)}
+                      title="Xóa"
                       className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -164,7 +176,8 @@ export default function FacultyModule({ onNotify, currentUser }) {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={isEdit ? `Sửa Khoa: ${formData.facultyId}` : 'Thêm Khoa Đào Tạo Mới'}
-        subtitle="Nhập mã khoa, tên khoa và thông tin lãnh đạo"
+        subtitle="Nhập mã khoa và tên khoa chuyên môn"
+        maxWidth="max-w-md"
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
@@ -176,7 +189,7 @@ export default function FacultyModule({ onNotify, currentUser }) {
               placeholder="VD: CNTT, DTVT, QTKD"
               value={formData.facultyId}
               onChange={(e) => setFormData({ ...formData, facultyId: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500 disabled:opacity-50"
+              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
             />
           </div>
 
@@ -185,10 +198,10 @@ export default function FacultyModule({ onNotify, currentUser }) {
             <input
               type="text"
               required
-              placeholder="e.g. Khoa Công Nghệ Thông Tin"
+              placeholder="VD: Công nghệ thông tin"
               value={formData.facultyName}
               onChange={(e) => setFormData({ ...formData, facultyName: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500"
+              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"
             />
           </div>
 
@@ -196,11 +209,13 @@ export default function FacultyModule({ onNotify, currentUser }) {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >Hủy</button>
+              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white font-semibold transition"
+            >
+              Hủy
+            </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold shadow-lg shadow-amber-600/30 transition"
+              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-600/20 transition active:scale-95"
             >
               {isEdit ? 'Lưu thay đổi' : 'Thêm Khoa'}
             </button>
