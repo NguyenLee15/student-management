@@ -4,6 +4,8 @@ import { Plus, Edit3, Trash2, Building2, RefreshCw, Layers } from 'lucide-react'
 import { facultyApi } from '../../api';
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
+import EmptyState from '../common/EmptyState';
+import Skeleton from '../common/Skeleton';
 
 export default function FacultyModule({ onNotify, currentUser }) {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
@@ -86,57 +88,76 @@ export default function FacultyModule({ onNotify, currentUser }) {
         {isAdmin && (
           <button
             onClick={handleOpenCreate}
-            className="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-amber-600/30 transition active:scale-95"
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            <span>Thêm Khoa</span>
+            <span>Thêm Khoa Mới</span>
           </button>
         )}
       </div>
 
       {/* Grid of Faculties */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {faculties.map((f) => (
-          <div
-            key={f.facultyId}
-            className="panel-card p-6 space-y-4 hover:border-amber-500/40 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 group-hover:scale-105 transition">
-                <Building2 className="h-6 w-6" />
-              </div>
-              <span className="px-2.5 py-1 text-xs font-mono font-bold bg-slate-900 border border-slate-800 text-amber-300 rounded-lg">
-                {f.facultyId}
-              </span>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="panel-card p-6 space-y-4 animate-pulse">
+              <div className="h-10 w-10 bg-slate-800 rounded-xl"></div>
+              <div className="h-5 w-3/4 bg-slate-800 rounded-lg"></div>
+              <div className="h-4 w-1/2 bg-slate-800 rounded-lg"></div>
             </div>
-
-            <div>
-              <h3 className="text-base font-bold text-white tracking-tight">{f.facultyName}</h3>
-              <p className="text-xs text-slate-400 mt-1">Khoa chuyên môn</p>
-            </div>
-
-            <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Trạng Thái Khoa: <span className="text-emerald-400 font-semibold">Hoạt động</span></span>
-              {isAdmin && (
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handleOpenEdit(f)}
-                    className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500 transition"
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setDeleteTarget(f)}
-                    className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+          ))}
+        </div>
+      ) : faculties.length === 0 ? (
+        <EmptyState
+          title="Chưa có khoa đào tạo nào"
+          description="Hiện chưa có dữ liệu khoa viện trong hệ thống. Hãy thêm khoa mới để bắt đầu."
+          actionText={isAdmin ? "Thêm Khoa Mới" : undefined}
+          onAction={isAdmin ? handleOpenCreate : undefined}
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {faculties.map((f) => (
+            <div
+              key={f.facultyId}
+              className="panel-card p-6 space-y-4 hover:border-amber-500/40 transition group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 group-hover:scale-105 transition">
+                  <Building2 className="h-6 w-6" />
                 </div>
-              )}
+                <span className="px-2.5 py-1 text-xs font-mono font-bold bg-slate-900 border border-slate-800 text-amber-300 rounded-lg">
+                  {f.facultyId}
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-white tracking-tight">{f.facultyName}</h3>
+                <p className="text-xs text-slate-400 mt-1">Khoa chuyên môn</p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                <span className="text-slate-400">Trạng Thái Khoa: <span className="text-emerald-400 font-semibold">Hoạt động</span></span>
+                {isAdmin && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenEdit(f)}
+                      className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500 transition"
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(f)}
+                      className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Add / Edit Modal */}
       <Modal

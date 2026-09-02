@@ -4,6 +4,8 @@ import { Plus, Edit3, Trash2, CalendarRange, RefreshCw } from 'lucide-react';
 import { academicYearApi } from '../../api';
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
+import EmptyState from '../common/EmptyState';
+import Skeleton from '../common/Skeleton';
 
 export default function AcademicYearModule({ onNotify, currentUser }) {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
@@ -79,13 +81,13 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản Lý Niên Khóa & Khóa Học</h1>
-          <p className="text-xs text-slate-400 mt-1">Quản lý các khóa tuyển sinh (K63, K64, K65, K66...) và thời gian đào tạo</p>
+          <p className="text-xs text-slate-400 mt-1">Quản lý các khóa tuyển sinh và niên khóa đào tạo</p>
         </div>
 
         {isAdmin && (
           <button
             onClick={handleOpenCreate}
-            className="flex items-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-violet-600/30 transition active:scale-95"
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95"
           >
             <Plus className="h-4 w-4" />
             <span>Thêm Niên Khóa Mới</span>
@@ -93,48 +95,67 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {years.map((y) => (
-          <div
-            key={y.academicYearId}
-            className="panel-card p-6 space-y-4 hover:border-violet-500/40 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="p-3 rounded-xl bg-violet-500/10 text-violet-400 group-hover:scale-105 transition">
-                <CalendarRange className="h-6 w-6" />
-              </div>
-              <span className="px-2.5 py-1 text-xs font-mono font-bold bg-slate-900 border border-slate-800 text-violet-300 rounded-lg">
-                {y.academicYearId}
-              </span>
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="panel-card p-6 space-y-4 animate-pulse">
+              <div className="h-10 w-10 bg-slate-800 rounded-xl"></div>
+              <div className="h-5 w-3/4 bg-slate-800 rounded-lg"></div>
+              <div className="h-4 w-1/2 bg-slate-800 rounded-lg"></div>
             </div>
-
-            <div>
-              <h3 className="text-base font-bold text-white tracking-tight">{y.academicYearName}</h3>
-              <p className="text-xs text-slate-400 mt-1">Khóa đào tạo chính quy</p>
-            </div>
-
-            <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Trạng thái: <span className="text-emerald-400 font-semibold">Đang hoạt động</span></span>
-              {isAdmin && (
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handleOpenEdit(y)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-violet-400 hover:bg-slate-800 transition"
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setDeleteTarget(y)}
-                    className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+          ))}
+        </div>
+      ) : years.length === 0 ? (
+        <EmptyState
+          title="Chưa có niên khóa nào"
+          description="Hiện chưa có dữ liệu niên khóa. Hãy thêm niên khóa mới để bắt đầu xếp lớp."
+          actionText={isAdmin ? "Thêm Niên Khóa Mới" : undefined}
+          onAction={isAdmin ? handleOpenCreate : undefined}
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {years.map((y) => (
+            <div
+              key={y.academicYearId}
+              className="panel-card p-6 space-y-4 hover:border-violet-500/40 transition group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-violet-500/10 text-violet-400 group-hover:scale-105 transition">
+                  <CalendarRange className="h-6 w-6" />
                 </div>
-              )}
+                <span className="px-2.5 py-1 text-xs font-mono font-bold bg-slate-900 border border-slate-800 text-violet-300 rounded-lg">
+                  {y.academicYearId}
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-white tracking-tight">{y.academicYearName}</h3>
+                <p className="text-xs text-slate-400 mt-1">Khóa đào tạo chính quy</p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                <span className="text-slate-400">Trạng thái: <span className="text-emerald-400 font-semibold">Đang hoạt động</span></span>
+                {isAdmin && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenEdit(y)}
+                      className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-violet-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-violet-500 transition"
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(y)}
+                      className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Modal */}
       <Modal
