@@ -2,7 +2,8 @@ import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Search, Filter, Upload, Download, Edit3, Trash2, 
-  GraduationCap, RefreshCw, Mail, Phone, Calendar, School, Check, FileSpreadsheet, X, Award, FileText 
+  GraduationCap, RefreshCw, Mail, Phone, Calendar, School, Check, FileSpreadsheet, X, Award, FileText,
+  ArrowUp, ArrowDown, ArrowUpDown
 } from 'lucide-react';
 import { studentApi, facultyApi, studentClassApi, academicYearApi } from '../../api';
 import Modal from '../common/Modal';
