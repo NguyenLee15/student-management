@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { userApi } from '../../api';
-
-import { Lock, X } from 'lucide-react';
+import { Lock } from 'lucide-react';
+import Modal from '../common/Modal';
 
 const ChangePasswordModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -36,7 +36,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword
       });
-      setSuccessMsg('Đổi mật khẩu thành công');
+      setSuccessMsg('Đổi mật khẩu thành công!');
       setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       setTimeout(() => { setSuccessMsg(''); onClose(); }, 1500);
     } catch (error) {
@@ -47,85 +47,84 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-      <div className="bg-slate-800 rounded-xl shadow-2xl w-full max-w-md border border-slate-700/50 overflow-hidden animate-in fade-in zoom-in duration-200">
-        <div className="flex items-center justify-between p-4 border-b border-slate-700/50 bg-slate-800/50">
-          <div className="flex items-center space-x-2">
-            <Lock className="h-5 w-5 text-indigo-400" />
-            <h2 className="text-lg font-bold text-white">Đổi Mật Khẩu</h2>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Đổi Mật Khẩu Bảo Mật"
+      subtitle="Thiết lập mật khẩu mới (tối thiểu 8 ký tự)"
+      maxWidth="max-w-md"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        {errorMsg && (
+          <div className="p-3 text-xs bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-xl">
+            {errorMsg}
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 text-slate-400 hover:text-white transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
+        )}
+        {successMsg && (
+          <div className="p-3 text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-xl font-semibold">
+            {successMsg}
+          </div>
+        )}
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            Mật khẩu hiện tại *
+          </label>
+          <input
+            type="password"
+            required
+            className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 transition"
+            value={formData.currentPassword}
+            onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {errorMsg && <div className="p-3 text-xs bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-lg">{errorMsg}</div>}
-          {successMsg && <div className="p-3 text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg">{successMsg}</div>}
+        <div>
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            Mật khẩu mới (tối thiểu 8 ký tự) *
+          </label>
+          <input
+            type="password"
+            required
+            minLength={8}
+            className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 transition"
+            value={formData.newPassword}
+            onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Mật khẩu hiện tại
-            </label>
-            <input
-              type="password"
-              required
-              className="w-full px-4 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
-              value={formData.currentPassword}
-              onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-            />
-          </div>
+        <div>
+          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+            Xác nhận mật khẩu mới *
+          </label>
+          <input
+            type="password"
+            required
+            minLength={8}
+            className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-indigo-500 transition"
+            value={formData.confirmPassword}
+            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Mật khẩu mới
-            </label>
-            <input
-              type="password"
-              required
-              minLength={8}
-              className="w-full px-4 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
-              value={formData.newPassword}
-              onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
-              Xác nhận mật khẩu mới
-            </label>
-            <input
-              type="password"
-              required
-              minLength={8}
-              className="w-full px-4 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
-              value={formData.confirmPassword}
-              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-            />
-          </div>
-
-          <div className="flex space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors font-medium"
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Đang lưu...' : 'Lưu mật khẩu'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl border border-slate-800 transition font-semibold"
+          >
+            Hủy
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition active:scale-95 font-semibold disabled:opacity-50 shadow-sm"
+          >
+            {loading ? 'Đang xử lý...' : 'Lưu mật khẩu mới'}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 };
 
