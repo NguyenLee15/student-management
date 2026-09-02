@@ -28,6 +28,12 @@ export default function StudentModule({ onNotify, currentUser }) {
   const [selectedFaculty, setSelectedFaculty] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [sortField, setSortField] = useState('studentId');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [showBatchClassModal, setShowBatchClassModal] = useState(false);
+  const [batchClassId, setBatchClassId] = useState('');
 
   // Dropdown Metadata
   const [faculties, setFaculties] = useState([]);
@@ -119,6 +125,99 @@ export default function StudentModule({ onNotify, currentUser }) {
       setLoading(false);
     }
   };
+
+
+  // Sắp xếp dữ liệu theo cột
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.size === students.length && students.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(students.map((s) => s.studentId)));
+    }
+  };
+
+  const handleToggleSelect = (id) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  };
+
+  const handleClearFilters = () => {
+    setKeyword('');
+    setSelectedFaculty('');
+    setSelectedClass('');
+    setSelectedYear('');
+    setSelectedStatus('');
+    setPage(0);
+  };
+
+  const handleBatchClassSubmit = async (e) => {
+    e.preventDefault();
+    if (!batchClassId) return;
+    setLoading(true);
+    try {
+      // Cập nhật lớp cho các sinh viên đã chọn
+      for (const id of Array.from(selectedIds)) {
+        const st = students.find((s) => s.studentId === id);
+        if (st) {
+          await studentApi.update(id, { ...st, classId: batchClassId });
+        }
+      }
+      addToast(`Đã chuyển lớp thành công cho ${selectedIds.size} sinh viên!`, 'success');
+      setSelectedIds(new Set());
+      setShowBatchClassModal(false);
+      loadStudents();
+    } catch (err) {
+      addToast('Có lỗi xảy ra khi chuyển lớp hàng loạt.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa ${selectedIds.size} sinh viên đã chọn không?`)) return;
+    setLoading(true);
+    try {
+      for (const id of Array.from(selectedIds)) {
+        await studentApi.delete(id);
+      }
+      addToast(`Đã xóa thành công ${selectedIds.size} sinh viên!`, 'success');
+      setSelectedIds(new Set());
+      loadStudents();
+    } catch (err) {
+      addToast('Có lỗi xảy ra khi xóa sinh viên.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sortedStudents = React.useMemo(() => {
+    let result = [...students];
+    if (selectedStatus === 'WARNING') {
+      // Lọc sinh viên có GPA < 2.0 nếu có
+      result = result.filter(s => (s.gpa || s.cumulativeGpa || 3.0) < 2.0);
+    }
+    result.sort((a, b) => {
+      let aVal = a[sortField] || '';
+      let bVal = b[sortField] || '';
+      if (typeof aVal === 'string') {
+        return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+    return result;
+  }, [students, sortField, sortOrder, selectedStatus]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -314,49 +413,82 @@ export default function StudentModule({ onNotify, currentUser }) {
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="panel-card p-4 flex flex-col md:flex-row items-center gap-3">
-        <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo họ tên hoặc mã sinh viên (VD: SV001)..."
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition"
-          />
-        </form>
+      {/* Advanced Filter and Search Bar */}
+      <div className="panel-card p-4 space-y-3">
+        <div className="flex flex-col lg:flex-row items-center gap-3">
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo họ tên hoặc mã sinh viên (VD: SV001)..."
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition"
+            />
+          </form>
 
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-          <select
-            value={selectedFaculty}
-            onChange={(e) => { setSelectedFaculty(e.target.value); setPage(0); }}
-            className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500 transition"
-          >
-            <option value="">Tất cả các Khoa</option>
-            {faculties.map((f) => (
-              <option key={f.facultyId} value={f.facultyId}>{f.facultyName || f.facultyId}</option>
-            ))}
-          </select>
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <select
+              value={selectedFaculty}
+              onChange={(e) => { setSelectedFaculty(e.target.value); setPage(0); }}
+              className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition"
+            >
+              <option value="">Tất cả Khoa</option>
+              {faculties.map((f) => (
+                <option key={f.facultyId} value={f.facultyId}>{f.facultyName || f.facultyId}</option>
+              ))}
+            </select>
 
-          <select
-            value={selectedClass}
-            onChange={(e) => { setSelectedClass(e.target.value); setPage(0); }}
-            className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500 transition"
-          >
-            <option value="">Tất cả các Lớp</option>
-            {classes.map((c) => (
-              <option key={c.classId} value={c.classId}>{c.className || c.classId}</option>
-            ))}
-          </select>
+            <select
+              value={selectedClass}
+              onChange={(e) => { setSelectedClass(e.target.value); setPage(0); }}
+              className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition"
+            >
+              <option value="">Tất cả Lớp</option>
+              {classes.map((c) => (
+                <option key={c.classId} value={c.classId}>{c.className || c.classId}</option>
+              ))}
+            </select>
 
-          <button
-            onClick={loadStudents}
-            title="Tải lại dữ liệu"
-            className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
-          </button>
+            <select
+              value={selectedYear}
+              onChange={(e) => { setSelectedYear(e.target.value); setPage(0); }}
+              className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition font-mono"
+            >
+              <option value="">Tất cả Niên khóa</option>
+              {academicYears.map((y) => (
+                <option key={y.academicYearId} value={y.academicYearId}>{y.academicYearName || y.academicYearId}</option>
+              ))}
+            </select>
+
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition"
+            >
+              <option value="">Tất cả Trạng thái</option>
+              <option value="ACTIVE">Đang học bình thường</option>
+              <option value="WARNING">⚠️ Cảnh báo học vụ (GPA &lt; 2.0)</option>
+            </select>
+
+            {(keyword || selectedFaculty || selectedClass || selectedYear || selectedStatus) && (
+              <button
+                onClick={handleClearFilters}
+                className="flex items-center gap-1 text-xs px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-rose-400 hover:bg-slate-800 transition"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Xóa lọc</span>
+              </button>
+            )}
+
+            <button
+              onClick={loadStudents}
+              title="Tải lại dữ liệu"
+              className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition active:scale-95"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -364,12 +496,52 @@ export default function StudentModule({ onNotify, currentUser }) {
       <div className="panel-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto" aria-live="polite">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+            <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800 select-none">
               <tr>
-                <th className="px-5 py-3.5">Mã sinh viên</th>
-                <th className="px-5 py-3.5">Họ và Tên & Giới tính</th>
-                <th className="px-5 py-3.5">Lớp / Khoa</th>
-                <th className="px-5 py-3.5">Niên khóa</th>
+                <th className="px-4 py-3.5 w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.size === students.length && students.length > 0}
+                    onChange={handleSelectAll}
+                    className="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  />
+                </th>
+                <th 
+                  onClick={() => handleSort('studentId')}
+                  className="px-5 py-3.5 cursor-pointer hover:text-white transition"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Mã sinh viên</span>
+                    {sortField === 'studentId' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
+                  </div>
+                </th>
+                <th 
+                  onClick={() => handleSort('fullName')}
+                  className="px-5 py-3.5 cursor-pointer hover:text-white transition"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Họ và Tên & Giới tính</span>
+                    {sortField === 'fullName' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
+                  </div>
+                </th>
+                <th 
+                  onClick={() => handleSort('className')}
+                  className="px-5 py-3.5 cursor-pointer hover:text-white transition"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Lớp / Khoa</span>
+                    {sortField === 'className' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
+                  </div>
+                </th>
+                <th 
+                  onClick={() => handleSort('academicYearId')}
+                  className="px-5 py-3.5 cursor-pointer hover:text-white transition"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Niên khóa</span>
+                    {sortField === 'academicYearId' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
+                  </div>
+                </th>
                 <th className="px-5 py-3.5">Thông tin liên hệ</th>
                 <th className="px-5 py-3.5 text-right">Thao tác</th>
               </tr>
@@ -393,8 +565,16 @@ export default function StudentModule({ onNotify, currentUser }) {
                   </td>
                 </tr>
               ) : (
-                students.map((st) => (
-                  <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
+                sortedStudents.map((st) => (
+                  <tr key={st.studentId} className={`hover:bg-slate-800/40 transition ${selectedIds.has(st.studentId) ? 'bg-indigo-950/20' : ''}`}>
+                    <td className="px-4 py-3.5 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(st.studentId)}
+                        onChange={() => handleToggleSelect(st.studentId)}
+                        className="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      />
+                    </td>
                     <td className="px-5 py-3.5 font-bold text-indigo-400 font-mono">{st.studentId}</td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">

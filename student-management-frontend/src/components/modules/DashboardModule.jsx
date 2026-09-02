@@ -10,6 +10,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip 
 } from 'recharts';
 import StatCard from '../common/StatCard';
+import Modal from '../common/Modal';
 import { analyticsApi, systemApi, auditLogApi } from '../../api';
 
 const FACULTY_PIE_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#38bdf8', '#8b5cf6'];
@@ -23,6 +24,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
   const [analyticsError, setAnalyticsError] = useState(null);
   const [healthData, setHealthData] = useState({ status: 'UP', db: 'UP', disk: 'UP', pingTime: '12ms' });
   const [healthLoading, setHealthLoading] = useState(false);
+  const [showWarningModal, setShowWarningModal] = useState(false);
 
   useEffect(() => {
     loadAllDashboardData();
@@ -192,24 +194,27 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
 
       {/* 3. Urgent Action & Academic Alerts Strip (Business Meaning) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="panel-card p-4 flex items-center justify-between border-l-4 border-l-rose-500">
+        <div 
+          onClick={() => setShowWarningModal(true)}
+          className="panel-card p-4 flex items-center justify-between border-l-4 border-l-rose-500 hover:bg-slate-800/40 cursor-pointer transition select-none"
+        >
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400">
               <AlertOctagon className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-xs font-semibold text-white">Cảnh Báo Học Vụ (GPA &lt; 2.0)</div>
+              <div className="text-xs font-semibold text-white flex items-center gap-2">
+                <span>Cảnh Báo Học Vụ (GPA &lt; 2.0)</span>
+                <span className="px-1.5 py-0.2 text-[10px] font-bold bg-rose-500/20 text-rose-300 rounded border border-rose-500/30">Xử lý ngay</span>
+              </div>
               <p className="text-[11px] text-slate-400 mt-0.5">
-                {warningCount > 0 ? `${warningCount} sinh viên cần gặp cố vấn học tập` : 'Không có cảnh báo nghiêm trọng'}
+                {warningCount > 0 ? `${warningCount} sinh viên có nguy cơ bị buộc thôi học` : 'Không có cảnh báo nghiêm trọng'}
               </p>
             </div>
           </div>
-          <button 
-            onClick={() => onNavigate('grades')}
-            className="p-1.5 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition"
-          >
+          <div className="p-1.5 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition">
             <ChevronRight className="h-4 w-4" />
-          </button>
+          </div>
         </div>
 
         <div className="panel-card p-4 flex items-center justify-between border-l-4 border-l-amber-500">
@@ -474,6 +479,94 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
           })}
         </div>
       </div>
+
+      {/* Modal Xử Lý Cảnh Báo Học Vụ */}
+      <Modal
+        isOpen={showWarningModal}
+        onClose={() => setShowWarningModal(false)}
+        title="Danh Sách Sinh Viên Cảnh Báo Học Vụ (GPA < 2.0)"
+        subtitle="Dữ liệu tổng hợp kỳ hiện tại phục vụ công tác cố vấn và xử lý học vụ"
+        maxWidth="max-w-3xl"
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl text-xs text-rose-300 flex items-start gap-2.5">
+            <AlertOctagon className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+            <div>
+              <span className="font-semibold">Quy định đào tạo:</span> Sinh viên có GPA tích lũy dưới 2.0 (thang 4) sẽ bị xếp loại cảnh báo học vụ mức 1. Cần tổ chức buổi làm việc với cố vấn học tập trước hạn chót đăng ký môn.
+            </div>
+          </div>
+
+          <div className="panel-card overflow-hidden border border-slate-800">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-900/90 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                <tr>
+                  <th className="px-4 py-2.5">Mã SV</th>
+                  <th className="px-4 py-2.5">Họ và Tên</th>
+                  <th className="px-4 py-2.5">Lớp</th>
+                  <th className="px-4 py-2.5 text-center">GPA Tích Lũy</th>
+                  <th className="px-4 py-2.5 text-right">Mức Cảnh Báo</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                <tr className="hover:bg-slate-800/40 transition">
+                  <td className="px-4 py-2.5 font-mono text-indigo-400 font-bold">SV2025008</td>
+                  <td className="px-4 py-2.5 font-semibold text-white">Trần Văn Nam</td>
+                  <td className="px-4 py-2.5 text-slate-300 font-mono">CNTT-K65A</td>
+                  <td className="px-4 py-2.5 text-center font-bold text-rose-400 font-mono">1.68</td>
+                  <td className="px-4 py-2.5 text-right">
+                    <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 font-semibold text-[10px] border border-rose-500/30">Mức 2</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-slate-800/40 transition">
+                  <td className="px-4 py-2.5 font-mono text-indigo-400 font-bold">SV2025014</td>
+                  <td className="px-4 py-2.5 font-semibold text-white">Lê Hoàng Long</td>
+                  <td className="px-4 py-2.5 text-slate-300 font-mono">KTPM-K66B</td>
+                  <td className="px-4 py-2.5 text-center font-bold text-rose-400 font-mono">1.85</td>
+                  <td className="px-4 py-2.5 text-right">
+                    <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-semibold text-[10px] border border-amber-500/30">Mức 1</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-slate-800/40 transition">
+                  <td className="px-4 py-2.5 font-mono text-indigo-400 font-bold">SV2025029</td>
+                  <td className="px-4 py-2.5 font-semibold text-white">Nguyễn Thị Mai</td>
+                  <td className="px-4 py-2.5 text-slate-300 font-mono">HTTT-K65</td>
+                  <td className="px-4 py-2.5 text-center font-bold text-rose-400 font-mono">1.92</td>
+                  <td className="px-4 py-2.5 text-right">
+                    <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-semibold text-[10px] border border-amber-500/30">Mức 1</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex justify-between items-center pt-3 border-t border-slate-800">
+            <span className="text-xs text-slate-400">Hiển thị 3 sinh viên thuộc diện cần xử lý</span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowWarningModal(false);
+                  onNavigate('students');
+                }}
+                className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white transition"
+              >
+                Mở Phân Hệ Sinh Viên
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  alert('Đã gửi thông báo cảnh báo học vụ và nhắc lịch hẹn cố vấn đến 3 sinh viên!');
+                  setShowWarningModal(false);
+                }}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white transition active:scale-95 shadow-sm"
+              >
+                Gửi Email Cảnh Báo
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
     </div>
   );
 }

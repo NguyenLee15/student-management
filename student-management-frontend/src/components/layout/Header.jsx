@@ -51,35 +51,12 @@ export default function Header({
         </div>
       </div>
 
-      {/* Middle: Role Perspective Switcher (Segmented Control) */}
-      {onRoleSwitch && (
-        <div className="hidden lg:flex items-center gap-2 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
-          <span className="text-[11px] text-slate-400 pl-1">Chuyển vai trò:</span>
-          <div className="flex items-center gap-1 bg-slate-900 p-0.5 rounded border border-slate-800 text-xs">
-            <button
-              onClick={() => onRoleSwitch('ROLE_ADMIN')}
-              className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold bg-indigo-600 text-white transition"
-            >
-              <Shield className="w-3 h-3" />
-              <span>Admin</span>
-            </button>
-            <button
-              onClick={() => onRoleSwitch('ROLE_TEACHER')}
-              className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition"
-            >
-              <UserSquare2 className="w-3 h-3" />
-              <span>Giảng Viên</span>
-            </button>
-            <button
-              onClick={() => onRoleSwitch('ROLE_STUDENT')}
-              className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition"
-            >
-              <GraduationCap className="w-3 h-3" />
-              <span>Sinh Viên</span>
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Middle: Active Academic Session & Global Scope */}
+      <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-xs">
+        <span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
+        <span className="text-slate-400">Niên khóa:</span>
+        <span className="font-semibold text-slate-200">2025 - 2026 (Học kỳ 1)</span>
+      </div>
 
       {/* Right: Server Status, Search, Profile */}
       <div className="flex items-center gap-2.5">
@@ -108,29 +85,53 @@ export default function Header({
 
         <div className="h-5 w-[1px] bg-slate-800 mx-0.5 hidden sm:block"></div>
 
-        {/* User Profile */}
+        {/* User Profile with Enterprise Dropdown */}
         {currentUser ? (
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setIsProfileModalOpen(true)}
-              className="flex items-center gap-2.5 bg-slate-950/80 hover:bg-slate-800/80 cursor-pointer border border-slate-800 hover:border-indigo-500/40 px-2.5 py-1.5 rounded-xl transition"
-            >
-              <div className="h-6 w-6 rounded-lg bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 flex items-center justify-center font-bold text-xs">
-                {currentUser.username?.charAt(0)?.toUpperCase() || 'A'}
-              </div>
-              <div className="text-left hidden md:block">
-                <div className="text-xs font-semibold text-white leading-tight">{currentUser.username}</div>
-                <div className="text-[10px] text-emerald-400 font-mono">Quản trị viên</div>
-              </div>
-              <Settings className="h-3.5 w-3.5 text-slate-400 hover:text-white transition" />
-            </button>
-            <button
-              onClick={onLogout}
-              title="Đăng xuất"
-              className="p-2 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+          <div className="relative">
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setIsProfileModalOpen(true)}
+                className="flex items-center gap-2.5 bg-slate-950/80 hover:bg-slate-800/80 cursor-pointer border border-slate-800 hover:border-indigo-500/40 px-2.5 py-1.5 rounded-xl transition"
+              >
+                <div className="h-6 w-6 rounded-lg bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 flex items-center justify-center font-bold text-xs">
+                  {currentUser.username?.charAt(0)?.toUpperCase() || 'A'}
+                </div>
+                <div className="text-left hidden md:block">
+                  <div className="text-xs font-semibold text-white leading-tight">{currentUser.username}</div>
+                  <div className="text-[10px] text-emerald-400 font-mono">Quản trị viên</div>
+                </div>
+                <Settings className="h-3.5 w-3.5 text-slate-400 hover:text-white transition" />
+              </button>
+              
+              {/* Optional Role Switcher for Developer/Admin Sandbox */}
+              {onRoleSwitch && (
+                <div className="hidden xl:flex items-center gap-1 bg-slate-950 px-1.5 py-1 rounded-xl border border-slate-800 text-[11px]">
+                  <span className="text-slate-500 pl-1 text-[10px]">Sandbox:</span>
+                  <button
+                    onClick={() => onRoleSwitch('ROLE_TEACHER')}
+                    title="Mô phỏng giao diện Giảng viên"
+                    className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                  >
+                    <UserSquare2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => onRoleSwitch('ROLE_STUDENT')}
+                    title="Mô phỏng giao diện Sinh viên"
+                    className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                  >
+                    <GraduationCap className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
+              <button
+                onClick={onLogout}
+                title="Đăng xuất"
+                className="p-2 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-rose-400 hover:bg-slate-800 active:scale-95 transition"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         ) : (
           <button 
