@@ -51,7 +51,7 @@ export default function AdminLayout({
   const currentTabInfo = TAB_TITLES[activeTab] || { title: 'Quản Trị', group: 'Hệ Thống' };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
+    <div className="h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white overflow-hidden">
       {/* 🟢 TOP HEADER */}
       <Header
         isBackendConnected={isBackendConnected}

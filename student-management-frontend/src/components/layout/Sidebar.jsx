@@ -50,7 +50,7 @@ export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUs
   return (
     <aside 
       aria-label="Điều Hướng Chính"
-      className={`w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 p-3.5 flex flex-col justify-between overflow-y-auto shrink-0 fixed inset-y-0 left-0 z-40 md:static md:flex transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+      className={`w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 p-3.5 flex flex-col justify-between overflow-y-auto shrink-0 fixed inset-y-0 left-0 z-40 md:static md:h-full md:flex transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
     >
       <nav className="space-y-5" aria-label="Sidebar Menu">
         {menuSections.map((section, sIdx) => (
