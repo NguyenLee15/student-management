@@ -43,6 +43,7 @@ export const studentApi = {
 export const teacherApi = {
   getAll: (params) => axiosClient.get('/teachers', { params }),
   getById: (id) => axiosClient.get(`/teachers/${id}`),
+  getMe: () => axiosClient.get('/teachers/me'),
   create: (data) => axiosClient.post('/teachers', data),
   update: (id, data) => axiosClient.put(`/teachers/${id}`, data),
   delete: (id) => axiosClient.delete(`/teachers/${id}`),
@@ -137,6 +138,7 @@ export const gradeApi = {
   getTranscript: (studentId) => axiosClient.get(`/academic-grades/transcript/${studentId}`),
   create: (data) => axiosClient.post('/academic-grades', data),
   update: (id, data) => axiosClient.put(`/academic-grades/${id}`, data),
+  saveBatch: (data) => axiosClient.post('/academic-grades/batch', data),
   delete: (id) => axiosClient.delete(`/academic-grades/${id}`),
 };
 

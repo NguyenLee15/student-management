@@ -84,6 +84,14 @@ public class AcademicGradeRestController {
                 .body(ApiResponse.success("Thêm mới Grade thành công", academicGradeService.create(dto)));
     }
 
+    @PostMapping("/batch")
+    @Operation(summary = "Lưu hoặc cập nhật danh sách điểm theo lô cho lớp học phần")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ResponseEntity<ApiResponse<java.util.List<AcademicGradeResponseDto>>> saveBatch(
+            @Valid @RequestBody java.util.List<AcademicGradeRequestDto> dtos) {
+        return ResponseEntity.ok(ApiResponse.success("Lưu điểm hàng loạt thành công", academicGradeService.saveBatch(dtos)));
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Cập nhật điểm")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")

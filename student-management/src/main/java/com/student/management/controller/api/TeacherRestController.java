@@ -46,6 +46,13 @@ public class TeacherRestController {
         Page<TeacherResponseDto> result = teacherService.searchAndFilter(keyword, facultyId, PageRequest.of(page, size));
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách giảng viên thành công", result));
     }
+ 
+    @GetMapping("/me")
+    @Operation(summary = "Lấy thông tin giảng viên đang đăng nhập")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ResponseEntity<ApiResponse<TeacherResponseDto>> getCurrentTeacher() {
+        return ResponseEntity.ok(ApiResponse.success("Lấy thông tin giảng viên thành công", teacherService.getCurrentTeacher()));
+    }
 
     @GetMapping("/{id}")
     @Operation(summary = "Lấy chi tiết giảng viên theo ID")

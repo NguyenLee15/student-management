@@ -160,6 +160,49 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
 
     @Override
     @Transactional
+    public List<AcademicGradeResponseDto> saveBatch(List<AcademicGradeRequestDto> dtos) {
+        List<AcademicGradeResponseDto> results = new ArrayList<>();
+        if (dtos == null || dtos.isEmpty()) return results;
+
+        for (AcademicGradeRequestDto dto : dtos) {
+            if (dto.getGradeId() != null) {
+                AcademicGradeUpdateDto updateDto = AcademicGradeUpdateDto.builder()
+                        .semester(dto.getSemester())
+                        .studyPhase(dto.getStudyPhase())
+                        .attendanceScore(dto.getAttendanceScore())
+                        .midtermScore(dto.getMidtermScore())
+                        .finalExamScore(dto.getFinalExamScore())
+                        .scoreScale10(dto.getScoreScale10())
+                        .scoreScale4(dto.getScoreScale4())
+                        .letterGrade(dto.getLetterGrade())
+                        .build();
+                results.add(update(dto.getGradeId(), updateDto));
+            } else {
+                var existing = academicGradeRepository.findExistingGrade(
+                        dto.getStudentId(), dto.getSubjectId(), dto.getSemester(), dto.getAcademicYear(), dto.getStudyPhase()
+                );
+                if (existing.isPresent()) {
+                    AcademicGradeUpdateDto updateDto = AcademicGradeUpdateDto.builder()
+                            .semester(dto.getSemester())
+                            .studyPhase(dto.getStudyPhase())
+                            .attendanceScore(dto.getAttendanceScore())
+                            .midtermScore(dto.getMidtermScore())
+                            .finalExamScore(dto.getFinalExamScore())
+                            .scoreScale10(dto.getScoreScale10())
+                            .scoreScale4(dto.getScoreScale4())
+                            .letterGrade(dto.getLetterGrade())
+                            .build();
+                    results.add(update(existing.get().getGradeId(), updateDto));
+                } else {
+                    results.add(create(dto));
+                }
+            }
+        }
+        return results;
+    }
+
+    @Override
+    @Transactional
     public void delete(Integer gradeId) {
         if (!academicGradeRepository.existsById(gradeId)) {
             throw new NotFoundException("Không tìm thấy Grade: " + gradeId);

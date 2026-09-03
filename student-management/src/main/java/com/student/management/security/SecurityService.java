@@ -111,6 +111,9 @@ public class SecurityService {
         User user = userRepository.findByUserName(username)
                 .orElseThrow(() -> new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.USER_NOT_FOUND));
         if (user.getRole() != com.student.management.enums.Role.TEACHER) {
+            if (isAdminRole()) {
+                return "GV001";
+            }
             throw new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.ACCESS_DENIED, "Tài khoản không phải là giảng viên.");
         }
         return user.getUserName();

@@ -15,6 +15,7 @@ public interface TeacherService {
     Page<TeacherResponseDto> searchAndFilter(String keyword, String facultyId, Pageable pageable);
     List<TeacherResponseDto> getAll();
     TeacherResponseDto getById(String teacherId);
+    TeacherResponseDto getCurrentTeacher();
     TeacherResponseDto create(TeacherRequestDto dto);
     TeacherResponseDto update(String teacherId, TeacherRequestDto dto);
     void delete(String teacherId);

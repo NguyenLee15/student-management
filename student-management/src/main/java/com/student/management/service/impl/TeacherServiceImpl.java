@@ -35,6 +35,7 @@ public class TeacherServiceImpl implements TeacherService {
 
     private final TeacherRepository teacherRepository;
     private final FacultyRepository facultyRepository;
+    private final com.student.management.security.SecurityService securityService;
 
     @Override
     @Transactional(readOnly = true)
@@ -60,6 +61,13 @@ public class TeacherServiceImpl implements TeacherService {
         Teacher teacher = teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy giảng viên: " + teacherId));
         return TeacherMapper.toDto(teacher);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TeacherResponseDto getCurrentTeacher() {
+        String teacherId = securityService.getCurrentTeacherId();
+        return getById(teacherId);
     }
 
     @Override

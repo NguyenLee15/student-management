@@ -24,6 +24,7 @@ public interface AcademicGradeService {
     TranscriptResponseDto getTranscriptByStudentId(String studentId);
     AcademicGradeResponseDto create(AcademicGradeRequestDto dto);
     AcademicGradeResponseDto update(Integer gradeId, AcademicGradeUpdateDto dto);
+    List<AcademicGradeResponseDto> saveBatch(List<AcademicGradeRequestDto> dtos);
     void delete(Integer gradeId);
     List<AcademicGradeResponseDto> importFromExcel(MultipartFile file);
     ByteArrayInputStream exportToExcel(List<AcademicGradeResponseDto> grades);
