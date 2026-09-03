@@ -57,8 +57,8 @@ export default function StudentModule({ onNotify, currentUser }) {
     email: '',
     phoneNumber: '',
     gender: 'MALE',
-    dateOfBirth: '2004-01-01',
-    address: 'Hà Nội, Việt Nam',
+    dateOfBirth: '',
+    address: '',
     classId: '',
     facultyId: '',
     academicYearId: '',
@@ -232,7 +232,7 @@ export default function StudentModule({ onNotify, currentUser }) {
       ...initialForm,
       facultyId: faculties[0]?.facultyId || '',
       classId: classes[0]?.classId || '',
-      academicYearId: academicYears[0]?.academicYearId || 'K65',
+      academicYearId: academicYears[0]?.academicYearId || '',
     });
     setShowModal(true);
   };
@@ -245,7 +245,7 @@ export default function StudentModule({ onNotify, currentUser }) {
       email: student.email || '',
       phoneNumber: student.phoneNumber || '',
       gender: student.gender || 'MALE',
-      dateOfBirth: student.dateOfBirth || '2004-01-01',
+      dateOfBirth: student.dateOfBirth || '',
       address: student.address || '',
       classId: student.classId || student.studentClassId || '',
       facultyId: student.facultyId || '',

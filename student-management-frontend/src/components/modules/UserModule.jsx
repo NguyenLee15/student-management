@@ -5,6 +5,8 @@ import { userApi } from '../../api';
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 import Pagination from '../common/Pagination';
+import Skeleton from '../common/Skeleton';
+import EmptyState from '../common/EmptyState';
 
 export default function UserModule({ onNotify }) {
   const [users, setUsers] = useState([]);
@@ -163,29 +165,23 @@ export default function UserModule({ onNotify }) {
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {loading ? (
-                [1, 2, 3, 4, 5].map((i) => (
+                [...Array(5)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="px-5 py-3.5">
+                    <td className="px-5 py-4">
                       <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-full bg-slate-800"></div>
-                        <div className="h-4 w-28 rounded bg-slate-800"></div>
+                        <Skeleton className="h-8 w-8 rounded-full" />
+                        <Skeleton className="h-4 w-28" />
                       </div>
                     </td>
-                    <td className="px-5 py-3.5">
-                      <div className="h-5 w-24 rounded bg-slate-800"></div>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <div className="h-4 w-20 rounded bg-slate-800"></div>
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <div className="h-6 w-6 rounded bg-slate-800 inline-block"></div>
-                    </td>
+                    <td className="px-5 py-4"><Skeleton className="h-5 w-24 rounded-lg" /></td>
+                    <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
+                    <td className="px-5 py-4 text-right"><Skeleton className="h-8 w-8 rounded-lg ml-auto" /></td>
                   </tr>
                 ))
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-5 py-8 text-center text-slate-500">
-                    Chưa có tài khoản nào khớp với bộ lọc.
+                  <td colSpan="4" className="p-0">
+                    <EmptyState title="Không tìm thấy tài khoản" message="Không có tài khoản nào khớp với điều kiện tìm kiếm hoặc bộ lọc hiện tại." />
                   </td>
                 </tr>
               ) : (

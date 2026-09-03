@@ -6,6 +6,7 @@ import com.student.management.dto.resp.SubjectResponseDto;
 import com.student.management.entity.Faculty;
 import com.student.management.entity.Subject;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,9 @@ public class SubjectMapper {
                 .credits(dto.getCredits())
                 .faculty(faculty)
                 .prerequisiteSubject(prerequisiteSubject)
+                .attendanceWeight(dto.getAttendanceWeight() != null ? dto.getAttendanceWeight() : new BigDecimal("0.10"))
+                .midtermWeight(dto.getMidtermWeight() != null ? dto.getMidtermWeight() : new BigDecimal("0.30"))
+                .finalExamWeight(dto.getFinalExamWeight() != null ? dto.getFinalExamWeight() : new BigDecimal("0.60"))
                 .build();
     }
 
@@ -35,6 +39,9 @@ public class SubjectMapper {
                 .facultyName(subject.getFaculty() != null ? subject.getFaculty().getFacultyName() : null)
                 .prerequisiteSubjectId(subject.getPrerequisiteSubject() != null ? subject.getPrerequisiteSubject().getSubjectId() : null)
                 .prerequisiteSubjectName(subject.getPrerequisiteSubject() != null ? subject.getPrerequisiteSubject().getSubjectName() : null)
+                .attendanceWeight(subject.getAttendanceWeight())
+                .midtermWeight(subject.getMidtermWeight())
+                .finalExamWeight(subject.getFinalExamWeight())
                 .build();
     }
 

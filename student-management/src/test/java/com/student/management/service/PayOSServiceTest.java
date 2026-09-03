@@ -224,9 +224,7 @@ class PayOSServiceTest {
         Map<String, Object> result = payOSService.processWebhook(payload);
 
         assertEquals(0, result.get("error"));
-        assertEquals("Transaction already processed", result.get("message"));
+        assertEquals("Giao dịch đã được xử lý", result.get("message"));
         verify(tuitionService, never()).recordPayment(any(), any());
     }
 }
-
-

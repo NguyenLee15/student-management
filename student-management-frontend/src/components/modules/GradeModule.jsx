@@ -31,9 +31,9 @@ export default function GradeModule({ onNotify, currentUser }) {
     gradeId: null,
     studentId: '',
     subjectId: '',
-    attendanceScore: 10,
-    midtermScore: 8.5,
-    finalExamScore: 8.0,
+    attendanceScore: '',
+    midtermScore: '',
+    finalExamScore: '',
     semester: 'SEMESTER_1',
     academicYear: '2026-2027',
     studyPhase: 'PHASE_1',
@@ -99,6 +99,9 @@ export default function GradeModule({ onNotify, currentUser }) {
       ...initialForm,
       studentId: students[0]?.studentId || '',
       subjectId: subjects[0]?.subjectId || '',
+      attendanceScore: '',
+      midtermScore: '',
+      finalExamScore: '',
     });
     setShowModal(true);
   };
@@ -109,9 +112,9 @@ export default function GradeModule({ onNotify, currentUser }) {
       gradeId: g.gradeId,
       studentId: g.studentId || '',
       subjectId: g.subjectId || '',
-      attendanceScore: g.attendanceScore ?? 10,
-      midtermScore: g.midtermScore ?? 8.5,
-      finalExamScore: g.finalExamScore ?? 8.0,
+      attendanceScore: g.attendanceScore ?? '',
+      midtermScore: g.midtermScore ?? '',
+      finalExamScore: g.finalExamScore ?? '',
       semester: g.semester || 'SEMESTER_1',
       academicYear: g.academicYear || '2026-2027',
       studyPhase: g.studyPhase || 'PHASE_1',
@@ -131,9 +134,9 @@ export default function GradeModule({ onNotify, currentUser }) {
       'Mã Sinh Viên',
       'Họ Và Tên',
       'Môn Học',
-      'Chuyên Cần (10%)',
-      'Giữa Kỳ (30%)',
-      'Cuối Kỳ (60%)',
+      'Điểm Chuyên Cần',
+      'Điểm Giữa Kỳ',
+      'Điểm Cuối Kỳ',
       'Tổng Kết (Hệ 10)',
       'Hệ 4',
       'Điểm Chữ',
@@ -184,13 +187,21 @@ export default function GradeModule({ onNotify, currentUser }) {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const att = Number(formData.attendanceScore) || 0;
-      const mid = Number(formData.midtermScore) || 0;
-      const fin = Number(formData.finalExamScore) || 0;
-      const scoreScale10 = Number(((att * 0.1) + (mid * 0.3) + (fin * 0.6)).toFixed(1));
+      const selectedSub = subjects.find(s => s.subjectId === formData.subjectId);
+      const attWeight = selectedSub?.attendanceWeight != null ? Number(selectedSub.attendanceWeight) : 0.10;
+      const midWeight = selectedSub?.midtermWeight != null ? Number(selectedSub.midtermWeight) : 0.30;
+      const finWeight = selectedSub?.finalExamWeight != null ? Number(selectedSub.finalExamWeight) : 0.60;
+
+      const att = formData.attendanceScore !== '' ? Number(formData.attendanceScore) : 0;
+      const mid = formData.midtermScore !== '' ? Number(formData.midtermScore) : 0;
+      const fin = formData.finalExamScore !== '' ? Number(formData.finalExamScore) : 0;
+      const scoreScale10 = Number(((att * attWeight) + (mid * midWeight) + (fin * finWeight)).toFixed(1));
 
       const payload = {
         ...formData,
+        attendanceScore: formData.attendanceScore !== '' ? Number(formData.attendanceScore) : null,
+        midtermScore: formData.midtermScore !== '' ? Number(formData.midtermScore) : null,
+        finalExamScore: formData.finalExamScore !== '' ? Number(formData.finalExamScore) : null,
         scoreScale10,
         studyPhase: formData.studyPhase || 'PHASE_1',
       };
@@ -219,6 +230,14 @@ export default function GradeModule({ onNotify, currentUser }) {
       onNotify('error', err?.message || msg.error.delete('bản ghi điểm'));
     }
   };
+
+  const activeSubject = subjects.find((s) => s.subjectId === formData.subjectId);
+  const activeAttWeight = activeSubject?.attendanceWeight != null ? Number(activeSubject.attendanceWeight) : 0.10;
+  const activeMidWeight = activeSubject?.midtermWeight != null ? Number(activeSubject.midtermWeight) : 0.30;
+  const activeFinWeight = activeSubject?.finalExamWeight != null ? Number(activeSubject.finalExamWeight) : 0.60;
+  const calculatedScale10 = formData.attendanceScore !== '' || formData.midtermScore !== '' || formData.finalExamScore !== ''
+    ? ((Number(formData.attendanceScore || 0) * activeAttWeight) + (Number(formData.midtermScore || 0) * activeMidWeight) + (Number(formData.finalExamScore || 0) * activeFinWeight)).toFixed(1)
+    : null;
 
   return (
     <div className="space-y-6">
@@ -410,44 +429,60 @@ export default function GradeModule({ onNotify, currentUser }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Điểm Chuyên Cần (10%)</label>
+              <label className="block text-slate-300 font-semibold mb-1">
+                Điểm Chuyên Cần <span className="text-purple-400 font-mono">({Math.round(activeAttWeight * 100)}%)</span>
+              </label>
               <input
                 type="number"
                 step="0.1"
                 min="0"
                 max="10"
+                placeholder="0 - 10"
                 value={formData.attendanceScore}
-                onChange={(e) => setFormData({ ...formData, attendanceScore: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-purple-500"
+                onChange={(e) => setFormData({ ...formData, attendanceScore: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 font-mono focus:outline-none focus:border-purple-500"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Điểm Giữa Kỳ (30%)</label>
+              <label className="block text-slate-300 font-semibold mb-1">
+                Điểm Giữa Kỳ <span className="text-purple-400 font-mono">({Math.round(activeMidWeight * 100)}%)</span>
+              </label>
               <input
                 type="number"
                 step="0.1"
                 min="0"
                 max="10"
+                placeholder="0 - 10"
                 value={formData.midtermScore}
-                onChange={(e) => setFormData({ ...formData, midtermScore: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-purple-500"
+                onChange={(e) => setFormData({ ...formData, midtermScore: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 font-mono focus:outline-none focus:border-purple-500"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Điểm Cuối Kỳ (60%)</label>
+              <label className="block text-slate-300 font-semibold mb-1">
+                Điểm Cuối Kỳ <span className="text-purple-400 font-mono">({Math.round(activeFinWeight * 100)}%)</span>
+              </label>
               <input
                 type="number"
                 step="0.1"
                 min="0"
                 max="10"
+                placeholder="0 - 10"
                 value={formData.finalExamScore}
-                onChange={(e) => setFormData({ ...formData, finalExamScore: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-purple-500"
+                onChange={(e) => setFormData({ ...formData, finalExamScore: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 font-mono focus:outline-none focus:border-purple-500"
               />
             </div>
           </div>
+
+          {calculatedScale10 !== null && (
+            <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-between text-xs">
+              <span className="text-slate-300 font-medium">Điểm Tổng Kết Dự Kiến (Hệ 10):</span>
+              <span className="font-bold font-mono text-purple-400 text-sm">{calculatedScale10} / 10.0</span>
+            </div>
+          )}
 
           <div className="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
             <button

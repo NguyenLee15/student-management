@@ -33,6 +33,9 @@ export default function SubjectModule({ onNotify, currentUser }) {
     subjectType: 'MAJOR',
     facultyId: '',
     prerequisiteSubjectId: '',
+    attendanceWeight: 0.10,
+    midtermWeight: 0.30,
+    finalExamWeight: 0.60,
   };
   const [formData, setFormData] = useState(initialForm);
 
@@ -99,24 +102,41 @@ export default function SubjectModule({ onNotify, currentUser }) {
       subjectType: s.subjectType || 'MAJOR',
       facultyId: s.facultyId || faculties[0]?.facultyId || '',
       prerequisiteSubjectId: s.prerequisiteSubjectId || '',
+      attendanceWeight: s.attendanceWeight != null ? Number(s.attendanceWeight) : 0.10,
+      midtermWeight: s.midtermWeight != null ? Number(s.midtermWeight) : 0.30,
+      finalExamWeight: s.finalExamWeight != null ? Number(s.finalExamWeight) : 0.60,
     });
     setShowModal(true);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
+    const attW = Number(formData.attendanceWeight);
+    const midW = Number(formData.midtermWeight);
+    const finW = Number(formData.finalExamWeight);
+    const sumW = Math.round((attW + midW + finW) * 100) / 100;
+    if (Math.abs(sumW - 1.0) > 0.001) {
+      onNotify('error', `Tổng trọng số điểm (Chuyên cần + Giữa kỳ + Cuối kỳ) phải bằng đúng 1.00 (100%). Hiện tại: ${sumW}`);
+      return;
+    }
+    const payload = {
+      ...formData,
+      attendanceWeight: attW,
+      midtermWeight: midW,
+      finalExamWeight: finW,
+    };
     try {
       if (isEdit) {
-        await subjectApi.update(formData.subjectId, formData);
+        await subjectApi.update(formData.subjectId, payload);
         onNotify('success', `Học phần ${formData.subjectId} đã được cập nhật thành công!`);
       } else {
-        await subjectApi.create(formData);
+        await subjectApi.create(payload);
         onNotify('success', `Học phần ${formData.subjectId} đã được tạo mới thành công!`);
       }
       setShowModal(false);
       loadSubjects();
     } catch (err) {
-      onNotify('error', err?.message || 'Lỗi khi lưu thông tin học phần');
+      onNotify('error', err?.response?.data?.message || err?.message || 'Lỗi khi lưu thông tin học phần');
     }
   };
 
@@ -218,6 +238,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
                 <th className="px-5 py-3.5">Tên Môn Học</th>
                 <th className="px-5 py-3.5">Phân Loại & Khoa</th>
                 <th className="px-5 py-3.5">Số Tín Chỉ</th>
+                <th className="px-5 py-3.5">Tỷ Lệ Điểm</th>
                 <th className="px-5 py-3.5">Môn Tiên Quyết</th>
                 <th className="px-5 py-3.5">Học Phí / Tín</th>
                 <th className="px-5 py-3.5 text-right">Thao tác</th>
@@ -231,6 +252,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
                       <td className="px-5 py-4"><Skeleton className="h-4 w-40" /></td>
                       <td className="px-5 py-4"><Skeleton className="h-4 w-32" /></td>
                       <td className="px-5 py-4"><Skeleton className="h-4 w-12" /></td>
+                      <td className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>
                       <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
                       <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
                       <td className="px-5 py-4"><Skeleton className="h-4 w-8" /></td>
@@ -238,7 +260,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
                   ))
                 ) : subjects.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="p-0">
+                    <td colSpan="8" className="p-0">
                       <EmptyState title="Không tìm thấy môn học" message="Không có môn học nào khớp với điều kiện tìm kiếm hiện tại." />
                     </td>
                   </tr>
@@ -260,6 +282,11 @@ export default function SubjectModule({ onNotify, currentUser }) {
                     <span className="ml-2 text-slate-400">({s.facultyName || s.facultyId})</span>
                   </td>
                   <td className="px-5 py-3.5 font-bold text-emerald-400">{s.credits} TC</td>
+                  <td className="px-5 py-3.5">
+                    <span className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-mono text-[11px] text-cyan-300 font-semibold whitespace-nowrap">
+                      {Math.round((s.attendanceWeight ?? 0.10) * 100)}% - {Math.round((s.midtermWeight ?? 0.30) * 100)}% - {Math.round((s.finalExamWeight ?? 0.60) * 100)}%
+                    </span>
+                  </td>
                   <td className="px-5 py-3.5 text-slate-400">
                     {s.prerequisiteSubjectId ? (
                       <div className="flex items-center gap-1.5 text-amber-400">
@@ -412,6 +439,60 @@ export default function SubjectModule({ onNotify, currentUser }) {
                     </option>
                   ))}
               </select>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-200 font-semibold text-xs">Cấu hình Trọng số Điểm Đánh Giá</span>
+              <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
+                Math.abs(Math.round(((Number(formData.attendanceWeight) || 0) + (Number(formData.midtermWeight) || 0) + (Number(formData.finalExamWeight) || 0)) * 100) / 100 - 1.0) < 0.001
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+              }`}>
+                Tổng: {Math.round(((Number(formData.attendanceWeight) || 0) + (Number(formData.midtermWeight) || 0) + (Number(formData.finalExamWeight) || 0)) * 100)}% / 100%
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-slate-400 text-[11px] mb-1">Chuyên cần (0 - 1)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  required
+                  value={formData.attendanceWeight}
+                  onChange={(e) => setFormData({ ...formData, attendanceWeight: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 font-mono text-xs focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-400 text-[11px] mb-1">Giữa kỳ (0 - 1)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  required
+                  value={formData.midtermWeight}
+                  onChange={(e) => setFormData({ ...formData, midtermWeight: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 font-mono text-xs focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-400 text-[11px] mb-1">Cuối kỳ (0 - 1)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  required
+                  value={formData.finalExamWeight}
+                  onChange={(e) => setFormData({ ...formData, finalExamWeight: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 font-mono text-xs focus:outline-none focus:border-cyan-500"
+                />
+              </div>
             </div>
           </div>
 

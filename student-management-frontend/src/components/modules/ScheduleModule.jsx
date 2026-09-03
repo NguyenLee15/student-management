@@ -146,9 +146,17 @@ export default function ScheduleModule({ onNotify, currentUser }) {
     e.preventDefault();
     try {
       const selectedCc = creditClasses.find(c => String(c.creditClassId) === String(formData.creditClassId));
-      const subjectId = selectedCc?.subjectId || formData.subjectId || 'IT101';
+      const subjectId = selectedCc?.subjectId || formData.subjectId || '';
+      if (!subjectId) {
+        onNotify('error', 'Vui lòng chọn lớp tín chỉ hợp lệ có gắn môn học.');
+        return;
+      }
       const semester = formData.semester || selectedCc?.semester || 'SEMESTER_1';
-      const academicYear = formData.academicYear || selectedCc?.academicYearId || selectedCc?.academicYearName || '2026-2027';
+      const academicYear = formData.academicYear || selectedCc?.academicYearId || selectedCc?.academicYearName || '';
+      if (!academicYear) {
+        onNotify('error', 'Vui lòng chọn hoặc điền thông tin niên khóa cho lịch học.');
+        return;
+      }
       const shiftCfg = SHIFT_CONFIGS[formData.classShift] || { classShift: 'MORNING', period: 'Tiết 1-3 (07:00 - 09:15)' };
       const weekdayStr = Number(formData.dayOfWeek) === 8 ? 'Chủ Nhật' : `Thứ ${formData.dayOfWeek}`;
       const studyTime = `${weekdayStr}, ${shiftCfg.period}`;

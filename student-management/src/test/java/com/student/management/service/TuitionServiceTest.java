@@ -8,6 +8,8 @@ import com.student.management.enums.PaymentMethod;
 import com.student.management.enums.TuitionInvoiceStatus;
 import com.student.management.enums.TuitionItemStatus;
 import com.student.management.repository.*;
+import com.student.management.repository.TuitionInvoiceRepository;
+import com.student.management.repository.TuitionItemRepository;
 import com.student.management.service.impl.TuitionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,8 +36,6 @@ class TuitionServiceTest {
 
     @Mock
     private TuitionItemRepository tuitionItemRepository;
-
-    @Mock
 
     @InjectMocks
     private TuitionServiceImpl tuitionService;

@@ -124,6 +124,9 @@ public class SubjectServiceImpl implements SubjectService {
         subject.setCredits(dto.getCredits());
         subject.setFaculty(faculty);
         subject.setPrerequisiteSubject(prerequisiteSubject);
+        if (dto.getAttendanceWeight() != null) subject.setAttendanceWeight(dto.getAttendanceWeight());
+        if (dto.getMidtermWeight() != null) subject.setMidtermWeight(dto.getMidtermWeight());
+        if (dto.getFinalExamWeight() != null) subject.setFinalExamWeight(dto.getFinalExamWeight());
         return SubjectMapper.toDto(subjectRepository.save(subject));
     }
 
