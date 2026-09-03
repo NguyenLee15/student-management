@@ -4,7 +4,7 @@ import {
   UserSquare2, Layers, Users, Award, Save, CheckCircle2, 
   RefreshCw, BookOpen, Clock, AlertCircle, Edit3, Calendar,
   Home, LogOut, Sparkles, MapPin, User, CheckCheck, FileSpreadsheet, Menu, X, ArrowRight,
-  Download, ShieldCheck
+  Download, ShieldCheck, Search
 } from 'lucide-react';
 import { creditClassApi, teacherApi, studentApi, gradeApi, scheduleApi } from '../api';
 
@@ -28,6 +28,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
   const [students, setStudents] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [gradeSheet, setGradeSheet] = useState({});
+  const [studentSearch, setStudentSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -121,17 +122,20 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
         stList.forEach((s) => {
           const match = gradeList.find(g => g.studentId === s.studentId);
           if (match) {
+            const s10 = match.scoreScale10 != null ? Number(match.scoreScale10) : 8;
             initialGrades[s.studentId] = {
               gradeId: match.gradeId || match.id,
               attendanceScore: match.attendanceScore ?? 10,
-              midtermScore: match.midtermScore ?? 8,
-              finalExamScore: match.finalExamScore ?? 8,
+              midtermScore: match.midtermScore ?? s10,
+              finalExamScore: match.finalExamScore ?? s10,
+              isSaved: true,
             };
           } else {
             initialGrades[s.studentId] = {
               attendanceScore: 10,
               midtermScore: 8,
               finalExamScore: 8,
+              isSaved: false,
             };
           }
         });
@@ -141,6 +145,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
             attendanceScore: 10,
             midtermScore: 8,
             finalExamScore: 8,
+            isSaved: false,
           };
         });
       }
@@ -157,30 +162,83 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       [studentId]: {
         ...prev[studentId],
         [field]: isNaN(num) ? '' : Math.min(10, Math.max(0, num)),
+        isSaved: false,
       }
     }));
   };
 
   const handleSaveAllGrades = async () => {
-    if (!selectedClass) return;
+    if (!selectedClass || students.length === 0) return;
     setSaving(true);
+    let successCount = 0;
+    let failCount = 0;
+    const updatedGrades = { ...gradeSheet };
+
     try {
-      const promises = students.map(st => {
+      const promises = students.map(async (st) => {
         const entry = gradeSheet[st.studentId] || {};
-        return gradeApi.create({
-          studentId: st.studentId,
-          subjectId: selectedClass.subjectId || 'IT001',
-          attendanceScore: Number(entry.attendanceScore) || 10,
-          midtermScore: Number(entry.midtermScore) || 8,
-          finalExamScore: Number(entry.finalExamScore) || 8,
-          semester: selectedClass.semester || 'SEMESTER_1',
-          academicYear: selectedClass.academicYear || '2025-2026',
-        });
+        const att = Number(entry.attendanceScore) || 0;
+        const mid = Number(entry.midtermScore) || 0;
+        const fin = Number(entry.finalExamScore) || 0;
+        const score10 = Number(((att * 0.1) + (mid * 0.3) + (fin * 0.6)).toFixed(1));
+
+        const baseSemester = selectedClass.semester || 'SEMESTER_1';
+        const baseYear = selectedClass.academicYear || '2025-2026';
+
+        try {
+          if (entry.gradeId) {
+            // Cập nhật điểm đã có trong cơ sở dữ liệu
+            const updatePayload = {
+              gradeId: Number(entry.gradeId),
+              semester: baseSemester,
+              studyPhase: 'PHASE_1',
+              scoreScale10: score10,
+            };
+            const res = await gradeApi.update(entry.gradeId, updatePayload);
+            const savedData = res.data || res;
+            updatedGrades[st.studentId] = {
+              ...entry,
+              gradeId: savedData.gradeId || entry.gradeId,
+              isSaved: true,
+            };
+            successCount++;
+          } else {
+            // Tạo mới bản ghi điểm chưa từng tồn tại
+            const createPayload = {
+              studentId: st.studentId,
+              subjectId: selectedClass.subjectId || 'IT001',
+              semester: baseSemester,
+              academicYear: baseYear,
+              studyPhase: 'PHASE_1',
+              scoreScale10: score10,
+            };
+            const res = await gradeApi.create(createPayload);
+            const savedData = res.data || res;
+            const newId = savedData.gradeId || savedData.data?.gradeId || savedData.id;
+            updatedGrades[st.studentId] = {
+              ...entry,
+              gradeId: newId,
+              isSaved: true,
+            };
+            successCount++;
+          }
+        } catch (itemErr) {
+          console.warn(`Lỗi lưu điểm sinh viên ${st.studentId}:`, itemErr);
+          failCount++;
+        }
       });
-      await Promise.allSettled(promises);
-      onNotify('success', `Đã lưu toàn bộ điểm cho lớp ${selectedClass.subjectName || selectedClass.creditClassId}!`);
+
+      await Promise.all(promises);
+      setGradeSheet(updatedGrades);
+
+      if (failCount === 0) {
+        onNotify('success', `Đã lưu thành công điểm cho toàn bộ ${successCount} sinh viên lớp ${selectedClass.subjectName || selectedClass.creditClassId}!`);
+      } else {
+        onNotify('warning', `Đã lưu thành công ${successCount} sinh viên. Thất bại: ${failCount} sinh viên.`);
+      }
     } catch (err) {
-      onNotify('error', 'Lỗi khi lưu điểm.');
+      console.warn('Lỗi khi lưu điểm:', err);
+      onNotify('error', 'Có lỗi xảy ra khi lưu điểm.');
     } finally {
       setSaving(false);
     }
@@ -216,6 +274,76 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     onNotify('success', `Đã xuất danh sách điểm danh lớp ${selectedClass.subjectName || selectedClass.creditClassId}!`);
   };
 
+  // Real Export Grade Sheet as CSV / Excel
+  const handleExportGrades = () => {
+    if (!selectedClass || students.length === 0) {
+      onNotify('warning', 'Không có sinh viên nào trong danh sách để xuất.');
+      return;
+    }
+
+    const headers = [
+      'STT',
+      'Mã Sinh Viên',
+      'Họ Và Tên',
+      'Lớp Hành Chính',
+      'Chuyên Cần (10%)',
+      'Giữa Kỳ (30%)',
+      'Cuối Kỳ (60%)',
+      'Tổng Kết (Hệ 10)',
+      'Điểm Chữ',
+      'Kết Quả',
+      'Trạng Thái Lưu'
+    ];
+
+    const rows = students.map((st, idx) => {
+      const entry = gradeSheet[st.studentId] || { attendanceScore: 10, midtermScore: 8, finalExamScore: 8 };
+      const att = Number(entry.attendanceScore) || 0;
+      const mid = Number(entry.midtermScore) || 0;
+      const fin = Number(entry.finalExamScore) || 0;
+      const finalScoreNum = ((att * 0.1) + (mid * 0.3) + (fin * 0.6));
+      const finalScore = finalScoreNum.toFixed(1);
+
+      let letterGrade = 'F';
+      if (finalScoreNum >= 8.5) letterGrade = 'A';
+      else if (finalScoreNum >= 8.0) letterGrade = 'B+';
+      else if (finalScoreNum >= 7.0) letterGrade = 'B';
+      else if (finalScoreNum >= 6.5) letterGrade = 'C+';
+      else if (finalScoreNum >= 5.5) letterGrade = 'C';
+      else if (finalScoreNum >= 5.0) letterGrade = 'D+';
+      else if (finalScoreNum >= 4.0) letterGrade = 'D';
+
+      const passed = finalScoreNum >= 4.0 ? 'Đạt' : 'Học lại';
+      const statusText = entry.isSaved ? 'Đã lưu CSDL' : 'Chưa lưu';
+
+      return [
+        idx + 1,
+        `"${st.studentId}"`,
+        `"${st.fullName}"`,
+        `"${st.className || st.classId || 'CNTT'}"`,
+        entry.attendanceScore ?? '',
+        entry.midtermScore ?? '',
+        entry.finalExamScore ?? '',
+        finalScore,
+        `"${letterGrade}"`,
+        `"${passed}"`,
+        `"${statusText}"`
+      ];
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `BangDiem_Lop_${selectedClass.creditClassId}_${selectedClass.subjectName || 'HocPhan'}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    onNotify('success', `Đã xuất bảng điểm lớp ${selectedClass.subjectName || selectedClass.creditClassId}!`);
+  };
+
   // Helper to match studyTime with weekday
   const matchesDay = (s, dayKey) => {
     if (!s) return false;
@@ -239,6 +367,24 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const filteredStudents = students.filter(st => {
+    if (!studentSearch.trim()) return true;
+    const q = studentSearch.toLowerCase().trim();
+    return (
+      (st.studentId && st.studentId.toLowerCase().includes(q)) ||
+      (st.fullName && st.fullName.toLowerCase().includes(q)) ||
+      (st.className && st.className.toLowerCase().includes(q))
+    );
+  });
+
+  const totalGradedCount = students.filter(st => {
+    const entry = gradeSheet[st.studentId];
+    return entry && (entry.isSaved || entry.gradeId);
+  }).length;
+  const gradeProgressPercent = students.length > 0 
+    ? Math.round((totalGradedCount / students.length) * 100) 
+    : 0;
 
   return (
     <div className="h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-white overflow-hidden">
@@ -396,9 +542,10 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
 
                 <div className="panel-card p-4 bg-slate-900/60 space-y-1">
                   <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Tiến Độ Nhập Điểm</span>
-                  <div className="text-2xl font-black text-purple-400">{classes.length > 0 ? '100%' : '0%'}</div>
-                  <p className="text-[10px] text-emerald-400 flex items-center gap-1">
-                    <CheckCircle2 className="h-3 w-3" /> Đúng hạn học vụ
+                  <div className="text-2xl font-black text-purple-400">{gradeProgressPercent}%</div>
+                  <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                    <span>{totalGradedCount}/{students.length || 0} SV đã lưu</span>
                   </p>
                 </div>
               </div>
@@ -593,13 +740,25 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                       </span>
                     </div>
 
-                    <button
-                      onClick={() => setActiveTab('grades')}
-                      className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition self-start sm:self-auto"
-                    >
-                      <Edit3 className="h-3.5 w-3.5" />
-                      <span>Chuyển sang Chấm điểm lớp này</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                        <input
+                          type="text"
+                          placeholder="Lọc sinh viên..."
+                          value={studentSearch}
+                          onChange={(e) => setStudentSearch(e.target.value)}
+                          className="pl-8 pr-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 w-40 sm:w-56"
+                        />
+                      </div>
+                      <button
+                        onClick={() => setActiveTab('grades')}
+                        className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition self-start sm:self-auto shrink-0"
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                        <span>Chấm điểm</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div className="overflow-x-auto">
@@ -614,19 +773,27 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/60">
-                        {students.map((st) => (
-                          <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
-                            <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
-                            <td className="px-5 py-3 font-semibold text-white truncate max-w-[180px] sm:max-w-[240px]" title={st.fullName}>{st.fullName}</td>
-                            <td className="px-5 py-3 text-slate-400 capitalize">{msg.enum.gender[st.gender] || st.gender || 'Nam'}</td>
-                            <td className="px-5 py-3 text-slate-300">{st.className || st.classId || 'CNTT-K65'}</td>
-                            <td className="px-5 py-3">
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
-                                <CheckCheck className="h-3 w-3" /> Đủ điều kiện dự thi
-                              </span>
+                        {filteredStudents.length === 0 ? (
+                          <tr>
+                            <td colSpan="5" className="px-5 py-6 text-center text-xs text-slate-500 italic">
+                              Không tìm thấy sinh viên nào phù hợp với từ khóa "{studentSearch}"
                             </td>
                           </tr>
-                        ))}
+                        ) : (
+                          filteredStudents.map((st) => (
+                            <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
+                              <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
+                              <td className="px-5 py-3 font-semibold text-white truncate max-w-[180px] sm:max-w-[240px]" title={st.fullName}>{st.fullName}</td>
+                              <td className="px-5 py-3 text-slate-400 capitalize">{msg.enum.gender[st.gender] || st.gender || 'Nam'}</td>
+                              <td className="px-5 py-3 text-slate-300">{st.className || st.classId || 'CNTT-K65'}</td>
+                              <td className="px-5 py-3">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                                  <CheckCheck className="h-3 w-3" /> Đủ điều kiện dự thi
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -666,7 +833,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
 
               {/* Main Grade Spreadsheet */}
               <div className="panel-card overflow-hidden flex flex-col justify-between">
-                <div className="p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/60">
+                <div className="p-5 border-b border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-slate-900/60">
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-bold text-white">
@@ -679,14 +846,35 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                     <p className="text-xs text-slate-400 mt-0.5">Nhập điểm số thang 10. Điểm tổng kết và điểm chữ sẽ được tính tự động</p>
                   </div>
 
-                  <button
-                    onClick={handleSaveAllGrades}
-                    disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition active:scale-95 self-start sm:self-auto"
-                  >
-                    <Save className={`h-4 w-4 ${saving ? 'animate-spin' : ''}`} />
-                    <span>Lưu Toàn Bộ Điểm</span>
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                      <input
+                        type="text"
+                        placeholder="Lọc sinh viên..."
+                        value={studentSearch}
+                        onChange={(e) => setStudentSearch(e.target.value)}
+                        className="pl-8 pr-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 w-44 sm:w-52"
+                      />
+                    </div>
+
+                    <button
+                      onClick={handleExportGrades}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600/20 border border-emerald-500/30 hover:bg-emerald-600/30 text-xs font-semibold text-emerald-300 transition active:scale-95"
+                    >
+                      <Download className="h-4 w-4" />
+                      <span>Xuất Bảng Điểm (CSV)</span>
+                    </button>
+
+                    <button
+                      onClick={handleSaveAllGrades}
+                      disabled={saving}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition active:scale-95 self-start sm:self-auto"
+                    >
+                      <Save className={`h-4 w-4 ${saving ? 'animate-spin' : ''}`} />
+                      <span>Lưu Toàn Bộ Điểm</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -700,77 +888,97 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                         <th className="px-5 py-3 text-center">Thi cuối kỳ (60%)</th>
                         <th className="px-5 py-3 text-center font-bold">Tổng kết</th>
                         <th className="px-5 py-3 text-center font-bold">Điểm chữ</th>
+                        <th className="px-5 py-3 text-center">Trạng thái</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60">
-                      {students.map((st) => {
-                        const entry = gradeSheet[st.studentId] || { attendanceScore: 10, midtermScore: 8, finalExamScore: 8 };
-                        const finalScoreNum = ((entry.attendanceScore * 0.1) + (entry.midtermScore * 0.3) + (entry.finalExamScore * 0.6));
-                        const finalScore = finalScoreNum.toFixed(1);
-                        
-                        let letterGrade = 'F';
-                        if (finalScoreNum >= 8.5) letterGrade = 'A';
-                        else if (finalScoreNum >= 8.0) letterGrade = 'B+';
-                        else if (finalScoreNum >= 7.0) letterGrade = 'B';
-                        else if (finalScoreNum >= 6.5) letterGrade = 'C+';
-                        else if (finalScoreNum >= 5.5) letterGrade = 'C';
-                        else if (finalScoreNum >= 5.0) letterGrade = 'D+';
-                        else if (finalScoreNum >= 4.0) letterGrade = 'D';
+                      {filteredStudents.length === 0 ? (
+                        <tr>
+                          <td colSpan="8" className="px-5 py-6 text-center text-xs text-slate-500 italic">
+                            Không tìm thấy sinh viên nào phù hợp với từ khóa "{studentSearch}"
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredStudents.map((st) => {
+                          const entry = gradeSheet[st.studentId] || { attendanceScore: 10, midtermScore: 8, finalExamScore: 8 };
+                          const finalScoreNum = ((entry.attendanceScore * 0.1) + (entry.midtermScore * 0.3) + (entry.finalExamScore * 0.6));
+                          const finalScore = finalScoreNum.toFixed(1);
+                          
+                          let letterGrade = 'F';
+                          if (finalScoreNum >= 8.5) letterGrade = 'A';
+                          else if (finalScoreNum >= 8.0) letterGrade = 'B+';
+                          else if (finalScoreNum >= 7.0) letterGrade = 'B';
+                          else if (finalScoreNum >= 6.5) letterGrade = 'C+';
+                          else if (finalScoreNum >= 5.5) letterGrade = 'C';
+                          else if (finalScoreNum >= 5.0) letterGrade = 'D+';
+                          else if (finalScoreNum >= 4.0) letterGrade = 'D';
 
-                        return (
-                          <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
-                            <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
-                            <td className="px-5 py-3 font-semibold text-white truncate max-w-[180px] sm:max-w-[240px]" title={st.fullName}>{st.fullName}</td>
-                            <td className="px-5 py-3 text-center">
-                              <input
-                                type="number"
-                                step="0.1"
-                                min="0"
-                                max="10"
-                                value={entry.attendanceScore}
-                                onChange={(e) => handleGradeChange(st.studentId, 'attendanceScore', e.target.value)}
-                                className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
-                              />
-                            </td>
-                            <td className="px-5 py-3 text-center">
-                              <input
-                                type="number"
-                                step="0.1"
-                                min="0"
-                                max="10"
-                                value={entry.midtermScore}
-                                onChange={(e) => handleGradeChange(st.studentId, 'midtermScore', e.target.value)}
-                                className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
-                              />
-                            </td>
-                            <td className="px-5 py-3 text-center">
-                              <input
-                                type="number"
-                                step="0.1"
-                                min="0"
-                                max="10"
-                                value={entry.finalExamScore}
-                                onChange={(e) => handleGradeChange(st.studentId, 'finalExamScore', e.target.value)}
-                                className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
-                              />
-                            </td>
-                            <td className="px-5 py-3 text-center font-mono font-bold text-white text-sm">
-                              {finalScore}
-                            </td>
-                            <td className="px-5 py-3 text-center">
-                              <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                                letterGrade === 'A' ? 'bg-emerald-500/10 text-emerald-400' :
-                                letterGrade.startsWith('B') ? 'bg-indigo-500/10 text-indigo-400' :
-                                letterGrade.startsWith('C') ? 'bg-cyan-500/10 text-cyan-400' :
-                                letterGrade.startsWith('D') ? 'bg-amber-500/10 text-amber-400' :
-                                'bg-rose-500/10 text-rose-400'
-                              }`}>
-                                {letterGrade}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                          return (
+                            <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
+                              <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
+                              <td className="px-5 py-3 font-semibold text-white truncate max-w-[180px] sm:max-w-[240px]" title={st.fullName}>{st.fullName}</td>
+                              <td className="px-5 py-3 text-center">
+                                <input
+                                  type="number"
+                                  step="0.1"
+                                  min="0"
+                                  max="10"
+                                  value={entry.attendanceScore}
+                                  onChange={(e) => handleGradeChange(st.studentId, 'attendanceScore', e.target.value)}
+                                  className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                                />
+                              </td>
+                              <td className="px-5 py-3 text-center">
+                                <input
+                                  type="number"
+                                  step="0.1"
+                                  min="0"
+                                  max="10"
+                                  value={entry.midtermScore}
+                                  onChange={(e) => handleGradeChange(st.studentId, 'midtermScore', e.target.value)}
+                                  className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                                />
+                              </td>
+                              <td className="px-5 py-3 text-center">
+                                <input
+                                  type="number"
+                                  step="0.1"
+                                  min="0"
+                                  max="10"
+                                  value={entry.finalExamScore}
+                                  onChange={(e) => handleGradeChange(st.studentId, 'finalExamScore', e.target.value)}
+                                  className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                                />
+                              </td>
+                              <td className="px-5 py-3 text-center font-mono font-bold text-white text-sm">
+                                {finalScore}
+                              </td>
+                              <td className="px-5 py-3 text-center">
+                                <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                                  letterGrade === 'A' ? 'bg-emerald-500/10 text-emerald-400' :
+                                  letterGrade.startsWith('B') ? 'bg-indigo-500/10 text-indigo-400' :
+                                  letterGrade.startsWith('C') ? 'bg-cyan-500/10 text-cyan-400' :
+                                  letterGrade.startsWith('D') ? 'bg-amber-500/10 text-amber-400' :
+                                  'bg-rose-500/10 text-rose-400'
+                                }`}>
+                                  {letterGrade}
+                                </span>
+                              </td>
+                              <td className="px-5 py-3 text-center">
+                                {entry.isSaved ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    <CheckCheck className="w-3 h-3" /> Đã lưu
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                    Chưa lưu
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
                     </tbody>
                   </table>
                 </div>
