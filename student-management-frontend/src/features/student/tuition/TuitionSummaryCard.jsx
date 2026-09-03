@@ -52,3 +52,4 @@ export default function TuitionSummaryCard({ invoice, onOpenPayModal }) {
     </div>
   );
 }
+

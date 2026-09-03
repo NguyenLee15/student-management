@@ -1,12 +1,10 @@
-import { msg } from '../../lib/messages';
+// cSpell:disable
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, BookOpen, RefreshCw, GitBranch, Download } from 'lucide-react';
+import { Plus, RefreshCw, Download } from 'lucide-react';
 import { subjectApi, facultyApi } from '../../api';
-import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
-import Pagination from '../common/Pagination';
-import EmptyState from '../common/EmptyState';
-import Skeleton from '../common/Skeleton';
+import SubjectTable from './subject/SubjectTable';
+import SubjectFormModal from './subject/SubjectFormModal';
 
 export default function SubjectModule({ onNotify, currentUser }) {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
@@ -162,13 +160,14 @@ export default function SubjectModule({ onNotify, currentUser }) {
       link.click();
       link.remove();
       onNotify('success', 'Xuất báo cáo Excel môn học thành công!');
-    } catch (err) {
+    } catch {
       onNotify('error', 'Xuất file Excel môn học thất bại.');
     }
   };
 
   return (
     <div className="space-y-6">
+      {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Danh Sách Học Phần & Môn Học</h1>
@@ -196,6 +195,7 @@ export default function SubjectModule({ onNotify, currentUser }) {
         </div>
       </div>
 
+      {/* Filter Bar */}
       <div className="panel-card p-4 flex flex-wrap items-center gap-3">
         <select
           value={selectedType}
@@ -229,302 +229,42 @@ export default function SubjectModule({ onNotify, currentUser }) {
         </button>
       </div>
 
-      <div className="panel-card overflow-hidden shadow-sm">
-        <div className="overflow-x-auto" aria-live="polite">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-              <tr>
-                <th className="px-5 py-3.5">Mã Môn</th>
-                <th className="px-5 py-3.5">Tên Môn Học</th>
-                <th className="px-5 py-3.5">Phân Loại & Khoa</th>
-                <th className="px-5 py-3.5">Số Tín Chỉ</th>
-                <th className="px-5 py-3.5">Tỷ Lệ Điểm</th>
-                <th className="px-5 py-3.5">Môn Tiên Quyết</th>
-                <th className="px-5 py-3.5">Học Phí / Tín</th>
-                <th className="px-5 py-3.5 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {loading ? (
-                  [...Array(5)].map((_, i) => (
-                    <tr key={i} className="animate-pulse">
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-40" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-32" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-12" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-8" /></td>
-                    </tr>
-                  ))
-                ) : subjects.length === 0 ? (
-                  <tr>
-                    <td colSpan="8" className="p-0">
-                      <EmptyState title="Không tìm thấy môn học" message="Không có môn học nào khớp với điều kiện tìm kiếm hiện tại." />
-                    </td>
-                  </tr>
-                ) : subjects.map((s) => (
-                <tr key={s.subjectId} className="hover:bg-slate-800/40 transition">
-                  <td className="px-5 py-3.5 font-bold text-cyan-400 font-mono">{s.subjectId}</td>
-                  <td className="px-5 py-3.5 font-semibold text-white">
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
-                        <BookOpen className="h-4 w-4" />
-                      </div>
-                      <span>{s.subjectName}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3.5 text-slate-300">
-                    <span className="px-2 py-0.5 rounded-md bg-slate-800 text-cyan-300 font-medium">
-                      {msg.enum.subjectType[s.subjectType] || 'Chuyên ngành'}
-                    </span>
-                    <span className="ml-2 text-slate-400">({s.facultyName || s.facultyId})</span>
-                  </td>
-                  <td className="px-5 py-3.5 font-bold text-emerald-400">{s.credits} TC</td>
-                  <td className="px-5 py-3.5">
-                    <span className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-mono text-[11px] text-cyan-300 font-semibold whitespace-nowrap">
-                      {Math.round((s.attendanceWeight ?? 0.10) * 100)}% - {Math.round((s.midtermWeight ?? 0.30) * 100)}% - {Math.round((s.finalExamWeight ?? 0.60) * 100)}%
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-slate-400">
-                    {s.prerequisiteSubjectId ? (
-                      <div className="flex items-center gap-1.5 text-amber-400">
-                        <GitBranch className="h-3.5 w-3.5" />
-                        <span className="font-mono">{s.prerequisiteSubjectId}</span>
-                      </div>
-                    ) : (
-                      <span className="text-slate-500">Không</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5 font-mono text-slate-300">
-                    {(s.tuitionPerCredit || 500000).toLocaleString('vi-VN')} đ
-                  </td>
-                  <td className="px-5 py-3.5 text-right space-x-1">
-                    {isAdmin && (
-                      <>
-                        <button
-                          onClick={() => handleOpenEdit(s)}
-                          className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-500 transition"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteTarget(s)}
-                          className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Subjects Table */}
+      <SubjectTable
+        subjects={subjects}
+        loading={loading}
+        isAdmin={isAdmin}
+        onOpenEdit={handleOpenEdit}
+        onOpenDelete={(s) => setDeleteTarget(s)}
+        page={page}
+        size={size}
+        totalPages={totalPages}
+        totalElements={totalElements}
+        onPageChange={(p) => setPage(p)}
+      />
 
-        <Pagination
-          page={page}
-          size={size}
-          totalPages={totalPages}
-          totalElements={totalElements}
-          onPageChange={(p) => setPage(p)}
-        />
-      </div>
-
-      <Modal
+      {/* Subject Form Modal */}
+      <SubjectFormModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Cập nhật Môn Học: ${formData.subjectId}` : 'Tạo Mới Học Phần'}
-      >
-        <form onSubmit={handleSave} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Mã Học Phần*</label>
-              <input
-                type="text"
-                required
-                disabled={isEdit}
-                placeholder="VD: JAVA01"
-                value={formData.subjectId}
-                onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500 disabled:opacity-50 font-mono"
-              />
-            </div>
+        isEdit={isEdit}
+        formData={formData}
+        setFormData={setFormData}
+        faculties={faculties}
+        onSubmit={handleSave}
+      />
 
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Tên Học Phần*</label>
-              <input
-                type="text"
-                required
-                placeholder="VD: Lập trình Java căn bản"
-                value={formData.subjectName}
-                onChange={(e) => setFormData({ ...formData, subjectName: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Số Tín Chỉ (TC)*</label>
-              <input
-                type="number"
-                min="1"
-                max="10"
-                required
-                value={formData.credits}
-                onChange={(e) => setFormData({ ...formData, credits: parseInt(e.target.value) || 1 })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Học Phí / Tín Chỉ (VNĐ)*</label>
-              <input
-                type="number"
-                min="100000"
-                step="50000"
-                required
-                value={formData.tuitionPerCredit}
-                onChange={(e) => setFormData({ ...formData, tuitionPerCredit: parseInt(e.target.value) || 500000 })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500 font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Khoa Quản Lý</label>
-              <select
-                value={formData.facultyId}
-                onChange={(e) => setFormData({ ...formData, facultyId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500"
-              >
-                {faculties.map((f) => (
-                  <option key={f.facultyId} value={f.facultyId}>{f.facultyName || f.facultyId}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Phân Loại Học Phần</label>
-              <select
-                value={formData.subjectType}
-                onChange={(e) => setFormData({ ...formData, subjectType: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500"
-              >
-                <option value="GENERAL_EDUCATION">Giáo dục đại cương</option>
-                <option value="BASIC">Cơ sở ngành</option>
-                <option value="MAJOR">Chuyên ngành</option>
-                <option value="SPECIALIZED">Chuyên sâu</option>
-                <option value="ELECTIVE">Tự chọn</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Môn Học Tiên Quyết</label>
-              <select
-                value={formData.prerequisiteSubjectId || ''}
-                onChange={(e) => setFormData({ ...formData, prerequisiteSubjectId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500"
-              >
-                <option value="">-- Không có môn tiên quyết --</option>
-                {subjects
-                  .filter((s) => s.subjectId !== formData.subjectId)
-                  .map((s) => (
-                    <option key={s.subjectId} value={s.subjectId}>
-                      {s.subjectId} - {s.subjectName}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-200 font-semibold text-xs">Cấu hình Trọng số Điểm Đánh Giá</span>
-              <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
-                Math.abs(Math.round(((Number(formData.attendanceWeight) || 0) + (Number(formData.midtermWeight) || 0) + (Number(formData.finalExamWeight) || 0)) * 100) / 100 - 1.0) < 0.001
-                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                  : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-              }`}>
-                Tổng: {Math.round(((Number(formData.attendanceWeight) || 0) + (Number(formData.midtermWeight) || 0) + (Number(formData.finalExamWeight) || 0)) * 100)}% / 100%
-              </span>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="block text-slate-400 text-[11px] mb-1">Chuyên cần (0 - 1)</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  required
-                  value={formData.attendanceWeight}
-                  onChange={(e) => setFormData({ ...formData, attendanceWeight: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 font-mono text-xs focus:outline-none focus:border-cyan-500"
-                />
-              </div>
-              <div>
-                <label className="block text-slate-400 text-[11px] mb-1">Giữa kỳ (0 - 1)</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  required
-                  value={formData.midtermWeight}
-                  onChange={(e) => setFormData({ ...formData, midtermWeight: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 font-mono text-xs focus:outline-none focus:border-cyan-500"
-                />
-              </div>
-              <div>
-                <label className="block text-slate-400 text-[11px] mb-1">Cuối kỳ (0 - 1)</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  required
-                  value={formData.finalExamWeight}
-                  onChange={(e) => setFormData({ ...formData, finalExamWeight: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 font-mono text-xs focus:outline-none focus:border-cyan-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold shadow-lg shadow-cyan-600/30 transition"
-            >
-              {isEdit ? 'Lưu Thay Đổi' : 'Tạo Môn Học'}
-            </button>
-          </div>
-        </form>
-      </Modal>
-
+      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        title="Xác nhận xóa môn học"
+        message={deleteTarget ? `Bạn có chắc chắn muốn xóa môn học '${deleteTarget.subjectName}' (${deleteTarget.subjectId}) không? Thao tác này không thể hoàn tác.` : ''}
+        confirmText="Xóa môn học"
+        cancelText="Hủy"
         onConfirm={handleConfirmDelete}
-        title="Xóa Học Phần"
-        message={`Bạn có chắc chắn muốn xóa học phần "${deleteTarget?.subjectName}" (Mã: ${deleteTarget?.subjectId}) không?`}
+        onCancel={() => setDeleteTarget(null)}
+        isDestructive={true}
       />
     </div>
   );
 }
-
-
-
-

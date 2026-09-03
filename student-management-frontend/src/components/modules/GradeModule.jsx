@@ -1,10 +1,12 @@
+// cSpell:disable
 import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, Award, Download, RefreshCw, Calculator, CheckCircle2, Search, X } from 'lucide-react';
+import { Plus, Download, RefreshCw, Search, X } from 'lucide-react';
 import { gradeApi, studentApi, subjectApi } from '../../api';
-import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
-import Pagination from '../common/Pagination';
+import GradeStatsBar from './grade/GradeStatsBar';
+import GradeTable from './grade/GradeTable';
+import GradeFormModal from './grade/GradeFormModal';
 
 export default function GradeModule({ onNotify, currentUser }) {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
@@ -63,7 +65,7 @@ export default function GradeModule({ onNotify, currentUser }) {
         setSubjects(Array.isArray(d) ? d : d.content || []);
       }
     } catch (e) {
-      console.warn('Lỗi khi tải dữ liệu cấu hình điểm', e);
+      console.warn('Lỗi khi tải dữ liệu phụ thuộc cho điểm', e);
     }
   };
 
@@ -122,6 +124,41 @@ export default function GradeModule({ onNotify, currentUser }) {
     setShowModal(true);
   };
 
+  const handleSaveGrade = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        ...formData,
+        attendanceScore: formData.attendanceScore !== '' ? Number(formData.attendanceScore) : null,
+        midtermScore: formData.midtermScore !== '' ? Number(formData.midtermScore) : null,
+        finalExamScore: formData.finalExamScore !== '' ? Number(formData.finalExamScore) : null,
+      };
+
+      if (isEdit) {
+        await gradeApi.update(formData.gradeId, payload);
+        onNotify('success', msg.success.updated('điểm', formData.gradeId));
+      } else {
+        await gradeApi.create(payload);
+        onNotify('success', msg.success.created('điểm'));
+      }
+      setShowModal(false);
+      loadGrades();
+    } catch (err) {
+      onNotify('error', err?.message || msg.error.save('điểm'));
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await gradeApi.delete(deleteTarget.gradeId);
+      onNotify('success', msg.success.deleted('điểm'));
+      loadGrades();
+    } catch (err) {
+      onNotify('error', err?.message || msg.error.delete('điểm'));
+    }
+  };
+
   const handleExportCSV = () => {
     if (!grades || grades.length === 0) {
       onNotify('error', 'Chưa có bản ghi điểm để xuất file.');
@@ -129,44 +166,28 @@ export default function GradeModule({ onNotify, currentUser }) {
     }
 
     const headers = [
-      'STT',
-      'Mã Điểm',
-      'Mã Sinh Viên',
-      'Họ Và Tên',
-      'Môn Học',
-      'Điểm Chuyên Cần',
-      'Điểm Giữa Kỳ',
-      'Điểm Cuối Kỳ',
-      'Tổng Kết (Hệ 10)',
-      'Hệ 4',
-      'Điểm Chữ',
-      'Học Kỳ',
-      'Năm Học'
+      'STT', 'Mã Điểm', 'Mã Sinh Viên', 'Họ Và Tên', 'Môn Học', 'Điểm Chuyên Cần', 'Điểm Giữa Kỳ', 'Điểm Cuối Kỳ', 'Tổng Kết (Hệ 10)', 'Hệ 4', 'Điểm Chữ', 'Học Kỳ', 'Năm Học'
     ];
 
-    const rows = grades.map((g, idx) => {
-      const sem = g.semester ? (msg.enum.semester[g.semester] || g.semester) : '';
-      return [
-        idx + 1,
-        `"${g.gradeId || ''}"`,
-        `"${g.studentId || ''}"`,
-        `"${(g.studentName || '').replace(/"/g, '""')}"`,
-        `"${(g.subjectName || g.subjectId || '').replace(/"/g, '""')}"`,
-        g.attendanceScore != null ? g.attendanceScore : '',
-        g.midtermScore != null ? g.midtermScore : '',
-        g.finalExamScore != null ? g.finalExamScore : '',
-        g.scoreScale10 != null ? g.scoreScale10 : '',
-        g.scoreScale4 != null ? g.scoreScale4 : '',
-        g.letterGrade || '',
-        `"${sem}"`,
-        `"${g.academicYear || ''}"`
-      ].join(',');
-    });
+    const rows = grades.map((g, idx) => [
+      idx + 1,
+      `"${g.gradeId || ''}"`,
+      `"${g.studentId || ''}"`,
+      `"${(g.studentName || '').replace(/"/g, '""')}"`,
+      `"${(g.subjectName || '').replace(/"/g, '""')}"`,
+      g.attendanceScore != null ? g.attendanceScore : '',
+      g.midtermScore != null ? g.midtermScore : '',
+      g.finalExamScore != null ? g.finalExamScore : '',
+      g.scoreScale10 != null ? g.scoreScale10 : '',
+      g.scoreScale4 != null ? g.scoreScale4 : '',
+      `"${g.letterGrade || ''}"`,
+      `"${msg.enum.semester[g.semester] || g.semester || ''}"`,
+      `"${g.academicYear || ''}"`
+    ].join(','));
 
     const metaBlock = [
       `"TRƯỜNG ĐẠI HỌC CÔNG NGHỆ & ĐÀO TẠO"`,
-      `"BẢNG ĐIỂM TỔNG HỢP HỌC PHẦN (QUẢN LÝ ĐÀO TẠO)"`,
-      `"Học kỳ: ${selectedSemester ? (msg.enum.semester[selectedSemester] || selectedSemester) : 'Tất cả học kỳ'} | Năm học: 2026-2027"`,
+      `"BẢNG TỔNG HỢP KẾT QUẢ HỌC TẬP SINH VIÊN"`,
       `"Tổng số bản ghi: ${grades.length}"`,
       `"Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}"`,
       ''
@@ -177,335 +198,146 @@ export default function GradeModule({ onNotify, currentUser }) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `BangDiem_TongHop_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `BangDiem_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    onNotify('success', 'Đã xuất bảng điểm ra file CSV thành công!');
   };
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-    try {
-      const selectedSub = subjects.find(s => s.subjectId === formData.subjectId);
-      const attWeight = selectedSub?.attendanceWeight != null ? Number(selectedSub.attendanceWeight) : 0.10;
-      const midWeight = selectedSub?.midtermWeight != null ? Number(selectedSub.midtermWeight) : 0.30;
-      const finWeight = selectedSub?.finalExamWeight != null ? Number(selectedSub.finalExamWeight) : 0.60;
-
-      const att = formData.attendanceScore !== '' ? Number(formData.attendanceScore) : 0;
-      const mid = formData.midtermScore !== '' ? Number(formData.midtermScore) : 0;
-      const fin = formData.finalExamScore !== '' ? Number(formData.finalExamScore) : 0;
-      const scoreScale10 = Number(((att * attWeight) + (mid * midWeight) + (fin * finWeight)).toFixed(1));
-
-      const payload = {
-        ...formData,
-        attendanceScore: formData.attendanceScore !== '' ? Number(formData.attendanceScore) : null,
-        midtermScore: formData.midtermScore !== '' ? Number(formData.midtermScore) : null,
-        finalExamScore: formData.finalExamScore !== '' ? Number(formData.finalExamScore) : null,
-        scoreScale10,
-        studyPhase: formData.studyPhase || 'PHASE_1',
-      };
-
-      if (isEdit) {
-        await gradeApi.update(formData.gradeId, payload);
-        onNotify('success', msg.success.updated('điểm số', '#' + formData.gradeId));
-      } else {
-        await gradeApi.create(payload);
-        onNotify('success', msg.success.created('điểm số', 'SV ' + formData.studentId));
-      }
-      setShowModal(false);
-      loadGrades();
-    } catch (err) {
-      onNotify('error', err?.response?.data?.message || err?.message || msg.error.save('điểm số'));
-    }
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!deleteTarget) return;
-    try {
-      await gradeApi.delete(deleteTarget.gradeId);
-      onNotify('success', msg.success.deleted('bản ghi điểm', '#' + deleteTarget.gradeId));
-      loadGrades();
-    } catch (err) {
-      onNotify('error', err?.message || msg.error.delete('bản ghi điểm'));
-    }
-  };
-
-  const activeSubject = subjects.find((s) => s.subjectId === formData.subjectId);
-  const activeAttWeight = activeSubject?.attendanceWeight != null ? Number(activeSubject.attendanceWeight) : 0.10;
-  const activeMidWeight = activeSubject?.midtermWeight != null ? Number(activeSubject.midtermWeight) : 0.30;
-  const activeFinWeight = activeSubject?.finalExamWeight != null ? Number(activeSubject.finalExamWeight) : 0.60;
-  const calculatedScale10 = formData.attendanceScore !== '' || formData.midtermScore !== '' || formData.finalExamScore !== ''
-    ? ((Number(formData.attendanceScore || 0) * activeAttWeight) + (Number(formData.midtermScore || 0) * activeMidWeight) + (Number(formData.finalExamScore || 0) * activeFinWeight)).toFixed(1)
-    : null;
 
   return (
     <div className="space-y-6">
+      {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản Lý Điểm Số & Đánh Giá GPA</h1>
-          <p className="text-xs text-slate-400 mt-1">Quản lý điểm chuyên cần, giữa kỳ, cuối kỳ, điểm chữ và quy đổi GPA thang 4.0</p>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản Lý Điểm Số & Học Vụ</h1>
+          <p className="text-xs text-slate-400 mt-1">
+            Theo dõi, cập nhật điểm học phần và tự động quy đổi thang 4, thang chữ
+          </p>
         </div>
 
         <div className="flex items-center gap-2.5">
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-xs font-semibold text-slate-300 transition active:scale-95"
+            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-cyan-400 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-800 transition shadow-sm"
           >
-            <Download className="h-4 w-4 text-slate-400" />
-            <span>Xuất Bảng Điểm (CSV)</span>
+            <Download className="h-4 w-4" />
+            <span>Xuất CSV</span>
           </button>
 
           {canManage && (
             <button
               onClick={handleOpenCreate}
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-purple-600/30 transition active:scale-95"
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-sm transition active:scale-95"
             >
               <Plus className="h-4 w-4" />
-              <span>Nhập Điểm Mới</span>
+              <span>Nhập Điểm</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="panel-card p-4 flex flex-wrap items-center gap-3">
-        <div className="relative flex items-center min-w-[240px]">
-          <input
-            type="text"
-            placeholder="Tìm theo mã sinh viên (VD: SV001)..."
-            value={studentSearch}
-            onChange={(e) => setStudentsSearch(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') { setPage(0); loadGrades(); } }}
-            className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-purple-500 pr-8"
-          />
-          {studentSearch && (
-            <button
-              onClick={() => { setStudentsSearch(''); setPage(0); }}
-              className="absolute right-2.5 text-slate-500 hover:text-slate-300 transition"
-              title="Xóa tìm kiếm"
+      {/* Stats Bar */}
+      <GradeStatsBar grades={grades} />
+
+      {/* Filter Toolbar */}
+      <div className="panel-card p-4">
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setPage(0);
+              loadGrades();
+            }}
+            className="relative flex-1 w-full"
+          >
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo mã sinh viên..."
+              value={studentSearch}
+              onChange={(e) => setStudentsSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition font-mono"
+            />
+          </form>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <select
+              value={selectedSemester}
+              onChange={(e) => {
+                setSelectedSemester(e.target.value);
+                setPage(0);
+              }}
+              className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition"
             >
-              <X className="w-3.5 h-3.5" />
+              <option value="">Tất cả học kỳ</option>
+              <option value="SEMESTER_1">Học kỳ 1</option>
+              <option value="SEMESTER_2">Học kỳ 2</option>
+              <option value="SUMMER_SEMESTER">Học kỳ hè</option>
+            </select>
+
+            {(studentSearch || selectedSemester) && (
+              <button
+                onClick={() => {
+                  setStudentsSearch('');
+                  setSelectedSemester('');
+                  setPage(0);
+                }}
+                className="flex items-center gap-1 text-xs px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-rose-400 hover:bg-slate-800 transition"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Xóa lọc</span>
+              </button>
+            )}
+
+            <button
+              onClick={loadGrades}
+              title="Tải lại dữ liệu"
+              className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition active:scale-95"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
             </button>
-          )}
+          </div>
         </div>
-
-        <select
-          value={selectedSemester}
-          onChange={(e) => { setSelectedSemester(e.target.value); setPage(0); }}
-          className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-purple-500"
-        >
-          <option value="">Tất Cả Các Học Kỳ</option>
-          <option value="SEMESTER_1">Học kỳ 1</option>
-          <option value="SEMESTER_2">Học kỳ 2</option>
-        </select>
-
-        <button
-          onClick={() => { setPage(0); loadGrades(); }}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition active:scale-95"
-        >
-          <Search className="w-3.5 h-3.5" />
-          <span>Tìm kiếm</span>
-        </button>
-
-        <button
-          onClick={loadGrades}
-          className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition ml-auto"
-          title="Tải lại bảng điểm"
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-purple-400' : ''}`} />
-        </button>
       </div>
 
       {/* Grade Table */}
-      <div className="panel-card overflow-hidden shadow-sm">
-        <div className="overflow-x-auto" aria-live="polite">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-              <tr>
-                <th className="px-5 py-3.5">Sinh Viên</th>
-                <th className="px-5 py-3.5">Học Phần</th>
-                <th className="px-5 py-3.5">Chuyên Cần (10%)</th>
-                <th className="px-5 py-3.5">Giữa Kỳ (30%)</th>
-                <th className="px-5 py-3.5">Cuối Kỳ (60%)</th>
-                <th className="px-5 py-3.5">Tổng Kết (Thang 10)</th>
-                <th className="px-5 py-3.5">Điểm Chữ</th>
-                <th className="px-5 py-3.5 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {grades.map((g) => (
-                <tr key={g.gradeId} className="hover:bg-slate-800/40 transition">
-                  <td className="px-5 py-3.5">
-                    <div className="font-semibold text-white">{g.studentName || g.studentId}</div>
-                    <div className="text-[10px] text-indigo-400 font-mono">{g.studentId}</div>
-                  </td>
-                  <td className="px-5 py-3.5 text-slate-300">
-                    <span className="font-medium text-slate-200">{g.subjectName || g.subjectId}</span>
-                  </td>
-                  <td className="px-5 py-3.5 font-mono text-slate-400">{g.attendanceScore ?? '10.0'}</td>
-                  <td className="px-5 py-3.5 font-mono text-slate-400">{g.midtermScore ?? '8.5'}</td>
-                  <td className="px-5 py-3.5 font-mono text-slate-400">{g.finalExamScore ?? '8.0'}</td>
-                  <td className="px-5 py-3.5 font-mono font-bold text-white">
-                    {g.totalScore10 ? g.totalScore10.toFixed(1) : '8.3'}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span className={`px-2 py-0.5 rounded-md font-bold text-[11px] ${
-                      (g.letterGrade === 'A' || g.letterGrade === 'A+') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                      (g.letterGrade === 'B' || g.letterGrade === 'B+') ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
-                      (g.letterGrade === 'C' || g.letterGrade === 'C+') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                      'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                    }`}>
-                      {g.letterGrade || 'B+'}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-right space-x-1">
-                    {canManage && (
-                      <>
-                        <button
-                          onClick={() => handleOpenEdit(g)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-purple-400 hover:bg-slate-800 transition"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteTarget(g)}
-                          className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <GradeTable
+        grades={grades}
+        loading={loading}
+        canManage={canManage}
+        onOpenEdit={handleOpenEdit}
+        onOpenDelete={(g) => setDeleteTarget(g)}
+        page={page}
+        size={size}
+        totalPages={totalPages}
+        totalElements={totalElements}
+        onPageChange={(p) => setPage(p)}
+      />
 
-        <Pagination
-          page={page}
-          size={size}
-          totalPages={totalPages}
-          totalElements={totalElements}
-          onPageChange={(p) => setPage(p)}
-        />
-      </div>
-
-      {/* Modal Add / Edit */}
-      <Modal
+      {/* Grade Form Modal */}
+      <GradeFormModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Sửa Điểm #${formData.gradeId}` : 'Nhập Điểm Học Phần'}
-      >
-        <form onSubmit={handleSave} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Sinh Viên (Sinh Viên)*</label>
-              <select
-                value={formData.studentId}
-                onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-purple-500"
-              >
-                {students.map((st) => (
-                  <option key={st.studentId} value={st.studentId}>{st.fullName} ({st.studentId})</option>
-                ))}
-              </select>
-            </div>
+        isEdit={isEdit}
+        formData={formData}
+        setFormData={setFormData}
+        students={students}
+        subjects={subjects}
+        onSubmit={handleSaveGrade}
+      />
 
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Môn Học *</label>
-              <select
-                value={formData.subjectId}
-                onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-purple-500"
-              >
-                {subjects.map((s) => (
-                  <option key={s.subjectId} value={s.subjectId}>{s.subjectName} ({s.subjectId})</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">
-                Điểm Chuyên Cần <span className="text-purple-400 font-mono">({Math.round(activeAttWeight * 100)}%)</span>
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                max="10"
-                placeholder="0 - 10"
-                value={formData.attendanceScore}
-                onChange={(e) => setFormData({ ...formData, attendanceScore: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 font-mono focus:outline-none focus:border-purple-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">
-                Điểm Giữa Kỳ <span className="text-purple-400 font-mono">({Math.round(activeMidWeight * 100)}%)</span>
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                max="10"
-                placeholder="0 - 10"
-                value={formData.midtermScore}
-                onChange={(e) => setFormData({ ...formData, midtermScore: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 font-mono focus:outline-none focus:border-purple-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">
-                Điểm Cuối Kỳ <span className="text-purple-400 font-mono">({Math.round(activeFinWeight * 100)}%)</span>
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                max="10"
-                placeholder="0 - 10"
-                value={formData.finalExamScore}
-                onChange={(e) => setFormData({ ...formData, finalExamScore: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 font-mono focus:outline-none focus:border-purple-500"
-              />
-            </div>
-          </div>
-
-          {calculatedScale10 !== null && (
-            <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-between text-xs">
-              <span className="text-slate-300 font-medium">Điểm Tổng Kết Dự Kiến (Hệ 10):</span>
-              <span className="font-bold font-mono text-purple-400 text-sm">{calculatedScale10} / 10.0</span>
-            </div>
-          )}
-
-          <div className="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >Hủy</button>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-lg shadow-purple-600/30 transition"
-            >
-              {isEdit ? 'Lưu thay đổi' : 'Lưu điểm'}
-            </button>
-          </div>
-        </form>
-      </Modal>
-
+      {/* Delete Confirmation */}
       <ConfirmDialog
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        title="Xác nhận xóa bản ghi điểm"
+        message={deleteTarget ? `Bạn có chắc chắn muốn xóa điểm môn '${deleteTarget.subjectName}' của sinh viên '${deleteTarget.studentName}' (${deleteTarget.studentId}) không?` : ''}
+        confirmText="Xóa điểm"
+        cancelText="Hủy"
         onConfirm={handleConfirmDelete}
-        title="Xóa Bản Ghi Điểm"
-        message={msg.confirm.delete('bản ghi điểm', '', '#' + deleteTarget?.gradeId)}
+        onCancel={() => setDeleteTarget(null)}
+        isDestructive={true}
       />
     </div>
   );

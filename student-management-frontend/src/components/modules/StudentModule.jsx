@@ -1,17 +1,16 @@
+// cSpell:disable
 import { msg } from '../../lib/messages';
-import React, { useState, useEffect } from 'react';
-import { 
-  Plus, Search, Filter, Upload, Download, Edit3, Trash2, 
-  GraduationCap, RefreshCw, Mail, Phone, Calendar, School, Check, FileSpreadsheet, X, Award, FileText,
-  ArrowUp, ArrowDown, ArrowUpDown
-} from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plus, Upload, Download } from 'lucide-react';
 import { studentApi, facultyApi, studentClassApi, academicYearApi } from '../../api';
-import Modal from '../common/Modal';
-import Pagination from '../common/Pagination';
-import EmptyState from '../common/EmptyState';
-import Skeleton from '../common/Skeleton';
 import ConfirmDialog from '../common/ConfirmDialog';
 import TranscriptModal from './TranscriptModal';
+import StudentFilterBar from './student/StudentFilterBar';
+import StudentTable from './student/StudentTable';
+import StudentFormModal from './student/StudentFormModal';
+import StudentImportModal from './student/StudentImportModal';
+import BatchClassModal from './student/BatchClassModal';
+import { useStudentImport } from './student/useStudentImport';
 
 export default function StudentModule({ onNotify, currentUser }) {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
@@ -24,7 +23,7 @@ export default function StudentModule({ onNotify, currentUser }) {
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
 
-  // Filters
+  // Filters & Sorting
   const [keyword, setKeyword] = useState('');
   const [selectedFaculty, setSelectedFaculty] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
@@ -33,24 +32,20 @@ export default function StudentModule({ onNotify, currentUser }) {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [sortField, setSortField] = useState('studentId');
   const [sortOrder, setSortOrder] = useState('asc');
-  const [showBatchClassModal, setShowBatchClassModal] = useState(false);
-  const [batchClassId, setBatchClassId] = useState('');
 
-  // Dropdown Metadata
+  // Metadata
   const [faculties, setFaculties] = useState([]);
   const [classes, setClasses] = useState([]);
   const [academicYears, setAcademicYears] = useState([]);
 
-  // Modal State
+  // Modals
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
+  const [showBatchClassModal, setShowBatchClassModal] = useState(false);
+  const [batchClassId, setBatchClassId] = useState('');
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [transcriptStudent, setTranscriptStudent] = useState(null);
-  const [importing, setImporting] = useState(false);
-  const [importProgress, setImportProgress] = useState(null); // { status, processedRows, totalRows, errorCount }
 
-  // Form State
   const initialForm = {
     studentId: '',
     fullName: '',
@@ -121,14 +116,20 @@ export default function StudentModule({ onNotify, currentUser }) {
         setTotalElements(pageData.length);
       }
     } catch (err) {
-      console.warn('Máy chủ backend không phản hồi hoặc đang trống', err);
+      console.warn('Lỗi khi tải danh sách sinh viên', err);
     } finally {
       setLoading(false);
     }
   };
 
+  const {
+    showImportModal,
+    setShowImportModal,
+    importing,
+    importProgress,
+    handleFileUpload,
+  } = useStudentImport({ onNotify, onRefresh: loadStudents });
 
-  // Sắp xếp dữ liệu theo cột
   const handleSort = (field) => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -161,64 +162,6 @@ export default function StudentModule({ onNotify, currentUser }) {
     setSelectedStatus('');
     setPage(0);
   };
-
-  const handleBatchClassSubmit = async (e) => {
-    e.preventDefault();
-    if (!batchClassId) return;
-    setLoading(true);
-    try {
-      // Cập nhật lớp cho các sinh viên đã chọn
-      for (const id of Array.from(selectedIds)) {
-        const st = students.find((s) => s.studentId === id);
-        if (st) {
-          await studentApi.update(id, { ...st, classId: batchClassId });
-        }
-      }
-      onNotify('success', `Đã chuyển lớp thành công cho ${selectedIds.size} sinh viên!`);
-      setSelectedIds(new Set());
-      setShowBatchClassModal(false);
-      loadStudents();
-    } catch (err) {
-      onNotify('error', 'Có lỗi xảy ra khi chuyển lớp hàng loạt.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBatchDelete = async () => {
-    if (selectedIds.size === 0) return;
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa ${selectedIds.size} sinh viên đã chọn không?`)) return;
-    setLoading(true);
-    try {
-      for (const id of Array.from(selectedIds)) {
-        await studentApi.delete(id);
-      }
-      onNotify('success', `Đã xóa thành công ${selectedIds.size} sinh viên!`);
-      setSelectedIds(new Set());
-      loadStudents();
-    } catch (err) {
-      onNotify('error', 'Có lỗi xảy ra khi xóa sinh viên.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const sortedStudents = React.useMemo(() => {
-    let result = [...students];
-    if (selectedStatus === 'WARNING') {
-      // Lọc sinh viên có GPA < 2.0 nếu có
-      result = result.filter(s => (s.gpa || s.cumulativeGpa || 3.0) < 2.0);
-    }
-    result.sort((a, b) => {
-      let aVal = a[sortField] || '';
-      let bVal = b[sortField] || '';
-      if (typeof aVal === 'string') {
-        return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-      }
-      return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
-    });
-    return result;
-  }, [students, sortField, sortOrder, selectedStatus]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -309,70 +252,70 @@ export default function StudentModule({ onNotify, currentUser }) {
       link.click();
       link.remove();
       onNotify('success', 'Xuất báo cáo Excel thành công!');
-    } catch (err) {
+    } catch {
       onNotify('error', 'Xuất file Excel thất bại.');
     }
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    setImporting(true);
-    setImportProgress({ status: 'UPLOADING', processedRows: 0, totalRows: 0, errorCount: 0 });
-    
+  const handleBatchClassSubmit = async (e) => {
+    e.preventDefault();
+    if (!batchClassId) return;
+    setLoading(true);
     try {
-      const res = await studentApi.importExcel(file);
-      const taskId = res.data?.taskId;
-      
-      if (!taskId) {
-        throw new Error("No taskId returned from server");
-      }
-      
-      // Poll for progress
-      const pollInterval = setInterval(async () => {
-        try {
-          const taskRes = await studentApi.getImportTask(taskId);
-          const taskData = taskRes.data;
-          if (taskData) {
-            setImportProgress({
-              status: taskData.status,
-              processedRows: taskData.processedRows,
-              totalRows: taskData.totalRows,
-              errorCount: taskData.errorCount
-            });
-            
-            if (taskData.status === 'COMPLETED' || taskData.status === 'COMPLETED_WITH_ERRORS' || taskData.status === 'FAILED') {
-              clearInterval(pollInterval);
-              setImporting(false);
-              
-              if (taskData.status === 'FAILED') {
-                onNotify('error', `Nhập dữ liệu thất bại: ${msg.safeMessage(taskData.errorDetails, 'Lỗi không xác định')}`);
-              } else if (taskData.status === 'COMPLETED_WITH_ERRORS') {
-                onNotify('warning', `Nhập dữ liệu hoàn tất với ${taskData.errorCount} lỗi.`);
-                loadStudents();
-              } else {
-                onNotify('success', 'Nhập dữ liệu Excel thành công!');
-                loadStudents();
-                setTimeout(() => { setShowImportModal(false); setImportProgress(null); }, 2000);
-              }
-            }
-          }
-        } catch (pollErr) {
-          console.error("Lỗi tiến trình:", pollErr);
+      for (const id of Array.from(selectedIds)) {
+        const st = students.find((s) => s.studentId === id);
+        if (st) {
+          await studentApi.update(id, { ...st, classId: batchClassId });
         }
-      }, 2000);
-      
-    } catch (err) {
-      setImporting(false);
-      setImportProgress(null);
-      onNotify('error', err?.response?.data?.message || err?.message || 'Lỗi khi bắt đầu nhập file');
+      }
+      onNotify('success', `Đã chuyển lớp thành công cho ${selectedIds.size} sinh viên!`);
+      setSelectedIds(new Set());
+      setShowBatchClassModal(false);
+      loadStudents();
+    } catch {
+      onNotify('error', 'Có lỗi xảy ra khi chuyển lớp hàng loạt.');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleBatchDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa ${selectedIds.size} sinh viên đã chọn không?`)) return;
+    setLoading(true);
+    try {
+      for (const id of Array.from(selectedIds)) {
+        await studentApi.delete(id);
+      }
+      onNotify('success', `Đã xóa thành công ${selectedIds.size} sinh viên!`);
+      setSelectedIds(new Set());
+      loadStudents();
+    } catch {
+      onNotify('error', 'Có lỗi xảy ra khi xóa sinh viên.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sortedStudents = useMemo(() => {
+    let result = [...students];
+    if (selectedStatus === 'WARNING') {
+      result = result.filter(s => (s.gpa || s.cumulativeGpa || 3.0) < 2.0);
+    }
+    result.sort((a, b) => {
+      let aVal = a[sortField] || '';
+      let bVal = b[sortField] || '';
+      if (typeof aVal === 'string') {
+        return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      return sortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+    return result;
+  }, [students, sortField, sortOrder, selectedStatus]);
+
   return (
     <div className="space-y-6">
-      {/* Header & Quick Action Buttons */}
+      {/* Header & Action Buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản lý Sinh viên</h1>
@@ -414,452 +357,105 @@ export default function StudentModule({ onNotify, currentUser }) {
         </div>
       </div>
 
-      {/* Advanced Filter and Search Bar */}
-      <div className="panel-card p-4 space-y-3">
-        <div className="flex flex-col lg:flex-row items-center gap-3">
-          <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo họ tên hoặc mã sinh viên (VD: SV001)..."
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition"
-            />
-          </form>
+      {/* Filter Toolbar */}
+      <StudentFilterBar
+        keyword={keyword}
+        setKeyword={setKeyword}
+        selectedFaculty={selectedFaculty}
+        setSelectedFaculty={setSelectedFaculty}
+        selectedClass={selectedClass}
+        setSelectedClass={setSelectedClass}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
+        selectedStatus={selectedStatus}
+        setSelectedStatus={setSelectedStatus}
+        faculties={faculties}
+        classes={classes}
+        academicYears={academicYears}
+        onSearchSubmit={handleSearchSubmit}
+        onClearFilters={handleClearFilters}
+        onReload={loadStudents}
+        loading={loading}
+      />
 
-          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-            <select
-              value={selectedFaculty}
-              onChange={(e) => { setSelectedFaculty(e.target.value); setPage(0); }}
-              className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition"
-            >
-              <option value="">Tất cả Khoa</option>
-              {faculties.map((f) => (
-                <option key={f.facultyId} value={f.facultyId}>{f.facultyName || f.facultyId}</option>
-              ))}
-            </select>
+      {/* Main Student Data Table */}
+      <StudentTable
+        students={sortedStudents}
+        selectedIds={selectedIds}
+        onSelectAll={handleSelectAll}
+        onToggleSelect={handleToggleSelect}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        onSort={handleSort}
+        loading={loading}
+        isAdmin={isAdmin}
+        onOpenTranscript={(st) => setTranscriptStudent(st)}
+        onOpenEdit={handleOpenEdit}
+        onOpenDelete={(st) => setDeleteTarget(st)}
+        onOpenBatchClass={() => setShowBatchClassModal(true)}
+        onBatchDelete={handleBatchDelete}
+        page={page}
+        size={size}
+        totalPages={totalPages}
+        totalElements={totalElements}
+        onPageChange={(p) => setPage(p)}
+      />
 
-            <select
-              value={selectedClass}
-              onChange={(e) => { setSelectedClass(e.target.value); setPage(0); }}
-              className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition"
-            >
-              <option value="">Tất cả Lớp</option>
-              {classes.map((c) => (
-                <option key={c.classId} value={c.classId}>{c.className || c.classId}</option>
-              ))}
-            </select>
-
-            <select
-              value={selectedYear}
-              onChange={(e) => { setSelectedYear(e.target.value); setPage(0); }}
-              className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition font-mono"
-            >
-              <option value="">Tất cả Niên khóa</option>
-              {academicYears.map((y) => (
-                <option key={y.academicYearId} value={y.academicYearId}>{y.academicYearName || y.academicYearId}</option>
-              ))}
-            </select>
-
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition"
-            >
-              <option value="">Tất cả Trạng thái</option>
-              <option value="ACTIVE">Đang học bình thường</option>
-              <option value="WARNING">⚠️ Cảnh báo học vụ (GPA &lt; 2.0)</option>
-            </select>
-
-            {(keyword || selectedFaculty || selectedClass || selectedYear || selectedStatus) && (
-              <button
-                onClick={handleClearFilters}
-                className="flex items-center gap-1 text-xs px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-rose-400 hover:bg-slate-800 transition"
-              >
-                <X className="w-3.5 h-3.5" />
-                <span>Xóa lọc</span>
-              </button>
-            )}
-
-            <button
-              onClick={loadStudents}
-              title="Tải lại dữ liệu"
-              className="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition active:scale-95"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Sinh Viên Data Table */}
-      <div className="panel-card overflow-hidden shadow-sm">
-        <div className="overflow-x-auto" aria-live="polite">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800 select-none">
-              <tr>
-                <th className="px-4 py-3.5 w-10 text-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.size === students.length && students.length > 0}
-                    onChange={handleSelectAll}
-                    className="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                  />
-                </th>
-                <th 
-                  onClick={() => handleSort('studentId')}
-                  className="px-5 py-3.5 cursor-pointer hover:text-white transition"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span>Mã sinh viên</span>
-                    {sortField === 'studentId' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
-                  </div>
-                </th>
-                <th 
-                  onClick={() => handleSort('fullName')}
-                  className="px-5 py-3.5 cursor-pointer hover:text-white transition"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span>Họ và Tên & Giới tính</span>
-                    {sortField === 'fullName' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
-                  </div>
-                </th>
-                <th 
-                  onClick={() => handleSort('className')}
-                  className="px-5 py-3.5 cursor-pointer hover:text-white transition"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span>Lớp / Khoa</span>
-                    {sortField === 'className' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
-                  </div>
-                </th>
-                <th 
-                  onClick={() => handleSort('academicYearId')}
-                  className="px-5 py-3.5 cursor-pointer hover:text-white transition"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span>Niên khóa</span>
-                    {sortField === 'academicYearId' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
-                  </div>
-                </th>
-                <th className="px-5 py-3.5">Thông tin liên hệ</th>
-                <th className="px-5 py-3.5 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {loading ? (
-                  [...Array(5)].map((_, i) => (
-                    <tr key={i} className="animate-pulse">
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-40" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-32" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-16" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-8" /></td>
-                    </tr>
-                  ))
-                ) : students.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="p-0">
-                    <EmptyState title="Không tìm thấy sinh viên" message="Không có sinh viên nào khớp với điều kiện tìm kiếm hiện tại." />
-                  </td>
-                </tr>
-              ) : (
-                sortedStudents.map((st) => (
-                  <tr key={st.studentId} className={`hover:bg-slate-800/40 transition ${selectedIds.has(st.studentId) ? 'bg-indigo-950/20' : ''}`}>
-                    <td className="px-4 py-3.5 text-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(st.studentId)}
-                        onChange={() => handleToggleSelect(st.studentId)}
-                        className="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                      />
-                    </td>
-                    <td className="px-5 py-3.5 font-bold text-indigo-400 font-mono">{st.studentId}</td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-slate-800 text-indigo-400 border border-slate-700 flex items-center justify-center font-bold text-white text-xs shadow-md">
-                          {st.fullName?.charAt(0) || 'S'}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-white truncate max-w-[180px] sm:max-w-[260px]" title={st.fullName}>{st.fullName}</div>
-                          <div className="text-[10px] text-slate-400 capitalize">{msg.enum.gender[st.gender] || st.gender || 'Nam'}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-300">
-                      <div>
-                        <div className="font-medium text-slate-200 truncate max-w-[140px]" title={st.className || st.classId}>{st.className || st.classId || ''}</div>
-                        <div className="text-[10px] text-slate-500">{st.facultyName || st.facultyId || 'Chưa phân khoa'}</div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-400 font-mono font-medium">
-                      {st.academicYearId || st.academicYearName || 'K65'}
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-400">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] text-slate-300 truncate max-w-[160px]" title={st.email}>{st.email || '—'}</span>
-                        <span className="text-[10px] text-slate-500 font-mono">{st.phoneNumber || '—'}</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-right space-x-1">
-                      <button
-                        onClick={() => setTranscriptStudent(st)}
-                        title="Xem Bảng Điểm & GPA Chi Tiết"
-                        className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500 transition"
-                      >
-                        <Award className="h-4 w-4" />
-                      </button>
-                      {isAdmin && (
-                        <>
-                          <button
-                            onClick={() => handleOpenEdit(st)}
-                            title="Sửa Sinh Viên"
-                            className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-indigo-500 transition"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => setDeleteTarget(st)}
-                            title="Xóa Sinh viên"
-                            className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination Bar */}
-        <Pagination
-          page={page}
-          size={size}
-          totalPages={totalPages}
-          totalElements={totalElements}
-          onPageChange={(p) => setPage(p)}
-        />
-      </div>
-
-      {/* ➕ Modal: Add / Sửa Sinh Viên */}
-      <Modal
+      {/* Form Modal */}
+      <StudentFormModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Sửa Sinh viên: ${formData.studentId}` : 'Đăng ký Sinh viên Mới'}
-        subtitle="Điền đầy đủ thông tin lý lịch và phân lớp của sinh viên"
-      >
-        <form onSubmit={handleSaveStudent} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Mã Sinh Viên*</label>
-              <input
-                type="text"
-                required
-                disabled={isEdit}
-                placeholder="VD: SV001"
-                value={formData.studentId}
-                onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Họ và Tên*</label>
-              <input
-                type="text"
-                required
-                placeholder="VD: Nguyễn Văn An"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Khoa*</label>
-              <select
-                value={formData.facultyId}
-                onChange={(e) => setFormData({ ...formData, facultyId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"
-              >
-                {faculties.map((f) => (
-                  <option key={f.facultyId} value={f.facultyId}>{f.facultyName || f.facultyId}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Lớp học*</label>
-              <select
-                value={formData.classId}
-                onChange={(e) => setFormData({ ...formData, classId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"
-              >
-                {classes.map((c) => (
-                  <option key={c.classId} value={c.classId}>{c.className || c.classId}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Khóa học (Niên khóa)*</label>
-              <select
-                value={formData.academicYearId}
-                onChange={(e) => setFormData({ ...formData, academicYearId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"
-              >
-                {academicYears.map((y) => (
-                  <option key={y.academicYearId} value={y.academicYearId}>{y.academicYearName || y.academicYearId}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Địa chỉ Email</label>
-              <input
-                type="email"
-                placeholder="student@gmail.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Số điện thoại</label>
-              <input
-                type="text"
-                placeholder="0987654321"
-                value={formData.phoneNumber}
-                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Giới tính</label>
-              <select
-                value={formData.gender}
-                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"
-              >
-                <option value="MALE">Nam</option>
-                <option value="FEMALE">Nữ</option>
-                <option value="OTHER">Khác</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Ngày sinh</label>
-              <input
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          </div>
-
-          <div className="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >Hủy</button>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-600/30 transition"
-            >
-              {isEdit ? 'Lưu thay đổi' : 'Thêm Sinh viên'}
-            </button>
-          </div>
-        </form>
-      </Modal>
-
-      <Modal
-        isOpen={showImportModal}
-        onClose={() => { if(!importing) { setShowImportModal(false); setImportProgress(null); } }}
-        title="Nhập Danh Sách Sinh Viên Bằng Excel"
-        subtitle="Tải lên tệp .xlsx theo đúng cấu trúc dữ liệu nhà trường"
-        maxWidth="max-w-md"
-      >
-        <div className="space-y-4">
-          {!importing && !importProgress ? (
-            <label className="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-8 text-center space-y-3 cursor-pointer transition block bg-slate-950/60">
-              <div className="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center">
-                <FileSpreadsheet className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-200">Nhấp để chọn tệp bảng tính Excel</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Hỗ trợ định dạng Microsoft Excel (.xlsx, .xls)</p>
-              </div>
-              <input type="file" accept=".xlsx,.xls" onChange={handleFileUpload} className="hidden" />
-            </label>
-          ) : (
-            <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 flex flex-col items-center">
-              <div className="mb-4 text-center">
-                <p className="text-sm font-semibold text-slate-200 mb-1">
-                  {importProgress?.status === 'UPLOADING' && "Đang tải tệp lên..."}
-                  {importProgress?.status === 'PENDING' && "Đang trong hàng đợi..."}
-                  {importProgress?.status === 'PROCESSING' && "Đang xử lý dữ liệu..."}
-                  {importProgress?.status === 'COMPLETED' && "Hoàn tất thành công!"}
-                  {importProgress?.status === 'COMPLETED_WITH_ERRORS' && "Hoàn tất với một số lỗi"}
-                  {importProgress?.status === 'FAILED' && "Nhập tệp thất bại"}
-                </p>
-                {importProgress?.totalRows > 0 && (
-                  <p className="text-xs text-slate-400">
-                    Đã xử lý {importProgress.processedRows} / {importProgress.totalRows} dòng
-                  </p>
-                )}
-                {importProgress?.errorCount > 0 && (
-                  <p className="text-xs text-rose-400 mt-1">
-                    Lỗi: {importProgress.errorCount}
-                  </p>
-                )}
-              </div>
-              
-              <div className="w-full bg-slate-800 rounded-full h-2 mb-2 overflow-hidden">
-                <div 
-                  className={`h-2 rounded-full transition-all duration-300 ${importProgress?.status === 'FAILED' ? 'bg-rose-500' : 'bg-indigo-500'}`}
-                  style={{ width: importProgress?.totalRows ? `${(importProgress.processedRows / importProgress.totalRows) * 100}%` : '0%' }}
-                ></div>
-              </div>
-            </div>
-          )}
-        </div>
-      </Modal>
-
-      {/* 📜 Official Academic Transcript Modal */}
-      <TranscriptModal
-        isOpen={!!transcriptStudent}
-        onClose={() => setTranscriptStudent(null)}
-        student={transcriptStudent}
+        isEdit={isEdit}
+        formData={formData}
+        setFormData={setFormData}
+        faculties={faculties}
+        classes={classes}
+        academicYears={academicYears}
+        onSubmit={handleSaveStudent}
       />
 
-      {/* 🗑️ Confirm Delete Dialog */}
+      {/* Excel Import Modal */}
+      <StudentImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        importing={importing}
+        importProgress={importProgress}
+        onFileUpload={handleFileUpload}
+      />
+
+      {/* Batch Class Modal */}
+      <BatchClassModal
+        isOpen={showBatchClassModal}
+        onClose={() => setShowBatchClassModal(false)}
+        selectedCount={selectedIds.size}
+        classes={classes}
+        batchClassId={batchClassId}
+        setBatchClassId={setBatchClassId}
+        onSubmit={handleBatchClassSubmit}
+        loading={loading}
+      />
+
+      {/* Delete Confirm Dialog */}
       <ConfirmDialog
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        title="Xác nhận xóa sinh viên"
+        message={deleteTarget ? `Bạn có chắc chắn muốn xóa sinh viên ${deleteTarget.fullName} (${deleteTarget.studentId}) không? Thao tác này không thể hoàn tác.` : ''}
+        confirmText="Xóa sinh viên"
+        cancelText="Hủy"
         onConfirm={handleConfirmDelete}
-        title="Xác Nhận Xóa Sinh Viên"
-        message={`Bạn có chắc chắn muốn xóa vĩnh viễn sinh viên "${deleteTarget?.fullName}" (ID: ${deleteTarget?.studentId})?`}
+        onCancel={() => setDeleteTarget(null)}
+        isDestructive={true}
       />
+
+      {/* Transcript Modal */}
+      {transcriptStudent && (
+        <TranscriptModal
+          isOpen={!!transcriptStudent}
+          onClose={() => setTranscriptStudent(null)}
+          student={transcriptStudent}
+          onNotify={onNotify}
+        />
+      )}
     </div>
   );
 }
-
-
-
-

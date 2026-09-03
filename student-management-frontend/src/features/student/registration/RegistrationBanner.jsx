@@ -66,3 +66,4 @@ export default function RegistrationBanner({ activePeriod, cartCount = 0, onOpen
     </div>
   );
 }
+
