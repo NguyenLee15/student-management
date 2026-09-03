@@ -105,21 +105,23 @@ export default function Header({
               
               {/* Optional Role Switcher for Developer/Admin Sandbox */}
               {onRoleSwitch && (
-                <div className="hidden xl:flex items-center gap-1 bg-slate-950 px-1.5 py-1 rounded-xl border border-slate-800 text-[11px]">
-                  <span className="text-slate-500 pl-1 text-[10px]">Sandbox:</span>
+                <div className="hidden xl:flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-xl border border-slate-800 text-[11px]">
+                  <span className="text-slate-500 text-[10px] font-medium mr-0.5">Mô phỏng:</span>
                   <button
                     onClick={() => onRoleSwitch('ROLE_TEACHER')}
-                    title="Mô phỏng giao diện Giảng viên"
-                    className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                    title="Chuyển sang xem thử Cổng Giảng Viên"
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition text-[11px]"
                   >
-                    <UserSquare2 className="w-3.5 h-3.5" />
+                    <UserSquare2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Giảng viên</span>
                   </button>
                   <button
                     onClick={() => onRoleSwitch('ROLE_STUDENT')}
-                    title="Mô phỏng giao diện Sinh viên"
-                    className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                    title="Chuyển sang xem thử Cổng Sinh Viên"
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition text-[11px]"
                   >
-                    <GraduationCap className="w-3.5 h-3.5" />
+                    <GraduationCap className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Sinh viên</span>
                   </button>
                 </div>
               )}

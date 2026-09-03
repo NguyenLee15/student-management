@@ -63,8 +63,8 @@ export default function UserModule({ onNotify }) {
     const payload = {
       userName: formData.userName.trim(),
       password: formData.password,
-      role: formData.role,
-      studentId: formData.role === 'ROLE_STUDENT' ? (formData.studentId?.trim() || null) : null,
+      role: formData.role.replace('ROLE_', ''),
+      studentId: formData.role.includes('STUDENT') ? (formData.studentId?.trim() || null) : null,
     };
     try {
       await userApi.create(payload);
@@ -72,7 +72,7 @@ export default function UserModule({ onNotify }) {
       setShowModal(false);
       loadUsers();
     } catch (err) {
-      onNotify('error', err?.message || 'Lỗi khi tạo tài khoản');
+      onNotify('error', err?.response?.data?.message || err?.message || 'Lỗi khi tạo tài khoản');
     }
   };
 

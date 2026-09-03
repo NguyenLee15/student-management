@@ -119,20 +119,84 @@ export default function GradeModule({ onNotify, currentUser }) {
     setShowModal(true);
   };
 
+  const handleExportCSV = () => {
+    if (!grades || grades.length === 0) {
+      onNotify('error', 'Chưa có bản ghi điểm để xuất file.');
+      return;
+    }
+
+    const headers = [
+      'STT',
+      'Mã Điểm',
+      'Mã Sinh Viên',
+      'Họ Và Tên',
+      'Môn Học',
+      'Chuyên Cần (10%)',
+      'Giữa Kỳ (30%)',
+      'Cuối Kỳ (60%)',
+      'Tổng Kết (Hệ 10)',
+      'Hệ 4',
+      'Điểm Chữ',
+      'Học Kỳ',
+      'Năm Học'
+    ];
+
+    const rows = grades.map((g, idx) => {
+      const sem = g.semester ? (msg.enum.semester[g.semester] || g.semester) : '';
+      return [
+        idx + 1,
+        `"${g.gradeId || ''}"`,
+        `"${g.studentId || ''}"`,
+        `"${(g.studentName || '').replace(/"/g, '""')}"`,
+        `"${(g.subjectName || g.subjectId || '').replace(/"/g, '""')}"`,
+        g.attendanceScore != null ? g.attendanceScore : '',
+        g.midtermScore != null ? g.midtermScore : '',
+        g.finalExamScore != null ? g.finalExamScore : '',
+        g.scoreScale10 != null ? g.scoreScale10 : '',
+        g.scoreScale4 != null ? g.scoreScale4 : '',
+        g.letterGrade || '',
+        `"${sem}"`,
+        `"${g.academicYear || ''}"`
+      ].join(',');
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `BangDiem_TongHop_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     try {
+      const att = Number(formData.attendanceScore) || 0;
+      const mid = Number(formData.midtermScore) || 0;
+      const fin = Number(formData.finalExamScore) || 0;
+      const scoreScale10 = Number(((att * 0.1) + (mid * 0.3) + (fin * 0.6)).toFixed(1));
+
+      const payload = {
+        ...formData,
+        scoreScale10,
+        studyPhase: formData.studyPhase || 'PHASE_1',
+      };
+
       if (isEdit) {
-        await gradeApi.update(formData.gradeId, formData);
+        await gradeApi.update(formData.gradeId, payload);
         onNotify('success', msg.success.updated('điểm số', '#' + formData.gradeId));
       } else {
-        await gradeApi.create(formData);
+        await gradeApi.create(payload);
         onNotify('success', msg.success.created('điểm số', 'SV ' + formData.studentId));
       }
       setShowModal(false);
       loadGrades();
     } catch (err) {
-      onNotify('error', err?.message || msg.error.save('điểm số'));
+      onNotify('error', err?.response?.data?.message || err?.message || msg.error.save('điểm số'));
     }
   };
 
@@ -155,15 +219,25 @@ export default function GradeModule({ onNotify, currentUser }) {
           <p className="text-xs text-slate-400 mt-1">Quản lý điểm chuyên cần, giữa kỳ, cuối kỳ, điểm chữ và quy đổi GPA thang 4.0</p>
         </div>
 
-        {canManage && (
+        <div className="flex items-center gap-2.5">
           <button
-            onClick={handleOpenCreate}
-            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-purple-600/30 transition active:scale-95"
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-xs font-semibold text-slate-300 transition active:scale-95"
           >
-            <Plus className="h-4 w-4" />
-            <span>Nhập Điểm Mới</span>
+            <Download className="h-4 w-4 text-slate-400" />
+            <span>Xuất Bảng Điểm (CSV)</span>
           </button>
-        )}
+
+          {canManage && (
+            <button
+              onClick={handleOpenCreate}
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-purple-600/30 transition active:scale-95"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Nhập Điểm Mới</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filter Bar */}
