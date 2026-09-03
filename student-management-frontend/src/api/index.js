@@ -100,6 +100,7 @@ export const creditClassApi = {
   create: (data) => axiosClient.post('/credit-classes', data),
   update: (id, data) => axiosClient.put(`/credit-classes/${id}`, data),
   delete: (id) => axiosClient.delete(`/credit-classes/${id}`),
+  getStudents: (id) => axiosClient.get(`/credit-classes/${id}/students`),
   addStudent: (creditClassId, studentId) => axiosClient.post(`/credit-classes/${creditClassId}/students/${studentId}`),
   removeStudent: (creditClassId, studentId) => axiosClient.delete(`/credit-classes/${creditClassId}/students/${studentId}`),
 };

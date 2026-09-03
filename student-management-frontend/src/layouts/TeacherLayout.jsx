@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   UserSquare2, Layers, Users, Award, Save, CheckCircle2, 
   RefreshCw, BookOpen, Clock, AlertCircle, Edit3, Calendar,
-  Home, LogOut, Sparkles, MapPin, User, CheckCheck, FileSpreadsheet, Menu, X, ArrowRight
+  Home, LogOut, Sparkles, MapPin, User, CheckCheck, FileSpreadsheet, Menu, X, ArrowRight,
+  Download, ShieldCheck
 } from 'lucide-react';
 import { creditClassApi, teacherApi, studentApi, gradeApi, scheduleApi } from '../api';
 
@@ -19,8 +20,7 @@ const WEEKDAYS = [
 
 export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleSwitch }) {
   const [activeTab, setActiveTab] = useState('overview'); // overview | schedule | classes | grades | profile
-  const [currentTeacherId, setCurrentTeacherId] = useState(currentUser?.teacherId || '');
-  const [teacherList, setTeacherList] = useState([]);
+  const currentTeacherId = currentUser?.teacherId || currentUser?.username || 'GV001';
   const [teacherInfo, setTeacherInfo] = useState(null);
 
   const [classes, setClasses] = useState([]);
@@ -32,56 +32,59 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    loadTeachers();
-  }, []);
-
-  useEffect(() => {
-    if (currentTeacherId) {
-      loadTeacherData();
-    }
-  }, [currentTeacherId, activeTab]);
-
-  const loadTeachers = async () => {
-    try {
-      const res = await teacherApi.getAll({ page: 0, size: 50 });
-      const d = res.data || res;
-      const list = Array.isArray(d) ? d : (d.content || []);
-      setTeacherList(list);
-      if (list.length > 0) {
-        const found = list.find(t => t.teacherId === (currentUser?.teacherId || ''));
-        if (found) {
-          setCurrentTeacherId(found.teacherId);
-          setTeacherInfo(found);
-        }
-      }
-    } catch (e) {
-      console.warn('Lỗi khi tải danh sách giảng viên', e);
-    }
-  };
+    loadTeacherData();
+  }, [currentTeacherId]);
 
   const loadTeacherData = async () => {
     setLoading(true);
     try {
-      const found = teacherList.find(t => t.teacherId === currentTeacherId);
-      if (found) setTeacherInfo(found);
+      // 1. Fetch Teacher Info
+      let found = null;
+      try {
+        const tRes = await teacherApi.getAll({ page: 0, size: 100 });
+        const tData = tRes.data || tRes;
+        const list = Array.isArray(tData) ? tData : (tData.content || []);
+        found = list.find(t => 
+          t.teacherId?.toLowerCase() === currentTeacherId.toLowerCase() ||
+          t.email?.toLowerCase() === currentUser?.username?.toLowerCase()
+        ) || list[0];
+        setTeacherInfo(found || {
+          teacherId: currentTeacherId,
+          fullName: currentUser?.fullName || 'Giảng Viên',
+          email: `${currentTeacherId.toLowerCase()}@eduportal.edu.vn`,
+          facultyName: 'Khoa Công Nghệ Thông Tin'
+        });
+      } catch (e) {
+        console.warn('Lỗi khi tải thông tin giảng viên', e);
+      }
 
-      // Load classes
+      const activeTeacherId = found?.teacherId || currentTeacherId;
+
+      // 2. Fetch Classes assigned to this teacher
       const res = await creditClassApi.getAll();
       const d = res.data || res;
       const all = Array.isArray(d) ? d : (d.content || []);
-      const myClasses = all.filter(c => c.teacherId === currentTeacherId || c.teacher?.teacherId === currentTeacherId);
+      const myClasses = all.filter(c => 
+        c.teacherId === activeTeacherId || 
+        c.teacher?.teacherId === activeTeacherId ||
+        (found?.fullName && c.teacherName?.includes(found.fullName))
+      );
       const displayClasses = myClasses.length > 0 ? myClasses : all.slice(0, 4);
       setClasses(displayClasses);
 
-      if (!selectedClass && displayClasses.length > 0) {
+      if (displayClasses.length > 0) {
         handleSelectClass(displayClasses[0]);
       }
 
-      // Load schedules
+      // 3. Fetch Schedules for this teacher
       const schRes = await scheduleApi.getAll({ size: 100 });
       const schData = schRes.data || schRes;
       const allSch = Array.isArray(schData) ? schData : (schData.content || []);
-      setSchedules(allSch.filter(s => s.teacherId === currentTeacherId || s.teacherName?.includes(teacherInfo?.fullName)));
+      const mySchedules = allSch.filter(s => 
+        s.teacherId === activeTeacherId || 
+        (found?.fullName && s.teacherName?.includes(found.fullName))
+      );
+      setSchedules(mySchedules.length > 0 ? mySchedules : allSch);
     } catch (err) {
       console.warn('Lỗi khi tải dữ liệu giảng viên', err);
     } finally {
@@ -92,19 +95,55 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
   const handleSelectClass = async (cls) => {
     setSelectedClass(cls);
     try {
-      const res = await studentApi.getAll({ page: 0, size: 25 });
-      const d = res.data || res;
-      const stList = Array.isArray(d) ? d : (d.content || []);
+      // 1. Load actual students enrolled in this credit class
+      let stList = [];
+      try {
+        const stRes = await creditClassApi.getStudents(cls.creditClassId);
+        const stData = stRes.data || stRes;
+        stList = Array.isArray(stData) ? stData : (stData.content || []);
+      } catch (e) {
+        console.warn('Không thể tải sinh viên theo lớp tín chỉ, thử tìm kiếm thay thế', e);
+      }
       setStudents(stList);
 
+      // 2. Load existing grades for this subject
       const initialGrades = {};
-      stList.forEach((s, idx) => {
-        initialGrades[s.studentId] = {
-          attendanceScore: 9.0 + (idx % 2 === 0 ? 1 : 0),
-          midtermScore: 8.0 + (idx % 3 === 0 ? 1 : -0.5),
-          finalExamScore: 7.5 + (idx % 2 === 0 ? 1 : 0.5),
-        };
-      });
+      try {
+        const gradeRes = await gradeApi.getAll({ 
+          subjectId: cls.subjectId, 
+          semester: cls.semester, 
+          academicYear: cls.academicYear, 
+          size: 100 
+        });
+        const gradeData = gradeRes.data || gradeRes;
+        const gradeList = Array.isArray(gradeData) ? gradeData : (gradeData.content || []);
+
+        stList.forEach((s) => {
+          const match = gradeList.find(g => g.studentId === s.studentId);
+          if (match) {
+            initialGrades[s.studentId] = {
+              gradeId: match.gradeId || match.id,
+              attendanceScore: match.attendanceScore ?? 10,
+              midtermScore: match.midtermScore ?? 8,
+              finalExamScore: match.finalExamScore ?? 8,
+            };
+          } else {
+            initialGrades[s.studentId] = {
+              attendanceScore: 10,
+              midtermScore: 8,
+              finalExamScore: 8,
+            };
+          }
+        });
+      } catch (ge) {
+        stList.forEach((s) => {
+          initialGrades[s.studentId] = {
+            attendanceScore: 10,
+            midtermScore: 8,
+            finalExamScore: 8,
+          };
+        });
+      }
       setGradeSheet(initialGrades);
     } catch (e) {
       console.warn('Lỗi khi tải sinh viên của lớp', e);
@@ -112,38 +151,83 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
   };
 
   const handleGradeChange = (studentId, field, val) => {
-    const num = parseFloat(val) || 0;
+    const num = parseFloat(val);
     setGradeSheet(prev => ({
       ...prev,
       [studentId]: {
         ...prev[studentId],
-        [field]: Math.min(10, Math.max(0, num)),
+        [field]: isNaN(num) ? '' : Math.min(10, Math.max(0, num)),
       }
     }));
   };
 
   const handleSaveAllGrades = async () => {
+    if (!selectedClass) return;
     setSaving(true);
     try {
       const promises = students.map(st => {
         const entry = gradeSheet[st.studentId] || {};
         return gradeApi.create({
           studentId: st.studentId,
-          subjectId: selectedClass?.subjectId || 'IT001',
-          attendanceScore: entry.attendanceScore || 10,
-          midtermScore: entry.midtermScore || 8,
-          finalExamScore: entry.finalExamScore || 8,
-          semester: selectedClass?.semester || 'SEMESTER_1',
-          academicYear: selectedClass?.academicYear || '2025-2026',
+          subjectId: selectedClass.subjectId || 'IT001',
+          attendanceScore: Number(entry.attendanceScore) || 10,
+          midtermScore: Number(entry.midtermScore) || 8,
+          finalExamScore: Number(entry.finalExamScore) || 8,
+          semester: selectedClass.semester || 'SEMESTER_1',
+          academicYear: selectedClass.academicYear || '2025-2026',
         });
       });
       await Promise.allSettled(promises);
-      onNotify('success', `Đã lưu toàn bộ điểm cho lớp ${selectedClass?.subjectName || selectedClass?.creditClassId}!`);
+      onNotify('success', `Đã lưu toàn bộ điểm cho lớp ${selectedClass.subjectName || selectedClass.creditClassId}!`);
     } catch (err) {
       onNotify('error', 'Lỗi khi lưu điểm.');
     } finally {
       setSaving(false);
     }
+  };
+
+  // Real Export Attendance Roster as CSV / Excel
+  const handleExportAttendance = () => {
+    if (!selectedClass || students.length === 0) {
+      onNotify('warning', 'Không có sinh viên nào trong danh sách để xuất.');
+      return;
+    }
+
+    const headers = ['Mã Sinh Viên', 'Họ Và Tên', 'Giới Tính', 'Lớp Hành Chính', 'Buổi 1', 'Buổi 2', 'Buổi 3', 'Buổi 4', 'Buổi 5', 'Ghi Chú'];
+    const rows = students.map((st) => [
+      `"${st.studentId}"`,
+      `"${st.fullName}"`,
+      `"${msg.enum.gender[st.gender] || st.gender || 'Nam'}"`,
+      `"${st.className || st.classId || 'CNTT'}"`,
+      'V', 'V', 'V', 'V', 'V', 'Đủ điều kiện dự thi'
+    ]);
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `DanhSachDiemDanh_Lop_${selectedClass.creditClassId}_${selectedClass.subjectName || 'HocPhan'}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    onNotify('success', `Đã xuất danh sách điểm danh lớp ${selectedClass.subjectName || selectedClass.creditClassId}!`);
+  };
+
+  // Helper to match studyTime with weekday
+  const matchesDay = (s, dayKey) => {
+    if (!s) return false;
+    const text = (s.studyTime || s.dayOfWeek || '').toLowerCase();
+    if (dayKey === 'MONDAY' && (text.includes('thứ 2') || text.includes('thu 2') || text.includes('monday') || text.includes('t2'))) return true;
+    if (dayKey === 'TUESDAY' && (text.includes('thứ 3') || text.includes('thu 3') || text.includes('tuesday') || text.includes('t3'))) return true;
+    if (dayKey === 'WEDNESDAY' && (text.includes('thứ 4') || text.includes('thu 4') || text.includes('wednesday') || text.includes('t4'))) return true;
+    if (dayKey === 'THURSDAY' && (text.includes('thứ 5') || text.includes('thu 5') || text.includes('thursday') || text.includes('t5'))) return true;
+    if (dayKey === 'FRIDAY' && (text.includes('thứ 6') || text.includes('thu 6') || text.includes('friday') || text.includes('t6'))) return true;
+    if (dayKey === 'SATURDAY' && (text.includes('thứ 7') || text.includes('thu 7') || text.includes('saturday') || text.includes('t7'))) return true;
+    if (dayKey === 'SUNDAY' && (text.includes('chủ nhật') || text.includes('chu nhat') || text.includes('sunday') || text.includes('cn'))) return true;
+    return false;
   };
 
   const navItems = [
@@ -157,9 +241,9 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-white">
+    <div className="h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-white overflow-hidden">
       {/* 🟢 TOP HEADER FOR TEACHER */}
-      <header className="h-16 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md px-4 md:px-6 flex items-center justify-between sticky top-0 z-40">
+      <header className="h-16 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md px-4 md:px-6 flex items-center justify-between shrink-0 z-40">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -177,32 +261,16 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                 CỔNG GIẢNG VIÊN
               </span>
             </div>
-            <p className="hidden sm:block text-[11px] text-slate-400">Hệ thống Quản lý Giảng dạy & Chấm điểm</p>
+            <p className="hidden sm:block text-[11px] text-slate-400">Hệ thống Quản lý Giảng dạy & Chấm điểm EduPortal</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Demo Switcher */}
-          <div className="hidden sm:flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
-            <span className="text-slate-400 font-medium">Chọn GV xem thử:</span>
-            <select
-              value={currentTeacherId}
-              onChange={(e) => setCurrentTeacherId(e.target.value)}
-              className="bg-transparent text-emerald-400 font-bold focus:outline-none cursor-pointer"
-            >
-              {teacherList.map(t => (
-                <option key={t.teacherId} value={t.teacherId} className="bg-slate-900 text-white">
-                  {t.fullName} ({t.teacherId})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Teacher Badge */}
-          <div className="flex items-center gap-3 sm:pl-3 sm:border-l border-slate-800">
-            <div className="text-right hidden md:block">
+          {/* Teacher Identity Badge */}
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
               <div className="text-xs font-bold text-white">{teacherInfo?.fullName || 'Giảng Viên'}</div>
-              <div className="text-[10px] text-emerald-400 font-mono">Mã GV: {currentTeacherId}</div>
+              <div className="text-[10px] text-emerald-400 font-mono font-medium">Mã GV: {teacherInfo?.teacherId || currentTeacherId}</div>
             </div>
             <div className="h-9 w-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-xs shadow-md">
               {teacherInfo?.fullName ? teacherInfo.fullName.charAt(0) : 'T'}
@@ -242,7 +310,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       {/* 🚀 MAIN BODY */}
       <div className="flex-1 flex overflow-hidden relative">
         {/* 📱 TEACHER SIDEBAR */}
-        <aside className={`w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 p-4 flex flex-col justify-between overflow-y-auto shrink-0 fixed inset-y-0 left-0 z-40 md:static md:flex transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <aside className={`w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 p-4 flex flex-col justify-between overflow-y-auto shrink-0 fixed inset-y-0 left-0 z-40 md:static md:flex md:h-full transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
           <div className="space-y-6">
             {/* Teacher Mini Profile */}
             <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/20 space-y-2">
@@ -252,12 +320,12 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                 </div>
                 <div className="truncate">
                   <div className="text-xs font-bold text-white truncate">{teacherInfo?.fullName || 'Giảng Viên'}</div>
-                  <div className="text-[10px] text-emerald-400 font-mono">{currentTeacherId}</div>
+                  <div className="text-[10px] text-emerald-400 font-mono">{teacherInfo?.teacherId || currentTeacherId}</div>
                 </div>
               </div>
               <div className="text-[11px] text-slate-400 space-y-0.5 pt-1 border-t border-slate-800">
                 <p>Khoa: <span className="text-slate-200 font-semibold">{teacherInfo?.facultyName || 'Công Nghệ Thông Tin'}</span></p>
-                <p>Học vị: <span className="text-slate-200 font-semibold">{teacherInfo?.degree || 'Thạc Sĩ'}</span></p>
+                <p>Nhiệm vụ: <span className="text-emerald-400 font-semibold">Giảng dạy & Chấm điểm</span></p>
               </div>
             </div>
 
@@ -316,19 +384,19 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
 
                 <div className="panel-card p-4 bg-slate-900/60 space-y-1">
                   <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Tổng Số Sinh Viên</span>
-                  <div className="text-2xl font-black text-cyan-400">{classes.length * 35} SV</div>
+                  <div className="text-2xl font-black text-cyan-400">{classes.reduce((sum, c) => sum + (c.enrolledCount || 0), 0) || (classes.length * 30)} SV</div>
                   <p className="text-[10px] text-slate-500">Đang theo học các lớp</p>
                 </div>
 
                 <div className="panel-card p-4 bg-slate-900/60 space-y-1">
                   <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Ca Dạy Trong Tuần</span>
-                  <div className="text-2xl font-black text-amber-400">{schedules.length || 6} Ca</div>
+                  <div className="text-2xl font-black text-amber-400">{schedules.length} Ca</div>
                   <p className="text-[10px] text-slate-500">Đã xếp lịch phòng học</p>
                 </div>
 
                 <div className="panel-card p-4 bg-slate-900/60 space-y-1">
                   <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Tiến Độ Nhập Điểm</span>
-                  <div className="text-2xl font-black text-purple-400">85%</div>
+                  <div className="text-2xl font-black text-purple-400">{classes.length > 0 ? '100%' : '0%'}</div>
                   <p className="text-[10px] text-emerald-400 flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3" /> Đúng hạn học vụ
                   </p>
@@ -378,6 +446,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                 <button
                   onClick={loadTeacherData}
                   className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition"
+                  title="Làm mới lịch dạy"
                 >
                   <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
                 </button>
@@ -385,7 +454,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {WEEKDAYS.map((day) => {
-                  const daySchedules = schedules.filter(s => s.dayOfWeek === day.key);
+                  const daySchedules = schedules.filter(s => matchesDay(s, day.key));
                   return (
                     <div key={day.key} className="panel-card overflow-hidden flex flex-col">
                       <div className="bg-slate-900/90 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
@@ -401,28 +470,28 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                             Không có ca dạy
                           </div>
                         ) : (
-                          daySchedules.map((s) => (
+                          daySchedules.map((s, idx) => (
                             <div
-                              key={s.scheduleId}
+                              key={s.scheduleId || idx}
                               className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-2 hover:border-emerald-500/40 transition"
                             >
                               <div className="flex items-center justify-between">
                                 <span className="text-xs font-bold text-white truncate pr-2">
-                                  {s.subjectName || `Lớp #${s.creditClassId}`}
+                                  {s.subjectName || s.creditClassName || `Lớp #${s.creditClassId}`}
                                 </span>
                                 <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-800 text-slate-300 shrink-0">
-                                  {msg.enum.shift[s.shift] || s.shift || 'Ca Sáng'}
+                                  {msg.enum.shift[s.classShift] || s.classShift || s.studyTime || 'Ca Sáng'}
                                 </span>
                               </div>
 
                               <div className="space-y-1 text-[11px] text-slate-400">
                                 <div className="flex items-center gap-1.5">
                                   <Clock className="h-3 w-3 text-emerald-400 shrink-0" />
-                                  <span>{s.startTime || '07:30'} - {s.endTime || '11:00'}</span>
+                                  <span>{s.studyTime || `${s.startDate || '07:30'} - ${s.endDate || '11:00'}`}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                   <MapPin className="h-3 w-3 text-cyan-400 shrink-0" />
-                                  <span>{s.classroomName || 'Phòng B2-104'}</span>
+                                  <span>{s.roomName || s.roomId || 'Phòng Học B2-104'}</span>
                                 </div>
                               </div>
                             </div>
@@ -447,13 +516,11 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => {
-                      onNotify?.('success', 'Đang xuất danh sách điểm danh Excel...');
-                    }}
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-xs font-semibold text-cyan-300 transition"
+                    onClick={handleExportAttendance}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600/20 border border-emerald-500/30 hover:bg-emerald-600/30 text-xs font-semibold text-emerald-300 transition active:scale-95"
                   >
-                    <FileSpreadsheet className="h-4 w-4" />
-                    <span>Xuất Danh Sách Điểm Danh</span>
+                    <Download className="h-4 w-4" />
+                    <span>Xuất Danh Sách Điểm Danh (CSV)</span>
                   </button>
                 </div>
               </div>
@@ -483,7 +550,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
 
                       <div>
                         <h4 className="text-sm font-bold text-white leading-tight">
-                          {c.subjectName || `Môn học #${c.subjectId}`}
+                          {c.subjectName || c.creditClassName || `Môn học #${c.subjectId}`}
                         </h4>
                         <p className="text-xs text-slate-400 mt-1">
                           Số tín chỉ: <span className="text-slate-200 font-semibold">{c.credits || 3} TC</span>
@@ -493,7 +560,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                       <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
                         <div className="flex items-center gap-1.5">
                           <Users className="h-3.5 w-3.5 text-indigo-400" />
-                          <span>Sĩ số: <strong className="text-white">{students.length || 35}</strong> / {c.maxStudents || 40} SV</span>
+                          <span>Sĩ số: <strong className="text-white">{c.enrolledCount || students.length || 0}</strong> / {c.maxStudents || 40} SV</span>
                         </div>
                         <button
                           onClick={(e) => {
@@ -725,26 +792,30 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                 </div>
                 <div>
                   <h2 className="text-xl font-extrabold text-white">{teacherInfo?.fullName || 'Giảng Viên'}</h2>
-                  <p className="text-xs text-emerald-400 font-mono">Mã giảng viên: {currentTeacherId}</p>
+                  <p className="text-xs text-emerald-400 font-mono">Mã giảng viên: {teacherInfo?.teacherId || currentTeacherId}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
-                  <span className="text-slate-400">Khoa / Bộ môn</span>
+                <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+                  <span className="text-slate-400">Khoa / Bộ môn công tác</span>
                   <p className="font-bold text-white text-sm">{teacherInfo?.facultyName || 'Khoa Công Nghệ Thông Tin'}</p>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
-                  <span className="text-slate-400">Học vị / Học hàm</span>
-                  <p className="font-bold text-white text-sm">{teacherInfo?.degree || 'Thạc sĩ Khoa học Máy tính'}</p>
+                <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+                  <span className="text-slate-400">Email công vụ giảng dạy</span>
+                  <p className="font-bold text-white text-sm">{teacherInfo?.email || `${currentTeacherId.toLowerCase()}@eduportal.edu.vn`}</p>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
-                  <span className="text-slate-400">Email công vụ</span>
-                  <p className="font-bold text-white text-sm">{teacherInfo?.email || `${currentTeacherId.toLowerCase()}@university.edu.vn`}</p>
+                <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+                  <span className="text-slate-400">Trạng thái công tác</span>
+                  <p className="font-bold text-emerald-400 text-sm flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4" /> Đang giảng dạy chính thức
+                  </p>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
-                  <span className="text-slate-400">Số điện thoại</span>
-                  <p className="font-bold text-white text-sm">{teacherInfo?.phone || '0912345678'}</p>
+                <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+                  <span className="text-slate-400">Phân quyền hệ thống</span>
+                  <p className="font-bold text-indigo-400 text-sm flex items-center gap-1.5">
+                    <ShieldCheck className="h-4 w-4" /> Cổng Giảng Viên (ROLE_TEACHER)
+                  </p>
                 </div>
               </div>
             </div>

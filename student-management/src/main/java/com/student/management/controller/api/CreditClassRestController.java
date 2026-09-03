@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import com.student.management.dto.resp.StudentResponseDto;
+import com.student.management.service.StudentService;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/credit-classes")
 @RequiredArgsConstructor
@@ -26,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 public class CreditClassRestController {
 
     private final CreditClassService creditClassService;
+    private final StudentService studentService;
     private final SecurityService securityService;
 
     @GetMapping
@@ -94,5 +99,12 @@ public class CreditClassRestController {
         }
         creditClassService.removeStudentFromCreditClass(classId, studentId);
         return ResponseEntity.ok(ApiResponse.success("Hủy đăng ký lớp tín chỉ thành công", null));
+    }
+
+    @GetMapping("/{id}/students")
+    @Operation(summary = "Lấy danh sách sinh viên đăng ký theo lớp tín chỉ")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
+    public ResponseEntity<ApiResponse<List<StudentResponseDto>>> getStudentsByCreditClass(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách sinh viên theo lớp tín chỉ thành công", studentService.getStudentsByCreditClassId(id)));
     }
 }
