@@ -74,3 +74,4 @@ export default function StudentQuickActions({ onNavigateTab }) {
     </div>
   );
 }
+

@@ -1,10 +1,11 @@
-import { msg } from '../../lib/messages';
+// cSpell:disable
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, CalendarDays, Clock, MapPin, User, BookOpen, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 import { scheduleApi, creditClassApi, teacherApi, classroomApi } from '../../api';
-import Modal from '../common/Modal';
+import { msg } from '../../lib/messages';
 import ConfirmDialog from '../common/ConfirmDialog';
-import Pagination from '../common/Pagination';
+import ScheduleTable from './schedule/ScheduleTable';
+import ScheduleFormModal from './schedule/ScheduleFormModal';
 
 const SHIFT_CONFIGS = {
   'SHIFT_1': { classShift: 'MORNING', label: 'Ca 1 (Tiết 1-3: 07:00 - 09:15)', period: 'Tiết 1-3 (07:00 - 09:15)' },
@@ -42,8 +43,8 @@ export default function ScheduleModule({ onNotify, currentUser }) {
     roomId: '',
     semester: 'SEMESTER_1',
     academicYear: '2026-2027',
-    dayOfWeek: 2, // Monday
-    classShift: 'SHIFT_1', // Shift key
+    dayOfWeek: 2,
+    classShift: 'SHIFT_1',
     studyTime: '',
     startDate: '2026-09-01',
     endDate: '2027-01-15',
@@ -196,18 +197,9 @@ export default function ScheduleModule({ onNotify, currentUser }) {
     }
   };
 
-  const dayOfWeekNames = {
-    2: 'Thứ Hai',
-    3: 'Thứ Ba',
-    4: 'Thứ Tư',
-    5: 'Thứ Năm',
-    6: 'Thứ Sáu',
-    7: 'Thứ Bảy',
-    8: 'Chủ Nhật',
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản Lý Thời Khóa Biểu & Lịch Học</h1>
@@ -257,192 +249,33 @@ export default function ScheduleModule({ onNotify, currentUser }) {
         </button>
       </div>
 
-      {/* Schedule Table */}
-      <div className="panel-card overflow-hidden shadow-sm">
-        <div className="overflow-x-auto" aria-live="polite">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-              <tr>
-                <th className="px-5 py-3.5">Thứ Trong Tuần & Ca Học</th>
-                <th className="px-5 py-3.5">Học Phần</th>
-                <th className="px-5 py-3.5">Giảng Viên Phụ Trách</th>
-                <th className="px-5 py-3.5">Phòng Học / Giảng Đường</th>
-                <th className="px-5 py-3.5">Học kỳ</th>
-                <th className="px-5 py-3.5 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {schedules.map((s) => (
-                <tr key={s.scheduleId} className="hover:bg-slate-800/40 transition">
-                  <td className="px-5 py-3.5 font-bold text-teal-400">
-                    <div>
-                      <div>{msg.enum.weekday[s.dayOfWeek] || 'Không xác định'}</div>
-                      <div className="text-[10px] text-slate-400 font-mono font-normal mt-0.5">{msg.enum.shift[s.classShift] || 'Ca 1'}</div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <div className="font-semibold text-white">{s.subjectName || `Credit Class #${s.creditClassId}`}</div>
-                    <div className="text-[10px] text-slate-500 font-mono">Class ID: {s.creditClassId}</div>
-                  </td>
-                  <td className="px-5 py-3.5 text-slate-300">
-                    <div className="flex items-center gap-2">
-                      <User className="h-3.5 w-3.5 text-indigo-400" />
-                      <span>{s.teacherName || s.teacherId || 'Chưa phân công'}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3.5 text-slate-300">
-                    <span className="px-2.5 py-1 rounded-lg bg-slate-800 text-rose-300 font-mono font-semibold">
-                      {s.roomName || s.roomId || 'Chưa xếp phòng'}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-slate-400">
-                    {s.semester} ({s.academicYear || '2026-2027'})
-                  </td>
-                  <td className="px-5 py-3.5 text-right space-x-1">
-                    {isAdmin && (
-                      <>
-                        <button
-                          onClick={() => handleOpenEdit(s)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-teal-400 hover:bg-slate-800 transition"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteTarget(s)}
-                          className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Schedule Table Component */}
+      <ScheduleTable
+        schedules={schedules}
+        isAdmin={isAdmin}
+        page={page}
+        size={size}
+        totalPages={totalPages}
+        totalElements={totalElements}
+        onPageChange={(p) => setPage(p)}
+        onEdit={handleOpenEdit}
+        onDelete={(s) => setDeleteTarget(s)}
+      />
 
-        <Pagination
-          page={page}
-          size={size}
-          totalPages={totalPages}
-          totalElements={totalElements}
-          onPageChange={(p) => setPage(p)}
-        />
-      </div>
-
-      {/* Modal */}
-      <Modal
+      {/* Schedule Form Modal */}
+      <ScheduleFormModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Sửa Lịch Học #${formData.scheduleId}` : 'Thêm Lịch Học'}
-      >
-        <form onSubmit={handleSave} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Lớp Tín Chỉ*</label>
-              <select
-                value={formData.creditClassId}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value) || e.target.value;
-                  const cc = creditClasses.find(c => String(c.creditClassId) === String(val));
-                  setFormData({
-                    ...formData,
-                    creditClassId: val,
-                    subjectId: cc?.subjectId || formData.subjectId,
-                    teacherId: cc?.teacherId || formData.teacherId,
-                    roomId: cc?.classroomId || formData.roomId,
-                    semester: cc?.semester || formData.semester,
-                    academicYear: cc?.academicYearId || cc?.academicYearName || formData.academicYear || '2026-2027',
-                  });
-                }}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-teal-500"
-              >
-                {creditClasses.map((cc) => (
-                  <option key={cc.creditClassId} value={cc.creditClassId}>
-                    {cc.subjectName || cc.subjectId} (Mã LTC: {cc.creditClassId})
-                  </option>
-                ))}
-              </select>
-            </div>
+        isEdit={isEdit}
+        formData={formData}
+        setFormData={setFormData}
+        creditClasses={creditClasses}
+        teachers={teachers}
+        classrooms={classrooms}
+        onSubmit={handleSave}
+      />
 
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Giảng Viên Phụ Trách*</label>
-              <select
-                value={formData.teacherId}
-                onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-teal-500"
-              >
-                {teachers.map((t) => (
-                  <option key={t.teacherId} value={t.teacherId}>{t.fullName} ({t.teacherId})</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Phòng Học / Giảng Đường*</label>
-              <select
-                value={formData.roomId}
-                onChange={(e) => setFormData({ ...formData, roomId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-teal-500"
-              >
-                {classrooms.map((cr) => (
-                  <option key={cr.roomId} value={cr.roomId}>{cr.roomName || cr.roomId}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Thứ *</label>
-              <select
-                value={formData.dayOfWeek}
-                onChange={(e) => setFormData({ ...formData, dayOfWeek: parseInt(e.target.value) || 2 })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-teal-500"
-              >
-                <option value={2}>Thứ 2</option>
-                <option value={3}>Thứ 3</option>
-                <option value={4}>Thứ 4</option>
-                <option value={5}>Thứ 5</option>
-                <option value={6}>Thứ 6</option>
-                <option value={7}>Thứ 7</option>
-                <option value={8}>Chủ Nhật</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Ca Học *</label>
-              <select
-                value={formData.classShift}
-                onChange={(e) => setFormData({ ...formData, classShift: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-teal-500"
-              >
-                <option value="SHIFT_1">Ca 1 (07:00 - 09:15)</option>
-                <option value="SHIFT_2">Ca 2 (09:30 - 11:45)</option>
-                <option value="SHIFT_3">Ca 3 (13:00 - 15:15)</option>
-                <option value="SHIFT_4">Ca 4 (15:30 - 17:45)</option>
-                <option value="SHIFT_5">Ca 5 (18:00 - 20:15)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >Hủy</button>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold shadow-lg shadow-teal-600/30 transition"
-            >
-              {isEdit ? 'Lưu thay đổi' : 'Lưu lịch học'}
-            </button>
-          </div>
-        </form>
-      </Modal>
-
+      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}

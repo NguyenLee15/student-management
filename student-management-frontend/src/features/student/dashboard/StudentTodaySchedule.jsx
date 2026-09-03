@@ -50,3 +50,4 @@ export default function StudentTodaySchedule({ todaySchedule = [], onNavigateTab
     </div>
   );
 }
+

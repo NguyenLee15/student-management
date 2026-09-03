@@ -1,14 +1,11 @@
-import { msg } from '../../lib/messages';
+// cSpell:disable
 import React, { useState, useEffect } from 'react';
-import { 
-  Plus, Search, Edit3, Trash2, UserSquare2, RefreshCw, Mail, Phone, Building2, Download 
-} from 'lucide-react';
+import { Plus, Search, RefreshCw, Download } from 'lucide-react';
 import { teacherApi, facultyApi } from '../../api';
-import Modal from '../common/Modal';
-import Pagination from '../common/Pagination';
-import EmptyState from '../common/EmptyState';
-import Skeleton from '../common/Skeleton';
+import { msg } from '../../lib/messages';
 import ConfirmDialog from '../common/ConfirmDialog';
+import TeacherTable from './teacher/TeacherTable';
+import TeacherFormModal from './teacher/TeacherFormModal';
 
 export default function TeacherModule({ onNotify, currentUser }) {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
@@ -163,8 +160,8 @@ export default function TeacherModule({ onNotify, currentUser }) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-6 animate-fade-in">
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Hồ Sơ Cán Bộ & Giảng Viên</h1>
@@ -227,180 +224,39 @@ export default function TeacherModule({ onNotify, currentUser }) {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="panel-card overflow-hidden shadow-sm">
-        <div className="overflow-x-auto" aria-live="polite">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-              <tr>
-                <th className="px-5 py-3.5">Mã Giảng Viên</th>
-                <th className="px-5 py-3.5">Họ và tên</th>
-                <th className="px-5 py-3.5">Khoa / Viện Đào Tạo</th>
-                <th className="px-5 py-3.5">Email Công Vụ</th>
-                <th className="px-5 py-3.5 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {loading ? (
-                  [...Array(5)].map((_, i) => (
-                    <tr key={i} className="animate-pulse">
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-40" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-32" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-8" /></td>
-                    </tr>
-                  ))
-                ) : teachers.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="p-0">
-                    <EmptyState title="Không tìm thấy giảng viên" message="Không có giảng viên nào khớp với điều kiện tìm kiếm hiện tại." />
-                  </td>
-                </tr>
-              ) : (
-                teachers.map((t) => (
-                  <tr key={t.teacherId} className="hover:bg-slate-800/40 transition">
-                    <td className="px-5 py-3.5 font-bold text-emerald-400 font-mono">{t.teacherId}</td>
-                    <td className="px-5 py-3.5 font-semibold text-white">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-slate-800 text-emerald-400 border border-slate-700 flex items-center justify-center font-bold text-white text-xs shadow-md">
-                          {t.fullName?.charAt(0) || 'G'}
-                        </div>
-                        <span>{t.fullName}</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-300">
-                      <span className="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 font-medium">
-                        {t.facultyName || t.facultyId || 'Chưa phân khoa'}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 text-slate-400">{t.email || '—'}</td>
-                    <td className="px-5 py-3.5 text-right space-x-1">
-                      {isAdmin && (
-                        <>
-                          <button
-                            onClick={() => handleOpenEdit(t)}
-                            title="Sửa Giảng Viên"
-                            className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-500 transition"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => setDeleteTarget(t)}
-                            title="Xóa Giảng viên"
-                            className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Teacher Table Component */}
+      <TeacherTable
+        teachers={teachers}
+        loading={loading}
+        isAdmin={isAdmin}
+        page={page}
+        size={size}
+        totalPages={totalPages}
+        totalElements={totalElements}
+        onPageChange={(p) => setPage(p)}
+        onEdit={handleOpenEdit}
+        onDelete={(t) => setDeleteTarget(t)}
+      />
 
-        <Pagination
-          page={page}
-          size={size}
-          totalPages={totalPages}
-          totalElements={totalElements}
-          onPageChange={(p) => setPage(p)}
-        />
-      </div>
-
-      {/* Modal Add / Edit */}
-      <Modal
+      {/* Teacher Form Modal */}
+      <TeacherFormModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Sửa Giảng Viên: ${formData.teacherId}` : 'Thêm Giảng Viên Mới'}
-        subtitle="Nhập học vị, học hàm và khoa công tác"
-      >
-        <form onSubmit={handleSaveTeacher} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Mã Giảng Viên *</label>
-              <input
-                type="text"
-                required
-                disabled={isEdit}
-                placeholder="VD: GV001"
-                value={formData.teacherId}
-                onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500 disabled:opacity-50"
-              />
-            </div>
+        isEdit={isEdit}
+        formData={formData}
+        setFormData={setFormData}
+        faculties={faculties}
+        onSubmit={handleSaveTeacher}
+      />
 
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Họ và Tên*</label>
-              <input
-                type="text"
-                required
-                placeholder="VD: TS. Nguyễn Văn Thức"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Khoa Chủ Quản*</label>
-              <select
-                value={formData.facultyId}
-                onChange={(e) => setFormData({ ...formData, facultyId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500"
-              >
-                {faculties.map((f) => (
-                  <option key={f.facultyId} value={f.facultyId}>{f.facultyName || f.facultyId}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Email Công Vụ*</label>
-              <input
-                type="email"
-                required
-                placeholder="thuc@eaut.edu.vn"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-          </div>
-
-          <div className="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >Hủy</button>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-600/30 transition"
-            >
-              {isEdit ? 'Lưu thay đổi' : 'Thêm Giảng Viên'}
-            </button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Confirm Delete */}
+      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
         title="Xóa Giảng Viên"
-        message={`Bạn có chắc chắn muốn xóa giảng viên "${deleteTarget?.fullName}" (ID: ${deleteTarget?.teacherId})?`}
+        message={msg.confirm.delete('giảng viên', deleteTarget?.fullName, deleteTarget?.teacherId)}
       />
     </div>
   );
 }
-
-
-
-
