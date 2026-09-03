@@ -75,7 +75,7 @@ const calculateFinalScore = (entry, weights) => {
 
 export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleSwitch }) {
   const [activeTab, setActiveTab] = useState('overview'); // overview | schedule | classes | grades | profile
-  const currentTeacherId = currentUser?.teacherId || currentUser?.username || 'GV001';
+  const currentTeacherId = currentUser?.teacherId || currentUser?.username || '';
   const [teacherInfo, setTeacherInfo] = useState(null);
 
   const [classes, setClasses] = useState([]);
@@ -101,15 +101,15 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
         const tData = tRes.data || tRes;
         const list = Array.isArray(tData) ? tData : (tData.content || []);
         const matched = list.find(t => 
-          t.teacherId?.toLowerCase() === currentTeacherId.toLowerCase() ||
-          t.email?.toLowerCase() === currentUser?.username?.toLowerCase()
+          (currentTeacherId && t.teacherId?.toLowerCase() === currentTeacherId.toLowerCase()) ||
+          (currentUser?.username && t.email?.toLowerCase() === currentUser?.username?.toLowerCase())
         );
         found = matched || (currentUser?.role?.includes('ADMIN') ? list[0] : null);
         setTeacherInfo(found || {
-          teacherId: currentTeacherId,
+          teacherId: currentTeacherId || 'GV-00',
           fullName: currentUser?.fullName || 'Giảng Viên',
-          email: currentUser?.email || `${currentTeacherId.toLowerCase()}@eduportal.edu.vn`,
-          facultyName: 'Khoa Công Nghệ Thông Tin'
+          email: currentUser?.email || (currentTeacherId ? `${currentTeacherId.toLowerCase()}@eduportal.edu.vn` : 'giangvien@eduportal.edu.vn'),
+          facultyName: 'Chưa cập nhật khoa'
         });
       } catch (e) {
         console.warn('Lỗi khi tải thông tin giảng viên', e);
@@ -199,12 +199,12 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
         stList.forEach((s) => {
           const match = gradeList.find(g => g.studentId === s.studentId);
           if (match) {
-            const s10 = match.scoreScale10 != null ? Number(match.scoreScale10) : 8;
+            const s10 = match.scoreScale10 != null ? Number(match.scoreScale10) : null;
             initialGrades[s.studentId] = {
               gradeId: match.gradeId || match.id,
-              attendanceScore: match.attendanceScore ?? 10,
-              midtermScore: match.midtermScore ?? s10,
-              finalExamScore: match.finalExamScore ?? s10,
+              attendanceScore: match.attendanceScore != null ? String(match.attendanceScore) : (s10 != null ? String(s10) : ''),
+              midtermScore: match.midtermScore != null ? String(match.midtermScore) : (s10 != null ? String(s10) : ''),
+              finalExamScore: match.finalExamScore != null ? String(match.finalExamScore) : (s10 != null ? String(s10) : ''),
               isSaved: true,
             };
           } else {
@@ -232,20 +232,110 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     }
   };
 
+  const handleSelectClassSafe = (cls) => {
+    if (!cls || cls.creditClassId === selectedClass?.creditClassId) return;
+    const hasUnsaved = Object.values(gradeSheet).some(g => !g.isSaved && (g.attendanceScore !== '' || g.midtermScore !== '' || g.finalExamScore !== ''));
+    if (hasUnsaved) {
+      const confirmSwitch = window.confirm('Lớp hiện tại có một số điểm chưa được lưu. Nếu chuyển lớp, các thay đổi này sẽ bị mất. Thầy/Cô có muốn tiếp tục chuyển không?');
+      if (!confirmSwitch) return;
+    }
+    handleSelectClass(cls);
+  };
+
   const handleGradeChange = (studentId, field, val) => {
-    const num = parseFloat(val);
+    if (val === '') {
+      setGradeSheet(prev => ({
+        ...prev,
+        [studentId]: {
+          ...prev[studentId],
+          [field]: '',
+          isSaved: false,
+        }
+      }));
+      return;
+    }
+
+    const cleanVal = val.replace(',', '.');
+    // Cho phép nhập số từ 0-10, có thể có dấu chấm thập phân và tối đa 2 chữ số sau dấu chấm
+    if (!/^\d{0,2}(\.\d{0,2})?$/.test(cleanVal)) return;
+
+    const num = parseFloat(cleanVal);
+    if (!isNaN(num) && num > 10) return;
+
     setGradeSheet(prev => ({
       ...prev,
       [studentId]: {
         ...prev[studentId],
-        [field]: isNaN(num) ? '' : Math.min(10, Math.max(0, num)),
+        [field]: cleanVal,
         isSaved: false,
       }
     }));
   };
 
+  const handleGradeBlur = (studentId, field) => {
+    setGradeSheet(prev => {
+      const entry = prev[studentId];
+      if (!entry) return prev;
+      const raw = entry[field];
+      if (raw === '' || raw == null) return prev;
+      const num = parseFloat(raw);
+      if (isNaN(num)) {
+        return {
+          ...prev,
+          [studentId]: { ...entry, [field]: '', isSaved: false }
+        };
+      }
+      const clamped = Math.min(10, Math.max(0, num));
+      return {
+        ...prev,
+        [studentId]: { ...entry, [field]: String(clamped) }
+      };
+    });
+  };
+
+  const handleGradeKeyDown = (e, index, field) => {
+    if (e.key === 'ArrowDown' || e.key === 'Enter') {
+      e.preventDefault();
+      const nextInput = document.querySelector(`input[data-field="${field}"][data-idx="${index + 1}"]`);
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select();
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prevInput = document.querySelector(`input[data-field="${field}"][data-idx="${index - 1}"]`);
+      if (prevInput) {
+        prevInput.focus();
+        prevInput.select();
+      }
+    }
+  };
+
+  const handleQuickFillAttendance = () => {
+    if (students.length === 0) return;
+    setGradeSheet(prev => {
+      const next = { ...prev };
+      students.forEach(st => {
+        const cur = next[st.studentId] || {};
+        if (cur.attendanceScore === '' || cur.attendanceScore == null) {
+          next[st.studentId] = {
+            ...cur,
+            attendanceScore: '10',
+            isSaved: false,
+          };
+        }
+      });
+      return next;
+    });
+    onNotify('info', 'Đã tự động điền điểm chuyên cần 10 cho các sinh viên chưa có điểm.');
+  };
+
   const handleSaveAllGrades = async () => {
     if (!selectedClass || students.length === 0) return;
+    if (!selectedClass.subjectId) {
+      onNotify('error', 'Lớp học phần không hợp lệ (thiếu mã môn học).');
+      return;
+    }
     setSaving(true);
     let successCount = 0;
     let failCount = 0;
@@ -254,61 +344,73 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     const weights = getWeights(selectedClass);
 
     try {
-      const promises = students.map(async (st) => {
-        const entry = gradeSheet[st.studentId] || {};
-        const calc = calculateFinalScore(entry, weights);
-        if (!calc.isComplete) {
-          skippedCount++;
-          return;
-        }
+      const baseSemester = normalizeSemesterEnum(selectedClass.semester);
+      const baseYear = normalizeAcademicYear(selectedClass.academicYearName || selectedClass.academicYearId);
 
-        const baseSemester = normalizeSemesterEnum(selectedClass.semester);
-        const baseYear = normalizeAcademicYear(selectedClass.academicYearId || selectedClass.academicYearName);
-
-        try {
-          if (entry.gradeId) {
-            // Cập nhật điểm đã có trong cơ sở dữ liệu
-            const updatePayload = {
-              gradeId: Number(entry.gradeId),
-              semester: baseSemester,
-              studyPhase: 'PHASE_1',
-              scoreScale10: calc.score10,
-            };
-            const res = await gradeApi.update(entry.gradeId, updatePayload);
-            const savedData = res.data || res;
-            updatedGrades[st.studentId] = {
-              ...entry,
-              gradeId: savedData.gradeId || entry.gradeId,
-              isSaved: true,
-            };
-            successCount++;
-          } else {
-            // Tạo mới bản ghi điểm chưa từng tồn tại
-            const createPayload = {
-              studentId: st.studentId,
-              subjectId: selectedClass.subjectId || 'IT001',
-              semester: baseSemester,
-              academicYear: baseYear,
-              studyPhase: 'PHASE_1',
-              scoreScale10: calc.score10,
-            };
-            const res = await gradeApi.create(createPayload);
-            const savedData = res.data || res;
-            const newId = savedData.gradeId || savedData.data?.gradeId || savedData.id;
-            updatedGrades[st.studentId] = {
-              ...entry,
-              gradeId: newId,
-              isSaved: true,
-            };
-            successCount++;
+      // Xử lý lưu tuần tự theo từng nhóm 5 sinh viên để tránh quá tải kết nối backend
+      const chunkSize = 5;
+      for (let i = 0; i < students.length; i += chunkSize) {
+        const chunk = students.slice(i, i + chunkSize);
+        await Promise.all(chunk.map(async (st) => {
+          const entry = gradeSheet[st.studentId] || {};
+          const calc = calculateFinalScore(entry, weights);
+          if (!calc.isComplete) {
+            skippedCount++;
+            return;
           }
-        } catch (itemErr) {
-          console.warn(`Lỗi lưu điểm sinh viên ${st.studentId}:`, itemErr);
-          failCount++;
-        }
-      });
 
-      await Promise.all(promises);
+          const attNum = entry.attendanceScore !== '' && entry.attendanceScore != null ? Number(entry.attendanceScore) : null;
+          const midNum = entry.midtermScore !== '' && entry.midtermScore != null ? Number(entry.midtermScore) : null;
+          const finNum = entry.finalExamScore !== '' && entry.finalExamScore != null ? Number(entry.finalExamScore) : null;
+
+          try {
+            if (entry.gradeId) {
+              const updatePayload = {
+                gradeId: Number(entry.gradeId),
+                semester: baseSemester,
+                studyPhase: 'PHASE_1',
+                attendanceScore: attNum,
+                midtermScore: midNum,
+                finalExamScore: finNum,
+                scoreScale10: calc.score10,
+              };
+              const res = await gradeApi.update(entry.gradeId, updatePayload);
+              const savedData = res.data || res;
+              updatedGrades[st.studentId] = {
+                ...entry,
+                gradeId: savedData.gradeId || entry.gradeId,
+                isSaved: true,
+              };
+              successCount++;
+            } else {
+              const createPayload = {
+                studentId: st.studentId,
+                subjectId: selectedClass.subjectId,
+                semester: baseSemester,
+                academicYear: baseYear,
+                studyPhase: 'PHASE_1',
+                attendanceScore: attNum,
+                midtermScore: midNum,
+                finalExamScore: finNum,
+                scoreScale10: calc.score10,
+              };
+              const res = await gradeApi.create(createPayload);
+              const savedData = res.data || res;
+              const newId = savedData.gradeId || savedData.data?.gradeId || savedData.id;
+              updatedGrades[st.studentId] = {
+                ...entry,
+                gradeId: newId,
+                isSaved: true,
+              };
+              successCount++;
+            }
+          } catch (itemErr) {
+            console.warn(`Lỗi lưu điểm sinh viên ${st.studentId}:`, itemErr);
+            failCount++;
+          }
+        }));
+      }
+
       setGradeSheet(updatedGrades);
 
       if (successCount > 0 && failCount === 0) {
@@ -328,6 +430,10 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
 
   const handleSaveSingleGrade = async (st) => {
     if (!selectedClass || !st) return;
+    if (!selectedClass.subjectId) {
+      onNotify('error', 'Lớp học phần không hợp lệ (thiếu mã môn học).');
+      return;
+    }
     const entry = gradeSheet[st.studentId] || {};
     const weights = getWeights(selectedClass);
     const calc = calculateFinalScore(entry, weights);
@@ -338,7 +444,10 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     }
 
     const baseSemester = normalizeSemesterEnum(selectedClass.semester);
-    const baseYear = normalizeAcademicYear(selectedClass.academicYearId || selectedClass.academicYearName);
+    const baseYear = normalizeAcademicYear(selectedClass.academicYearName || selectedClass.academicYearId);
+    const attNum = entry.attendanceScore !== '' && entry.attendanceScore != null ? Number(entry.attendanceScore) : null;
+    const midNum = entry.midtermScore !== '' && entry.midtermScore != null ? Number(entry.midtermScore) : null;
+    const finNum = entry.finalExamScore !== '' && entry.finalExamScore != null ? Number(entry.finalExamScore) : null;
 
     try {
       if (entry.gradeId) {
@@ -346,6 +455,9 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
           gradeId: Number(entry.gradeId),
           semester: baseSemester,
           studyPhase: 'PHASE_1',
+          attendanceScore: attNum,
+          midtermScore: midNum,
+          finalExamScore: finNum,
           scoreScale10: calc.score10,
         };
         const res = await gradeApi.update(entry.gradeId, updatePayload);
@@ -361,10 +473,13 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       } else {
         const createPayload = {
           studentId: st.studentId,
-          subjectId: selectedClass.subjectId || 'IT001',
+          subjectId: selectedClass.subjectId,
           semester: baseSemester,
           academicYear: baseYear,
           studyPhase: 'PHASE_1',
+          attendanceScore: attNum,
+          midtermScore: midNum,
+          finalExamScore: finNum,
           scoreScale10: calc.score10,
         };
         const res = await gradeApi.create(createPayload);
@@ -403,17 +518,20 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       ''
     ];
 
-    const headers = ['Mã Sinh Viên', 'Họ Và Tên', 'Giới Tính', 'Lớp Hành Chính', 'Buổi 1', 'Buổi 2', 'Buổi 3', 'Buổi 4', 'Buổi 5', 'Ghi Chú'];
+    const headers = ['Mã Sinh Viên', 'Họ Và Tên', 'Giới Tính', 'Lớp Hành Chính', 'Điểm Chuyên Cần', 'Trạng Thái Dự Thi', 'Ghi Chú'];
     const rows = students.map((st) => {
       const entry = gradeSheet[st.studentId];
       const att = entry?.attendanceScore !== '' && entry?.attendanceScore != null ? Number(entry.attendanceScore) : null;
-      const note = att !== null && att < 5 ? 'Cảnh báo vắng nhiều' : 'Đủ điều kiện dự thi';
+      const status = att !== null && att < 5 ? 'Cảnh báo vắng nhiều' : 'Đủ điều kiện dự thi';
+      const note = att !== null && att < 5 ? 'Cần bổ sung điều kiện hoặc học lại' : 'Bình thường';
       return [
         `"${st.studentId}"`,
         `"${st.fullName}"`,
         `"${msg.enum.gender[st.gender] || st.gender || 'Nam'}"`,
-        `"${st.className || st.classId || 'CNTT'}"`,
-        'V', 'V', 'V', 'V', 'V', `"${note}"`
+        `"${st.className || st.classId || 'Chưa xếp lớp'}"`,
+        att !== null ? att : '""',
+        `"${status}"`,
+        `"${note}"`
       ];
     });
 
@@ -474,7 +592,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
         idx + 1,
         `"${st.studentId}"`,
         `"${st.fullName}"`,
-        `"${st.className || st.classId || 'CNTT'}"`,
+        `"${st.className || st.classId || 'Chưa xếp lớp'}"`,
         entry.attendanceScore ?? '',
         entry.midtermScore ?? '',
         entry.finalExamScore ?? '',
@@ -540,6 +658,37 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
   const gradeProgressPercent = students.length > 0 
     ? Math.round((totalGradedCount / students.length) * 100) 
     : 0;
+
+  const gradeStats = React.useMemo(() => {
+    const weights = getWeights(selectedClass);
+    let totalGraded = 0;
+    let totalPassed = 0;
+    let sumScore = 0;
+    const distribution = { A: 0, BPlus: 0, B: 0, CPlus: 0, C: 0, DPlus: 0, D: 0, F: 0 };
+
+    students.forEach(st => {
+      const entry = gradeSheet[st.studentId];
+      const calc = calculateFinalScore(entry, weights);
+      if (calc.isComplete && calc.score10 != null) {
+        totalGraded++;
+        sumScore += calc.score10;
+        if (calc.score10 >= 4.0) totalPassed++;
+        if (calc.letterGrade === 'A') distribution.A++;
+        else if (calc.letterGrade === 'B+') distribution.BPlus++;
+        else if (calc.letterGrade === 'B') distribution.B++;
+        else if (calc.letterGrade === 'C+') distribution.CPlus++;
+        else if (calc.letterGrade === 'C') distribution.C++;
+        else if (calc.letterGrade === 'D+') distribution.DPlus++;
+        else if (calc.letterGrade === 'D') distribution.D++;
+        else if (calc.letterGrade === 'F') distribution.F++;
+      }
+    });
+
+    const avgScore = totalGraded > 0 ? (sumScore / totalGraded).toFixed(2) : '--';
+    const passRate = totalGraded > 0 ? Math.round((totalPassed / totalGraded) * 100) : 0;
+
+    return { totalGraded, totalPassed, avgScore, passRate, distribution };
+  }, [students, gradeSheet, selectedClass]);
 
   return (
     <div className="h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-white overflow-hidden">
@@ -825,18 +974,18 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                                     {s.subjectName || s.creditClassName || `Lớp #${s.creditClassId}`}
                                   </span>
                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-800 text-slate-300 shrink-0">
-                                    {msg.enum.shift[s.classShift] || s.classShift || s.studyTime || 'Ca Sáng'}
+                                    {msg.enum.shift[s.classShift] || s.classShift || 'Ca học'}
                                   </span>
                                 </div>
 
                                 <div className="space-y-1 text-[11px] text-slate-400">
                                   <div className="flex items-center gap-1.5">
                                     <Clock className="h-3 w-3 text-emerald-400 shrink-0" />
-                                    <span>{s.studyTime || `${s.startDate || '07:30'} - ${s.endDate || '11:00'}`}</span>
+                                    <span>{s.studyTime || (s.startDate && s.endDate ? `${s.startDate} - ${s.endDate}` : 'Thời gian thông báo sau')}</span>
                                   </div>
                                   <div className="flex items-center gap-1.5">
                                     <MapPin className="h-3 w-3 text-cyan-400 shrink-0" />
-                                    <span>{s.roomName || s.roomId || 'Phòng Học B2-104'}</span>
+                                    <span>{s.roomName || (s.roomId ? `Phòng ${s.roomId}` : 'Chưa xếp phòng')}</span>
                                   </div>
                                 </div>
                               </div>
@@ -1003,19 +1152,31 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                             </td>
                           </tr>
                         ) : (
-                          filteredStudents.map((st) => (
-                            <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
-                              <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
-                              <td className="px-5 py-3 font-semibold text-white truncate max-w-[180px] sm:max-w-[240px]" title={st.fullName}>{st.fullName}</td>
-                              <td className="px-5 py-3 text-slate-400 capitalize">{msg.enum.gender[st.gender] || st.gender || 'Nam'}</td>
-                              <td className="px-5 py-3 text-slate-300">{st.className || st.classId || 'CNTT-K65'}</td>
-                              <td className="px-5 py-3">
-                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
-                                  <CheckCheck className="h-3 w-3" /> Đủ điều kiện dự thi
-                                </span>
-                              </td>
-                            </tr>
-                          ))
+                          filteredStudents.map((st) => {
+                            const entry = gradeSheet[st.studentId];
+                            const attScore = entry?.attendanceScore !== '' && entry?.attendanceScore != null ? Number(entry.attendanceScore) : null;
+                            const isWarning = attScore !== null && attScore < 5.0;
+
+                            return (
+                              <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
+                                <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
+                                <td className="px-5 py-3 font-semibold text-white truncate max-w-[180px] sm:max-w-[240px]" title={st.fullName}>{st.fullName}</td>
+                                <td className="px-5 py-3 text-slate-400 capitalize">{msg.enum.gender[st.gender] || st.gender || 'Nam'}</td>
+                                <td className="px-5 py-3 text-slate-300">{st.className || st.classId || 'Chưa xếp lớp'}</td>
+                                <td className="px-5 py-3">
+                                  {isWarning ? (
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                                      <AlertCircle className="h-3 w-3" /> Cảnh báo vắng nhiều (CC: {attScore})
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                      <CheckCheck className="h-3 w-3" /> {attScore !== null ? `Đủ điều kiện (CC: ${attScore})` : 'Đủ điều kiện dự thi'}
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
                         )}
                       </tbody>
                     </table>
@@ -1042,7 +1203,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                       value={selectedClass?.creditClassId || ''}
                       onChange={(e) => {
                         const found = classes.find(c => String(c.creditClassId) === e.target.value);
-                        if (found) handleSelectClass(found);
+                        if (found) handleSelectClassSafe(found);
                       }}
                       className="bg-slate-900 border border-slate-800 rounded-lg text-xs font-semibold text-white px-3 py-2 focus:outline-none focus:border-emerald-500 transition"
                     >
@@ -1089,6 +1250,15 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                     </div>
 
                     <button
+                      onClick={handleQuickFillAttendance}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600/20 border border-indigo-500/30 hover:bg-indigo-600/30 text-xs font-semibold text-indigo-300 transition active:scale-95"
+                      title="Điền nhanh điểm chuyên cần 10 cho toàn bộ sinh viên chưa có điểm"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      <span>Điền nhanh CC 10</span>
+                    </button>
+
+                    <button
                       onClick={handleExportGrades}
                       className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600/20 border border-emerald-500/30 hover:bg-emerald-600/30 text-xs font-semibold text-emerald-300 transition active:scale-95"
                     >
@@ -1104,6 +1274,42 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                       <Save className={`h-4 w-4 ${saving ? 'animate-spin' : ''}`} />
                       <span>Lưu Toàn Bộ Điểm</span>
                     </button>
+                  </div>
+                </div>
+
+                {/* 📊 THỐNG KÊ PHỔ ĐIỂM & TỶ LỆ ĐẠT CỦA LỚP */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 p-3 bg-slate-900/40 border-b border-slate-800 text-xs">
+                  <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 text-center">
+                    <div className="text-[10px] text-slate-400 uppercase font-semibold">Đã chấm</div>
+                    <div className="text-sm font-black text-white">{gradeStats.totalGraded}/{students.length}</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 text-center">
+                    <div className="text-[10px] text-slate-400 uppercase font-semibold">Tỷ lệ đạt</div>
+                    <div className={`text-sm font-black ${gradeStats.passRate >= 80 ? 'text-emerald-400' : gradeStats.passRate >= 50 ? 'text-amber-400' : 'text-rose-400'}`}>{gradeStats.passRate}%</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 text-center">
+                    <div className="text-[10px] text-slate-400 uppercase font-semibold">ĐTB lớp</div>
+                    <div className="text-sm font-black text-cyan-400">{gradeStats.avgScore}</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 text-center">
+                    <div className="text-[10px] text-emerald-400 uppercase font-semibold">Điểm A</div>
+                    <div className="text-sm font-black text-emerald-400">{gradeStats.distribution.A}</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 text-center">
+                    <div className="text-[10px] text-indigo-400 uppercase font-semibold">Điểm B/B+</div>
+                    <div className="text-sm font-black text-indigo-400">{gradeStats.distribution.B + gradeStats.distribution.BPlus}</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 text-center">
+                    <div className="text-[10px] text-cyan-400 uppercase font-semibold">Điểm C/C+</div>
+                    <div className="text-sm font-black text-cyan-400">{gradeStats.distribution.C + gradeStats.distribution.CPlus}</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 text-center">
+                    <div className="text-[10px] text-amber-400 uppercase font-semibold">Điểm D/D+</div>
+                    <div className="text-sm font-black text-amber-400">{gradeStats.distribution.D + gradeStats.distribution.DPlus}</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 text-center">
+                    <div className="text-[10px] text-rose-400 uppercase font-semibold">Điểm F</div>
+                    <div className="text-sm font-black text-rose-400">{gradeStats.distribution.F}</div>
                   </div>
                 </div>
 
@@ -1132,7 +1338,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                               </td>
                             </tr>
                           ) : (
-                            filteredStudents.map((st) => {
+                            filteredStudents.map((st, idx) => {
                               const entry = gradeSheet[st.studentId] || {};
                               const calc = calculateFinalScore(entry, currentWeights);
 
@@ -1142,35 +1348,44 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                                   <td className="px-5 py-3 font-semibold text-white truncate max-w-[180px] sm:max-w-[240px]" title={st.fullName}>{st.fullName}</td>
                                   <td className="px-5 py-3 text-center">
                                     <input
-                                      type="number"
-                                      step="0.1"
-                                      min="0"
-                                      max="10"
+                                      type="text"
+                                      inputMode="decimal"
+                                      data-field="attendanceScore"
+                                      data-idx={idx}
                                       value={entry.attendanceScore ?? ''}
                                       onChange={(e) => handleGradeChange(st.studentId, 'attendanceScore', e.target.value)}
-                                      className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                                      onBlur={() => handleGradeBlur(st.studentId, 'attendanceScore')}
+                                      onKeyDown={(e) => handleGradeKeyDown(e, idx, 'attendanceScore')}
+                                      placeholder="--"
+                                      className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono transition"
                                     />
                                   </td>
                                   <td className="px-5 py-3 text-center">
                                     <input
-                                      type="number"
-                                      step="0.1"
-                                      min="0"
-                                      max="10"
+                                      type="text"
+                                      inputMode="decimal"
+                                      data-field="midtermScore"
+                                      data-idx={idx}
                                       value={entry.midtermScore ?? ''}
                                       onChange={(e) => handleGradeChange(st.studentId, 'midtermScore', e.target.value)}
-                                      className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                                      onBlur={() => handleGradeBlur(st.studentId, 'midtermScore')}
+                                      onKeyDown={(e) => handleGradeKeyDown(e, idx, 'midtermScore')}
+                                      placeholder="--"
+                                      className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono transition"
                                     />
                                   </td>
                                   <td className="px-5 py-3 text-center">
                                     <input
-                                      type="number"
-                                      step="0.1"
-                                      min="0"
-                                      max="10"
+                                      type="text"
+                                      inputMode="decimal"
+                                      data-field="finalExamScore"
+                                      data-idx={idx}
                                       value={entry.finalExamScore ?? ''}
                                       onChange={(e) => handleGradeChange(st.studentId, 'finalExamScore', e.target.value)}
-                                      className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                                      onBlur={() => handleGradeBlur(st.studentId, 'finalExamScore')}
+                                      onKeyDown={(e) => handleGradeKeyDown(e, idx, 'finalExamScore')}
+                                      placeholder="--"
+                                      className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono transition"
                                     />
                                   </td>
                                   <td className="px-5 py-3 text-center font-mono font-bold text-white text-sm">

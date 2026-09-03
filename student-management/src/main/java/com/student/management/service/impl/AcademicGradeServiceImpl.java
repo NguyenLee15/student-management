@@ -94,6 +94,18 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
             throw new IllegalArgumentException("Điểm số đã tồn tại cho môn học, học kỳ, niên khóa và giai đoạn này.");
         }
 
+        // Nếu scoreScale10 chưa truyền nhưng có đủ 3 điểm thành phần thì tự động tính toán
+        if (dto.getScoreScale10() == null && dto.getAttendanceScore() != null && dto.getMidtermScore() != null && dto.getFinalExamScore() != null) {
+            BigDecimal wAtt = subject.getAttendanceWeight() != null ? subject.getAttendanceWeight() : new BigDecimal("0.10");
+            BigDecimal wMid = subject.getMidtermWeight() != null ? subject.getMidtermWeight() : new BigDecimal("0.30");
+            BigDecimal wFin = subject.getFinalExamWeight() != null ? subject.getFinalExamWeight() : new BigDecimal("0.60");
+            BigDecimal calculated10 = dto.getAttendanceScore().multiply(wAtt)
+                    .add(dto.getMidtermScore().multiply(wMid))
+                    .add(dto.getFinalExamScore().multiply(wFin))
+                    .setScale(1, java.math.RoundingMode.HALF_UP);
+            dto.setScoreScale10(calculated10);
+        }
+
         // Tự động quy đổi điểm chuẩn Thông tư 08/2021/TT-BGDĐT nếu chưa điền
         if (dto.getLetterGrade() == null || dto.getLetterGrade().isBlank()) {
             dto.setLetterGrade(GradeCalculationUtils.determineLetterGrade(dto.getScoreScale10()));
@@ -114,11 +126,28 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
 
         grade.setSemester(dto.getSemester());
         grade.setStudyPhase(dto.getStudyPhase());
-        grade.setScoreScale10(dto.getScoreScale10());
+
+        if (dto.getAttendanceScore() != null) grade.setAttendanceScore(dto.getAttendanceScore());
+        if (dto.getMidtermScore() != null) grade.setMidtermScore(dto.getMidtermScore());
+        if (dto.getFinalExamScore() != null) grade.setFinalExamScore(dto.getFinalExamScore());
+
+        if (dto.getScoreScale10() != null) {
+            grade.setScoreScale10(dto.getScoreScale10());
+        } else if (grade.getAttendanceScore() != null && grade.getMidtermScore() != null && grade.getFinalExamScore() != null && grade.getSubject() != null) {
+            Subject subj = grade.getSubject();
+            BigDecimal wAtt = subj.getAttendanceWeight() != null ? subj.getAttendanceWeight() : new BigDecimal("0.10");
+            BigDecimal wMid = subj.getMidtermWeight() != null ? subj.getMidtermWeight() : new BigDecimal("0.30");
+            BigDecimal wFin = subj.getFinalExamWeight() != null ? subj.getFinalExamWeight() : new BigDecimal("0.60");
+            BigDecimal calculated10 = grade.getAttendanceScore().multiply(wAtt)
+                    .add(grade.getMidtermScore().multiply(wMid))
+                    .add(grade.getFinalExamScore().multiply(wFin))
+                    .setScale(1, java.math.RoundingMode.HALF_UP);
+            grade.setScoreScale10(calculated10);
+        }
 
         String letterGrade = (dto.getLetterGrade() != null && !dto.getLetterGrade().isBlank())
                 ? dto.getLetterGrade()
-                : GradeCalculationUtils.determineLetterGrade(dto.getScoreScale10());
+                : GradeCalculationUtils.determineLetterGrade(grade.getScoreScale10());
         BigDecimal scoreScale4 = dto.getScoreScale4() != null
                 ? dto.getScoreScale4()
                 : GradeCalculationUtils.determineScoreScale4(letterGrade);

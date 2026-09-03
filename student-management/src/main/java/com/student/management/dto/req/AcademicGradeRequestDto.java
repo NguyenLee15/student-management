@@ -43,6 +43,18 @@ public class AcademicGradeRequestDto {
     @DecimalMax(value = "4.0", inclusive = true, message = "Scale 4 score must be <= 4")
     private BigDecimal scoreScale4;
 
+    @DecimalMin(value = "0.0", inclusive = true, message = "Attendance score must be >= 0")
+    @DecimalMax(value = "10.0", inclusive = true, message = "Attendance score must be <= 10")
+    private BigDecimal attendanceScore;
+
+    @DecimalMin(value = "0.0", inclusive = true, message = "Midterm score must be >= 0")
+    @DecimalMax(value = "10.0", inclusive = true, message = "Midterm score must be <= 10")
+    private BigDecimal midtermScore;
+
+    @DecimalMin(value = "0.0", inclusive = true, message = "Final exam score must be >= 0")
+    @DecimalMax(value = "10.0", inclusive = true, message = "Final exam score must be <= 10")
+    private BigDecimal finalExamScore;
+
     private String letterGrade;
 }
 

@@ -66,6 +66,21 @@ public class AcademicGrade extends BaseEntity {
     @Column(name = "score_scale_4", precision = 3, scale = 1)
     private BigDecimal scoreScale4;
 
+    @DecimalMin(value = "0.0", inclusive = true, message = "Attendance score must be >= 0")
+    @DecimalMax(value = "10.0", inclusive = true, message = "Attendance score must be <= 10")
+    @Column(name = "attendance_score", precision = 3, scale = 1)
+    private BigDecimal attendanceScore;
+
+    @DecimalMin(value = "0.0", inclusive = true, message = "Midterm score must be >= 0")
+    @DecimalMax(value = "10.0", inclusive = true, message = "Midterm score must be <= 10")
+    @Column(name = "midterm_score", precision = 3, scale = 1)
+    private BigDecimal midtermScore;
+
+    @DecimalMin(value = "0.0", inclusive = true, message = "Final exam score must be >= 0")
+    @DecimalMax(value = "10.0", inclusive = true, message = "Final exam score must be <= 10")
+    @Column(name = "final_exam_score", precision = 3, scale = 1)
+    private BigDecimal finalExamScore;
+
     @Column(name = "letter_grade", nullable = false, length = 5)
     private String letterGrade;
 }

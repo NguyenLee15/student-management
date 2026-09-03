@@ -26,5 +26,8 @@ public class AcademicGradeResponseDto {
     private BigDecimal scoreScale10;
     private BigDecimal scoreScale4;
     private String letterGrade;
+    private BigDecimal attendanceScore;
+    private BigDecimal midtermScore;
+    private BigDecimal finalExamScore;
 }
 

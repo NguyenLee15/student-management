@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "semester_schedules", 
        uniqueConstraints = @UniqueConstraint(
-           columnNames = {"credit_class_id", "subject_id", "semester", "academic_year", "teacher_id", "room_id", "class_shift"}))
+           columnNames = {"credit_class_id", "subject_id", "semester", "academic_year", "teacher_id", "classroom_id", "class_shift"}))
 @SQLRestriction("deleted = false")
 @Data
 @lombok.EqualsAndHashCode(callSuper = true)

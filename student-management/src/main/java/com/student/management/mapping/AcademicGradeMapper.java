@@ -23,6 +23,9 @@ public class AcademicGradeMapper {
                 .scoreScale10(dto.getScoreScale10())
                 .scoreScale4(dto.getScoreScale4())
                 .letterGrade(dto.getLetterGrade())
+                .attendanceScore(dto.getAttendanceScore())
+                .midtermScore(dto.getMidtermScore())
+                .finalExamScore(dto.getFinalExamScore())
                 .build();
     }
 
@@ -40,6 +43,9 @@ public class AcademicGradeMapper {
                 .scoreScale10(grade.getScoreScale10())
                 .scoreScale4(grade.getScoreScale4())
                 .letterGrade(grade.getLetterGrade())
+                .attendanceScore(grade.getAttendanceScore())
+                .midtermScore(grade.getMidtermScore())
+                .finalExamScore(grade.getFinalExamScore())
                 .build();
     }
 
