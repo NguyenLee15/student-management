@@ -141,7 +141,7 @@ export default function RegistrationCartDrawer({
                         <span>{item.roomName || 'Chưa xếp phòng'}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-blue-700 font-semibold">
-                        <span>{((item.unitPrice || 450000) * (item.credits || 3)).toLocaleString('vi-VN')} đ</span>
+                        <span>{((item.unitPrice || item.tuitionPerCredit || item.pricePerCredit || 500000) * (item.credits || 3)).toLocaleString('vi-VN')} đ</span>
                       </div>
                     </div>
                   </div>

@@ -141,8 +141,8 @@ export default function TuitionLedgerView({ onNavigateTab }) {
             onChange={(e) => setSelectedSemester(Number(e.target.value))}
             className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           >
-            <option value={1}>Học kỳ 1</option>
-            <option value={2}>Học kỳ 2</option>
+            <option value={1}>Học kỳ 1 (2026-2027)</option>
+            <option value={2}>Học kỳ 2 (2026-2027)</option>
           </select>
         </div>
       </div>

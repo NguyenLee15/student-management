@@ -2,6 +2,7 @@ import { msg } from '../../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, User, Download, Printer, RefreshCw } from 'lucide-react';
 import { studentPortalApi } from '../../../api';
+import Skeleton from '../../../components/common/Skeleton';
 
 export default function MatrixTimetableView() {
   const [timetable, setTimetable] = useState([]);
@@ -104,7 +105,16 @@ export default function MatrixTimetableView() {
       ].join(',');
     });
 
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const metaBlock = [
+      `"TRƯỜNG ĐẠI HỌC CÔNG NGHỆ & ĐÀO TẠO"`,
+      `"THỜI KHÓA BIỂU HỌC TẬP CÁ NHÂN"`,
+      `"Học kỳ: Học kỳ ${selectedSemester} - Năm học: 2026-2027"`,
+      `"Tổng số lớp học phần: ${timetable.length}"`,
+      `"Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}"`,
+      ''
+    ];
+
+    const csvContent = '\uFEFF' + [...metaBlock, headers.join(','), ...rows].join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -162,66 +172,90 @@ export default function MatrixTimetableView() {
         </div>
       </div>
 
-      {/* Timetable Matrix Grid */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse min-w-[850px]">
-            <thead>
-              <tr className="bg-slate-900 text-white text-xs font-bold uppercase">
-                <th className="p-3.5 border-r border-slate-800 w-36 text-center">Ca / Khung Giờ</th>
-                {daysOfWeek.map((day) => (
-                  <th key={day} className="p-3.5 border-r border-slate-800 last:border-r-0 text-center">
-                    {day}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {timeSlots.map((slot, sIdx) => (
-                <tr key={sIdx} className="hover:bg-slate-50/50">
-                  <td className="p-3 bg-slate-50 border-r border-slate-200 text-center space-y-0.5">
-                    <div className="font-bold text-xs text-slate-800">{slot.label}</div>
-                    <div className="text-[11px] text-slate-400 font-mono flex items-center justify-center gap-1">
-                      <Clock className="w-3 h-3 text-slate-400" />
-                      {slot.time}
-                    </div>
-                  </td>
-
-                  {daysOfWeek.map((day, dIdx) => {
-                    const entries = getEntriesForCell(day, slot);
-
-                    return (
-                      <td
-                        key={dIdx}
-                        className="p-2 border-r border-slate-200 last:border-r-0 align-top h-24 w-1/7 bg-slate-50/20"
-                      >
-                        {entries.map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="p-2.5 bg-gradient-to-br from-blue-50 to-indigo-50 border-l-4 border-blue-600 rounded-lg shadow-xs space-y-1 hover:shadow-md transition-all"
-                          >
-                            <div className="font-black text-xs text-blue-900 line-clamp-1">
-                              {item.subjectName}
-                            </div>
-                            <div className="text-[11px] text-blue-700 font-semibold flex items-center gap-1">
-                              <MapPin className="w-3 h-3 text-blue-500 flex-shrink-0" />
-                              <span className="truncate">{item.roomName || 'Chưa xếp phòng'}</span>
-                            </div>
-                            <div className="text-[10px] text-slate-500 flex items-center gap-1">
-                              <User className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                              <span className="truncate">{item.teacherName || 'Chưa phân công'}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Timetable Content */}
+      {loading ? (
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-6 w-32" />
+          </div>
+          <div className="space-y-3">
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-20 w-full rounded-xl" />
+            <Skeleton className="h-20 w-full rounded-xl" />
+            <Skeleton className="h-20 w-full rounded-xl" />
+            <Skeleton className="h-20 w-full rounded-xl" />
+          </div>
         </div>
-      </div>
+      ) : timetable.length === 0 ? (
+        <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400 space-y-3 shadow-sm">
+          <Calendar className="w-12 h-12 mx-auto stroke-1 text-slate-300" />
+          <p className="text-base font-bold text-slate-700">Chưa có lịch học nào trong học kỳ này</p>
+          <p className="text-xs text-slate-400 max-w-md mx-auto">
+            Thời khóa biểu các môn học sẽ tự động hiển thị sau khi bạn hoàn tất đăng ký học phần hoặc khi phòng Đào tạo phân bổ thời gian học.
+          </p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[850px]">
+              <thead>
+                <tr className="bg-slate-900 text-white text-xs font-bold uppercase">
+                  <th className="p-3.5 border-r border-slate-800 w-36 text-center">Ca / Khung Giờ</th>
+                  {daysOfWeek.map((day) => (
+                    <th key={day} className="p-3.5 border-r border-slate-800 last:border-r-0 text-center">
+                      {day}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {timeSlots.map((slot, sIdx) => (
+                  <tr key={sIdx} className="hover:bg-slate-50/50">
+                    <td className="p-3 bg-slate-50 border-r border-slate-200 text-center space-y-0.5">
+                      <div className="font-bold text-xs text-slate-800">{slot.label}</div>
+                      <div className="text-[11px] text-slate-400 font-mono flex items-center justify-center gap-1">
+                        <Clock className="w-3 h-3 text-slate-400" />
+                        {slot.time}
+                      </div>
+                    </td>
+
+                    {daysOfWeek.map((day, dIdx) => {
+                      const entries = getEntriesForCell(day, slot);
+
+                      return (
+                        <td
+                          key={dIdx}
+                          className="p-2 border-r border-slate-200 last:border-r-0 align-top h-24 w-1/7 bg-slate-50/20"
+                        >
+                          {entries.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="p-2.5 bg-gradient-to-br from-blue-50 to-indigo-50 border-l-4 border-blue-600 rounded-lg shadow-xs space-y-1 hover:shadow-md transition-all"
+                            >
+                              <div className="font-black text-xs text-blue-900 line-clamp-1">
+                                {item.subjectName}
+                              </div>
+                              <div className="text-[11px] text-blue-700 font-semibold flex items-center gap-1">
+                                <MapPin className="w-3 h-3 text-blue-500 flex-shrink-0" />
+                                <span className="truncate">{item.roomName || 'Chưa xếp phòng'}</span>
+                              </div>
+                              <div className="text-[10px] text-slate-500 flex items-center gap-1">
+                                <User className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                                <span className="truncate">{item.teacherName || 'Chưa phân công'}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

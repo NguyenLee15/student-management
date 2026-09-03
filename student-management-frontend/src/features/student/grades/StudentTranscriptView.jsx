@@ -94,7 +94,18 @@ export default function StudentTranscriptView({ currentUser }) {
       ].join(',');
     });
 
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const metaBlock = [
+      `"TRƯỜNG ĐẠI HỌC CÔNG NGHỆ & ĐÀO TẠO"`,
+      `"BẢNG ĐIỂM TỔNG HỢP KẾT QUẢ HỌC TẬP"`,
+      `"Họ và tên sinh viên: ${(overview?.fullName || currentUser?.fullName || 'Sinh viên').replace(/"/g, '""')}"`,
+      `"Mã sinh viên: ${overview?.studentId || currentUser?.studentId || 'SV'}"`,
+      `"Lớp danh nghĩa: ${overview?.className || 'Chưa xếp lớp'} | Khoa: ${overview?.facultyName || 'Công nghệ thông tin'}"`,
+      `"Tổng tín chỉ tích lũy: ${transcript?.totalCreditsEarned ?? overview?.totalAccumulatedCredits ?? 0} TC | GPA Hệ 10: ${transcript?.cumulativeGpa10 ?? overview?.cumulativeGpa10 ?? '0.00'} | GPA Hệ 4: ${transcript?.cumulativeGpa4 ?? overview?.cumulativeGpa4 ?? '0.00'}"`,
+      `"Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}"`,
+      ''
+    ];
+
+    const csvContent = '\uFEFF' + [...metaBlock, headers.join(','), ...rows].join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
