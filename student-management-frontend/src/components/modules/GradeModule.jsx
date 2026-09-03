@@ -1,6 +1,6 @@
 import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, Award, Download, RefreshCw, Calculator, CheckCircle2 } from 'lucide-react';
+import { Plus, Edit3, Trash2, Award, Download, RefreshCw, Calculator, CheckCircle2, Search, X } from 'lucide-react';
 import { gradeApi, studentApi, subjectApi } from '../../api';
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
@@ -168,14 +168,25 @@ export default function GradeModule({ onNotify, currentUser }) {
 
       {/* Filter Bar */}
       <div className="panel-card p-4 flex flex-wrap items-center gap-3">
-        <input
-          type="text"
-          placeholder="Tìm theo mã sinh viên (VD: SV001)..."
-          value={studentSearch}
-          onChange={(e) => setStudentsSearch(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') { setPage(0); loadGrades(); } }}
-          className="px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-purple-500 min-w-[220px]"
-        />
+        <div className="relative flex items-center min-w-[240px]">
+          <input
+            type="text"
+            placeholder="Tìm theo mã sinh viên (VD: SV001)..."
+            value={studentSearch}
+            onChange={(e) => setStudentsSearch(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { setPage(0); loadGrades(); } }}
+            className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-purple-500 pr-8"
+          />
+          {studentSearch && (
+            <button
+              onClick={() => { setStudentsSearch(''); setPage(0); }}
+              className="absolute right-2.5 text-slate-500 hover:text-slate-300 transition"
+              title="Xóa tìm kiếm"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
 
         <select
           value={selectedSemester}
@@ -188,8 +199,17 @@ export default function GradeModule({ onNotify, currentUser }) {
         </select>
 
         <button
+          onClick={() => { setPage(0); loadGrades(); }}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition active:scale-95"
+        >
+          <Search className="w-3.5 h-3.5" />
+          <span>Tìm kiếm</span>
+        </button>
+
+        <button
           onClick={loadGrades}
           className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition ml-auto"
+          title="Tải lại bảng điểm"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-purple-400' : ''}`} />
         </button>

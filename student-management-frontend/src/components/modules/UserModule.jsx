@@ -56,17 +56,19 @@ export default function UserModule({ onNotify }) {
       onNotify('error', 'Tên đăng nhập phải có ít nhất 3 ký tự.');
       return;
     }
-    if (!formData.password || formData.password.length < 6) {
-      onNotify('error', 'Mật khẩu phải có ít nhất 6 ký tự.');
+    if (!formData.password || formData.password.length < 8) {
+      onNotify('error', 'Mật khẩu phải có ít nhất 8 ký tự.');
       return;
     }
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      onNotify('error', 'Địa chỉ email không đúng định dạng.');
-      return;
-    }
+    const payload = {
+      userName: formData.userName.trim(),
+      password: formData.password,
+      role: formData.role,
+      studentId: formData.role === 'ROLE_STUDENT' ? (formData.studentId?.trim() || null) : null,
+    };
     try {
-      await userApi.create(formData);
-      onNotify('success', msg.success.created('tài khoản', formData.userName));
+      await userApi.create(payload);
+      onNotify('success', msg.success.created('tài khoản', payload.userName));
       setShowModal(false);
       loadUsers();
     } catch (err) {

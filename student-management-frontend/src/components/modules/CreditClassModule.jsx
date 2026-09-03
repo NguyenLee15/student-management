@@ -91,9 +91,9 @@ export default function CreditClassModule({ onNotify, currentUser }) {
     setSelectedClass(cc);
     setShowStudentsModal(true);
     try {
-      const res = await creditClassApi.getById(cc.creditClassId);
+      const res = await creditClassApi.getStudents(cc.creditClassId);
       const data = res.data || res;
-      setEnrolledStudents(data.students || []);
+      setEnrolledStudents(Array.isArray(data) ? data : []);
     } catch (e) {
       setEnrolledStudents([]);
     }

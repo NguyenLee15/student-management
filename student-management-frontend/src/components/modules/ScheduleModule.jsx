@@ -6,6 +6,14 @@ import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 import Pagination from '../common/Pagination';
 
+const SHIFT_CONFIGS = {
+  'SHIFT_1': { classShift: 'MORNING', label: 'Ca 1 (Tiết 1-3: 07:00 - 09:15)', period: 'Tiết 1-3 (07:00 - 09:15)' },
+  'SHIFT_2': { classShift: 'MORNING', label: 'Ca 2 (Tiết 4-6: 09:30 - 11:45)', period: 'Tiết 4-6 (09:30 - 11:45)' },
+  'SHIFT_3': { classShift: 'AFTERNOON', label: 'Ca 3 (Tiết 7-9: 13:00 - 15:15)', period: 'Tiết 7-9 (13:00 - 15:15)' },
+  'SHIFT_4': { classShift: 'AFTERNOON', label: 'Ca 4 (Tiết 10-12: 15:30 - 17:45)', period: 'Tiết 10-12 (15:30 - 17:45)' },
+  'SHIFT_5': { classShift: 'EVENING', label: 'Ca 5 (Tiết 13-15: 18:00 - 20:15)', period: 'Tiết 13-15 (18:00 - 20:15)' },
+};
+
 export default function ScheduleModule({ onNotify, currentUser }) {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
 
@@ -29,12 +37,14 @@ export default function ScheduleModule({ onNotify, currentUser }) {
   const initialForm = {
     scheduleId: null,
     creditClassId: '',
+    subjectId: '',
     teacherId: '',
     roomId: '',
     semester: 'SEMESTER_1',
     academicYear: '2025-2026',
     dayOfWeek: 2, // Monday
-    classShift: 'SHIFT_1', // Morning 07:00 - 09:15
+    classShift: 'SHIFT_1', // Shift key
+    studyTime: '',
     startDate: '2025-09-01',
     endDate: '2025-12-30',
   };
@@ -103,6 +113,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
     setFormData({
       ...initialForm,
       creditClassId: creditClasses[0]?.creditClassId || '',
+      subjectId: creditClasses[0]?.subjectId || '',
       teacherId: teachers[0]?.teacherId || '',
       roomId: classrooms[0]?.roomId || '',
     });
@@ -114,12 +125,14 @@ export default function ScheduleModule({ onNotify, currentUser }) {
     setFormData({
       scheduleId: s.scheduleId,
       creditClassId: s.creditClassId || '',
+      subjectId: s.subjectId || '',
       teacherId: s.teacherId || '',
       roomId: s.roomId || '',
       semester: s.semester || 'SEMESTER_1',
       academicYear: s.academicYear || '2025-2026',
       dayOfWeek: s.dayOfWeek || 2,
-      classShift: s.classShift || 'SHIFT_1',
+      classShift: s.classShift?.startsWith('SHIFT_') ? s.classShift : 'SHIFT_1',
+      studyTime: s.studyTime || '',
       startDate: s.startDate || '2025-09-01',
       endDate: s.endDate || '2025-12-30',
     });
@@ -129,11 +142,25 @@ export default function ScheduleModule({ onNotify, currentUser }) {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
+      const selectedCc = creditClasses.find(c => String(c.creditClassId) === String(formData.creditClassId));
+      const subjectId = selectedCc?.subjectId || formData.subjectId || 'IT101';
+      const shiftCfg = SHIFT_CONFIGS[formData.classShift] || { classShift: 'MORNING', period: 'Tiết 1-3 (07:00 - 09:15)' };
+      const weekdayStr = Number(formData.dayOfWeek) === 8 ? 'Chủ Nhật' : `Thứ ${formData.dayOfWeek}`;
+      const studyTime = `${weekdayStr}, ${shiftCfg.period}`;
+
+      const payload = {
+        ...formData,
+        creditClassId: Number(formData.creditClassId),
+        subjectId,
+        studyTime,
+        classShift: shiftCfg.classShift,
+      };
+
       if (isEdit) {
-        await scheduleApi.update(formData.scheduleId, formData);
+        await scheduleApi.update(formData.scheduleId, payload);
         onNotify('success', msg.success.updated('lịch học', '#' + formData.scheduleId));
       } else {
-        await scheduleApi.create(formData);
+        await scheduleApi.create(payload);
         onNotify('success', msg.success.created('lịch học', ''));
       }
       setShowModal(false);
@@ -202,11 +229,9 @@ export default function ScheduleModule({ onNotify, currentUser }) {
           className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-teal-500 transition"
         >
           <option value="">Tất cả ca học</option>
-          <option value="SHIFT_1">Ca 1: 07:00 - 09:15 (Sáng)</option>
-          <option value="SHIFT_2">Ca 2: 09:30 - 11:45 (Sáng)</option>
-          <option value="SHIFT_3">Ca 3: 13:00 - 15:15 (Chiều)</option>
-          <option value="SHIFT_4">Ca 4: 15:30 - 17:45 (Chiều)</option>
-          <option value="SHIFT_5">Ca 5: 18:00 - 20:15 (Tối)</option>
+          <option value="MORNING">Ca Sáng (07:00 - 11:45)</option>
+          <option value="AFTERNOON">Ca Chiều (13:00 - 17:45)</option>
+          <option value="EVENING">Ca Tối (18:00 - 20:15)</option>
         </select>
 
         <button
