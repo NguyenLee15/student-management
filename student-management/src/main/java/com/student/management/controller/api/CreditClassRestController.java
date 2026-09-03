@@ -39,7 +39,12 @@ public class CreditClassRestController {
     public ResponseEntity<ApiResponse<Object>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "false") boolean unpaged) {
+            @RequestParam(defaultValue = "false") boolean unpaged,
+            @RequestParam(required = false) String teacherId) {
+
+        if (teacherId != null && !teacherId.isBlank()) {
+            return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lớp tín chỉ theo giảng viên thành công", creditClassService.getByTeacherId(teacherId)));
+        }
 
         if (unpaged) {
             return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lớp tín chỉ thành công", creditClassService.getAll()));

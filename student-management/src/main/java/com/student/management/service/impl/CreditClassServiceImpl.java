@@ -39,6 +39,12 @@ public class CreditClassServiceImpl implements CreditClassService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<CreditClassResponseDto> getByTeacherId(String teacherId) {
+        return CreditClassMapper.toDtoList(creditClassRepository.findByTeacherId(teacherId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<CreditClassResponseDto> getAll(Pageable pageable) {
         return creditClassRepository.findAll(pageable).map(CreditClassMapper::toDto);
     }

@@ -7,6 +7,8 @@ import {
   Download, ShieldCheck, Search
 } from 'lucide-react';
 import { creditClassApi, teacherApi, studentApi, gradeApi, scheduleApi } from '../api';
+import Skeleton from '../components/common/Skeleton';
+import EmptyState from '../components/common/EmptyState';
 
 const WEEKDAYS = [
   { key: 'MONDAY', label: 'Thứ Hai' },
@@ -17,6 +19,59 @@ const WEEKDAYS = [
   { key: 'SATURDAY', label: 'Thứ Bảy' },
   { key: 'SUNDAY', label: 'Chủ Nhật' },
 ];
+
+const normalizeSemesterEnum = (sem) => {
+  if (!sem) return 'SEMESTER_1';
+  if (sem === 'SEMESTER_1' || sem === 'SEMESTER_2' || sem === 'SUMMER_SEMESTER') return sem;
+  const str = String(sem).toLowerCase();
+  if (str.includes('2')) return 'SEMESTER_2';
+  if (str.includes('hè') || str.includes('he') || str.includes('phụ') || str.includes('phu') || str.includes('summer')) return 'SUMMER_SEMESTER';
+  return 'SEMESTER_1';
+};
+
+const normalizeAcademicYear = (yr) => {
+  if (!yr) return '2026-2027';
+  return String(yr).replace(/\s+/g, '').slice(0, 9);
+};
+
+const getWeights = (cls) => ({
+  att: cls?.attendanceWeight != null ? Number(cls.attendanceWeight) : 0.1,
+  mid: cls?.midtermWeight != null ? Number(cls.midtermWeight) : 0.3,
+  fin: cls?.finalExamWeight != null ? Number(cls.finalExamWeight) : 0.6,
+});
+
+const calculateFinalScore = (entry, weights) => {
+  if (!entry) return { score10: null, scoreText: '--', letterGrade: 'Chưa đủ', passedText: 'Chưa đủ điểm', isComplete: false };
+  const hasAtt = entry.attendanceScore !== '' && entry.attendanceScore != null;
+  const hasMid = entry.midtermScore !== '' && entry.midtermScore != null;
+  const hasFin = entry.finalExamScore !== '' && entry.finalExamScore != null;
+
+  if (!hasAtt || !hasMid || !hasFin) {
+    return { score10: null, scoreText: '--', letterGrade: 'Chưa đủ', passedText: 'Chưa thi đủ', isComplete: false };
+  }
+
+  const att = Number(entry.attendanceScore) || 0;
+  const mid = Number(entry.midtermScore) || 0;
+  const fin = Number(entry.finalExamScore) || 0;
+  const wAtt = weights?.att ?? 0.1;
+  const wMid = weights?.mid ?? 0.3;
+  const wFin = weights?.fin ?? 0.6;
+
+  const rawScore = (att * wAtt) + (mid * wMid) + (fin * wFin);
+  const score10 = Number(rawScore.toFixed(1));
+
+  let letterGrade = 'F';
+  if (score10 >= 8.5) letterGrade = 'A';
+  else if (score10 >= 8.0) letterGrade = 'B+';
+  else if (score10 >= 7.0) letterGrade = 'B';
+  else if (score10 >= 6.5) letterGrade = 'C+';
+  else if (score10 >= 5.5) letterGrade = 'C';
+  else if (score10 >= 5.0) letterGrade = 'D+';
+  else if (score10 >= 4.0) letterGrade = 'D';
+
+  const passedText = score10 >= 4.0 ? 'Đạt' : 'Học lại';
+  return { score10, scoreText: score10.toFixed(1), letterGrade, passedText, isComplete: true };
+};
 
 export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleSwitch }) {
   const [activeTab, setActiveTab] = useState('overview'); // overview | schedule | classes | grades | profile
@@ -45,14 +100,15 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
         const tRes = await teacherApi.getAll({ page: 0, size: 100 });
         const tData = tRes.data || tRes;
         const list = Array.isArray(tData) ? tData : (tData.content || []);
-        found = list.find(t => 
+        const matched = list.find(t => 
           t.teacherId?.toLowerCase() === currentTeacherId.toLowerCase() ||
           t.email?.toLowerCase() === currentUser?.username?.toLowerCase()
-        ) || list[0];
+        );
+        found = matched || (currentUser?.role?.includes('ADMIN') ? list[0] : null);
         setTeacherInfo(found || {
           teacherId: currentTeacherId,
           fullName: currentUser?.fullName || 'Giảng Viên',
-          email: `${currentTeacherId.toLowerCase()}@eduportal.edu.vn`,
+          email: currentUser?.email || `${currentTeacherId.toLowerCase()}@eduportal.edu.vn`,
           facultyName: 'Khoa Công Nghệ Thông Tin'
         });
       } catch (e) {
@@ -61,31 +117,50 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
 
       const activeTeacherId = found?.teacherId || currentTeacherId;
 
-      // 2. Fetch Classes assigned to this teacher
-      const res = await creditClassApi.getAll();
-      const d = res.data || res;
-      const all = Array.isArray(d) ? d : (d.content || []);
-      const myClasses = all.filter(c => 
-        c.teacherId === activeTeacherId || 
-        c.teacher?.teacherId === activeTeacherId ||
-        (found?.fullName && c.teacherName?.includes(found.fullName))
-      );
-      const displayClasses = myClasses.length > 0 ? myClasses : all.slice(0, 4);
-      setClasses(displayClasses);
+      // 2. Fetch Classes assigned to this teacher (Backend API filter with fallback)
+      let myClasses = [];
+      try {
+        const res = await creditClassApi.getAll({ teacherId: activeTeacherId });
+        const d = res.data || res;
+        myClasses = Array.isArray(d) ? d : (d.content || []);
+      } catch (e) {
+        console.warn('Lỗi khi tải lớp tín chỉ theo teacherId, thử lọc client', e);
+        const res = await creditClassApi.getAll();
+        const d = res.data || res;
+        const all = Array.isArray(d) ? d : (d.content || []);
+        myClasses = all.filter(c => 
+          c.teacherId === activeTeacherId || 
+          c.teacher?.teacherId === activeTeacherId ||
+          (found?.fullName && c.teacherName?.includes(found.fullName))
+        );
+      }
+      setClasses(myClasses);
 
-      if (displayClasses.length > 0) {
-        handleSelectClass(displayClasses[0]);
+      if (myClasses.length > 0) {
+        handleSelectClass(myClasses[0]);
+      } else {
+        setSelectedClass(null);
+        setStudents([]);
+        setGradeSheet({});
       }
 
-      // 3. Fetch Schedules for this teacher
-      const schRes = await scheduleApi.getAll({ size: 100 });
-      const schData = schRes.data || schRes;
-      const allSch = Array.isArray(schData) ? schData : (schData.content || []);
-      const mySchedules = allSch.filter(s => 
-        s.teacherId === activeTeacherId || 
-        (found?.fullName && s.teacherName?.includes(found.fullName))
-      );
-      setSchedules(mySchedules.length > 0 ? mySchedules : allSch);
+      // 3. Fetch Schedules for this teacher (Backend API filter with fallback)
+      let mySchedules = [];
+      try {
+        const schRes = await scheduleApi.getAll({ teacherId: activeTeacherId, size: 100 });
+        const schData = schRes.data || schRes;
+        mySchedules = Array.isArray(schData) ? schData : (schData.content || []);
+      } catch (se) {
+        console.warn('Lỗi khi tải lịch dạy theo teacherId, thử lọc client', se);
+        const schRes = await scheduleApi.getAll({ size: 100 });
+        const schData = schRes.data || schRes;
+        const allSch = Array.isArray(schData) ? schData : (schData.content || []);
+        mySchedules = allSch.filter(s => 
+          s.teacherId === activeTeacherId || 
+          (found?.fullName && s.teacherName?.includes(found.fullName))
+        );
+      }
+      setSchedules(mySchedules);
     } catch (err) {
       console.warn('Lỗi khi tải dữ liệu giảng viên', err);
     } finally {
@@ -110,10 +185,11 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       // 2. Load existing grades for this subject
       const initialGrades = {};
       try {
-        const activeYear = cls.academicYearId || cls.academicYearName || '2026-2027';
+        const activeYear = normalizeAcademicYear(cls.academicYearId || cls.academicYearName);
+        const normSemester = normalizeSemesterEnum(cls.semester);
         const gradeRes = await gradeApi.getAll({ 
           subjectId: cls.subjectId, 
-          semester: cls.semester, 
+          semester: normSemester, 
           academicYear: activeYear, 
           size: 100 
         });
@@ -133,9 +209,9 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
             };
           } else {
             initialGrades[s.studentId] = {
-              attendanceScore: 10,
-              midtermScore: 8,
-              finalExamScore: 8,
+              attendanceScore: '',
+              midtermScore: '',
+              finalExamScore: '',
               isSaved: false,
             };
           }
@@ -143,9 +219,9 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       } catch (ge) {
         stList.forEach((s) => {
           initialGrades[s.studentId] = {
-            attendanceScore: 10,
-            midtermScore: 8,
-            finalExamScore: 8,
+            attendanceScore: '',
+            midtermScore: '',
+            finalExamScore: '',
             isSaved: false,
           };
         });
@@ -173,18 +249,21 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     setSaving(true);
     let successCount = 0;
     let failCount = 0;
+    let skippedCount = 0;
     const updatedGrades = { ...gradeSheet };
+    const weights = getWeights(selectedClass);
 
     try {
       const promises = students.map(async (st) => {
         const entry = gradeSheet[st.studentId] || {};
-        const att = Number(entry.attendanceScore) || 0;
-        const mid = Number(entry.midtermScore) || 0;
-        const fin = Number(entry.finalExamScore) || 0;
-        const score10 = Number(((att * 0.1) + (mid * 0.3) + (fin * 0.6)).toFixed(1));
+        const calc = calculateFinalScore(entry, weights);
+        if (!calc.isComplete) {
+          skippedCount++;
+          return;
+        }
 
-        const baseSemester = selectedClass.semester || 'SEMESTER_1';
-        const baseYear = selectedClass.academicYearId || selectedClass.academicYearName || '2026-2027';
+        const baseSemester = normalizeSemesterEnum(selectedClass.semester);
+        const baseYear = normalizeAcademicYear(selectedClass.academicYearId || selectedClass.academicYearName);
 
         try {
           if (entry.gradeId) {
@@ -193,7 +272,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
               gradeId: Number(entry.gradeId),
               semester: baseSemester,
               studyPhase: 'PHASE_1',
-              scoreScale10: score10,
+              scoreScale10: calc.score10,
             };
             const res = await gradeApi.update(entry.gradeId, updatePayload);
             const savedData = res.data || res;
@@ -211,7 +290,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
               semester: baseSemester,
               academicYear: baseYear,
               studyPhase: 'PHASE_1',
-              scoreScale10: score10,
+              scoreScale10: calc.score10,
             };
             const res = await gradeApi.create(createPayload);
             const savedData = res.data || res;
@@ -232,10 +311,12 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       await Promise.all(promises);
       setGradeSheet(updatedGrades);
 
-      if (failCount === 0) {
-        onNotify('success', `Đã lưu thành công điểm cho toàn bộ ${successCount} sinh viên lớp ${selectedClass.subjectName || selectedClass.creditClassId}!`);
-      } else {
+      if (successCount > 0 && failCount === 0) {
+        onNotify('success', `Đã lưu thành công điểm cho ${successCount} sinh viên lớp ${selectedClass.subjectName || selectedClass.creditClassId}!`);
+      } else if (successCount > 0 && failCount > 0) {
         onNotify('warning', `Đã lưu thành công ${successCount} sinh viên. Thất bại: ${failCount} sinh viên.`);
+      } else if (skippedCount > 0 && successCount === 0) {
+        onNotify('info', `Có ${skippedCount} sinh viên chưa nhập đủ các cột điểm để lưu.`);
       }
     } catch (err) {
       console.warn('Lỗi khi lưu điểm:', err);
@@ -248,12 +329,16 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
   const handleSaveSingleGrade = async (st) => {
     if (!selectedClass || !st) return;
     const entry = gradeSheet[st.studentId] || {};
-    const att = Number(entry.attendanceScore) || 0;
-    const mid = Number(entry.midtermScore) || 0;
-    const fin = Number(entry.finalExamScore) || 0;
-    const score10 = Number(((att * 0.1) + (mid * 0.3) + (fin * 0.6)).toFixed(1));
-    const baseSemester = selectedClass.semester || 'SEMESTER_1';
-    const baseYear = selectedClass.academicYearId || selectedClass.academicYearName || '2026-2027';
+    const weights = getWeights(selectedClass);
+    const calc = calculateFinalScore(entry, weights);
+
+    if (!calc.isComplete) {
+      onNotify('warning', `Vui lòng nhập đầy đủ các đầu điểm cho SV ${st.fullName || st.studentId} trước khi lưu.`);
+      return;
+    }
+
+    const baseSemester = normalizeSemesterEnum(selectedClass.semester);
+    const baseYear = normalizeAcademicYear(selectedClass.academicYearId || selectedClass.academicYearName);
 
     try {
       if (entry.gradeId) {
@@ -261,7 +346,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
           gradeId: Number(entry.gradeId),
           semester: baseSemester,
           studyPhase: 'PHASE_1',
-          scoreScale10: score10,
+          scoreScale10: calc.score10,
         };
         const res = await gradeApi.update(entry.gradeId, updatePayload);
         const savedData = res.data || res;
@@ -280,7 +365,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
           semester: baseSemester,
           academicYear: baseYear,
           studyPhase: 'PHASE_1',
-          scoreScale10: score10,
+          scoreScale10: calc.score10,
         };
         const res = await gradeApi.create(createPayload);
         const savedData = res.data || res;
@@ -308,23 +393,29 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     }
 
     const metaBlock = [
+      `"TRƯỜNG ĐẠI HỌC CÔNG NGHỆ & ĐÀO TẠO"`,
       `"DANH SÁCH ĐIỂM DANH HỌC PHẦN"`,
       `"Môn học: ${selectedClass.subjectName || selectedClass.subjectId}"`,
       `"Mã lớp tín chỉ: #${selectedClass.creditClassId}"`,
       `"Giảng viên: ${teacherInfo?.fullName || 'Giảng Viên'} (${teacherInfo?.teacherId || currentTeacherId})"`,
-      `"Học kỳ: ${msg.enum.semester[selectedClass.semester] || selectedClass.semester || 'Học kỳ 1'} - Năm học: ${selectedClass.academicYearName || selectedClass.academicYearId || '2026-2027'}"`,
+      `"Học kỳ: ${msg.enum.semester[selectedClass.semester] || selectedClass.semester || 'Học kỳ 1'} - Năm học: ${normalizeAcademicYear(selectedClass.academicYearName || selectedClass.academicYearId)}"`,
       `"Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}"`,
       ''
     ];
 
     const headers = ['Mã Sinh Viên', 'Họ Và Tên', 'Giới Tính', 'Lớp Hành Chính', 'Buổi 1', 'Buổi 2', 'Buổi 3', 'Buổi 4', 'Buổi 5', 'Ghi Chú'];
-    const rows = students.map((st) => [
-      `"${st.studentId}"`,
-      `"${st.fullName}"`,
-      `"${msg.enum.gender[st.gender] || st.gender || 'Nam'}"`,
-      `"${st.className || st.classId || 'CNTT'}"`,
-      'V', 'V', 'V', 'V', 'V', 'Đủ điều kiện dự thi'
-    ]);
+    const rows = students.map((st) => {
+      const entry = gradeSheet[st.studentId];
+      const att = entry?.attendanceScore !== '' && entry?.attendanceScore != null ? Number(entry.attendanceScore) : null;
+      const note = att !== null && att < 5 ? 'Cảnh báo vắng nhiều' : 'Đủ điều kiện dự thi';
+      return [
+        `"${st.studentId}"`,
+        `"${st.fullName}"`,
+        `"${msg.enum.gender[st.gender] || st.gender || 'Nam'}"`,
+        `"${st.className || st.classId || 'CNTT'}"`,
+        'V', 'V', 'V', 'V', 'V', `"${note}"`
+      ];
+    });
 
     const csvContent = '\uFEFF' + [...metaBlock, headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -347,13 +438,15 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       return;
     }
 
+    const weights = getWeights(selectedClass);
     const metaBlock = [
+      `"TRƯỜNG ĐẠI HỌC CÔNG NGHỆ & ĐÀO TẠO"`,
       `"BẢNG ĐIỂM TỔNG KẾT HỌC PHẦN"`,
       `"Môn học: ${selectedClass.subjectName || selectedClass.subjectId}"`,
       `"Mã lớp tín chỉ: #${selectedClass.creditClassId}"`,
       `"Giảng viên: ${teacherInfo?.fullName || 'Giảng Viên'} (${teacherInfo?.teacherId || currentTeacherId})"`,
-      `"Học kỳ: ${msg.enum.semester[selectedClass.semester] || selectedClass.semester || 'Học kỳ 1'} - Năm học: ${selectedClass.academicYearName || selectedClass.academicYearId || '2026-2027'}"`,
-      `"Quy chuẩn tính điểm: Chuyên cần (10%) + Giữa kỳ (30%) + Cuối kỳ (60%)"`,
+      `"Học kỳ: ${msg.enum.semester[selectedClass.semester] || selectedClass.semester || 'Học kỳ 1'} - Năm học: ${normalizeAcademicYear(selectedClass.academicYearName || selectedClass.academicYearId)}"`,
+      `"Quy chuẩn tính điểm: Chuyên cần (${Math.round(weights.att * 100)}%) + Giữa kỳ (${Math.round(weights.mid * 100)}%) + Cuối kỳ (${Math.round(weights.fin * 100)}%)"`,
       `"Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}"`,
       ''
     ];
@@ -363,9 +456,9 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       'Mã Sinh Viên',
       'Họ Và Tên',
       'Lớp Hành Chính',
-      'Chuyên Cần (10%)',
-      'Giữa Kỳ (30%)',
-      'Cuối Kỳ (60%)',
+      `Chuyên Cần (${Math.round(weights.att * 100)}%)`,
+      `Giữa Kỳ (${Math.round(weights.mid * 100)}%)`,
+      `Cuối Kỳ (${Math.round(weights.fin * 100)}%)`,
       'Tổng Kết (Hệ 10)',
       'Điểm Chữ',
       'Kết Quả',
@@ -373,23 +466,8 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     ];
 
     const rows = students.map((st, idx) => {
-      const entry = gradeSheet[st.studentId] || { attendanceScore: 10, midtermScore: 8, finalExamScore: 8 };
-      const att = Number(entry.attendanceScore) || 0;
-      const mid = Number(entry.midtermScore) || 0;
-      const fin = Number(entry.finalExamScore) || 0;
-      const finalScoreNum = ((att * 0.1) + (mid * 0.3) + (fin * 0.6));
-      const finalScore = finalScoreNum.toFixed(1);
-
-      let letterGrade = 'F';
-      if (finalScoreNum >= 8.5) letterGrade = 'A';
-      else if (finalScoreNum >= 8.0) letterGrade = 'B+';
-      else if (finalScoreNum >= 7.0) letterGrade = 'B';
-      else if (finalScoreNum >= 6.5) letterGrade = 'C+';
-      else if (finalScoreNum >= 5.5) letterGrade = 'C';
-      else if (finalScoreNum >= 5.0) letterGrade = 'D+';
-      else if (finalScoreNum >= 4.0) letterGrade = 'D';
-
-      const passed = finalScoreNum >= 4.0 ? 'Đạt' : 'Học lại';
+      const entry = gradeSheet[st.studentId] || {};
+      const calc = calculateFinalScore(entry, weights);
       const statusText = entry.isSaved ? 'Đã lưu CSDL' : 'Chưa lưu';
 
       return [
@@ -400,9 +478,9 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
         entry.attendanceScore ?? '',
         entry.midtermScore ?? '',
         entry.finalExamScore ?? '',
-        finalScore,
-        `"${letterGrade}"`,
-        `"${passed}"`,
+        calc.isComplete ? calc.scoreText : '',
+        `"${calc.letterGrade}"`,
+        `"${calc.passedText}"`,
         `"${statusText}"`
       ];
     });
@@ -534,7 +612,19 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       <div className="flex-1 flex overflow-hidden relative">
         {/* 📱 TEACHER SIDEBAR */}
         <aside className={`w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/80 p-4 flex flex-col justify-between overflow-y-auto shrink-0 fixed inset-y-0 left-0 z-40 md:static md:flex md:h-full transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-          <div className="space-y-6">
+          <div className="space-y-5">
+            {/* Mobile Header with close button */}
+            <div className="flex items-center justify-between md:hidden pb-2 border-b border-slate-800">
+              <span className="text-xs font-bold text-slate-300">Menu Giảng Viên</span>
+              <button 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                aria-label="Đóng menu"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
             {/* Teacher Mini Profile */}
             <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/20 space-y-2">
               <div className="flex items-center gap-2.5">
@@ -561,7 +651,10 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                 return (
                   <button
                     key={item.id}
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setIsMobileMenuOpen(false);
+                    }}
                     className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
                       isActive
                         ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20'
@@ -599,32 +692,44 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
 
               {/* 4 Stat Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="panel-card p-4 bg-slate-900/60 space-y-1">
-                  <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Lớp Tín Chỉ Đang Dạy</span>
-                  <div className="text-2xl font-black text-emerald-400">{classes.length} Lớp</div>
-                  <p className="text-[10px] text-slate-500">Phân công học kỳ này</p>
-                </div>
+                {loading ? (
+                  [1, 2, 3, 4].map((i) => (
+                    <div key={i} className="panel-card p-4 bg-slate-900/60 space-y-2 animate-pulse">
+                      <div className="h-3 w-28 bg-slate-800 rounded"></div>
+                      <div className="h-8 w-20 bg-slate-800 rounded"></div>
+                      <div className="h-2 w-24 bg-slate-800 rounded"></div>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="panel-card p-4 bg-slate-900/60 space-y-1">
+                      <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Lớp Tín Chỉ Đang Dạy</span>
+                      <div className="text-2xl font-black text-emerald-400">{classes.length} Lớp</div>
+                      <p className="text-[10px] text-slate-500">Phân công học kỳ này</p>
+                    </div>
 
-                <div className="panel-card p-4 bg-slate-900/60 space-y-1">
-                  <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Tổng Số Sinh Viên</span>
-                  <div className="text-2xl font-black text-cyan-400">{classes.reduce((sum, c) => sum + (c.enrolledCount || 0), 0)} SV</div>
-                  <p className="text-[10px] text-slate-500">Đang theo học các lớp</p>
-                </div>
+                    <div className="panel-card p-4 bg-slate-900/60 space-y-1">
+                      <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Tổng Số Sinh Viên</span>
+                      <div className="text-2xl font-black text-cyan-400">{classes.reduce((sum, c) => sum + (c.enrolledCount || 0), 0)} SV</div>
+                      <p className="text-[10px] text-slate-500">Đang theo học các lớp</p>
+                    </div>
 
-                <div className="panel-card p-4 bg-slate-900/60 space-y-1">
-                  <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Ca Dạy Trong Tuần</span>
-                  <div className="text-2xl font-black text-amber-400">{schedules.length} Ca</div>
-                  <p className="text-[10px] text-slate-500">Đã xếp lịch phòng học</p>
-                </div>
+                    <div className="panel-card p-4 bg-slate-900/60 space-y-1">
+                      <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Ca Dạy Trong Tuần</span>
+                      <div className="text-2xl font-black text-amber-400">{schedules.length} Ca</div>
+                      <p className="text-[10px] text-slate-500">Đã xếp lịch phòng học</p>
+                    </div>
 
-                <div className="panel-card p-4 bg-slate-900/60 space-y-1">
-                  <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Tiến Độ Nhập Điểm</span>
-                  <div className="text-2xl font-black text-purple-400">{gradeProgressPercent}%</div>
-                  <p className="text-[10px] text-slate-400 flex items-center gap-1">
-                    <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                    <span>{totalGradedCount}/{students.length || 0} SV đã lưu</span>
-                  </p>
-                </div>
+                    <div className="panel-card p-4 bg-slate-900/60 space-y-1">
+                      <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Tiến Độ Nhập Điểm</span>
+                      <div className="text-2xl font-black text-purple-400">{gradeProgressPercent}%</div>
+                      <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                        <span>{totalGradedCount}/{students.length || 0} SV đã lưu</span>
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Quick Actions */}
@@ -677,54 +782,71 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {WEEKDAYS.map((day) => {
-                  const daySchedules = schedules.filter(s => matchesDay(s, day.key));
-                  return (
-                    <div key={day.key} className="panel-card overflow-hidden flex flex-col">
+                {loading ? (
+                  [1, 2, 3, 4].map((i) => (
+                    <div key={i} className="panel-card overflow-hidden flex flex-col animate-pulse">
                       <div className="bg-slate-900/90 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-                        <span className="font-bold text-xs text-white">{day.label}</span>
-                        <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">
-                          {daySchedules.length} Ca dạy
-                        </span>
+                        <div className="h-4 w-16 bg-slate-800 rounded"></div>
+                        <div className="h-4 w-12 bg-slate-800 rounded"></div>
                       </div>
-
-                      <div className="p-3 space-y-3 flex-1">
-                        {daySchedules.length === 0 ? (
-                          <div className="h-28 flex items-center justify-center text-xs text-slate-500 italic">
-                            Không có ca dạy
-                          </div>
-                        ) : (
-                          daySchedules.map((s, idx) => (
-                            <div
-                              key={s.scheduleId || idx}
-                              className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-2 hover:border-emerald-500/40 transition"
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-white truncate pr-2">
-                                  {s.subjectName || s.creditClassName || `Lớp #${s.creditClassId}`}
-                                </span>
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-800 text-slate-300 shrink-0">
-                                  {msg.enum.shift[s.classShift] || s.classShift || s.studyTime || 'Ca Sáng'}
-                                </span>
-                              </div>
-
-                              <div className="space-y-1 text-[11px] text-slate-400">
-                                <div className="flex items-center gap-1.5">
-                                  <Clock className="h-3 w-3 text-emerald-400 shrink-0" />
-                                  <span>{s.studyTime || `${s.startDate || '07:30'} - ${s.endDate || '11:00'}`}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <MapPin className="h-3 w-3 text-cyan-400 shrink-0" />
-                                  <span>{s.roomName || s.roomId || 'Phòng Học B2-104'}</span>
-                                </div>
-                              </div>
-                            </div>
-                          ))
-                        )}
+                      <div className="p-3 space-y-3">
+                        <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+                          <div className="h-3.5 w-3/4 bg-slate-800 rounded"></div>
+                          <div className="h-2.5 w-1/2 bg-slate-800 rounded"></div>
+                        </div>
                       </div>
                     </div>
-                  );
-                })}
+                  ))
+                ) : (
+                  WEEKDAYS.map((day) => {
+                    const daySchedules = schedules.filter(s => matchesDay(s, day.key));
+                    return (
+                      <div key={day.key} className="panel-card overflow-hidden flex flex-col">
+                        <div className="bg-slate-900/90 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                          <span className="font-bold text-xs text-white">{day.label}</span>
+                          <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">
+                            {daySchedules.length} Ca dạy
+                          </span>
+                        </div>
+
+                        <div className="p-3 space-y-3 flex-1">
+                          {daySchedules.length === 0 ? (
+                            <div className="h-28 flex items-center justify-center text-xs text-slate-500 italic">
+                              Không có ca dạy
+                            </div>
+                          ) : (
+                            daySchedules.map((s, idx) => (
+                              <div
+                                key={s.scheduleId || idx}
+                                className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-2 hover:border-emerald-500/40 transition"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-bold text-white truncate pr-2">
+                                    {s.subjectName || s.creditClassName || `Lớp #${s.creditClassId}`}
+                                  </span>
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-800 text-slate-300 shrink-0">
+                                    {msg.enum.shift[s.classShift] || s.classShift || s.studyTime || 'Ca Sáng'}
+                                  </span>
+                                </div>
+
+                                <div className="space-y-1 text-[11px] text-slate-400">
+                                  <div className="flex items-center gap-1.5">
+                                    <Clock className="h-3 w-3 text-emerald-400 shrink-0" />
+                                    <span>{s.studyTime || `${s.startDate || '07:30'} - ${s.endDate || '11:00'}`}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <MapPin className="h-3 w-3 text-cyan-400 shrink-0" />
+                                    <span>{s.roomName || s.roomId || 'Phòng Học B2-104'}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           )}
@@ -750,58 +872,82 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
               </div>
 
               {/* Grid of Assigned Classes */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {classes.map((c) => {
-                  const isSelected = selectedClass?.creditClassId === c.creditClassId;
-                  return (
-                    <div
-                      key={c.creditClassId}
-                      className={`panel-card p-5 space-y-3 cursor-pointer transition-all ${
-                        isSelected
-                          ? 'border-emerald-500 bg-slate-900/90 shadow-md'
-                          : 'hover:border-slate-700 bg-slate-950/60'
-                      }`}
-                      onClick={() => handleSelectClass(c)}
-                    >
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="panel-card p-5 space-y-3 animate-pulse">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold font-mono text-emerald-400">
-                          Mã Lớp: #{c.creditClassId}
-                        </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">
-                          {c.semester || 'Học kỳ 1'}
-                        </span>
+                        <div className="h-4 w-20 bg-slate-800 rounded"></div>
+                        <div className="h-4 w-16 bg-slate-800 rounded"></div>
                       </div>
-
-                      <div>
-                        <h4 className="text-sm font-bold text-white leading-tight">
-                          {c.subjectName || c.creditClassName || `Môn học #${c.subjectId}`}
-                        </h4>
-                        <p className="text-xs text-slate-400 mt-1">
-                          Số tín chỉ: <span className="text-slate-200 font-semibold">{c.credits || 3} TC</span>
-                        </p>
-                      </div>
-
-                      <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-                        <div className="flex items-center gap-1.5">
-                          <Users className="h-3.5 w-3.5 text-indigo-400" />
-                          <span>Sĩ số: <strong className="text-white">{c.enrolledCount || students.length || 0}</strong> / {c.maxStudents || 40} SV</span>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelectClass(c);
-                            setActiveTab('grades');
-                          }}
-                          className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-0.5"
-                        >
-                          <span>Nhập điểm</span>
-                          <ArrowRight className="h-3 w-3" />
-                        </button>
+                      <div className="h-5 w-3/4 bg-slate-800 rounded"></div>
+                      <div className="h-3 w-1/2 bg-slate-800 rounded"></div>
+                      <div className="pt-2 border-t border-slate-800 flex justify-between">
+                        <div className="h-3 w-24 bg-slate-800 rounded"></div>
+                        <div className="h-3 w-16 bg-slate-800 rounded"></div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              ) : classes.length === 0 ? (
+                <EmptyState
+                  title="Chưa có lớp học phần"
+                  description="Thầy/Cô hiện chưa được phân công phụ trách lớp tín chỉ nào trong học kỳ này."
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {classes.map((c) => {
+                    const isSelected = selectedClass?.creditClassId === c.creditClassId;
+                    return (
+                      <div
+                        key={c.creditClassId}
+                        className={`panel-card p-5 space-y-3 cursor-pointer transition-all ${
+                          isSelected
+                            ? 'border-emerald-500 bg-slate-900/90 shadow-md'
+                            : 'hover:border-slate-700 bg-slate-950/60'
+                        }`}
+                        onClick={() => handleSelectClass(c)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold font-mono text-emerald-400">
+                            Mã Lớp: #{c.creditClassId}
+                          </span>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">
+                            {c.semester || 'Học kỳ 1'}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-bold text-white leading-tight">
+                            {c.subjectName || c.creditClassName || `Môn học #${c.subjectId}`}
+                          </h4>
+                          <p className="text-xs text-slate-400 mt-1">
+                            Số tín chỉ: <span className="text-slate-200 font-semibold">{c.credits || 3} TC</span>
+                          </p>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                          <div className="flex items-center gap-1.5">
+                            <Users className="h-3.5 w-3.5 text-indigo-400" />
+                            <span>Sĩ số: <strong className="text-white">{c.enrolledCount || students.length || 0}</strong> / {c.maxStudents || 40} SV</span>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectClass(c);
+                              setActiveTab('grades');
+                            }}
+                            className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-0.5"
+                          >
+                            <span>Nhập điểm</span>
+                            <ArrowRight className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Selected Class Student Roster Table */}
               {selectedClass && (
@@ -885,31 +1031,38 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-extrabold text-white">Bảng Nhập Điểm Học Phần</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Nhập điểm thành phần trực tiếp theo tỷ lệ chuẩn (10% - 30% - 60%) và lưu về phòng đào tạo</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Nhập điểm thành phần trực tiếp theo tỷ lệ chuẩn và lưu về phòng đào tạo</p>
                 </div>
 
                 {/* Class selector */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400">Chọn lớp:</span>
-                  <select
-                    value={selectedClass?.creditClassId || ''}
-                    onChange={(e) => {
-                      const found = classes.find(c => String(c.creditClassId) === e.target.value);
-                      if (found) handleSelectClass(found);
-                    }}
-                    className="bg-slate-900 border border-slate-800 rounded-lg text-xs font-semibold text-white px-3 py-2 focus:outline-none focus:border-emerald-500 transition"
-                  >
-                    {classes.map(c => (
-                      <option key={c.creditClassId} value={c.creditClassId}>
-                        Lớp #{c.creditClassId} - {c.subjectName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {classes.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400">Chọn lớp:</span>
+                    <select
+                      value={selectedClass?.creditClassId || ''}
+                      onChange={(e) => {
+                        const found = classes.find(c => String(c.creditClassId) === e.target.value);
+                        if (found) handleSelectClass(found);
+                      }}
+                      className="bg-slate-900 border border-slate-800 rounded-lg text-xs font-semibold text-white px-3 py-2 focus:outline-none focus:border-emerald-500 transition"
+                    >
+                      {classes.map(c => (
+                        <option key={c.creditClassId} value={c.creditClassId}>
+                          Lớp #{c.creditClassId} - {c.subjectName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
-              {/* Main Grade Spreadsheet */}
-              <div className="panel-card overflow-hidden flex flex-col justify-between">
+              {classes.length === 0 ? (
+                <EmptyState
+                  title="Chưa có lớp học phần"
+                  description="Thầy/Cô hiện chưa được phân công phụ trách lớp tín chỉ nào để thực hiện nhập điểm."
+                />
+              ) : (
+                <div className="panel-card overflow-hidden flex flex-col justify-between">
                 <div className="p-5 border-b border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-slate-900/60">
                   <div>
                     <div className="flex items-center gap-2">
@@ -955,125 +1108,127 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-                      <tr>
-                        <th className="px-5 py-3">Mã SV</th>
-                        <th className="px-5 py-3">Họ và Tên</th>
-                        <th className="px-5 py-3 text-center">Chuyên cần (10%)</th>
-                        <th className="px-5 py-3 text-center">Giữa kỳ (30%)</th>
-                        <th className="px-5 py-3 text-center">Thi cuối kỳ (60%)</th>
-                        <th className="px-5 py-3 text-center font-bold">Tổng kết</th>
-                        <th className="px-5 py-3 text-center font-bold">Điểm chữ</th>
-                        <th className="px-5 py-3 text-center">Trạng thái</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800/60">
-                      {filteredStudents.length === 0 ? (
-                        <tr>
-                          <td colSpan="8" className="px-5 py-6 text-center text-xs text-slate-500 italic">
-                            Không tìm thấy sinh viên nào phù hợp với từ khóa "{studentSearch}"
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredStudents.map((st) => {
-                          const entry = gradeSheet[st.studentId] || { attendanceScore: 10, midtermScore: 8, finalExamScore: 8 };
-                          const finalScoreNum = ((entry.attendanceScore * 0.1) + (entry.midtermScore * 0.3) + (entry.finalExamScore * 0.6));
-                          const finalScore = finalScoreNum.toFixed(1);
-                          
-                          let letterGrade = 'F';
-                          if (finalScoreNum >= 8.5) letterGrade = 'A';
-                          else if (finalScoreNum >= 8.0) letterGrade = 'B+';
-                          else if (finalScoreNum >= 7.0) letterGrade = 'B';
-                          else if (finalScoreNum >= 6.5) letterGrade = 'C+';
-                          else if (finalScoreNum >= 5.5) letterGrade = 'C';
-                          else if (finalScoreNum >= 5.0) letterGrade = 'D+';
-                          else if (finalScoreNum >= 4.0) letterGrade = 'D';
-
-                          return (
-                            <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
-                              <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
-                              <td className="px-5 py-3 font-semibold text-white truncate max-w-[180px] sm:max-w-[240px]" title={st.fullName}>{st.fullName}</td>
-                              <td className="px-5 py-3 text-center">
-                                <input
-                                  type="number"
-                                  step="0.1"
-                                  min="0"
-                                  max="10"
-                                  value={entry.attendanceScore ?? ''}
-                                  onChange={(e) => handleGradeChange(st.studentId, 'attendanceScore', e.target.value)}
-                                  className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
-                                />
-                              </td>
-                              <td className="px-5 py-3 text-center">
-                                <input
-                                  type="number"
-                                  step="0.1"
-                                  min="0"
-                                  max="10"
-                                  value={entry.midtermScore ?? ''}
-                                  onChange={(e) => handleGradeChange(st.studentId, 'midtermScore', e.target.value)}
-                                  className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
-                                />
-                              </td>
-                              <td className="px-5 py-3 text-center">
-                                <input
-                                  type="number"
-                                  step="0.1"
-                                  min="0"
-                                  max="10"
-                                  value={entry.finalExamScore ?? ''}
-                                  onChange={(e) => handleGradeChange(st.studentId, 'finalExamScore', e.target.value)}
-                                  className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
-                                />
-                              </td>
-                              <td className="px-5 py-3 text-center font-mono font-bold text-white text-sm">
-                                {finalScore}
-                              </td>
-                              <td className="px-5 py-3 text-center">
-                                <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                                  letterGrade === 'A' ? 'bg-emerald-500/10 text-emerald-400' :
-                                  letterGrade.startsWith('B') ? 'bg-indigo-500/10 text-indigo-400' :
-                                  letterGrade.startsWith('C') ? 'bg-cyan-500/10 text-cyan-400' :
-                                  letterGrade.startsWith('D') ? 'bg-amber-500/10 text-amber-400' :
-                                  'bg-rose-500/10 text-rose-400'
-                                }`}>
-                                  {letterGrade}
-                                </span>
-                              </td>
-                              <td className="px-5 py-3 text-center">
-                                <div className="flex items-center justify-center gap-1.5">
-                                  {entry.isSaved ? (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                      <CheckCheck className="w-3 h-3" /> Đã lưu
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                      Chưa lưu
-                                    </span>
-                                  )}
-                                  <button
-                                    onClick={() => handleSaveSingleGrade(st)}
-                                    title="Lưu điểm sinh viên này"
-                                    className="p-1 rounded-md text-slate-400 hover:text-emerald-400 hover:bg-slate-800 transition"
-                                  >
-                                    <Save className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
+                  {(() => {
+                    const currentWeights = getWeights(selectedClass);
+                    return (
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+                          <tr>
+                            <th className="px-5 py-3">Mã SV</th>
+                            <th className="px-5 py-3">Họ và Tên</th>
+                            <th className="px-5 py-3 text-center">Chuyên cần ({Math.round(currentWeights.att * 100)}%)</th>
+                            <th className="px-5 py-3 text-center">Giữa kỳ ({Math.round(currentWeights.mid * 100)}%)</th>
+                            <th className="px-5 py-3 text-center">Thi cuối kỳ ({Math.round(currentWeights.fin * 100)}%)</th>
+                            <th className="px-5 py-3 text-center font-bold">Tổng kết</th>
+                            <th className="px-5 py-3 text-center font-bold">Điểm chữ</th>
+                            <th className="px-5 py-3 text-center">Trạng thái</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/60">
+                          {filteredStudents.length === 0 ? (
+                            <tr>
+                              <td colSpan="8" className="px-5 py-6 text-center text-xs text-slate-500 italic">
+                                Không tìm thấy sinh viên nào phù hợp với từ khóa "{studentSearch}"
                               </td>
                             </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
+                          ) : (
+                            filteredStudents.map((st) => {
+                              const entry = gradeSheet[st.studentId] || {};
+                              const calc = calculateFinalScore(entry, currentWeights);
+
+                              return (
+                                <tr key={st.studentId} className="hover:bg-slate-800/40 transition">
+                                  <td className="px-5 py-3 font-mono font-bold text-emerald-400">{st.studentId}</td>
+                                  <td className="px-5 py-3 font-semibold text-white truncate max-w-[180px] sm:max-w-[240px]" title={st.fullName}>{st.fullName}</td>
+                                  <td className="px-5 py-3 text-center">
+                                    <input
+                                      type="number"
+                                      step="0.1"
+                                      min="0"
+                                      max="10"
+                                      value={entry.attendanceScore ?? ''}
+                                      onChange={(e) => handleGradeChange(st.studentId, 'attendanceScore', e.target.value)}
+                                      className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                                    />
+                                  </td>
+                                  <td className="px-5 py-3 text-center">
+                                    <input
+                                      type="number"
+                                      step="0.1"
+                                      min="0"
+                                      max="10"
+                                      value={entry.midtermScore ?? ''}
+                                      onChange={(e) => handleGradeChange(st.studentId, 'midtermScore', e.target.value)}
+                                      className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                                    />
+                                  </td>
+                                  <td className="px-5 py-3 text-center">
+                                    <input
+                                      type="number"
+                                      step="0.1"
+                                      min="0"
+                                      max="10"
+                                      value={entry.finalExamScore ?? ''}
+                                      onChange={(e) => handleGradeChange(st.studentId, 'finalExamScore', e.target.value)}
+                                      className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                                    />
+                                  </td>
+                                  <td className="px-5 py-3 text-center font-mono font-bold text-white text-sm">
+                                    {calc.scoreText}
+                                  </td>
+                                  <td className="px-5 py-3 text-center">
+                                    <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                                      !calc.isComplete ? 'bg-slate-800 text-slate-500' :
+                                      calc.letterGrade === 'A' ? 'bg-emerald-500/10 text-emerald-400' :
+                                      calc.letterGrade.startsWith('B') ? 'bg-indigo-500/10 text-indigo-400' :
+                                      calc.letterGrade.startsWith('C') ? 'bg-cyan-500/10 text-cyan-400' :
+                                      calc.letterGrade.startsWith('D') ? 'bg-amber-500/10 text-amber-400' :
+                                      'bg-rose-500/10 text-rose-400'
+                                    }`}>
+                                      {calc.letterGrade}
+                                    </span>
+                                  </td>
+                                  <td className="px-5 py-3 text-center">
+                                    <div className="flex items-center justify-center gap-1.5">
+                                      {entry.isSaved ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                          <CheckCheck className="w-3 h-3" /> Đã lưu
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                          Chưa lưu
+                                        </span>
+                                      )}
+                                      <button
+                                        onClick={() => handleSaveSingleGrade(st)}
+                                        title="Lưu điểm sinh viên này"
+                                        className="p-1 rounded-md text-slate-400 hover:text-emerald-400 hover:bg-slate-800 transition"
+                                      >
+                                        <Save className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    );
+                  })()}
                 </div>
 
                 <div className="p-4 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between text-xs text-slate-400">
-                  <span>💡 Quy chuẩn: Chuyên cần (10%) + Giữa kỳ (30%) + Cuối kỳ (60%).</span>
+                  {(() => {
+                    const currentWeights = getWeights(selectedClass);
+                    return (
+                      <span>💡 Quy chuẩn: Chuyên cần ({Math.round(currentWeights.att * 100)}%) + Giữa kỳ ({Math.round(currentWeights.mid * 100)}%) + Cuối kỳ ({Math.round(currentWeights.fin * 100)}%).</span>
+                    );
+                  })()}
                   <span className="font-semibold text-emerald-400">Đã kích hoạt tính điểm chữ tự động (A, B+, B, C, D, F)</span>
                 </div>
               </div>
+              )}
             </div>
           )}
 

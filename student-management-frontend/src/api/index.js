@@ -111,7 +111,7 @@ export const classroomApi = {
 
 // 9. Credit Classes (Lớp tín chỉ) API
 export const creditClassApi = {
-  getAll: () => axiosClient.get('/credit-classes'),
+  getAll: (params) => axiosClient.get('/credit-classes', { params }),
   getById: (id) => axiosClient.get(`/credit-classes/${id}`),
   create: (data) => axiosClient.post('/credit-classes', data),
   update: (id, data) => axiosClient.put(`/credit-classes/${id}`, data),

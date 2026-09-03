@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface CreditClassService {
     List<CreditClassResponseDto> getAll();
+    List<CreditClassResponseDto> getByTeacherId(String teacherId);
     Page<CreditClassResponseDto> getAll(Pageable pageable);
     CreditClassResponseDto getById(Long creditClassId);
     CreditClassResponseDto create(CreditClassRequestDto dto);
