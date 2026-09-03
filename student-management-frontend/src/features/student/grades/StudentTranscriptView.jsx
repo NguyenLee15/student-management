@@ -1,7 +1,10 @@
+// cSpell:disable
 import { msg } from '../../../lib/messages';
 import React, { useState, useEffect } from 'react';
-import { Award, Printer, Download, BookOpen, CheckCircle, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { gradeApi, studentPortalApi } from '../../../api';
+import TranscriptActionHeader from './TranscriptActionHeader';
+import TranscriptSummaryFooter from './TranscriptSummaryFooter';
 
 export default function StudentTranscriptView({ currentUser, onNotify }) {
   const [transcript, setTranscript] = useState(null);
@@ -16,7 +19,6 @@ export default function StudentTranscriptView({ currentUser, onNotify }) {
   const loadTranscriptData = async () => {
     setLoading(true);
     try {
-      // 1. Lấy thông tin tổng quan sinh viên
       try {
         const overRes = await studentPortalApi.getMyOverview();
         setOverview(overRes?.data);
@@ -24,7 +26,6 @@ export default function StudentTranscriptView({ currentUser, onNotify }) {
         console.warn('Không thể tải overview', e);
       }
 
-      // 2. Lấy bảng điểm chuẩn hóa từ endpoint cá nhân
       let transcriptData = null;
       try {
         const transcriptRes = await studentPortalApi.getMyTranscript();
@@ -140,35 +141,10 @@ export default function StudentTranscriptView({ currentUser, onNotify }) {
   return (
     <div className="space-y-6">
       {/* Action Header */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 print:hidden">
-        <div>
-          <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2.5">
-            <Award className="w-6 h-6 text-blue-600" />
-            Bảng Điểm Kết Quả Học Tập
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Tra cứu kết quả học tập toàn khóa và in bảng điểm chuẩn A4
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleExportCSV}
-            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors border border-slate-200"
-          >
-            <Download className="w-4 h-4 text-slate-600" />
-            <span>Xuất Bảng Điểm (CSV)</span>
-          </button>
-
-          <button
-            onClick={handlePrint}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-md transition-all active:scale-95"
-          >
-            <Printer className="w-4 h-4" />
-            <span>In Bảng Điểm Chuẩn A4</span>
-          </button>
-        </div>
-      </div>
+      <TranscriptActionHeader
+        onExportCSV={handleExportCSV}
+        onPrint={handlePrint}
+      />
 
       {/* Official A4 Sheet */}
       <div className="bg-white p-8 md:p-12 rounded-2xl border border-slate-200 shadow-lg max-w-4xl mx-auto print:border-none print:shadow-none print:p-0 space-y-6">
@@ -249,23 +225,29 @@ export default function StudentTranscriptView({ currentUser, onNotify }) {
                       {g.subjectName || g.subject?.subjectName || 'Học phần'}
                     </td>
                     <td className="p-2 border-r border-slate-300 text-center font-semibold">
-                      {g.credits || g.subject?.credits || 0}
+                      {g.credits || 3}
                     </td>
-                    <td className="p-2 border-r border-slate-300 text-center font-bold text-blue-700">
-                      {g.scoreScale10 != null ? Number(g.scoreScale10).toFixed(1) : '-'}
+                    <td className="p-2 border-r border-slate-300 text-center font-mono font-bold text-slate-800">
+                      {g.scoreScale10 != null ? Number(g.scoreScale10).toFixed(1) : '--'}
                     </td>
-                    <td className="p-2 border-r border-slate-300 text-center font-bold text-slate-700">
-                      {g.scoreScale4 != null ? Number(g.scoreScale4).toFixed(2) : '-'}
+                    <td className="p-2 border-r border-slate-300 text-center font-mono font-bold text-slate-800">
+                      {g.scoreScale4 != null ? Number(g.scoreScale4).toFixed(2) : '--'}
                     </td>
-                    <td className="p-2 text-center">
-                      <span className={`px-2 py-0.5 rounded text-xs font-black ${
-                        g.letterGrade === 'A' ? 'bg-emerald-100 text-emerald-800' :
-                        g.letterGrade?.startsWith('B') ? 'bg-indigo-100 text-indigo-800' :
-                        g.letterGrade?.startsWith('C') ? 'bg-blue-100 text-blue-800' :
-                        g.letterGrade?.startsWith('D') ? 'bg-amber-100 text-amber-800' :
-                        'bg-rose-100 text-rose-800'
-                      }`}>
-                        {g.letterGrade || '-'}
+                    <td className="p-2 text-center font-bold">
+                      <span
+                        className={`px-2 py-0.5 rounded text-[11px] ${
+                          g.letterGrade === 'A'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : g.letterGrade?.startsWith('B')
+                            ? 'bg-blue-100 text-blue-800'
+                            : g.letterGrade?.startsWith('C')
+                            ? 'bg-cyan-100 text-cyan-800'
+                            : g.letterGrade?.startsWith('D')
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-rose-100 text-rose-800'
+                        }`}
+                      >
+                        {g.letterGrade || '--'}
                       </span>
                     </td>
                   </tr>
@@ -275,37 +257,11 @@ export default function StudentTranscriptView({ currentUser, onNotify }) {
           </table>
         </div>
 
-        {/* GPA Summary Box */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-900 text-white rounded-xl text-center">
-          <div>
-            <div className="text-[11px] text-slate-400 uppercase font-bold">Tổng Tín Chỉ Tích Lũy</div>
-            <div className="text-xl font-black text-white">{transcript?.totalCreditsEarned ?? overview?.totalAccumulatedCredits ?? 0} TC</div>
-          </div>
-          <div>
-            <div className="text-[11px] text-slate-400 uppercase font-bold">Điểm GPA Hệ 10</div>
-            <div className="text-xl font-black text-emerald-400">{transcript?.cumulativeGpa10 ?? overview?.cumulativeGpa10 ?? '0.00'}</div>
-          </div>
-          <div>
-            <div className="text-[11px] text-slate-400 uppercase font-bold">Điểm GPA Hệ 4</div>
-            <div className="text-xl font-black text-blue-400">{transcript?.cumulativeGpa4 ?? overview?.cumulativeGpa4 ?? '0.00'}</div>
-          </div>
-          <div>
-            <div className="text-[11px] text-slate-400 uppercase font-bold">Xếp Loại Học Lực</div>
-            <div className="text-xl font-black text-amber-400">{transcript?.academicStanding || overview?.academicStanding || 'Chưa xét'}</div>
-          </div>
-        </div>
-
-        {/* Signatures for Print */}
-        <div className="hidden print:grid grid-cols-2 pt-12 text-center text-xs">
-          <div>
-            <div className="font-bold uppercase">Người Lập Bảng</div>
-            <div className="italic text-slate-400">(Ký và ghi rõ họ tên)</div>
-          </div>
-          <div>
-            <div className="font-bold uppercase">Phòng Đào Tạo & Quản Lý Sinh Viên</div>
-            <div className="italic text-slate-400">(Ký tên và đóng dấu)</div>
-          </div>
-        </div>
+        {/* GPA Summary & Official Signatures */}
+        <TranscriptSummaryFooter
+          transcript={transcript}
+          overview={overview}
+        />
       </div>
     </div>
   );
