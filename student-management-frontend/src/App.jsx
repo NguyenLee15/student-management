@@ -17,13 +17,15 @@ export default function App() {
 
   const [isBackendConnected, setIsBackendConnected] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [isInitializingAuth, setIsInitializingAuth] = useState(!!localStorage.getItem('user_info') && !isResetPasswordPath);
+  const [isInitializingAuth, setIsInitializingAuth] = useState(
+    !!(localStorage.getItem('user_info') || sessionStorage.getItem('user_info')) && !isResetPasswordPath
+  );
 
   // Authentication State
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(() => {
     try {
-      const stored = localStorage.getItem('user_info');
+      const stored = localStorage.getItem('user_info') || sessionStorage.getItem('user_info');
       return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
@@ -176,6 +178,8 @@ export default function App() {
     }
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('user_info');
+    sessionStorage.removeItem('jwt_token');
+    sessionStorage.removeItem('user_info');
     setCurrentUser(null);
     setSimulatedRole(null);
     showToast('info', 'Đã đăng xuất thành công.');

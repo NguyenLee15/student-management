@@ -136,6 +136,7 @@ const handleLogout = () => {
   console.warn('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
   setMemoryToken(null);
   localStorage.removeItem('user_info');
+  sessionStorage.removeItem('user_info');
   window.dispatchEvent(new Event('auth:unauthorized'));
 };
 
