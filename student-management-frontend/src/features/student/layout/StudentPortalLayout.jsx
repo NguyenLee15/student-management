@@ -9,10 +9,18 @@ import CourseRegistrationView from '../registration/CourseRegistrationView';
 import MatrixTimetableView from '../timetable/MatrixTimetableView';
 import StudentTranscriptView from '../grades/StudentTranscriptView';
 import TuitionLedgerView from '../tuition/TuitionLedgerView';
+import { studentPortalApi } from '../../../api';
 
 export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    studentPortalApi.getMyOverview()
+      .then(res => setProfile(res.data))
+      .catch(err => console.warn('Không thể tải profile sinh viên', err));
+  }, []);
 
   const navItems = [
     { id: 'dashboard', label: 'Bảng Tổng Quan', icon: LayoutDashboard },
@@ -21,6 +29,9 @@ export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin })
     { id: 'grades', label: 'Bảng Điểm Học Tập', icon: Award },
     { id: 'tuition', label: 'Sổ Cái Học Phí', icon: CreditCard },
   ];
+
+  const studentDisplayName = profile?.fullName || user?.fullName || user?.username || 'Sinh Viên';
+  const studentDisplayId = profile?.studentId || user?.studentId || user?.username || 'SV001';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -52,26 +63,27 @@ export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin })
 
           <div className="flex items-center gap-3">
             {/* Switch to Admin if user has Admin role */}
-            {user?.roles?.some(r => r === 'ADMIN' || r === 'ROLE_ADMIN') && (
+            {(user?.role === 'ROLE_ADMIN' || user?.roles?.includes('ROLE_ADMIN') || user?.roles?.includes('ADMIN') || onSwitchToAdmin) && (
               <button
                 onClick={onSwitchToAdmin}
                 className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold rounded-lg border border-slate-700 transition-colors"
+                title="Quay lại giao diện Admin"
               >
                 <Shield className="w-3.5 h-3.5 text-amber-400" />
-                <span>Quản Trị Admin</span>
+                <span>👑 Trở Về Admin</span>
               </button>
             )}
 
             <div className="flex items-center gap-2.5 pl-3 border-l border-slate-800">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
-                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'S'}
+              <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow">
+                {studentDisplayName.charAt(0).toUpperCase()}
               </div>
               <div className="hidden md:block text-left">
-                <div className="text-xs font-bold text-white truncate max-w-[120px]">
-                  {user?.fullName || ''}
+                <div className="text-xs font-bold text-white truncate max-w-[140px]" title={studentDisplayName}>
+                  {studentDisplayName}
                 </div>
-                <div className="text-[10px] text-slate-400 font-mono">
-                  {user?.userName || ''}
+                <div className="text-[10px] text-blue-400 font-mono">
+                  Mã SV: {studentDisplayId}
                 </div>
               </div>
               <button
@@ -145,8 +157,8 @@ export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin })
           )}
           {activeTab === 'registration' && <CourseRegistrationView />}
           {activeTab === 'timetable' && <MatrixTimetableView />}
-          {activeTab === 'grades' && <StudentTranscriptView />}
-          {activeTab === 'tuition' && <TuitionLedgerView />}
+          {activeTab === 'grades' && <StudentTranscriptView currentUser={user} />}
+          {activeTab === 'tuition' && <TuitionLedgerView onNavigateTab={(tab) => setActiveTab(tab)} />}
         </main>
       </div>
     </div>

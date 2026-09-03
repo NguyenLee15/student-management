@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Award, Printer, Download, BookOpen, CheckCircle, RefreshCw } from 'lucide-react';
 import { gradeApi, studentPortalApi } from '../../../api';
 
-export default function StudentTranscriptView() {
+export default function StudentTranscriptView({ currentUser }) {
   const [transcript, setTranscript] = useState(null);
   const [grades, setGrades] = useState([]);
   const [overview, setOverview] = useState(null);
@@ -20,26 +20,91 @@ export default function StudentTranscriptView() {
       const stOverview = overRes.data;
       setOverview(stOverview);
 
-      const targetStudentId = stOverview?.studentId || 'SV001';
-      const transcriptRes = await gradeApi.getTranscript(targetStudentId);
-      const transcriptData = transcriptRes.data;
-      setTranscript(transcriptData);
-
-      // Collect all grades from semester transcripts or fallback
-      let allGrades = [];
-      if (transcriptData?.semesterTranscripts?.length > 0) {
-        transcriptData.semesterTranscripts.forEach((st) => {
-          if (st.grades) {
-            allGrades.push(...st.grades.map(g => ({ ...g, semester: st.semester, academicYear: st.academicYear })));
+      let targetStudentId = stOverview?.studentId || currentUser?.studentId;
+      if (!targetStudentId) {
+        try {
+          const stored = localStorage.getItem('user_info') || sessionStorage.getItem('user_info');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            targetStudentId = parsed.studentId || (parsed.username?.startsWith('SV') ? parsed.username : null);
           }
-        });
+        } catch (e) {}
       }
-      setGrades(allGrades);
+
+      if (targetStudentId) {
+        const transcriptRes = await gradeApi.getTranscript(targetStudentId);
+        const transcriptData = transcriptRes.data;
+        setTranscript(transcriptData);
+
+        let allGrades = [];
+        if (transcriptData?.semesterTranscripts?.length > 0) {
+          transcriptData.semesterTranscripts.forEach((st) => {
+            if (st.grades) {
+              allGrades.push(...st.grades.map(g => ({ ...g, semester: st.semester, academicYear: st.academicYear })));
+            }
+          });
+        }
+        setGrades(allGrades);
+      }
     } catch (err) {
       console.error('Lỗi khi tải dữ liệu bảng điểm', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExportCSV = () => {
+    if (!grades || grades.length === 0) {
+      alert('Chưa có dữ liệu bảng điểm để xuất file.');
+      return;
+    }
+
+    const headers = [
+      'STT',
+      'Mã Học Phần',
+      'Tên Môn Học',
+      'Số Tín Chỉ',
+      'Điểm Hệ 10',
+      'Điểm Hệ 4',
+      'Điểm Chữ',
+      'Kết Quả',
+      'Học Kỳ',
+      'Năm Học'
+    ];
+
+    const rows = grades.map((g, idx) => {
+      const score10 = g.scoreScale10 != null ? Number(g.scoreScale10).toFixed(1) : '';
+      const score4 = g.scoreScale4 != null ? Number(g.scoreScale4).toFixed(2) : '';
+      const letter = g.letterGrade || '';
+      const result = letter === 'F' ? 'Học lại' : 'Đạt';
+      const sem = g.semester ? (msg.enum.semester[g.semester] || `Học kỳ ${g.semester}`) : '';
+      const year = g.academicYear || '';
+
+      return [
+        idx + 1,
+        `"${g.subjectId || ''}"`,
+        `"${(g.subjectName || '').replace(/"/g, '""')}"`,
+        g.credits || 3,
+        score10,
+        score4,
+        letter,
+        result,
+        `"${sem}"`,
+        `"${year}"`
+      ].join(',');
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const stId = overview?.studentId || currentUser?.studentId || 'BangDiem';
+    link.download = `BangDiem_${stId}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handlePrint = () => {
@@ -60,13 +125,23 @@ export default function StudentTranscriptView() {
           </p>
         </div>
 
-        <button
-          onClick={handlePrint}
-          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-md transition-all active:scale-95"
-        >
-          <Printer className="w-4 h-4" />
-          <span>In Bảng Điểm Chuẩn A4</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportCSV}
+            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors border border-slate-200"
+          >
+            <Download className="w-4 h-4 text-slate-600" />
+            <span>Xuất Bảng Điểm (CSV)</span>
+          </button>
+
+          <button
+            onClick={handlePrint}
+            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-md transition-all active:scale-95"
+          >
+            <Printer className="w-4 h-4" />
+            <span>In Bảng Điểm Chuẩn A4</span>
+          </button>
+        </div>
       </div>
 
       {/* Official A4 Sheet */}

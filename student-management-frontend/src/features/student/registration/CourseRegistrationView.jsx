@@ -160,7 +160,7 @@ export default function CourseRegistrationView() {
               </span>
             )}
             <span className="text-blue-200 text-xs">
-              {activePeriod ? (activePeriod.semester ? (msg.enum.semester[activePeriod.semester] || activePeriod.semester) : 'Học kỳ chính khóa') : 'Học kỳ hiện tại'}
+              {activePeriod ? (activePeriod.semesterName ? `${activePeriod.semesterName} • ${activePeriod.academicYearName || ''}` : (activePeriod.semester ? (msg.enum.semester[activePeriod.semester] || activePeriod.semester) : 'Học kỳ chính khóa')) : 'Học kỳ hiện tại'}
             </span>
           </div>
           <h1 className="text-2xl font-black">
@@ -345,7 +345,7 @@ export default function CourseRegistrationView() {
                           </div>
                         </td>
                         <td className="px-4 py-4 text-right font-bold text-slate-800">
-                          {((item.credits || 3) * 450000).toLocaleString('vi-VN')} đ
+                          {((item.credits || 3) * (item.tuitionPerCredit || item.pricePerCredit || 500000)).toLocaleString('vi-VN')} đ
                         </td>
                         <td className="px-5 py-4 text-center">
                           {isAlreadyEnrolled ? (

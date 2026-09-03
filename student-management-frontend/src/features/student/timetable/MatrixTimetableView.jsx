@@ -65,6 +65,57 @@ export default function MatrixTimetableView() {
     });
   };
 
+  const handleExportCSV = () => {
+    if (!timetable || timetable.length === 0) {
+      alert('Chưa có lịch học trong học kỳ này để xuất file.');
+      return;
+    }
+
+    const headers = [
+      'STT',
+      'Mã Lớp Học Phần',
+      'Mã Môn Học',
+      'Tên Môn Học',
+      'Số Tín Chỉ',
+      'Giảng Viên',
+      'Phòng Học',
+      'Thời Gian / Ca Học',
+      'Ngày Bắt Đầu',
+      'Ngày Kết Thúc'
+    ];
+
+    const rows = timetable.map((t, idx) => {
+      const shift = t.shiftName || t.classShift || '';
+      const timeStr = t.studyTime ? `${t.studyTime} (${shift})` : shift;
+      const start = t.startDate ? new Date(t.startDate).toLocaleDateString('vi-VN') : '';
+      const end = t.endDate ? new Date(t.endDate).toLocaleDateString('vi-VN') : '';
+
+      return [
+        idx + 1,
+        `"${t.classCode || t.creditClassId || ''}"`,
+        `"${t.subjectId || ''}"`,
+        `"${(t.subjectName || '').replace(/"/g, '""')}"`,
+        t.credits || 3,
+        `"${(t.teacherName || '').replace(/"/g, '""')}"`,
+        `"${t.roomName || ''}"`,
+        `"${timeStr}"`,
+        `"${start}"`,
+        `"${end}"`
+      ].join(',');
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ThoiKhoaBieu_HK${selectedSemester}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -92,6 +143,14 @@ export default function MatrixTimetableView() {
             <option value={1}>Học kỳ 1 (2026-2027)</option>
             <option value={2}>Học kỳ 2 (2026-2027)</option>
           </select>
+
+          <button
+            onClick={handleExportCSV}
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors border border-slate-200"
+          >
+            <Download className="w-4 h-4 text-slate-600" />
+            <span>Xuất TKB (CSV)</span>
+          </button>
 
           <button
             onClick={handlePrint}

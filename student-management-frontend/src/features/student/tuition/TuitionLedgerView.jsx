@@ -7,7 +7,7 @@ import {
 import { studentPortalApi, paymentApi } from '../../../api';
 import Skeleton from '../../../components/common/Skeleton';
 
-export default function TuitionLedgerView() {
+export default function TuitionLedgerView({ onNavigateTab }) {
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSemester, setSelectedSemester] = useState(1);
@@ -48,8 +48,8 @@ export default function TuitionLedgerView() {
         setPayAmount(inv.remainingAmount || 0);
       }
     } catch (err) {
-      console.error('Lỗi khi tải hóa đơn học phí', err);
-      setErrorMsg('Không tìm thấy thông tin hóa đơn học phí cho học kỳ này.');
+      console.warn('Chưa phát sinh học phí học kỳ này:', err?.response?.data?.message || err.message);
+      setInvoice(null);
     } finally {
       setLoading(false);
     }
@@ -179,10 +179,23 @@ export default function TuitionLedgerView() {
           <Skeleton className="h-64 w-full rounded-2xl" />
         </div>
       ) : !invoice ? (
-        <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400 space-y-2">
+        <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400 space-y-3">
           <Receipt className="w-12 h-12 mx-auto stroke-1 text-slate-300" />
-          <p className="text-base font-bold text-slate-600">Chưa có hóa đơn học phí</p>
-          <p className="text-xs">Hóa đơn sẽ tự động được tạo khi bạn đăng ký các lớp học phần.</p>
+          <p className="text-base font-bold text-slate-700">Chưa phát sinh học phí trong học kỳ này</p>
+          <p className="text-xs text-slate-400 max-w-md mx-auto">
+            Hóa đơn học phí sẽ tự động được hệ thống phòng Đào tạo khởi tạo ngay sau khi bạn hoàn tất đăng ký các lớp học phần.
+          </p>
+          {onNavigateTab && (
+            <div className="pt-2">
+              <button
+                onClick={() => onNavigateTab('registration')}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95"
+              >
+                <span>Đến trang Đăng ký học phần</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <>

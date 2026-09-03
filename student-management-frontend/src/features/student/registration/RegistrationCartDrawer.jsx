@@ -20,7 +20,7 @@ export default function RegistrationCartDrawer({
 
   const totalCredits = cartItems.reduce((acc, item) => acc + (item.credits || 0), 0);
   const estimatedTuition = cartItems.reduce((acc, item) => {
-    const price = item.unitPrice || 450000;
+    const price = item.unitPrice || item.tuitionPerCredit || item.pricePerCredit || 500000;
     return acc + price * (item.credits || 0);
   }, 0);
 
