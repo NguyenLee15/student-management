@@ -256,7 +256,6 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     }
 
     const cleanVal = val.replace(',', '.');
-    // Cho phép nhập số từ 0-10, có thể có dấu chấm thập phân và tối đa 2 chữ số sau dấu chấm
     if (!/^\d{0,2}(\.\d{0,2})?$/.test(cleanVal)) return;
 
     const num = parseFloat(cleanVal);
@@ -347,7 +346,6 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       const baseSemester = normalizeSemesterEnum(selectedClass.semester);
       const baseYear = normalizeAcademicYear(selectedClass.academicYearName || selectedClass.academicYearId);
 
-      // Xử lý lưu tuần tự theo từng nhóm 5 sinh viên để tránh quá tải kết nối backend
       const chunkSize = 5;
       for (let i = 0; i < students.length; i += chunkSize) {
         const chunk = students.slice(i, i + chunkSize);
