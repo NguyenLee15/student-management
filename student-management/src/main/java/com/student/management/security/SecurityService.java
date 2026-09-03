@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Service("securityEvaluator")
+@Service({"securityService", "securityEvaluator"})
 @lombok.RequiredArgsConstructor
 public class SecurityService {
 

@@ -4,7 +4,7 @@ import { Calendar, Clock, MapPin, User, Download, Printer, RefreshCw } from 'luc
 import { studentPortalApi } from '../../../api';
 import Skeleton from '../../../components/common/Skeleton';
 
-export default function MatrixTimetableView() {
+export default function MatrixTimetableView({ onNotify }) {
   const [timetable, setTimetable] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSemester, setSelectedSemester] = useState(1);
@@ -29,6 +29,7 @@ export default function MatrixTimetableView() {
       setTimetable(res.data || []);
     } catch (err) {
       console.error('Lỗi khi tải thời khóa biểu', err);
+      onNotify?.('error', 'Không thể tải thời khóa biểu học tập');
     } finally {
       setLoading(false);
     }
@@ -68,7 +69,7 @@ export default function MatrixTimetableView() {
 
   const handleExportCSV = () => {
     if (!timetable || timetable.length === 0) {
-      alert('Chưa có lịch học trong học kỳ này để xuất file.');
+      onNotify?.('warning', 'Chưa có lịch học trong học kỳ này để xuất file.');
       return;
     }
 
@@ -124,6 +125,7 @@ export default function MatrixTimetableView() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    onNotify?.('success', 'Đã xuất thời khóa biểu học kỳ (CSV) thành công!');
   };
 
   const handlePrint = () => {

@@ -35,6 +35,15 @@ public class StudentPortalRestController {
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin tổng quan thành công", overview));
     }
 
+    @GetMapping("/transcript")
+    @Operation(summary = "Lấy bảng điểm học tập cá nhân của sinh viên")
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    public ResponseEntity<ApiResponse<TranscriptResponseDto>> getMyTranscript() {
+        String studentId = securityService.getCurrentStudentId();
+        TranscriptResponseDto transcript = studentPortalService.getMyTranscript(studentId);
+        return ResponseEntity.ok(ApiResponse.success("Lấy bảng điểm thành công", transcript));
+    }
+
     @GetMapping("/timetable")
     @Operation(summary = "Lấy thời khóa biểu học tập của sinh viên")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")

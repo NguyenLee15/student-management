@@ -11,7 +11,7 @@ import StudentTranscriptView from '../grades/StudentTranscriptView';
 import TuitionLedgerView from '../tuition/TuitionLedgerView';
 import { studentPortalApi } from '../../../api';
 
-export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin }) {
+export default function StudentPortalLayout({ user, onLogout, onNotify, onSwitchToAdmin }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [profile, setProfile] = useState(null);
@@ -153,12 +153,12 @@ export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin })
         {/* View Content Area */}
         <main className="flex-1 min-w-0">
           {activeTab === 'dashboard' && (
-            <StudentDashboardView onNavigateTab={(tab) => setActiveTab(tab)} />
+            <StudentDashboardView onNotify={onNotify} onNavigateTab={(tab) => setActiveTab(tab)} />
           )}
-          {activeTab === 'registration' && <CourseRegistrationView />}
-          {activeTab === 'timetable' && <MatrixTimetableView />}
-          {activeTab === 'grades' && <StudentTranscriptView currentUser={user} />}
-          {activeTab === 'tuition' && <TuitionLedgerView onNavigateTab={(tab) => setActiveTab(tab)} />}
+          {activeTab === 'registration' && <CourseRegistrationView onNotify={onNotify} />}
+          {activeTab === 'timetable' && <MatrixTimetableView onNotify={onNotify} />}
+          {activeTab === 'grades' && <StudentTranscriptView onNotify={onNotify} currentUser={user} />}
+          {activeTab === 'tuition' && <TuitionLedgerView onNotify={onNotify} onNavigateTab={(tab) => setActiveTab(tab)} />}
         </main>
       </div>
     </div>

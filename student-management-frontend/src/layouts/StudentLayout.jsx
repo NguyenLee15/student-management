@@ -6,6 +6,7 @@ export default function StudentLayout({ currentUser, onLogout, onNotify, onRoleS
     <StudentPortalLayout
       user={currentUser}
       onLogout={onLogout}
+      onNotify={onNotify}
       onSwitchToAdmin={onRoleSwitch ? () => onRoleSwitch('ROLE_ADMIN') : null}
     />
   );

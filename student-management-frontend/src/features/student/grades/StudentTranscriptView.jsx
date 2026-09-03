@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Award, Printer, Download, BookOpen, CheckCircle, RefreshCw } from 'lucide-react';
 import { gradeApi, studentPortalApi } from '../../../api';
 
-export default function StudentTranscriptView({ currentUser }) {
+export default function StudentTranscriptView({ currentUser, onNotify }) {
   const [transcript, setTranscript] = useState(null);
   const [grades, setGrades] = useState([]);
   const [overview, setOverview] = useState(null);
@@ -16,38 +16,52 @@ export default function StudentTranscriptView({ currentUser }) {
   const loadTranscriptData = async () => {
     setLoading(true);
     try {
-      const overRes = await studentPortalApi.getMyOverview();
-      const stOverview = overRes.data;
-      setOverview(stOverview);
-
-      let targetStudentId = stOverview?.studentId || currentUser?.studentId;
-      if (!targetStudentId) {
-        try {
-          const stored = localStorage.getItem('user_info') || sessionStorage.getItem('user_info');
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            targetStudentId = parsed.studentId || (parsed.username?.startsWith('SV') ? parsed.username : null);
-          }
-        } catch (e) {}
+      // 1. Lấy thông tin tổng quan sinh viên
+      try {
+        const overRes = await studentPortalApi.getMyOverview();
+        setOverview(overRes?.data);
+      } catch (e) {
+        console.warn('Không thể tải overview', e);
       }
 
-      if (targetStudentId) {
-        const transcriptRes = await gradeApi.getTranscript(targetStudentId);
-        const transcriptData = transcriptRes.data;
-        setTranscript(transcriptData);
-
-        let allGrades = [];
-        if (transcriptData?.semesterTranscripts?.length > 0) {
-          transcriptData.semesterTranscripts.forEach((st) => {
-            if (st.grades) {
-              allGrades.push(...st.grades.map(g => ({ ...g, semester: st.semester, academicYear: st.academicYear })));
+      // 2. Lấy bảng điểm chuẩn hóa từ endpoint cá nhân
+      let transcriptData = null;
+      try {
+        const transcriptRes = await studentPortalApi.getMyTranscript();
+        transcriptData = transcriptRes?.data;
+      } catch (err) {
+        console.warn('Endpoint cá nhân gặp sự cố, thử fallback theo mã SV', err);
+        let targetStudentId = currentUser?.studentId;
+        if (!targetStudentId) {
+          try {
+            const stored = localStorage.getItem('user_info') || sessionStorage.getItem('user_info');
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              targetStudentId = parsed.studentId || (parsed.username?.startsWith('SV') ? parsed.username : null);
             }
-          });
+          } catch (e) {}
         }
-        setGrades(allGrades);
+
+        if (targetStudentId) {
+          const fallbackRes = await gradeApi.getTranscript(targetStudentId);
+          transcriptData = fallbackRes?.data;
+        }
       }
+
+      setTranscript(transcriptData);
+
+      let allGrades = [];
+      if (transcriptData?.semesterTranscripts?.length > 0) {
+        transcriptData.semesterTranscripts.forEach((st) => {
+          if (st.grades) {
+            allGrades.push(...st.grades.map(g => ({ ...g, semester: st.semester, academicYear: st.academicYear })));
+          }
+        });
+      }
+      setGrades(allGrades);
     } catch (err) {
       console.error('Lỗi khi tải dữ liệu bảng điểm', err);
+      onNotify?.('error', 'Không thể tải bảng điểm học tập');
     } finally {
       setLoading(false);
     }
@@ -55,7 +69,7 @@ export default function StudentTranscriptView({ currentUser }) {
 
   const handleExportCSV = () => {
     if (!grades || grades.length === 0) {
-      alert('Chưa có dữ liệu bảng điểm để xuất file.');
+      onNotify?.('warning', 'Chưa có dữ liệu bảng điểm để xuất file.');
       return;
     }
 
@@ -116,6 +130,7 @@ export default function StudentTranscriptView({ currentUser }) {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    onNotify?.('success', 'Đã xuất bảng điểm kết quả học tập (CSV) thành công!');
   };
 
   const handlePrint = () => {

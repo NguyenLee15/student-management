@@ -7,8 +7,10 @@ import {
 import { studentRegistrationApi, registrationPeriodApi } from '../../../api';
 import RegistrationCartDrawer from './RegistrationCartDrawer';
 import ConfirmDialog from '../../../components/common/ConfirmDialog';
+import Skeleton from '../../../components/common/Skeleton';
+import EmptyState from '../../../components/common/EmptyState';
 
-export default function CourseRegistrationView() {
+export default function CourseRegistrationView({ onNotify }) {
   const [activeTab, setActiveTab] = useState('available'); // 'available' | 'enrolled'
   const [activePeriod, setActivePeriod] = useState(null);
   const [availableClasses, setAvailableClasses] = useState([]);
@@ -96,14 +98,18 @@ export default function CourseRegistrationView() {
       const idempotencyKey = 'REG-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8);
       const res = await studentRegistrationApi.registerBatch(classIds, idempotencyKey);
       
-      setSuccessMessage(res.data?.message || 'Đăng ký thành công!');
+      const successMsg = res.data?.message || 'Đăng ký học phần thành công!';
+      setSuccessMessage(successMsg);
+      onNotify?.('success', successMsg);
       setCart([]);
       setIsCartOpen(false);
       await loadRegistrationData();
     } catch (err) {
       console.error('Đăng ký học phần thất bại', err);
       const errorData = err.response?.data;
-      setErrorMessage(errorData?.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại điều kiện giỏ môn học.');
+      const errMsg = errorData?.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại điều kiện giỏ môn học.';
+      setErrorMessage(errMsg);
+      onNotify?.('error', errMsg);
       if (errorData?.details) {
         setValidationResult({ valid: false, violations: Array.isArray(errorData.details) ? errorData.details : [errorData.details] });
       }
@@ -123,10 +129,14 @@ export default function CourseRegistrationView() {
 
     try {
       await studentRegistrationApi.dropCourse(enrollmentId);
-      setSuccessMessage(`Đã rút môn '${subjectName}' thành công.`);
+      const successMsg = `Đã rút môn '${subjectName}' thành công.`;
+      setSuccessMessage(successMsg);
+      onNotify?.('success', successMsg);
       await loadRegistrationData();
     } catch (err) {
-      setErrorMessage(err.response?.data?.message || 'Không thể rút học phần.');
+      const errMsg = err.response?.data?.message || 'Không thể rút học phần.';
+      setErrorMessage(errMsg);
+      onNotify?.('error', errMsg);
     }
   };
 
@@ -289,16 +299,29 @@ export default function CourseRegistrationView() {
               </thead>
               <tbody className="divide-y divide-slate-200/70">
                 {loading ? (
-                  <tr>
-                    <td colSpan="7" className="py-12 text-center text-slate-400">
-                      <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-blue-600" />
-                      <span>Đang tải danh sách lớp học phần...</span>
-                    </td>
-                  </tr>
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <tr key={idx} className="animate-pulse">
+                      <td className="px-5 py-4">
+                        <Skeleton className="h-4 w-16 mb-2 rounded" />
+                        <Skeleton className="h-5 w-48 mb-1 rounded" />
+                        <Skeleton className="h-3 w-32 rounded" />
+                      </td>
+                      <td className="px-4 py-4"><Skeleton className="h-5 w-8 rounded" /></td>
+                      <td className="px-4 py-4"><Skeleton className="h-4 w-28 rounded" /></td>
+                      <td className="px-4 py-4"><Skeleton className="h-4 w-24 rounded" /></td>
+                      <td className="px-4 py-4 text-center"><Skeleton className="h-4 w-16 mx-auto rounded" /></td>
+                      <td className="px-4 py-4 text-right"><Skeleton className="h-4 w-24 ml-auto rounded" /></td>
+                      <td className="px-5 py-4 text-center"><Skeleton className="h-8 w-24 mx-auto rounded-xl" /></td>
+                    </tr>
+                  ))
                 ) : filteredClasses.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="py-12 text-center text-slate-400">
-                      Không tìm thấy lớp học phần nào phù hợp.
+                    <td colSpan="7" className="py-12">
+                      <EmptyState
+                        icon={BookOpen}
+                        title="Không tìm thấy lớp học phần nào"
+                        description="Hiện tại không có lớp học phần nào mở đăng ký khớp với từ khóa tìm kiếm."
+                      />
                     </td>
                   </tr>
                 ) : (
@@ -407,8 +430,12 @@ export default function CourseRegistrationView() {
               <tbody className="divide-y divide-slate-200/70">
                 {myEnrollments.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="py-12 text-center text-slate-400">
-                      Bạn chưa đăng ký môn học nào trong học kỳ này.
+                    <td colSpan="7" className="py-12">
+                      <EmptyState
+                        icon={BookOpen}
+                        title="Chưa có học phần nào được đăng ký"
+                        description="Bạn chưa đăng ký lớp học phần nào trong học kỳ này. Hãy chuyển sang tab 'Môn Mở Đăng Ký' để bắt đầu chọn môn."
+                      />
                     </td>
                   </tr>
                 ) : (

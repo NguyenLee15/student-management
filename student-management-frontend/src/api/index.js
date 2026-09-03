@@ -210,6 +210,7 @@ export const studentRegistrationApi = {
 // 19. Student Personal Portal API
 export const studentPortalApi = {
   getMyOverview: () => axiosClient.get('/students/portal/me/overview'),
+  getMyTranscript: () => axiosClient.get('/students/portal/me/transcript'),
   getMyTimetable: (semesterId) => axiosClient.get('/students/portal/me/timetable', { params: { semesterId } }),
   getMyTuition: (semesterId) => axiosClient.get('/students/portal/me/tuition', { params: { semesterId } }),
   getAllMyTuition: () => axiosClient.get('/students/portal/me/tuition/all'),

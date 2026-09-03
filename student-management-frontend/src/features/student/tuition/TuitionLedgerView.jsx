@@ -7,7 +7,7 @@ import {
 import { studentPortalApi, paymentApi } from '../../../api';
 import Skeleton from '../../../components/common/Skeleton';
 
-export default function TuitionLedgerView({ onNavigateTab }) {
+export default function TuitionLedgerView({ onNotify, onNavigateTab }) {
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSemester, setSelectedSemester] = useState(1);
@@ -33,6 +33,11 @@ export default function TuitionLedgerView({ onNavigateTab }) {
       handleSyncPayOSStatus(orderCodeParam);
       
       // Clear URL params so we don't re-sync on refresh or semester change
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === 'cancelled') {
+      const cancelMsg = 'Bạn đã hủy phiên thanh toán VietQR PayOS.';
+      setErrorMsg(cancelMsg);
+      onNotify?.('warning', cancelMsg);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [selectedSemester]);
@@ -64,13 +69,18 @@ export default function TuitionLedgerView({ onNavigateTab }) {
       const res = await paymentApi.syncStatus(code);
       const txn = res.data;
       if (txn?.status === 'PAID') {
-        setSuccessMsg(`✅ Giao dịch #${code} đã được xác nhận thanh toán thành công! Công nợ đã giảm.`);
+        const msgText = `Giao dịch #${code} đã được xác nhận thanh toán thành công! Công nợ đã giảm.`;
+        setSuccessMsg(msgText);
+        onNotify?.('success', msgText);
       } else {
-        setErrorMsg(`Trạng thái giao dịch #${code}: ${msg.enum.paymentStatus[txn?.status] || txn?.status || 'Đang chờ xử lý'}.`);
+        const msgText = `Trạng thái giao dịch #${code}: ${msg.enum.paymentStatus[txn?.status] || txn?.status || 'Đang chờ xử lý'}.`;
+        setErrorMsg(msgText);
+        onNotify?.('info', msgText);
       }
       await loadInvoice();
     } catch (err) {
       console.error('Lỗi khi đồng bộ trạng thái giao dịch', err);
+      onNotify?.('error', 'Không thể đồng bộ trạng thái giao dịch từ cổng thanh toán');
     } finally {
       setIsSyncing(false);
     }
@@ -110,12 +120,16 @@ export default function TuitionLedgerView({ onNavigateTab }) {
         note: `Nộp học phí qua cổng ${payMethod}`,
       });
 
-      setSuccessMsg('Thanh toán học phí thành công! Công nợ đã được tất toán.');
+      const successText = 'Thanh toán học phí thành công! Công nợ đã được cập nhật.';
+      setSuccessMsg(successText);
+      onNotify?.('success', successText);
       setIsPayModalOpen(false);
       await loadInvoice();
     } catch (err) {
       console.error('Lỗi khi khởi tạo thanh toán', err);
-      setErrorMsg(err.response?.data?.message || 'Giao dịch thanh toán thất bại.');
+      const errorText = err.response?.data?.message || 'Giao dịch thanh toán thất bại.';
+      setErrorMsg(errorText);
+      onNotify?.('error', errorText);
     } finally {
       setIsPaying(false);
     }
