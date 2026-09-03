@@ -110,10 +110,11 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       // 2. Load existing grades for this subject
       const initialGrades = {};
       try {
+        const activeYear = cls.academicYearId || cls.academicYearName || '2026-2027';
         const gradeRes = await gradeApi.getAll({ 
           subjectId: cls.subjectId, 
           semester: cls.semester, 
-          academicYear: cls.academicYear, 
+          academicYear: activeYear, 
           size: 100 
         });
         const gradeData = gradeRes.data || gradeRes;
@@ -183,7 +184,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
         const score10 = Number(((att * 0.1) + (mid * 0.3) + (fin * 0.6)).toFixed(1));
 
         const baseSemester = selectedClass.semester || 'SEMESTER_1';
-        const baseYear = selectedClass.academicYear || '2025-2026';
+        const baseYear = selectedClass.academicYearId || selectedClass.academicYearName || '2026-2027';
 
         try {
           if (entry.gradeId) {
@@ -244,12 +245,77 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     }
   };
 
+  const handleSaveSingleGrade = async (st) => {
+    if (!selectedClass || !st) return;
+    const entry = gradeSheet[st.studentId] || {};
+    const att = Number(entry.attendanceScore) || 0;
+    const mid = Number(entry.midtermScore) || 0;
+    const fin = Number(entry.finalExamScore) || 0;
+    const score10 = Number(((att * 0.1) + (mid * 0.3) + (fin * 0.6)).toFixed(1));
+    const baseSemester = selectedClass.semester || 'SEMESTER_1';
+    const baseYear = selectedClass.academicYearId || selectedClass.academicYearName || '2026-2027';
+
+    try {
+      if (entry.gradeId) {
+        const updatePayload = {
+          gradeId: Number(entry.gradeId),
+          semester: baseSemester,
+          studyPhase: 'PHASE_1',
+          scoreScale10: score10,
+        };
+        const res = await gradeApi.update(entry.gradeId, updatePayload);
+        const savedData = res.data || res;
+        setGradeSheet(prev => ({
+          ...prev,
+          [st.studentId]: {
+            ...entry,
+            gradeId: savedData.gradeId || entry.gradeId,
+            isSaved: true,
+          }
+        }));
+      } else {
+        const createPayload = {
+          studentId: st.studentId,
+          subjectId: selectedClass.subjectId || 'IT001',
+          semester: baseSemester,
+          academicYear: baseYear,
+          studyPhase: 'PHASE_1',
+          scoreScale10: score10,
+        };
+        const res = await gradeApi.create(createPayload);
+        const savedData = res.data || res;
+        const newId = savedData.gradeId || savedData.data?.gradeId || savedData.id;
+        setGradeSheet(prev => ({
+          ...prev,
+          [st.studentId]: {
+            ...entry,
+            gradeId: newId,
+            isSaved: true,
+          }
+        }));
+      }
+      onNotify('success', `Đã lưu điểm cho SV ${st.fullName || st.studentId}!`);
+    } catch (err) {
+      onNotify('error', err?.response?.data?.message || err?.message || `Lỗi khi lưu điểm cho SV ${st.studentId}`);
+    }
+  };
+
   // Real Export Attendance Roster as CSV / Excel
   const handleExportAttendance = () => {
     if (!selectedClass || students.length === 0) {
       onNotify('warning', 'Không có sinh viên nào trong danh sách để xuất.');
       return;
     }
+
+    const metaBlock = [
+      `"DANH SÁCH ĐIỂM DANH HỌC PHẦN"`,
+      `"Môn học: ${selectedClass.subjectName || selectedClass.subjectId}"`,
+      `"Mã lớp tín chỉ: #${selectedClass.creditClassId}"`,
+      `"Giảng viên: ${teacherInfo?.fullName || 'Giảng Viên'} (${teacherInfo?.teacherId || currentTeacherId})"`,
+      `"Học kỳ: ${msg.enum.semester[selectedClass.semester] || selectedClass.semester || 'Học kỳ 1'} - Năm học: ${selectedClass.academicYearName || selectedClass.academicYearId || '2026-2027'}"`,
+      `"Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}"`,
+      ''
+    ];
 
     const headers = ['Mã Sinh Viên', 'Họ Và Tên', 'Giới Tính', 'Lớp Hành Chính', 'Buổi 1', 'Buổi 2', 'Buổi 3', 'Buổi 4', 'Buổi 5', 'Ghi Chú'];
     const rows = students.map((st) => [
@@ -260,7 +326,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       'V', 'V', 'V', 'V', 'V', 'Đủ điều kiện dự thi'
     ]);
 
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const csvContent = '\uFEFF' + [...metaBlock, headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -280,6 +346,17 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       onNotify('warning', 'Không có sinh viên nào trong danh sách để xuất.');
       return;
     }
+
+    const metaBlock = [
+      `"BẢNG ĐIỂM TỔNG KẾT HỌC PHẦN"`,
+      `"Môn học: ${selectedClass.subjectName || selectedClass.subjectId}"`,
+      `"Mã lớp tín chỉ: #${selectedClass.creditClassId}"`,
+      `"Giảng viên: ${teacherInfo?.fullName || 'Giảng Viên'} (${teacherInfo?.teacherId || currentTeacherId})"`,
+      `"Học kỳ: ${msg.enum.semester[selectedClass.semester] || selectedClass.semester || 'Học kỳ 1'} - Năm học: ${selectedClass.academicYearName || selectedClass.academicYearId || '2026-2027'}"`,
+      `"Quy chuẩn tính điểm: Chuyên cần (10%) + Giữa kỳ (30%) + Cuối kỳ (60%)"`,
+      `"Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}"`,
+      ''
+    ];
 
     const headers = [
       'STT',
@@ -330,7 +407,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
       ];
     });
 
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const csvContent = '\uFEFF' + [...metaBlock, headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -348,12 +425,12 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
   const matchesDay = (s, dayKey) => {
     if (!s) return false;
     const text = (s.studyTime || s.dayOfWeek || '').toLowerCase();
-    if (dayKey === 'MONDAY' && (text.includes('thứ 2') || text.includes('thu 2') || text.includes('monday') || text.includes('t2'))) return true;
-    if (dayKey === 'TUESDAY' && (text.includes('thứ 3') || text.includes('thu 3') || text.includes('tuesday') || text.includes('t3'))) return true;
-    if (dayKey === 'WEDNESDAY' && (text.includes('thứ 4') || text.includes('thu 4') || text.includes('wednesday') || text.includes('t4'))) return true;
-    if (dayKey === 'THURSDAY' && (text.includes('thứ 5') || text.includes('thu 5') || text.includes('thursday') || text.includes('t5'))) return true;
-    if (dayKey === 'FRIDAY' && (text.includes('thứ 6') || text.includes('thu 6') || text.includes('friday') || text.includes('t6'))) return true;
-    if (dayKey === 'SATURDAY' && (text.includes('thứ 7') || text.includes('thu 7') || text.includes('saturday') || text.includes('t7'))) return true;
+    if (dayKey === 'MONDAY' && (text.includes('thứ 2') || text.includes('thu 2') || text.includes('thứ hai') || text.includes('thu hai') || text.includes('monday') || text.includes('t2'))) return true;
+    if (dayKey === 'TUESDAY' && (text.includes('thứ 3') || text.includes('thu 3') || text.includes('thứ ba') || text.includes('thu ba') || text.includes('tuesday') || text.includes('t3'))) return true;
+    if (dayKey === 'WEDNESDAY' && (text.includes('thứ 4') || text.includes('thu 4') || text.includes('thứ tư') || text.includes('thu tu') || text.includes('wednesday') || text.includes('t4'))) return true;
+    if (dayKey === 'THURSDAY' && (text.includes('thứ 5') || text.includes('thu 5') || text.includes('thứ năm') || text.includes('thu nam') || text.includes('thursday') || text.includes('t5'))) return true;
+    if (dayKey === 'FRIDAY' && (text.includes('thứ 6') || text.includes('thu 6') || text.includes('thứ sáu') || text.includes('thu sau') || text.includes('friday') || text.includes('t6'))) return true;
+    if (dayKey === 'SATURDAY' && (text.includes('thứ 7') || text.includes('thu 7') || text.includes('thứ bảy') || text.includes('thu bay') || text.includes('saturday') || text.includes('t7'))) return true;
     if (dayKey === 'SUNDAY' && (text.includes('chủ nhật') || text.includes('chu nhat') || text.includes('sunday') || text.includes('cn'))) return true;
     return false;
   };
@@ -501,7 +578,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
 
           <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-400 flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-amber-400 shrink-0" />
-            <span>Học kỳ 1 • Năm học 2025 - 2026</span>
+            <span>Học kỳ 1 • Năm học 2026 - 2027</span>
           </div>
         </aside>
 
@@ -511,7 +588,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
           {activeTab === 'overview' && (
             <div className="space-y-6 animate-fade-in">
               <div className="panel-card p-6 bg-gradient-to-r from-emerald-950/60 via-slate-900 to-slate-900 space-y-2">
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Học kỳ 1 • 2025 - 2026</span>
+                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Học kỳ 1 • 2026 - 2027</span>
                 <h2 className="text-2xl font-black text-white">
                   Kính chào Thầy/Cô {teacherInfo?.fullName || 'Giảng Viên'}! 👋
                 </h2>
@@ -530,7 +607,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
 
                 <div className="panel-card p-4 bg-slate-900/60 space-y-1">
                   <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Tổng Số Sinh Viên</span>
-                  <div className="text-2xl font-black text-cyan-400">{classes.reduce((sum, c) => sum + (c.enrolledCount || 0), 0) || (classes.length * 30)} SV</div>
+                  <div className="text-2xl font-black text-cyan-400">{classes.reduce((sum, c) => sum + (c.enrolledCount || 0), 0)} SV</div>
                   <p className="text-[10px] text-slate-500">Đang theo học các lớp</p>
                 </div>
 
@@ -923,7 +1000,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                                   step="0.1"
                                   min="0"
                                   max="10"
-                                  value={entry.attendanceScore}
+                                  value={entry.attendanceScore ?? ''}
                                   onChange={(e) => handleGradeChange(st.studentId, 'attendanceScore', e.target.value)}
                                   className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
                                 />
@@ -934,7 +1011,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                                   step="0.1"
                                   min="0"
                                   max="10"
-                                  value={entry.midtermScore}
+                                  value={entry.midtermScore ?? ''}
                                   onChange={(e) => handleGradeChange(st.studentId, 'midtermScore', e.target.value)}
                                   className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
                                 />
@@ -945,7 +1022,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                                   step="0.1"
                                   min="0"
                                   max="10"
-                                  value={entry.finalExamScore}
+                                  value={entry.finalExamScore ?? ''}
                                   onChange={(e) => handleGradeChange(st.studentId, 'finalExamScore', e.target.value)}
                                   className="w-16 px-2 py-1 text-center bg-slate-950 border border-slate-800 rounded text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
                                 />
@@ -965,15 +1042,24 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                                 </span>
                               </td>
                               <td className="px-5 py-3 text-center">
-                                {entry.isSaved ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                    <CheckCheck className="w-3 h-3" /> Đã lưu
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                    Chưa lưu
-                                  </span>
-                                )}
+                                <div className="flex items-center justify-center gap-1.5">
+                                  {entry.isSaved ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                      <CheckCheck className="w-3 h-3" /> Đã lưu
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                      Chưa lưu
+                                    </span>
+                                  )}
+                                  <button
+                                    onClick={() => handleSaveSingleGrade(st)}
+                                    title="Lưu điểm sinh viên này"
+                                    className="p-1 rounded-md text-slate-400 hover:text-emerald-400 hover:bg-slate-800 transition"
+                                  >
+                                    <Save className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           );
