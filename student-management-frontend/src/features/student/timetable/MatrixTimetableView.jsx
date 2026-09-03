@@ -10,11 +10,11 @@ export default function MatrixTimetableView() {
 
   const daysOfWeek = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
   const timeSlots = [
-    { label: 'Sáng (Tiết 1-3)', time: '07:00 - 09:25', shift: 'MORNING' },
-    { label: 'Sáng (Tiết 4-6)', time: '09:35 - 12:00', shift: 'MORNING' },
-    { label: 'Chiều (Tiết 7-9)', time: '13:00 - 15:25', shift: 'AFTERNOON' },
-    { label: 'Chiều (Tiết 10-12)', time: '15:35 - 18:00', shift: 'AFTERNOON' },
-    { label: 'Tối (Tiết 13-15)', time: '18:15 - 20:45', shift: 'EVENING' },
+    { key: '1-3', label: 'Sáng (Tiết 1-3)', time: '07:00 - 09:25', shift: 'MORNING' },
+    { key: '4-6', label: 'Sáng (Tiết 4-6)', time: '09:35 - 12:00', shift: 'MORNING' },
+    { key: '7-9', label: 'Chiều (Tiết 7-9)', time: '13:00 - 15:25', shift: 'AFTERNOON' },
+    { key: '10-12', label: 'Chiều (Tiết 10-12)', time: '15:35 - 18:00', shift: 'AFTERNOON' },
+    { key: '13-15', label: 'Tối (Tiết 13-15)', time: '18:15 - 20:45', shift: 'EVENING' },
   ];
 
   useEffect(() => {
@@ -35,10 +35,33 @@ export default function MatrixTimetableView() {
 
   const getEntriesForCell = (day, slot) => {
     return timetable.filter((item) => {
-      const studyTime = item.studyTime || '';
-      const matchesDay = studyTime.toLowerCase().includes(day.toLowerCase());
-      const matchesShift = item.classShift === slot.shift;
-      return matchesDay || (matchesShift && studyTime.includes(day));
+      const studyTime = (item.studyTime || '').toLowerCase();
+      const dayNorm = day.toLowerCase();
+      const dayMatches = studyTime.includes(dayNorm) || 
+        (dayNorm === 'thứ 2' && (studyTime.includes('thứ hai') || studyTime.includes('t2') || studyTime.includes('monday'))) ||
+        (dayNorm === 'thứ 3' && (studyTime.includes('thứ ba') || studyTime.includes('t3') || studyTime.includes('tuesday'))) ||
+        (dayNorm === 'thứ 4' && (studyTime.includes('thứ tư') || studyTime.includes('t4') || studyTime.includes('wednesday'))) ||
+        (dayNorm === 'thứ 5' && (studyTime.includes('thứ năm') || studyTime.includes('t5') || studyTime.includes('thursday'))) ||
+        (dayNorm === 'thứ 6' && (studyTime.includes('thứ sáu') || studyTime.includes('t6') || studyTime.includes('friday'))) ||
+        (dayNorm === 'thứ 7' && (studyTime.includes('thứ bảy') || studyTime.includes('t7') || studyTime.includes('saturday'))) ||
+        (dayNorm === 'chủ nhật' && (studyTime.includes('cn') || studyTime.includes('sunday')));
+
+      if (!dayMatches) return false;
+
+      // Match slot key if present in studyTime
+      if (slot.key && studyTime.includes(slot.key)) return true;
+      if (slot.key === '1-3' && (studyTime.includes('tiết 1') || studyTime.includes('ca 1'))) return true;
+      if (slot.key === '4-6' && (studyTime.includes('tiết 4') || studyTime.includes('ca 2'))) return true;
+      if (slot.key === '7-9' && (studyTime.includes('tiết 7') || studyTime.includes('ca 3'))) return true;
+      if (slot.key === '10-12' && (studyTime.includes('tiết 10') || studyTime.includes('ca 4'))) return true;
+      if (slot.key === '13-15' && (studyTime.includes('tiết 13') || studyTime.includes('ca 5'))) return true;
+
+      // Fallback: match shift if studyTime doesn't specify periods
+      if (!studyTime.includes('tiết') && !studyTime.includes('-')) {
+        return item.classShift === slot.shift && (slot.key === '1-3' || slot.key === '7-9' || slot.key === '13-15');
+      }
+
+      return false;
     });
   };
 

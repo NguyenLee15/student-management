@@ -118,6 +118,7 @@ export const scheduleApi = {
 export const gradeApi = {
   getAll: (params) => axiosClient.get('/academic-grades', { params }),
   getById: (id) => axiosClient.get(`/academic-grades/${id}`),
+  getTranscript: (studentId) => axiosClient.get(`/academic-grades/transcript/${studentId}`),
   create: (data) => axiosClient.post('/academic-grades', data),
   update: (id, data) => axiosClient.put(`/academic-grades/${id}`, data),
   delete: (id) => axiosClient.delete(`/academic-grades/${id}`),

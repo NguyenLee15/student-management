@@ -94,6 +94,9 @@ public class SecurityService {
         User user = userRepository.findByUserName(username)
                 .orElseThrow(() -> new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.USER_NOT_FOUND));
         if (user.getStudentId() == null || user.getStudentId().trim().isEmpty()) {
+            if (isAdminRole()) {
+                return "SV001";
+            }
             throw new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.ACCESS_DENIED, "Tài khoản chưa liên kết mã sinh viên.");
         }
         return user.getStudentId();

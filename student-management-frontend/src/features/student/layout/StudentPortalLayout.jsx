@@ -98,11 +98,11 @@ export default function StudentPortalLayout({ user, onLogout, onSwitchToAdmin })
 
         {/* Sidebar Navigation */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 p-4 transform transition-transform duration-200 ease-in-out md:static md:translate-x-0 md:bg-transparent md:border-0 md:p-0 ${
+          className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 p-4 transform transition-transform duration-200 ease-in-out md:static md:translate-x-0 md:bg-transparent md:border-0 md:p-0 shrink-0 ${
             isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
-          <div className="space-y-1">
+          <div className="md:sticky md:top-24 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;

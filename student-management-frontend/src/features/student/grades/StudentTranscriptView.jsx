@@ -4,6 +4,7 @@ import { Award, Printer, Download, BookOpen, CheckCircle, RefreshCw } from 'luci
 import { gradeApi, studentPortalApi } from '../../../api';
 
 export default function StudentTranscriptView() {
+  const [transcript, setTranscript] = useState(null);
   const [grades, setGrades] = useState([]);
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,35 +16,30 @@ export default function StudentTranscriptView() {
   const loadTranscriptData = async () => {
     setLoading(true);
     try {
-      const [gradeRes, overRes] = await Promise.all([
-        gradeApi.getAll({ unpaged: true }),
-        studentPortalApi.getMyOverview(),
-      ]);
-      setGrades(gradeRes.data?.content || gradeRes.data || []);
-      setOverview(overRes.data);
+      const overRes = await studentPortalApi.getMyOverview();
+      const stOverview = overRes.data;
+      setOverview(stOverview);
+
+      const targetStudentId = stOverview?.studentId || 'SV001';
+      const transcriptRes = await gradeApi.getTranscript(targetStudentId);
+      const transcriptData = transcriptRes.data;
+      setTranscript(transcriptData);
+
+      // Collect all grades from semester transcripts or fallback
+      let allGrades = [];
+      if (transcriptData?.semesterTranscripts?.length > 0) {
+        transcriptData.semesterTranscripts.forEach((st) => {
+          if (st.grades) {
+            allGrades.push(...st.grades.map(g => ({ ...g, semester: st.semester, academicYear: st.academicYear })));
+          }
+        });
+      }
+      setGrades(allGrades);
     } catch (err) {
       console.error('Lỗi khi tải dữ liệu bảng điểm', err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const getLetterGrade = (score10) => {
-    if (!score10) return 'F';
-    const s = Number(score10);
-    if (s >= 8.5) return 'A';
-    if (s >= 8.0) return 'B+';
-    if (s >= 7.0) return 'B';
-    if (s >= 6.5) return 'C+';
-    if (s >= 5.5) return 'C';
-    if (s >= 5.0) return 'D+';
-    if (s >= 4.0) return 'D';
-    return 'F';
-  };
-
-  const getScore4 = (score10) => {
-    if (!score10) return '0.0';
-    return (Number(score10) * 0.4).toFixed(2);
   };
 
   const handlePrint = () => {
@@ -146,22 +142,30 @@ export default function StudentTranscriptView() {
                       {idx + 1}
                     </td>
                     <td className="p-2 border-r border-slate-300 font-mono font-bold">
-                      {g.subject?.subjectId || g.subjectId || ''}
+                      {g.subjectId || g.subject?.subjectId || ''}
                     </td>
                     <td className="p-2 border-r border-slate-300 font-bold text-slate-800">
-                      {g.subject?.subjectName || g.subjectName || 'Học phần'}
+                      {g.subjectName || g.subject?.subjectName || 'Học phần'}
                     </td>
                     <td className="p-2 border-r border-slate-300 text-center font-semibold">
-                      {g.subject?.credits || 0}
+                      {g.credits || g.subject?.credits || 0}
                     </td>
                     <td className="p-2 border-r border-slate-300 text-center font-bold text-blue-700">
                       {g.scoreScale10 != null ? Number(g.scoreScale10).toFixed(1) : '-'}
                     </td>
-                    <td className="p-2 border-r border-slate-300 text-center font-semibold">
-                      {getScore4(g.scoreScale10)}
+                    <td className="p-2 border-r border-slate-300 text-center font-bold text-slate-700">
+                      {g.scoreScale4 != null ? Number(g.scoreScale4).toFixed(2) : '-'}
                     </td>
-                    <td className="p-2 text-center font-black text-slate-800">
-                      {getLetterGrade(g.scoreScale10)}
+                    <td className="p-2 text-center">
+                      <span className={`px-2 py-0.5 rounded text-xs font-black ${
+                        g.letterGrade === 'A' ? 'bg-emerald-100 text-emerald-800' :
+                        g.letterGrade?.startsWith('B') ? 'bg-indigo-100 text-indigo-800' :
+                        g.letterGrade?.startsWith('C') ? 'bg-blue-100 text-blue-800' :
+                        g.letterGrade?.startsWith('D') ? 'bg-amber-100 text-amber-800' :
+                        'bg-rose-100 text-rose-800'
+                      }`}>
+                        {g.letterGrade || '-'}
+                      </span>
                     </td>
                   </tr>
                 ))
@@ -171,18 +175,22 @@ export default function StudentTranscriptView() {
         </div>
 
         {/* GPA Summary Box */}
-        <div className="grid grid-cols-3 gap-4 p-4 bg-slate-900 text-white rounded-xl text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-900 text-white rounded-xl text-center">
           <div>
             <div className="text-[11px] text-slate-400 uppercase font-bold">Tổng Tín Chỉ Tích Lũy</div>
-            <div className="text-xl font-black">{overview?.totalAccumulatedCredits || 0} TC</div>
+            <div className="text-xl font-black text-white">{transcript?.totalCreditsEarned ?? overview?.totalAccumulatedCredits ?? 0} TC</div>
           </div>
           <div>
             <div className="text-[11px] text-slate-400 uppercase font-bold">Điểm GPA Hệ 10</div>
-            <div className="text-xl font-black text-emerald-400">{overview?.cumulativeGpa10 || '0.00'}</div>
+            <div className="text-xl font-black text-emerald-400">{transcript?.cumulativeGpa10 ?? overview?.cumulativeGpa10 ?? '0.00'}</div>
           </div>
           <div>
             <div className="text-[11px] text-slate-400 uppercase font-bold">Điểm GPA Hệ 4</div>
-            <div className="text-xl font-black text-blue-400">{overview?.cumulativeGpa4 || '0.00'}</div>
+            <div className="text-xl font-black text-blue-400">{transcript?.cumulativeGpa4 ?? overview?.cumulativeGpa4 ?? '0.00'}</div>
+          </div>
+          <div>
+            <div className="text-[11px] text-slate-400 uppercase font-bold">Xếp Loại Học Lực</div>
+            <div className="text-xl font-black text-amber-400">{transcript?.academicStanding || overview?.academicStanding || 'Chưa xét'}</div>
           </div>
         </div>
 
