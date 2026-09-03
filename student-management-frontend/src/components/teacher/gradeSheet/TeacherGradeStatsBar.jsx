@@ -49,3 +49,4 @@ export default function TeacherGradeStatsBar({ gradeStats, totalStudents = 0 }) 
     </div>
   );
 }
+
