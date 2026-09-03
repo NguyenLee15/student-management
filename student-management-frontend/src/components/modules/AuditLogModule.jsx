@@ -88,7 +88,7 @@ export default function AuditLogModule({ onNotify }) {
             <tbody className="divide-y divide-slate-800/60">
               {logs.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-5 py-8 text-center text-slate-500">
+                  <td colSpan="7" className="px-5 py-8 text-center text-slate-500">
                     {loading ? 'Đang tải nhật ký hoạt động...' : 'Chưa có hoạt động nào được ghi nhận.'}
                   </td>
                 </tr>

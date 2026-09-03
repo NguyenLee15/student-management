@@ -58,9 +58,7 @@ public class UserRestController {
     @Operation(summary = "Lấy chi tiết người dùng theo tên đăng nhập")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponseDto>> getByUserName(@PathVariable String userName) {
-        return userService.findByUserName(userName)
-                .map(u -> ResponseEntity.ok(ApiResponse.success(u)))
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(ApiResponse.success(userService.getByUserName(userName)));
     }
 
     @PostMapping

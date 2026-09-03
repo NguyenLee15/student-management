@@ -131,6 +131,22 @@ export default function SubjectModule({ onNotify, currentUser }) {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const response = await subjectApi.exportExcel();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `DanhSachMonHoc_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      onNotify('success', 'Xuất báo cáo Excel môn học thành công!');
+    } catch (err) {
+      onNotify('error', 'Xuất file Excel môn học thất bại.');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -139,15 +155,25 @@ export default function SubjectModule({ onNotify, currentUser }) {
           <p className="text-xs text-slate-400 mt-1">Quản lý chương trình đào tạo, số tín chỉ, học phí và môn học tiên quyết</p>
         </div>
 
-        {isAdmin && (
+        <div className="flex items-center gap-2.5">
           <button
-            onClick={handleOpenCreate}
-            className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-cyan-600/30 transition active:scale-95"
+            onClick={handleExportExcel}
+            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-cyan-400 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-800 transition shadow-sm"
           >
-            <Plus className="h-4 w-4" />
-            <span>Thêm Môn Học</span>
+            <Download className="h-4 w-4" />
+            <span>Xuất Excel</span>
           </button>
-        )}
+
+          {isAdmin && (
+            <button
+              onClick={handleOpenCreate}
+              className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-cyan-600/30 transition active:scale-95"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Thêm Môn Học</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="panel-card p-4 flex flex-wrap items-center gap-3">

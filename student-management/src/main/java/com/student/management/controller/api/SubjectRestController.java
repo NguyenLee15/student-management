@@ -4,6 +4,7 @@ package com.student.management.controller.api;
 import com.student.management.dto.req.SubjectRequestDto;
 import com.student.management.dto.resp.ApiResponse;
 import com.student.management.dto.resp.SubjectResponseDto;
+import com.student.management.exception.NotFoundException;
 import com.student.management.service.SubjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,9 +49,9 @@ public class SubjectRestController {
     @Operation(summary = "Lấy chi tiết môn học theo ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
     public ResponseEntity<ApiResponse<SubjectResponseDto>> getById(@PathVariable String id) {
-        return subjectService.getById(id)
-                .map(s -> ResponseEntity.ok(ApiResponse.success(s)))
-                .orElse(ResponseEntity.notFound().build());
+        SubjectResponseDto subject = subjectService.getById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy môn học: " + id));
+        return ResponseEntity.ok(ApiResponse.success(subject));
     }
 
     @PostMapping

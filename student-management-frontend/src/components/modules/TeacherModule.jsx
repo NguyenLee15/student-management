@@ -1,7 +1,7 @@
 import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
 import { 
-  Plus, Search, Edit3, Trash2, UserSquare2, RefreshCw, Mail, Phone, Building2 
+  Plus, Search, Edit3, Trash2, UserSquare2, RefreshCw, Mail, Phone, Building2, Download 
 } from 'lucide-react';
 import { teacherApi, facultyApi } from '../../api';
 import Modal from '../common/Modal';
@@ -146,6 +146,22 @@ export default function TeacherModule({ onNotify, currentUser }) {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const response = await teacherApi.exportExcel();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `DanhSachGiangVien_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      onNotify('success', 'Xuất báo cáo Excel giảng viên thành công!');
+    } catch (err) {
+      onNotify('error', 'Xuất file Excel thất bại.');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -155,15 +171,25 @@ export default function TeacherModule({ onNotify, currentUser }) {
           <p className="text-xs text-slate-400 mt-1">Quản lý hồ sơ giảng viên, học hàm học vị, phân công khoa và liên hệ</p>
         </div>
 
-        {isAdmin && (
+        <div className="flex items-center gap-2.5">
           <button
-            onClick={handleOpenCreate}
-            className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/30 transition active:scale-95"
+            onClick={handleExportExcel}
+            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-cyan-400 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-800 transition shadow-sm"
           >
-            <Plus className="h-4 w-4" />
-            <span>Thêm Giảng Viên Mới</span>
+            <Download className="h-4 w-4" />
+            <span>Xuất Excel</span>
           </button>
-        )}
+
+          {isAdmin && (
+            <button
+              onClick={handleOpenCreate}
+              className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/30 transition active:scale-95"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Thêm Giảng Viên Mới</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filter and Search Bar */}

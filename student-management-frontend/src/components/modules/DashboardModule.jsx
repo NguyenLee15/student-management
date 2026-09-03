@@ -191,7 +191,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
         <StatCard
           title="Lớp Tín Chỉ Đang Mở"
           value={stats?.creditClasses ?? stats?.classes ?? '—'}
-          subtitle="Học kỳ 1 (2025 - 2026)"
+          subtitle="Học kỳ 1 (2026 - 2027)"
           icon={Layers}
           trend="Đang giảng dạy"
         />

@@ -174,12 +174,12 @@ export default function StudentModule({ onNotify, currentUser }) {
           await studentApi.update(id, { ...st, classId: batchClassId });
         }
       }
-      addToast(`Đã chuyển lớp thành công cho ${selectedIds.size} sinh viên!`, 'success');
+      onNotify('success', `Đã chuyển lớp thành công cho ${selectedIds.size} sinh viên!`);
       setSelectedIds(new Set());
       setShowBatchClassModal(false);
       loadStudents();
     } catch (err) {
-      addToast('Có lỗi xảy ra khi chuyển lớp hàng loạt.', 'error');
+      onNotify('error', 'Có lỗi xảy ra khi chuyển lớp hàng loạt.');
     } finally {
       setLoading(false);
     }
@@ -193,11 +193,11 @@ export default function StudentModule({ onNotify, currentUser }) {
       for (const id of Array.from(selectedIds)) {
         await studentApi.delete(id);
       }
-      addToast(`Đã xóa thành công ${selectedIds.size} sinh viên!`, 'success');
+      onNotify('success', `Đã xóa thành công ${selectedIds.size} sinh viên!`);
       setSelectedIds(new Set());
       loadStudents();
     } catch (err) {
-      addToast('Có lỗi xảy ra khi xóa sinh viên.', 'error');
+      onNotify('error', 'Có lỗi xảy ra khi xóa sinh viên.');
     } finally {
       setLoading(false);
     }

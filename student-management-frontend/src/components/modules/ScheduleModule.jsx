@@ -41,12 +41,12 @@ export default function ScheduleModule({ onNotify, currentUser }) {
     teacherId: '',
     roomId: '',
     semester: 'SEMESTER_1',
-    academicYear: '2025-2026',
+    academicYear: '2026-2027',
     dayOfWeek: 2, // Monday
     classShift: 'SHIFT_1', // Shift key
     studyTime: '',
-    startDate: '2025-09-01',
-    endDate: '2025-12-30',
+    startDate: '2026-09-01',
+    endDate: '2027-01-15',
   };
   const [formData, setFormData] = useState(initialForm);
 
@@ -110,12 +110,15 @@ export default function ScheduleModule({ onNotify, currentUser }) {
 
   const handleOpenCreate = () => {
     setIsEdit(false);
+    const firstCc = creditClasses[0];
     setFormData({
       ...initialForm,
-      creditClassId: creditClasses[0]?.creditClassId || '',
-      subjectId: creditClasses[0]?.subjectId || '',
-      teacherId: teachers[0]?.teacherId || '',
-      roomId: classrooms[0]?.roomId || '',
+      creditClassId: firstCc?.creditClassId || '',
+      subjectId: firstCc?.subjectId || '',
+      teacherId: firstCc?.teacherId || teachers[0]?.teacherId || '',
+      roomId: firstCc?.classroomId || classrooms[0]?.roomId || '',
+      semester: firstCc?.semester || 'SEMESTER_1',
+      academicYear: firstCc?.academicYearId || firstCc?.academicYearName || '2026-2027',
     });
     setShowModal(true);
   };
@@ -129,12 +132,12 @@ export default function ScheduleModule({ onNotify, currentUser }) {
       teacherId: s.teacherId || '',
       roomId: s.roomId || '',
       semester: s.semester || 'SEMESTER_1',
-      academicYear: s.academicYear || '2025-2026',
+      academicYear: s.academicYear || '2026-2027',
       dayOfWeek: s.dayOfWeek || 2,
       classShift: s.classShift?.startsWith('SHIFT_') ? s.classShift : 'SHIFT_1',
       studyTime: s.studyTime || '',
-      startDate: s.startDate || '2025-09-01',
-      endDate: s.endDate || '2025-12-30',
+      startDate: s.startDate || '2026-09-01',
+      endDate: s.endDate || '2027-01-15',
     });
     setShowModal(true);
   };
@@ -144,6 +147,8 @@ export default function ScheduleModule({ onNotify, currentUser }) {
     try {
       const selectedCc = creditClasses.find(c => String(c.creditClassId) === String(formData.creditClassId));
       const subjectId = selectedCc?.subjectId || formData.subjectId || 'IT101';
+      const semester = formData.semester || selectedCc?.semester || 'SEMESTER_1';
+      const academicYear = formData.academicYear || selectedCc?.academicYearId || selectedCc?.academicYearName || '2026-2027';
       const shiftCfg = SHIFT_CONFIGS[formData.classShift] || { classShift: 'MORNING', period: 'Tiết 1-3 (07:00 - 09:15)' };
       const weekdayStr = Number(formData.dayOfWeek) === 8 ? 'Chủ Nhật' : `Thứ ${formData.dayOfWeek}`;
       const studyTime = `${weekdayStr}, ${shiftCfg.period}`;
@@ -152,6 +157,8 @@ export default function ScheduleModule({ onNotify, currentUser }) {
         ...formData,
         creditClassId: Number(formData.creditClassId),
         subjectId,
+        semester,
+        academicYear,
         studyTime,
         classShift: shiftCfg.classShift,
       };
@@ -281,7 +288,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-slate-400">
-                    {s.semester} ({s.academicYear || '2025-2026'})
+                    {s.semester} ({s.academicYear || '2026-2027'})
                   </td>
                   <td className="px-5 py-3.5 text-right space-x-1">
                     {isAdmin && (
@@ -328,7 +335,19 @@ export default function ScheduleModule({ onNotify, currentUser }) {
               <label className="block text-slate-300 font-semibold mb-1">Lớp Tín Chỉ*</label>
               <select
                 value={formData.creditClassId}
-                onChange={(e) => setFormData({ ...formData, creditClassId: parseInt(e.target.value) || e.target.value })}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value) || e.target.value;
+                  const cc = creditClasses.find(c => String(c.creditClassId) === String(val));
+                  setFormData({
+                    ...formData,
+                    creditClassId: val,
+                    subjectId: cc?.subjectId || formData.subjectId,
+                    teacherId: cc?.teacherId || formData.teacherId,
+                    roomId: cc?.classroomId || formData.roomId,
+                    semester: cc?.semester || formData.semester,
+                    academicYear: cc?.academicYearId || cc?.academicYearName || formData.academicYear || '2026-2027',
+                  });
+                }}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-teal-500"
               >
                 {creditClasses.map((cc) => (

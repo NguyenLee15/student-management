@@ -35,7 +35,7 @@ export default function GradeModule({ onNotify, currentUser }) {
     midtermScore: 8.5,
     finalExamScore: 8.0,
     semester: 'SEMESTER_1',
-    academicYear: '2025-2026',
+    academicYear: '2026-2027',
     studyPhase: 'PHASE_1',
   };
   const [formData, setFormData] = useState(initialForm);
@@ -113,7 +113,7 @@ export default function GradeModule({ onNotify, currentUser }) {
       midtermScore: g.midtermScore ?? 8.5,
       finalExamScore: g.finalExamScore ?? 8.0,
       semester: g.semester || 'SEMESTER_1',
-      academicYear: g.academicYear || '2025-2026',
+      academicYear: g.academicYear || '2026-2027',
       studyPhase: g.studyPhase || 'PHASE_1',
     });
     setShowModal(true);
@@ -160,7 +160,16 @@ export default function GradeModule({ onNotify, currentUser }) {
       ].join(',');
     });
 
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const metaBlock = [
+      `"TRƯỜNG ĐẠI HỌC CÔNG NGHỆ & ĐÀO TẠO"`,
+      `"BẢNG ĐIỂM TỔNG HỢP HỌC PHẦN (QUẢN LÝ ĐÀO TẠO)"`,
+      `"Học kỳ: ${selectedSemester ? (msg.enum.semester[selectedSemester] || selectedSemester) : 'Tất cả học kỳ'} | Năm học: 2026-2027"`,
+      `"Tổng số bản ghi: ${grades.length}"`,
+      `"Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}"`,
+      ''
+    ];
+
+    const csvContent = '\uFEFF' + [...metaBlock, headers.join(','), ...rows].join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

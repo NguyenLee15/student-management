@@ -46,6 +46,14 @@ export const teacherApi = {
   create: (data) => axiosClient.post('/teachers', data),
   update: (id, data) => axiosClient.put(`/teachers/${id}`, data),
   delete: (id) => axiosClient.delete(`/teachers/${id}`),
+  exportExcel: () => {
+    return axios.get(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/teachers/export`, {
+      responseType: 'blob',
+      headers: {
+        Authorization: `Bearer ${getMemoryToken() || ''}`,
+      },
+    });
+  },
 };
 
 // 4. Faculties API
@@ -82,6 +90,14 @@ export const subjectApi = {
   create: (data) => axiosClient.post('/subjects', data),
   update: (id, data) => axiosClient.put(`/subjects/${id}`, data),
   delete: (id) => axiosClient.delete(`/subjects/${id}`),
+  exportExcel: () => {
+    return axios.get(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/subjects/export`, {
+      responseType: 'blob',
+      headers: {
+        Authorization: `Bearer ${getMemoryToken() || ''}`,
+      },
+    });
+  },
 };
 
 // 8. Classrooms (Phòng học) API
