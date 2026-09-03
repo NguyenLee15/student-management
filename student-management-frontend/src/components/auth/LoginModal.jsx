@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   LogIn, Lock, User, AlertCircle, ShieldCheck, Eye, EyeOff, 
-  Loader2, GraduationCap, AlertTriangle, Shield, Check,
+  Loader2, GraduationCap, AlertTriangle, Check,
   UserSquare2, Award, BookOpen, CalendarDays, Sparkles, ChevronRight
 } from 'lucide-react';
 import Modal from '../common/Modal';
@@ -101,13 +101,6 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleQuickFill = (u, p, roleKey) => {
-    setUsername(u);
-    setPassword(p);
-    if (roleKey) setActiveRole(roleKey);
-    setError('');
   };
 
   // Render form contents
@@ -218,7 +211,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
         )}
       </div>
 
-      {/* Remember Me & Security Notice */}
+      {/* Remember Me */}
       <div className="flex items-center justify-between pt-1">
         <label className="flex items-center gap-2 cursor-pointer select-none text-slate-400 hover:text-slate-300">
           <input
@@ -229,11 +222,6 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
           />
           <span className="text-[11px]">Ghi nhớ đăng nhập</span>
         </label>
-
-        <div className="flex items-center gap-1 text-[11px] text-slate-500 font-mono">
-          <Shield className="h-3 w-3 text-indigo-400" />
-          <span>JWT RBAC 256-bit</span>
-        </div>
       </div>
 
       {/* Submit Button */}
@@ -266,39 +254,6 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
             </>
           )}
         </button>
-      </div>
-
-      {/* Sandbox Demo Accounts */}
-      <div className="mt-4 pt-4 border-t border-slate-800/80">
-        <p className="text-[11px] text-slate-400 mb-2 text-center font-medium">
-          ⚡ 1-Click Tài Khoản Trải Nghiệm (Sandbox Demo)
-        </p>
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            type="button"
-            onClick={() => handleQuickFill('student', 'student123', 'student')}
-            className="flex flex-col items-center py-2 px-1 rounded-xl bg-slate-950 border border-emerald-500/30 hover:border-emerald-500 hover:bg-emerald-950/20 text-emerald-300 text-[11px] font-semibold transition active:scale-95"
-          >
-            <span>Sinh viên</span>
-            <span className="text-[9px] text-slate-500 font-mono mt-0.5">student</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickFill('teacher', 'teacher123', 'teacher')}
-            className="flex flex-col items-center py-2 px-1 rounded-xl bg-slate-950 border border-sky-500/30 hover:border-sky-500 hover:bg-sky-950/20 text-sky-300 text-[11px] font-semibold transition active:scale-95"
-          >
-            <span>Giảng viên</span>
-            <span className="text-[9px] text-slate-500 font-mono mt-0.5">teacher</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickFill('admin', 'admin123', 'admin')}
-            className="flex flex-col items-center py-2 px-1 rounded-xl bg-slate-950 border border-indigo-500/30 hover:border-indigo-500 hover:bg-indigo-950/20 text-indigo-300 text-[11px] font-semibold transition active:scale-95"
-          >
-            <span>Quản trị viên</span>
-            <span className="text-[9px] text-slate-500 font-mono mt-0.5">admin</span>
-          </button>
-        </div>
       </div>
     </form>
   );
