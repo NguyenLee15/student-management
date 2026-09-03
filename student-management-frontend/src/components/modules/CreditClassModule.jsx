@@ -4,6 +4,8 @@ import { Plus, Edit3, Trash2, Layers, Users, BookOpen, UserPlus, X, RefreshCw, D
 import { creditClassApi, subjectApi, studentClassApi, studentApi, teacherApi, classroomApi, academicYearApi } from '../../api';
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
+import EmptyState from '../common/EmptyState';
+import Skeleton from '../common/Skeleton';
 
 export default function CreditClassModule({ onNotify, currentUser }) {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
@@ -91,7 +93,7 @@ export default function CreditClassModule({ onNotify, currentUser }) {
       creditClassName: '',
       subjectId: subjects[0]?.subjectId || '',
       teacherId: teachers[0]?.teacherId || '',
-      classroomId: classrooms[0]?.classroomId || '',
+      classroomId: classrooms[0]?.roomId || classrooms[0]?.classroomId || '',
       academicYearId: academicYears[0]?.academicYearId || '',
       semester: 'SEMESTER_1',
       maxStudents: 60,
@@ -134,7 +136,16 @@ export default function CreditClassModule({ onNotify, currentUser }) {
       ].join(',');
     });
 
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const metaBlock = [
+      `"TRƯỜNG ĐẠI HỌC CÔNG NGHỆ & ĐÀO TẠO"`,
+      `"DANH SÁCH LỚP TÍN CHỈ (HỌC PHẦN ĐÀO TẠO)"`,
+      `"Năm học: 2026-2027 | Học kỳ 1"`,
+      `"Tổng số lớp tín chỉ: ${creditClasses.length}"`,
+      `"Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}"`,
+      ''
+    ];
+
+    const csvContent = '\uFEFF' + [...metaBlock, headers.join(','), ...rows].join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -238,65 +249,91 @@ export default function CreditClassModule({ onNotify, currentUser }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {creditClasses.map((cc) => (
-          <div
-            key={cc.creditClassId}
-            className="panel-card p-6 space-y-4 hover:border-blue-500/40 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 group-hover:scale-105 transition">
-                <Layers className="h-6 w-6" />
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="panel-card p-6 space-y-4 animate-pulse">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-xl bg-slate-800"></div>
+                <div className="h-6 w-20 rounded-lg bg-slate-800"></div>
               </div>
-              <span className="px-2.5 py-1 text-xs font-mono font-bold bg-slate-900 border border-slate-800 text-blue-300 rounded-lg">
-                Mã: {cc.creditClassId}
-              </span>
+              <div className="h-5 w-3/4 rounded-lg bg-slate-800"></div>
+              <div className="h-4 w-1/2 rounded-lg bg-slate-800"></div>
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-800">
+                <div className="h-10 rounded bg-slate-800"></div>
+                <div className="h-10 rounded bg-slate-800"></div>
+              </div>
             </div>
+          ))}
+        </div>
+      ) : creditClasses.length === 0 ? (
+        <EmptyState
+          title="Chưa có lớp tín chỉ nào"
+          description="Hiện chưa có lớp tín chỉ nào được mở trong học kỳ hiện tại. Hãy mở lớp học phần mới để sinh viên có thể đăng ký học."
+          actionText={isAdmin ? "Mở Lớp Mới" : undefined}
+          onAction={isAdmin ? handleOpenCreate : undefined}
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {creditClasses.map((cc) => (
+            <div
+              key={cc.creditClassId}
+              className="panel-card p-6 space-y-4 hover:border-blue-500/40 transition group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 group-hover:scale-105 transition">
+                  <Layers className="h-6 w-6" />
+                </div>
+                <span className="px-2.5 py-1 text-xs font-mono font-bold bg-slate-900 border border-slate-800 text-blue-300 rounded-lg">
+                  Mã: {cc.creditClassId}
+                </span>
+              </div>
 
-            <div>
-              <h3 className="text-base font-bold text-white tracking-tight">{cc.subjectName || cc.subjectId}</h3>
-              <p className="text-xs text-slate-400 mt-1">
-                Giảng viên: <span className="text-slate-200 font-semibold">{cc.teacherName || 'Chưa phân công'}</span>
-              </p>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Phòng: <span className="text-blue-300 font-semibold">{cc.roomName || cc.classroomId || 'Chưa xếp'}</span> • Học kỳ: <span className="text-slate-200">{msg.enum.semester[cc.semester] || cc.semester || 'Học kỳ 1'}</span>
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-800/80 text-xs">
               <div>
-                <span className="text-slate-500">Đã Đăng Ký</span>
-                <p className="text-lg font-bold text-emerald-400">{cc.enrolledStudentsCount || cc.enrolledCount || cc.students?.length || 0} SV</p>
+                <h3 className="text-base font-bold text-white tracking-tight">{cc.subjectName || cc.subjectId}</h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Giảng viên: <span className="text-slate-200 font-semibold">{cc.teacherName || 'Chưa phân công'}</span>
+                </p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Phòng: <span className="text-blue-300 font-semibold">{cc.roomName || cc.classroomId || 'Chưa xếp'}</span> • Học kỳ: <span className="text-slate-200">{msg.enum.semester[cc.semester] || cc.semester || 'Học kỳ 1'}</span>
+                </p>
               </div>
-              <div>
-                <span className="text-slate-500">Sĩ Số Tối Đa</span>
-                <p className="text-lg font-bold text-slate-300">{cc.maxStudents || 60} SV</p>
+
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-800/80 text-xs">
+                <div>
+                  <span className="text-slate-500">Đã Đăng Ký</span>
+                  <p className="text-lg font-bold text-emerald-400">{cc.enrolledStudentsCount || cc.enrolledCount || cc.students?.length || 0} SV</p>
+                </div>
+                <div>
+                  <span className="text-slate-500">Sĩ Số Tối Đa</span>
+                  <p className="text-lg font-bold text-slate-300">{cc.maxStudents || 60} SV</p>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                {isAdmin && (
+                  <>
+                    <button
+                      onClick={() => handleViewStudents(cc)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-500/20 transition"
+                    >
+                      <Users className="h-3.5 w-3.5" />
+                      <span>Quản Lý Sĩ Số</span>
+                    </button>
+
+                    <button
+                      onClick={() => setDeleteTarget(cc)}
+                      className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
-
-            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
-              {isAdmin && (
-                <>
-                  <button
-                    onClick={() => handleViewStudents(cc)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-500/20 transition"
-                  >
-                    <Users className="h-3.5 w-3.5" />
-                    <span>Quản Lý Sĩ Số</span>
-                  </button>
-
-                  <button
-                    onClick={() => setDeleteTarget(cc)}
-                    className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Modal Add Credit Class */}
       <Modal
@@ -343,9 +380,12 @@ export default function CreditClassModule({ onNotify, currentUser }) {
                 onChange={(e) => setFormData({ ...formData, classroomId: e.target.value })}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-blue-500"
               >
-                {classrooms.map((cr) => (
-                  <option key={cr.classroomId} value={cr.classroomId}>{cr.roomName || cr.classroomId}</option>
-                ))}
+                {classrooms.map((cr) => {
+                  const rId = cr.roomId || cr.classroomId;
+                  return (
+                    <option key={rId} value={rId}>{cr.roomName || rId}</option>
+                  );
+                })}
               </select>
             </div>
 

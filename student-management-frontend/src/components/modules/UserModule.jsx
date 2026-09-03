@@ -1,6 +1,6 @@
 import { msg } from '../../lib/messages';
-import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, ShieldAlert, Key, UserCheck, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plus, Trash2, ShieldAlert, Key, UserCheck, RefreshCw, Search } from 'lucide-react';
 import { userApi } from '../../api';
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
@@ -14,6 +14,9 @@ export default function UserModule({ onNotify }) {
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
 
+  const [keyword, setKeyword] = useState('');
+  const [selectedRole, setSelectedRole] = useState('');
+
   const [showModal, setShowModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
@@ -23,6 +26,14 @@ export default function UserModule({ onNotify }) {
   useEffect(() => {
     loadUsers();
   }, [page, size]);
+
+  const filteredUsers = useMemo(() => {
+    return users.filter((u) => {
+      const matchKeyword = !keyword || u.userName?.toLowerCase().includes(keyword.toLowerCase());
+      const matchRole = !selectedRole || u.role === selectedRole || u.role === `ROLE_${selectedRole}`;
+      return matchKeyword && matchRole;
+    });
+  }, [users, keyword, selectedRole]);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -104,6 +115,41 @@ export default function UserModule({ onNotify }) {
         </button>
       </div>
 
+      {/* Filter and Search Bar */}
+      <div className="panel-card p-4 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm tài khoản theo tên đăng nhập..."
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-red-500 transition"
+          />
+        </div>
+
+        <div className="flex items-center gap-2.5 w-full md:w-auto">
+          <select
+            value={selectedRole}
+            onChange={(e) => setSelectedRole(e.target.value)}
+            className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-red-500 transition"
+          >
+            <option value="">Tất Cả Vai Trò</option>
+            <option value="ADMIN">Quản trị viên</option>
+            <option value="TEACHER">Giảng viên</option>
+            <option value="STUDENT">Sinh viên</option>
+          </select>
+
+          <button
+            onClick={loadUsers}
+            title="Làm mới"
+            className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition active:scale-95"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-red-400' : ''}`} />
+          </button>
+        </div>
+      </div>
+
       <div className="panel-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto" aria-live="polite">
           <table className="w-full text-left text-xs">
@@ -116,47 +162,77 @@ export default function UserModule({ onNotify }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {users.map((u) => (
-                <tr key={u.userName} className="hover:bg-slate-800/40 transition">
-                  <td className="px-5 py-3.5 font-bold text-white font-mono flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-full bg-rose-500/20 text-rose-300 flex items-center justify-center font-bold text-xs">
-                      {u.userName?.charAt(0)?.toUpperCase()}
-                    </div>
-                    <span>{u.userName}</span>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold ${
-                      u.role === 'ROLE_ADMIN' || u.role === 'ADMIN'
-                        ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                        : u.role === 'ROLE_STUDENT' || u.role === 'STUDENT'
-                        ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                        : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    }`}>
-                      {msg.enum.role[u.role] || u.role}
-                    </span>
-                    {u.studentId && (
-                      <span className="ml-2 px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">
-                        {u.studentId}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5 text-emerald-400 font-semibold flex items-center gap-1.5 pt-4">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Hoạt động</span>
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
-                    {u.userName !== 'admin' && (
-                      <button
-                        onClick={() => setDeleteTarget(u)}
-                        title="Xóa người dùng"
-                        className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
+              {loading ? (
+                [1, 2, 3, 4, 5].map((i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-full bg-slate-800"></div>
+                        <div className="h-4 w-28 rounded bg-slate-800"></div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="h-5 w-24 rounded bg-slate-800"></div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="h-4 w-20 rounded bg-slate-800"></div>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="h-6 w-6 rounded bg-slate-800 inline-block"></div>
+                    </td>
+                  </tr>
+                ))
+              ) : filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="px-5 py-8 text-center text-slate-500">
+                    Chưa có tài khoản nào khớp với bộ lọc.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredUsers.map((u) => (
+                  <tr key={u.userName} className="hover:bg-slate-800/40 transition">
+                    <td className="px-5 py-3.5 font-bold text-white font-mono flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-full bg-rose-500/20 text-rose-300 flex items-center justify-center font-bold text-xs">
+                        {u.userName?.charAt(0)?.toUpperCase()}
+                      </div>
+                      <span>{u.userName}</span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold ${
+                        u.role === 'ROLE_ADMIN' || u.role === 'ADMIN'
+                          ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                          : u.role === 'ROLE_STUDENT' || u.role === 'STUDENT'
+                          ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                          : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                      }`}>
+                        {msg.enum.role[u.role] || u.role}
+                      </span>
+                      {u.studentId && (
+                        <span className="ml-2 px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">
+                          {u.studentId}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>Hoạt động</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      {u.userName !== 'admin' && (
+                        <button
+                          onClick={() => setDeleteTarget(u)}
+                          title="Xóa người dùng"
+                          className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

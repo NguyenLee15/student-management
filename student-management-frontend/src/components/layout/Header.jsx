@@ -55,7 +55,7 @@ export default function Header({
       <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-xs">
         <span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
         <span className="text-slate-400">Niên khóa:</span>
-        <span className="font-semibold text-slate-200">2025 - 2026 (Học kỳ 1)</span>
+        <span className="font-semibold text-slate-200">2026 - 2027 (Học kỳ 1)</span>
       </div>
 
       {/* Right: Server Status, Search, Profile */}

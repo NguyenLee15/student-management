@@ -5,6 +5,8 @@ import { classroomApi } from '../../api';
 import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
 import Pagination from '../common/Pagination';
+import EmptyState from '../common/EmptyState';
+import Skeleton from '../common/Skeleton';
 
 export default function ClassroomModule({ onNotify, currentUser }) {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
@@ -138,52 +140,78 @@ export default function ClassroomModule({ onNotify, currentUser }) {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {classrooms.map((c) => (
-          <div
-            key={c.roomId}
-            className="panel-card p-6 space-y-4 hover:border-rose-500/40 transition group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="p-3 rounded-xl bg-rose-500/10 text-rose-400 group-hover:scale-105 transition">
-                <DoorOpen className="h-6 w-6" />
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="panel-card p-6 space-y-4 animate-pulse">
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-xl bg-slate-800"></div>
+                <div className="h-6 w-16 rounded-lg bg-slate-800"></div>
               </div>
-              <span className="px-2.5 py-1 text-xs font-mono font-bold bg-slate-900 border border-slate-800 text-rose-300 rounded-lg">
-                {c.roomId}
-              </span>
-            </div>
-
-            <div>
-              <h3 className="text-base font-bold text-white tracking-tight">{c.roomName || c.roomId}</h3>
-              <p className="text-xs text-slate-400 mt-1">{msg.enum.building[c.building] || 'Tòa A'}</p>
-            </div>
-
-            <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-1.5 text-slate-400">
-                <Users className="h-3.5 w-3.5 text-slate-500" />
-                <span>{c.capacity || 60} chỗ</span>
+              <div className="h-5 w-3/4 rounded-lg bg-slate-800"></div>
+              <div className="h-4 w-1/2 rounded-lg bg-slate-800"></div>
+              <div className="pt-3 border-t border-slate-800 flex justify-between">
+                <div className="h-4 w-20 rounded bg-slate-800"></div>
+                <div className="h-6 w-16 rounded bg-slate-800"></div>
               </div>
-
-              {isAdmin && (
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handleOpenEdit(c)}
-                    className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setDeleteTarget(c)}
-                    className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+            </div>
+          ))}
+        </div>
+      ) : classrooms.length === 0 ? (
+        <EmptyState
+          title="Chưa có phòng học nào"
+          description="Hiện chưa có phòng học hoặc giảng đường nào khớp với bộ lọc tòa nhà. Hãy thêm phòng học mới để phân công lịch giảng dạy."
+          actionText={isAdmin ? "Thêm Phòng Học Mới" : undefined}
+          onAction={isAdmin ? handleOpenCreate : undefined}
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {classrooms.map((c) => (
+            <div
+              key={c.roomId}
+              className="panel-card p-6 space-y-4 hover:border-rose-500/40 transition group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-rose-500/10 text-rose-400 group-hover:scale-105 transition">
+                  <DoorOpen className="h-6 w-6" />
                 </div>
-              )}
+                <span className="px-2.5 py-1 text-xs font-mono font-bold bg-slate-900 border border-slate-800 text-rose-300 rounded-lg">
+                  {c.roomId}
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-white tracking-tight">{c.roomName || c.roomId}</h3>
+                <p className="text-xs text-slate-400 mt-1">{msg.enum.building[c.building] || 'Tòa A'}</p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 text-slate-400">
+                  <Users className="h-3.5 w-3.5 text-slate-500" />
+                  <span>{c.capacity || 60} chỗ</span>
+                </div>
+
+                {isAdmin && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenEdit(c)}
+                      className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(c)}
+                      className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <Pagination
         page={page}
