@@ -59,3 +59,4 @@ export default function RolePresetSelector({ activeRole, onRoleSelect }) {
     </div>
   );
 }
+
