@@ -12,6 +12,8 @@ export function useTeacherGrades({ onNotify }) {
   const [loadingGrades, setLoadingGrades] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const [pendingClassSwitch, setPendingClassSwitch] = useState(null);
+
   const handleSelectClass = async (cls) => {
     setSelectedClass(cls);
     setLoadingGrades(true);
@@ -19,17 +21,7 @@ export function useTeacherGrades({ onNotify }) {
     try {
       const stRes = await creditClassApi.getStudents(cls.creditClassId);
       const stData = stRes.data || stRes;
-      let stList = Array.isArray(stData) ? stData : (stData.content || []);
-      
-      if (stList.length === 0) {
-        try {
-          const fallbackStudentsRes = await studentApi.getAll({ size: 10 });
-          const fallbackData = fallbackStudentsRes.data || fallbackStudentsRes;
-          stList = Array.isArray(fallbackData) ? fallbackData : (fallbackData.content || []);
-        } catch (fbErr) {
-          console.warn('Không thể tải sinh viên fallback', fbErr);
-        }
-      }
+      const stList = Array.isArray(stData) ? stData : (stData.content || []);
       setStudents(stList);
 
       const baseSemester = normalizeSemesterEnum(cls.semester);
@@ -53,12 +45,11 @@ export function useTeacherGrades({ onNotify }) {
       stList.forEach((s) => {
         const match = gradeList.find(g => g.studentId === s.studentId);
         if (match) {
-          const s10 = match.scoreScale10 != null ? Number(match.scoreScale10) : null;
           initialGrades[s.studentId] = {
             gradeId: match.gradeId || match.id,
-            attendanceScore: match.attendanceScore != null ? String(match.attendanceScore) : (s10 != null ? String(s10) : ''),
-            midtermScore: match.midtermScore != null ? String(match.midtermScore) : (s10 != null ? String(s10) : ''),
-            finalExamScore: match.finalExamScore != null ? String(match.finalExamScore) : (s10 != null ? String(s10) : ''),
+            attendanceScore: match.attendanceScore != null ? String(match.attendanceScore) : '',
+            midtermScore: match.midtermScore != null ? String(match.midtermScore) : '',
+            finalExamScore: match.finalExamScore != null ? String(match.finalExamScore) : '',
             isSaved: true,
           };
         } else {
@@ -82,10 +73,21 @@ export function useTeacherGrades({ onNotify }) {
     if (!cls || cls.creditClassId === selectedClass?.creditClassId) return;
     const hasUnsaved = Object.values(gradeSheet).some(g => !g.isSaved && (g.attendanceScore !== '' || g.midtermScore !== '' || g.finalExamScore !== ''));
     if (hasUnsaved) {
-      const confirmSwitch = window.confirm('Lớp hiện tại có một số điểm chưa được lưu. Nếu chuyển lớp, các thay đổi này sẽ bị mất. Thầy/Cô có muốn tiếp tục chuyển không?');
-      if (!confirmSwitch) return;
+      setPendingClassSwitch(cls);
+      return;
     }
     handleSelectClass(cls);
+  };
+
+  const confirmClassSwitch = () => {
+    if (pendingClassSwitch) {
+      handleSelectClass(pendingClassSwitch);
+      setPendingClassSwitch(null);
+    }
+  };
+
+  const cancelClassSwitch = () => {
+    setPendingClassSwitch(null);
   };
 
   const handleGradeChange = (studentId, field, val) => {
@@ -139,16 +141,19 @@ export function useTeacherGrades({ onNotify }) {
   };
 
   const handleGradeKeyDown = (e, index, field) => {
+    const table = e?.currentTarget?.closest('table');
+    if (!table) return;
+
     if (e.key === 'ArrowDown' || e.key === 'Enter') {
       e.preventDefault();
-      const nextInput = document.querySelector(`input[data-field="${field}"][data-idx="${index + 1}"]`);
+      const nextInput = table.querySelector(`input[data-field="${field}"][data-idx="${index + 1}"]`);
       if (nextInput) {
         nextInput.focus();
         nextInput.select();
       }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      const prevInput = document.querySelector(`input[data-field="${field}"][data-idx="${index - 1}"]`);
+      const prevInput = table.querySelector(`input[data-field="${field}"][data-idx="${index - 1}"]`);
       if (prevInput) {
         prevInput.focus();
         prevInput.select();
@@ -376,6 +381,9 @@ export function useTeacherGrades({ onNotify }) {
     gradeStats,
     handleSelectClass,
     handleSelectClassSafe,
+    pendingClassSwitch,
+    confirmClassSwitch,
+    cancelClassSwitch,
     handleGradeChange,
     handleGradeBlur,
     handleGradeKeyDown,

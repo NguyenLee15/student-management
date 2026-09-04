@@ -1,6 +1,6 @@
 // cSpell:disable
 import React, { useState } from 'react';
-import { Calendar, Clock, MapPin, BookOpen, Layers } from 'lucide-react';
+import { Clock, MapPin, Layers } from 'lucide-react';
 import { msg } from '../../lib/messages';
 import { WEEKDAYS } from '../../utils/gradeCalculations';
 import Skeleton from '../common/Skeleton';
@@ -23,8 +23,10 @@ export default function TeacherScheduleTab({ schedules = [], classes = [], loadi
         </div>
 
         {/* Day Filter */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 sm:pb-0">
+        <div role="tablist" aria-label="Bộ lọc ngày trong tuần" className="flex items-center gap-1.5 overflow-x-auto pb-2 sm:pb-0">
           <button
+            role="tab"
+            aria-selected={selectedDay === 'ALL'}
             onClick={() => setSelectedDay('ALL')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
               selectedDay === 'ALL'
@@ -37,6 +39,8 @@ export default function TeacherScheduleTab({ schedules = [], classes = [], loadi
           {WEEKDAYS.map((d) => (
             <button
               key={d.key}
+              role="tab"
+              aria-selected={selectedDay === d.key}
               onClick={() => setSelectedDay(d.key)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
                 selectedDay === d.key

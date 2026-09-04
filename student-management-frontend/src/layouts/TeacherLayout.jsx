@@ -10,6 +10,7 @@ import {
   TeacherGradeSheetTab,
   TeacherProfileTab,
 } from '../components/teacher';
+import ConfirmDialog from '../components/common/ConfirmDialog';
 
 export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleSwitch }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -33,6 +34,9 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     gradeProgressPercent,
     gradeStats,
     handleSelectClassSafe,
+    pendingClassSwitch,
+    confirmClassSwitch,
+    cancelClassSwitch,
     handleGradeChange,
     handleGradeBlur,
     handleGradeKeyDown,
@@ -142,6 +146,18 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
           </div>
         </main>
       </div>
+
+      {/* 🟢 CONFIRM SWITCH CLASS MODAL */}
+      <ConfirmDialog
+        isOpen={!!pendingClassSwitch}
+        title="Xác nhận chuyển lớp học phần"
+        message="Lớp hiện tại có một số điểm chưa được lưu. Nếu chuyển lớp, các thay đổi chưa lưu sẽ bị mất. Thầy/Cô có chắc chắn muốn tiếp tục chuyển không?"
+        confirmText="Tiếp tục chuyển"
+        cancelText="Ở lại lớp này"
+        onConfirm={confirmClassSwitch}
+        onCancel={cancelClassSwitch}
+        isDestructive={true}
+      />
     </div>
   );
 }

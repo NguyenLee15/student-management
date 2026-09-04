@@ -29,6 +29,9 @@ export function useTeacherPortal({ currentUser, onNotify }) {
     gradeStats,
     handleSelectClass,
     handleSelectClassSafe,
+    pendingClassSwitch,
+    confirmClassSwitch,
+    cancelClassSwitch,
     handleGradeChange,
     handleGradeBlur,
     handleGradeKeyDown,
@@ -42,7 +45,7 @@ export function useTeacherPortal({ currentUser, onNotify }) {
     if (classes.length > 0 && !selectedClass) {
       handleSelectClass(classes[0]);
     }
-  }, [classes, selectedClass]);
+  }, [classes, selectedClass, handleSelectClass]);
 
   const loading = loadingProfile || loadingGrades;
 
@@ -67,6 +70,9 @@ export function useTeacherPortal({ currentUser, onNotify }) {
     loadTeacherData,
     handleSelectClass,
     handleSelectClassSafe,
+    pendingClassSwitch,
+    confirmClassSwitch,
+    cancelClassSwitch,
     handleGradeChange,
     handleGradeBlur,
     handleGradeKeyDown,

@@ -1,6 +1,6 @@
 // cSpell:disable
 import React from 'react';
-import { Layers, Users, BookOpen, Search, Download, CheckCheck, AlertCircle } from 'lucide-react';
+import { Users, BookOpen, Search, Download, CheckCheck, AlertCircle } from 'lucide-react';
 import { msg } from '../../lib/messages';
 import { exportAttendanceCsv } from '../../utils/exportCsv';
 import EmptyState from '../common/EmptyState';

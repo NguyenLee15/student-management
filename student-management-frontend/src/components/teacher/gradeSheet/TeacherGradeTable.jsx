@@ -58,6 +58,7 @@ export default function TeacherGradeTable({
                       inputMode="decimal"
                       data-field="attendanceScore"
                       data-idx={idx}
+                      aria-label={`Điểm chuyên cần của ${st.fullName}`}
                       value={entry.attendanceScore ?? ''}
                       onChange={(e) => handleGradeChange(st.studentId, 'attendanceScore', e.target.value)}
                       onBlur={() => handleGradeBlur(st.studentId, 'attendanceScore')}
@@ -72,6 +73,7 @@ export default function TeacherGradeTable({
                       inputMode="decimal"
                       data-field="midtermScore"
                       data-idx={idx}
+                      aria-label={`Điểm giữa kỳ của ${st.fullName}`}
                       value={entry.midtermScore ?? ''}
                       onChange={(e) => handleGradeChange(st.studentId, 'midtermScore', e.target.value)}
                       onBlur={() => handleGradeBlur(st.studentId, 'midtermScore')}
@@ -86,6 +88,7 @@ export default function TeacherGradeTable({
                       inputMode="decimal"
                       data-field="finalExamScore"
                       data-idx={idx}
+                      aria-label={`Điểm cuối kỳ của ${st.fullName}`}
                       value={entry.finalExamScore ?? ''}
                       onChange={(e) => handleGradeChange(st.studentId, 'finalExamScore', e.target.value)}
                       onBlur={() => handleGradeBlur(st.studentId, 'finalExamScore')}

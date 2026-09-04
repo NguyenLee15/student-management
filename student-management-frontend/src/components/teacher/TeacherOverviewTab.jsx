@@ -13,21 +13,27 @@ export default function TeacherOverviewTab({
   setActiveTab,
   handleSelectClassSafe
 }) {
+  const activeSemester = classes[0]?.semesterName || classes[0]?.semester || 'Học kỳ chính thức';
+  const activeYear = classes[0]?.academicYearName || 'Năm học hiện hành';
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-900/60 via-slate-900 to-slate-900 border border-emerald-500/20 p-6 md:p-8">
         <div className="relative z-10 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-3">
-            <span>Học kỳ 1 • Năm học 2026 - 2027</span>
+            <span>{activeSemester} • {activeYear}</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
             Kính chào Thầy/Cô, {teacherInfo?.fullName || 'Giảng Viên'}!
           </h1>
+          <p className="text-xs text-slate-400 font-mono mt-1">
+            Mã giảng viên: {teacherInfo?.teacherId || currentTeacherId || 'GV001'} • {teacherInfo?.facultyName || 'Khoa CNTT'}
+          </p>
           <p className="text-sm text-slate-300 mt-2 leading-relaxed">
             Chào mừng Thầy/Cô quay trở lại Cổng quản lý giảng dạy. Hiện Thầy/Cô đang phụ trách{' '}
             <span className="text-emerald-400 font-bold">{classes.length} lớp học phần</span> với{' '}
-            <span className="text-cyan-400 font-bold">{students.length} sinh viên</span> trong danh sách lớp đang chọn.
+            <span className="text-cyan-400 font-bold">{students.length} sinh viên</span> trong lớp đang chọn.
           </p>
         </div>
       </div>
@@ -47,13 +53,13 @@ export default function TeacherOverviewTab({
 
         <div className="panel-card p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Sinh Viên Phụ Trách</span>
+            <span className="text-xs font-semibold text-slate-400">Sinh Viên Lớp Hiện Tại</span>
             <div className="p-2 bg-cyan-500/10 rounded-xl text-cyan-400">
               <Users className="h-5 w-5" />
             </div>
           </div>
           <div className="text-2xl font-black text-white mt-2">{students.length}</div>
-          <p className="text-[11px] text-slate-400 mt-1">Trong lớp tín chỉ hiện tại</p>
+          <p className="text-[11px] text-slate-400 mt-1">Trong lớp tín chỉ đang chấm điểm</p>
         </div>
 
         <div className="panel-card p-5">
@@ -70,6 +76,9 @@ export default function TeacherOverviewTab({
               style={{ width: `${gradeProgressPercent}%` }}
             />
           </div>
+          <p className="text-[11px] text-slate-400 mt-1.5">
+            Đã nhập: {totalGradedCount}/{students.length} sinh viên
+          </p>
         </div>
 
         <div className="panel-card p-5">

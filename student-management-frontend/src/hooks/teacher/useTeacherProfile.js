@@ -48,18 +48,14 @@ export function useTeacherProfile({ currentUser, onNotify }) {
         const cData = cRes.data || cRes;
         let cList = Array.isArray(cData) ? cData : (cData.content || []);
         
-        if (cList.length === 0) {
+        if (cList.length === 0 && activeTeacherId) {
           const allRes = await creditClassApi.getAll({ size: 100 });
           const allData = allRes.data || allRes;
           const allList = Array.isArray(allData) ? allData : (allData.content || []);
           cList = allList.filter(c => 
             c.teacherId === activeTeacherId || 
-            c.teacherName === found?.fullName ||
-            (currentUser?.role?.includes('ADMIN') && allList.length > 0)
+            (found?.fullName && c.teacherName === found.fullName)
           );
-          if (cList.length === 0 && allList.length > 0 && currentUser?.role?.includes('ADMIN')) {
-            cList = allList.slice(0, 5);
-          }
         }
         setClasses(cList);
       } catch (cErr) {
@@ -70,12 +66,7 @@ export function useTeacherProfile({ currentUser, onNotify }) {
       try {
         const sRes = await scheduleApi.getAll({ teacherId: activeTeacherId, size: 100 });
         const sData = sRes.data || sRes;
-        let sList = Array.isArray(sData) ? sData : (sData.content || []);
-        if (sList.length === 0 && currentUser?.role?.includes('ADMIN')) {
-          const allSched = await scheduleApi.getAll({ size: 100 });
-          const allSData = allSched.data || allSched;
-          sList = Array.isArray(allSData) ? allSData : (allSData.content || []);
-        }
+        const sList = Array.isArray(sData) ? sData : (sData.content || []);
         setSchedules(sList);
       } catch (sErr) {
         console.warn('Lỗi khi tải thời khóa biểu:', sErr);
