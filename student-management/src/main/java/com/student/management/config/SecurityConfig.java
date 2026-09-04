@@ -88,10 +88,10 @@ public class SecurityConfig {
     UserDetailsService userDetailsService() {
         return username -> {
             logger.debug("Finding user: {}", username);
-            User user = userRepository.findByUserName(username)
+            User user = userRepository.findByIdentifier(username)
                 .orElseThrow(() -> {
                     logger.error("User not found: {}", username);
-                    return new UsernameNotFoundException("Không tìm thấy người dùng với tên đăng nhập: " + username);
+                    return new UsernameNotFoundException("Không tìm thấy người dùng với tên đăng nhập hoặc mã: " + username);
                 });
             logger.debug("Found user: {}, role: {}", user.getUserName(), user.getRole());
             return org.springframework.security.core.userdetails.User

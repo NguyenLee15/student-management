@@ -21,6 +21,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,11 +44,11 @@ public class AuthRestController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> login(
             @Valid @RequestBody LoginRequestDto loginRequest,
             HttpServletResponse response) {
-        authenticationManager.authenticate(
+        Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword())
         );
 
-        UserResponseDto user = userService.getByUserName(loginRequest.getUserName());
+        UserResponseDto user = userService.getByUserName(auth.getName());
 
         String token = jwtTokenProvider.generateToken(user.getUserName(), user.getRole().name(), user.getStudentId());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getUserName());

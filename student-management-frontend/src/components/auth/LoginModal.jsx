@@ -13,8 +13,8 @@ import { setMemoryToken } from '../../api/axiosClient';
 
 export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUser }) {
   const [activeRole, setActiveRole] = useState('student');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState(ROLE_PRESETS.student.demoUser);
+  const [password, setPassword] = useState(ROLE_PRESETS.student.demoPass);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isCapsLockOn, setIsCapsLockOn] = useState(false);
