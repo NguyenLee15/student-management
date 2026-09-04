@@ -29,6 +29,7 @@ public class PaymentRestController {
 
     private final PayOSService payOSService;
     private final SecurityService securityService;
+    private final PaymentTransactionRepository paymentTransactionRepository;
 
     @PostMapping("/create-checkout")
     @Operation(summary = "Tạo link thanh toán VietQR PayOS cho hóa đơn học phí")

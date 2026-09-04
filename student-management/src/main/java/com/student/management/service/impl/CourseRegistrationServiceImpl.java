@@ -424,6 +424,14 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
         return false;
     }
 
+    private Long resolveSemesterId(Long semesterId) {
+        if (semesterId != null) {
+            return semesterId;
+        }
+        List<RegistrationPeriodResponseDto> activePeriods = registrationPeriodService.getCurrentlyActivePeriods();
+        return !activePeriods.isEmpty() ? activePeriods.get(0).getSemesterId() : 1L;
+    }
+
     private EnrollmentResponseDto toEnrollmentDto(Enrollment e) {
         CreditClass cc = e.getCreditClass();
         Subject sub = cc != null ? cc.getSubject() : null;
