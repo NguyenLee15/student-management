@@ -1,24 +1,84 @@
 // cSpell:disable
-import { useState, useMemo } from 'react';
-import { creditClassApi, studentApi, gradeApi } from '../../api';
-import { normalizeSemesterEnum, normalizeAcademicYear, getWeights, calculateFinalScore } from '../../utils/gradeCalculations';
+import { useState, useMemo, useCallback } from 'react';
+import { creditClassApi, gradeApi } from '../../api';
+import { normalizeSemesterEnum, normalizeAcademicYear } from '../../utils/gradeCalculations';
 import { useGradeStats } from './useGradeStats';
+import { useGradeKeyboardNav } from './useGradeKeyboardNav';
+import { useGradeSheetState } from './useGradeSheetState';
+import { useGradePersistence } from './useGradePersistence';
 
+/**
+ * useTeacherGrades.js (Facade Hook)
+ * Điều phối toàn bộ trạng thái bảng điểm, tích hợp API Gradebook chuyên biệt và phân quyền giảng viên
+ */
 export function useTeacherGrades({ onNotify }) {
   const [selectedClass, setSelectedClass] = useState(null);
   const [students, setStudents] = useState([]);
-  const [gradeSheet, setGradeSheet] = useState({});
   const [studentSearch, setStudentSearch] = useState('');
   const [loadingGrades, setLoadingGrades] = useState(false);
-  const [saving, setSaving] = useState(false);
-
   const [pendingClassSwitch, setPendingClassSwitch] = useState(null);
 
-  const handleSelectClass = async (cls) => {
+  // 🟢 Sub-hooks
+  const {
+    gradeSheet,
+    setGradeSheet,
+    handleGradeChange,
+    handleGradeBlur,
+    handleQuickFillAttendance: quickFillAttendanceInternal,
+    hasUnsavedGrades,
+  } = useGradeSheetState({ onNotify });
+
+  const { handleGradeKeyDown } = useGradeKeyboardNav();
+
+  const {
+    saving,
+    handleSaveAllGrades: saveAllInternal,
+    handleSaveSingleGrade: saveSingleInternal,
+  } = useGradePersistence({ onNotify, setGradeSheet });
+
+  // 🟢 Tải bảng điểm cho lớp tín chỉ
+  const handleSelectClass = useCallback(async (cls) => {
+    if (!cls) return;
     setSelectedClass(cls);
     setLoadingGrades(true);
     setGradeSheet({});
+
     try {
+      // 1. Thử gọi Dedicated Gradebook API (tối ưu hóa 1 query đơn lẻ)
+      try {
+        const gbRes = await creditClassApi.getGradebook(cls.creditClassId);
+        const gb = gbRes.data || gbRes;
+
+        if (gb && Array.isArray(gb.students)) {
+          const stList = gb.students.map(item => ({
+            studentId: item.studentId,
+            fullName: item.fullName,
+            gender: item.gender,
+            className: item.studentClassId,
+          }));
+          setStudents(stList);
+
+          const initialGrades = {};
+          gb.students.forEach(item => {
+            const hasExistingScore = item.gradeId != null;
+            initialGrades[item.studentId] = {
+              gradeId: item.gradeId ?? null,
+              version: item.version ?? null,
+              attendanceScore: item.attendanceScore != null ? String(item.attendanceScore) : '',
+              midtermScore: item.midtermScore != null ? String(item.midtermScore) : '',
+              finalExamScore: item.finalExamScore != null ? String(item.finalExamScore) : '',
+              isSaved: hasExistingScore,
+            };
+          });
+          setGradeSheet(initialGrades);
+          setLoadingGrades(false);
+          return;
+        }
+      } catch (gbErr) {
+        console.warn('Dedicated Gradebook API không khả dụng, chuyển sang chế độ dự phòng:', gbErr);
+      }
+
+      // 2. Chế độ dự phòng (Fallback)
       const stRes = await creditClassApi.getStudents(cls.creditClassId);
       const stData = stRes.data || stRes;
       const stList = Array.isArray(stData) ? stData : (stData.content || []);
@@ -33,12 +93,12 @@ export function useTeacherGrades({ onNotify }) {
           subjectId: cls.subjectId,
           semester: baseSemester,
           academicYear: baseYear,
-          size: 100
+          size: 100,
         });
         const gData = gRes.data || gRes;
         gradeList = Array.isArray(gData) ? gData : (gData.content || []);
       } catch (gErr) {
-        console.warn('Lỗi khi tải bảng điểm lớp:', gErr);
+        console.warn('Lỗi khi tải bảng điểm lớp qua search:', gErr);
       }
 
       const initialGrades = {};
@@ -47,6 +107,7 @@ export function useTeacherGrades({ onNotify }) {
         if (match) {
           initialGrades[s.studentId] = {
             gradeId: match.gradeId || match.id,
+            version: match.version ?? null,
             attendanceScore: match.attendanceScore != null ? String(match.attendanceScore) : '',
             midtermScore: match.midtermScore != null ? String(match.midtermScore) : '',
             finalExamScore: match.finalExamScore != null ? String(match.finalExamScore) : '',
@@ -57,299 +118,52 @@ export function useTeacherGrades({ onNotify }) {
             attendanceScore: '',
             midtermScore: '',
             finalExamScore: '',
+            version: null,
             isSaved: false,
           };
         }
       });
       setGradeSheet(initialGrades);
     } catch (err) {
-      console.warn('Lỗi khi tải dữ liệu lớp học phần:', err);
+      console.error('Lỗi khi tải bảng điểm lớp tín chỉ:', err);
+      if (onNotify) onNotify('error', 'Không thể tải danh sách sinh viên và bảng điểm của lớp này.');
     } finally {
       setLoadingGrades(false);
     }
-  };
+  }, [onNotify, setGradeSheet]);
 
-  const handleSelectClassSafe = (cls) => {
-    if (!cls || cls.creditClassId === selectedClass?.creditClassId) return;
-    const hasUnsaved = Object.values(gradeSheet).some(g => !g.isSaved && (g.attendanceScore !== '' || g.midtermScore !== '' || g.finalExamScore !== ''));
-    if (hasUnsaved) {
+  // 🟢 Chuyển lớp an toàn kèm cảnh báo nếu có điểm chưa lưu
+  const handleSelectClassSafe = useCallback((cls) => {
+    if (selectedClass && cls?.creditClassId === selectedClass.creditClassId) return;
+    if (hasUnsavedGrades) {
       setPendingClassSwitch(cls);
-      return;
+    } else {
+      handleSelectClass(cls);
     }
-    handleSelectClass(cls);
-  };
+  }, [selectedClass, hasUnsavedGrades, handleSelectClass]);
 
-  const confirmClassSwitch = () => {
+  const confirmClassSwitch = useCallback(() => {
     if (pendingClassSwitch) {
       handleSelectClass(pendingClassSwitch);
       setPendingClassSwitch(null);
     }
-  };
+  }, [pendingClassSwitch, handleSelectClass]);
 
-  const cancelClassSwitch = () => {
+  const cancelClassSwitch = useCallback(() => {
     setPendingClassSwitch(null);
-  };
+  }, []);
 
-  const handleGradeChange = (studentId, field, val) => {
-    if (val === '') {
-      setGradeSheet(prev => ({
-        ...prev,
-        [studentId]: {
-          ...prev[studentId],
-          [field]: '',
-          isSaved: false,
-        }
-      }));
-      return;
-    }
+  const handleQuickFillAttendance = useCallback(() => {
+    quickFillAttendanceInternal(students);
+  }, [quickFillAttendanceInternal, students]);
 
-    const cleanVal = val.replace(',', '.');
-    if (!/^\d{0,2}(\.\d{0,2})?$/.test(cleanVal)) return;
+  const handleSaveAllGrades = useCallback(() => {
+    saveAllInternal({ selectedClass, students, gradeSheet });
+  }, [saveAllInternal, selectedClass, students, gradeSheet]);
 
-    const num = parseFloat(cleanVal);
-    if (!isNaN(num) && num > 10) return;
-
-    setGradeSheet(prev => ({
-      ...prev,
-      [studentId]: {
-        ...prev[studentId],
-        [field]: cleanVal,
-        isSaved: false,
-      }
-    }));
-  };
-
-  const handleGradeBlur = (studentId, field) => {
-    setGradeSheet(prev => {
-      const entry = prev[studentId];
-      if (!entry) return prev;
-      const raw = entry[field];
-      if (raw === '' || raw == null) return prev;
-      const num = parseFloat(raw);
-      if (isNaN(num)) {
-        return {
-          ...prev,
-          [studentId]: { ...entry, [field]: '', isSaved: false }
-        };
-      }
-      const clamped = Math.min(10, Math.max(0, num));
-      return {
-        ...prev,
-        [studentId]: { ...entry, [field]: String(clamped) }
-      };
-    });
-  };
-
-  const handleGradeKeyDown = (e, index, field) => {
-    const table = e?.currentTarget?.closest('table');
-    if (!table) return;
-
-    if (e.key === 'ArrowDown' || e.key === 'Enter') {
-      e.preventDefault();
-      const nextInput = table.querySelector(`input[data-field="${field}"][data-idx="${index + 1}"]`);
-      if (nextInput) {
-        nextInput.focus();
-        nextInput.select();
-      }
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      const prevInput = table.querySelector(`input[data-field="${field}"][data-idx="${index - 1}"]`);
-      if (prevInput) {
-        prevInput.focus();
-        prevInput.select();
-      }
-    }
-  };
-
-  const handleQuickFillAttendance = () => {
-    if (students.length === 0) return;
-    setGradeSheet(prev => {
-      const next = { ...prev };
-      students.forEach(st => {
-        const cur = next[st.studentId] || {};
-        if (cur.attendanceScore === '' || cur.attendanceScore == null) {
-          next[st.studentId] = {
-            ...cur,
-            attendanceScore: '10',
-            isSaved: false,
-          };
-        }
-      });
-      return next;
-    });
-    if (onNotify) onNotify('info', 'Đã tự động điền điểm chuyên cần 10 cho các sinh viên chưa có điểm.');
-  };
-
-  const handleSaveAllGrades = async () => {
-    if (!selectedClass || students.length === 0) return;
-    if (!selectedClass.subjectId) {
-      if (onNotify) onNotify('error', 'Lớp học phần không hợp lệ (thiếu mã môn học).');
-      return;
-    }
-    setSaving(true);
-    const updatedGrades = { ...gradeSheet };
-    const weights = getWeights(selectedClass);
-
-    try {
-      const baseSemester = normalizeSemesterEnum(selectedClass.semester);
-      const baseYear = normalizeAcademicYear(selectedClass.academicYearName || selectedClass.academicYearId);
-
-      const batchPayloads = [];
-      let skippedCount = 0;
-
-      students.forEach(st => {
-        const entry = gradeSheet[st.studentId] || {};
-        const calc = calculateFinalScore(entry, weights);
-        if (!calc.isComplete) {
-          skippedCount++;
-          return;
-        }
-
-        const attNum = entry.attendanceScore !== '' && entry.attendanceScore != null ? Number(entry.attendanceScore) : null;
-        const midNum = entry.midtermScore !== '' && entry.midtermScore != null ? Number(entry.midtermScore) : null;
-        const finNum = entry.finalExamScore !== '' && entry.finalExamScore != null ? Number(entry.finalExamScore) : null;
-
-        batchPayloads.push({
-          gradeId: entry.gradeId ? Number(entry.gradeId) : null,
-          studentId: st.studentId,
-          subjectId: selectedClass.subjectId,
-          semester: baseSemester,
-          academicYear: baseYear,
-          studyPhase: 'PHASE_1',
-          attendanceScore: attNum,
-          midtermScore: midNum,
-          finalExamScore: finNum,
-          scoreScale10: calc.score10,
-        });
-      });
-
-      if (batchPayloads.length === 0) {
-        if (onNotify) onNotify('info', `Có ${skippedCount} sinh viên chưa nhập đủ các cột điểm để lưu.`);
-        return;
-      }
-
-      let successCount = 0;
-      try {
-        const res = await gradeApi.saveBatch(batchPayloads);
-        const savedList = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
-        
-        savedList.forEach(savedItem => {
-          const stId = savedItem.studentId;
-          if (stId && updatedGrades[stId]) {
-            updatedGrades[stId] = {
-              ...updatedGrades[stId],
-              gradeId: savedItem.gradeId,
-              isSaved: true,
-            };
-          }
-        });
-        successCount = savedList.length || batchPayloads.length;
-      } catch (batchErr) {
-        console.warn('Lưu batch thất bại, chuyển sang lưu phân đoạn:', batchErr);
-        const chunkSize = 5;
-        for (let i = 0; i < batchPayloads.length; i += chunkSize) {
-          const chunk = batchPayloads.slice(i, i + chunkSize);
-          await Promise.all(chunk.map(async (item) => {
-            try {
-              if (item.gradeId) {
-                const res = await gradeApi.update(item.gradeId, item);
-                const saved = res.data || res;
-                updatedGrades[item.studentId] = {
-                  ...updatedGrades[item.studentId],
-                  gradeId: saved.gradeId || item.gradeId,
-                  isSaved: true,
-                };
-              } else {
-                const res = await gradeApi.create(item);
-                const saved = res.data || res;
-                updatedGrades[item.studentId] = {
-                  ...updatedGrades[item.studentId],
-                  gradeId: saved.gradeId || saved.id,
-                  isSaved: true,
-                };
-              }
-              successCount++;
-            } catch (err) {
-              console.warn(`Lỗi lưu sinh viên ${item.studentId}:`, err);
-            }
-          }));
-        }
-      }
-
-      setGradeSheet(updatedGrades);
-
-      if (successCount > 0) {
-        if (onNotify) onNotify('success', `Đã lưu thành công điểm cho ${successCount} sinh viên lớp ${selectedClass.subjectName || selectedClass.creditClassId}!`);
-      }
-      if (skippedCount > 0 && successCount === 0) {
-        if (onNotify) onNotify('info', `Có ${skippedCount} sinh viên chưa nhập đủ các cột điểm để lưu.`);
-      }
-    } catch (err) {
-      console.warn('Lỗi khi lưu điểm:', err);
-      if (onNotify) onNotify('error', 'Có lỗi xảy ra khi lưu điểm.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveSingleGrade = async (st) => {
-    if (!selectedClass || !st) return;
-    if (!selectedClass.subjectId) {
-      if (onNotify) onNotify('error', 'Lớp học phần không hợp lệ (thiếu mã môn học).');
-      return;
-    }
-    const entry = gradeSheet[st.studentId] || {};
-    const weights = getWeights(selectedClass);
-    const calc = calculateFinalScore(entry, weights);
-
-    if (!calc.isComplete) {
-      if (onNotify) onNotify('warning', `Vui lòng nhập đầy đủ các đầu điểm cho SV ${st.fullName || st.studentId} trước khi lưu.`);
-      return;
-    }
-
-    const baseSemester = normalizeSemesterEnum(selectedClass.semester);
-    const baseYear = normalizeAcademicYear(selectedClass.academicYearName || selectedClass.academicYearId);
-    const attNum = entry.attendanceScore !== '' && entry.attendanceScore != null ? Number(entry.attendanceScore) : null;
-    const midNum = entry.midtermScore !== '' && entry.midtermScore != null ? Number(entry.midtermScore) : null;
-    const finNum = entry.finalExamScore !== '' && entry.finalExamScore != null ? Number(entry.finalExamScore) : null;
-
-    try {
-      const payload = {
-        studentId: st.studentId,
-        subjectId: selectedClass.subjectId,
-        semester: baseSemester,
-        academicYear: baseYear,
-        studyPhase: 'PHASE_1',
-        attendanceScore: attNum,
-        midtermScore: midNum,
-        finalExamScore: finNum,
-        scoreScale10: calc.score10,
-      };
-
-      let savedId = entry.gradeId;
-      if (entry.gradeId) {
-        const res = await gradeApi.update(entry.gradeId, { ...payload, gradeId: Number(entry.gradeId) });
-        const saved = res.data || res;
-        savedId = saved.gradeId || entry.gradeId;
-      } else {
-        const res = await gradeApi.create(payload);
-        const saved = res.data || res;
-        savedId = saved.gradeId || saved.data?.gradeId || saved.id;
-      }
-
-      setGradeSheet(prev => ({
-        ...prev,
-        [st.studentId]: {
-          ...entry,
-          gradeId: savedId,
-          isSaved: true,
-        }
-      }));
-      if (onNotify) onNotify('success', `Đã lưu điểm cho SV ${st.fullName || st.studentId}!`);
-    } catch (err) {
-      if (onNotify) onNotify('error', err?.response?.data?.message || err?.message || `Lỗi khi lưu điểm cho SV ${st.studentId}`);
-    }
-  };
+  const handleSaveSingleGrade = useCallback((st) => {
+    saveSingleInternal({ st, selectedClass, gradeSheet });
+  }, [saveSingleInternal, selectedClass, gradeSheet]);
 
   const filteredStudents = useMemo(() => {
     if (!studentSearch.trim()) return students;
@@ -379,6 +193,7 @@ export function useTeacherGrades({ onNotify }) {
     totalGradedCount,
     gradeProgressPercent,
     gradeStats,
+    hasUnsavedGrades,
     handleSelectClass,
     handleSelectClassSafe,
     pendingClassSwitch,

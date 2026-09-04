@@ -5,6 +5,8 @@ import com.student.management.dto.req.TeacherRequestDto;
 import com.student.management.dto.resp.TeacherResponseDto;
 import com.student.management.entity.Faculty;
 import com.student.management.entity.Teacher;
+import com.student.management.exception.BusinessException;
+import com.student.management.exception.ErrorCode;
 import com.student.management.exception.NotFoundException;
 import com.student.management.mapping.TeacherMapper;
 import com.student.management.repository.FacultyRepository;

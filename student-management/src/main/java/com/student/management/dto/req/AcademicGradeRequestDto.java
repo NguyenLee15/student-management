@@ -56,5 +56,6 @@ public class AcademicGradeRequestDto {
     private BigDecimal finalExamScore;
 
     private String letterGrade;
+    private Long version;
 }
 

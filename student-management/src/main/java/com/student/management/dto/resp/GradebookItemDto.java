@@ -1,8 +1,6 @@
 // cSpell:disable
 package com.student.management.dto.resp;
 
-import com.student.management.enums.Semester;
-import com.student.management.enums.StudyPhase;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,21 +12,18 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AcademicGradeResponseDto {
-    private Integer gradeId;
+public class GradebookItemDto {
     private String studentId;
     private String studentName;
-    private String subjectId;
-    private String subjectName;
-    private Semester semester;
-    private String academicYear;
-    private StudyPhase studyPhase;
-    private BigDecimal scoreScale10;
-    private BigDecimal scoreScale4;
-    private String letterGrade;
+    private String className;
+    private Integer gradeId;
     private BigDecimal attendanceScore;
     private BigDecimal midtermScore;
     private BigDecimal finalExamScore;
+    private BigDecimal scoreScale10;
+    private BigDecimal scoreScale4;
+    private String letterGrade;
+    private Boolean isPassed;
     private Long version;
 }
 

@@ -47,4 +47,15 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     boolean existsByStudentAndTeacherAndSubject(@Param("studentId") String studentId,
                                                 @Param("teacherId") String teacherId,
                                                 @Param("subjectId") String subjectId);
+
+    @Query("SELECT (COUNT(e) > 0) FROM Enrollment e " +
+           "WHERE e.student.studentId = :studentId " +
+           "AND e.creditClass.teacher.teacherId = :teacherId " +
+           "AND e.creditClass.subject.subjectId = :subjectId " +
+           "AND e.creditClass.academicYear.academicYearId = :academicYear " +
+           "AND e.status = 'ENROLLED'")
+    boolean existsByStudentAndTeacherAndSubjectAndAcademicYear(@Param("studentId") String studentId,
+                                                               @Param("teacherId") String teacherId,
+                                                               @Param("subjectId") String subjectId,
+                                                               @Param("academicYear") String academicYear);
 }

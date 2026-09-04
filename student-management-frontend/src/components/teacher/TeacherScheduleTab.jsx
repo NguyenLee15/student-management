@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Clock, MapPin, Layers } from 'lucide-react';
 import { msg } from '../../lib/messages';
 import { WEEKDAYS } from '../../utils/gradeCalculations';
+import { parseDayOfWeek, getDayLabel } from '../../utils/scheduleUtils';
 import Skeleton from '../common/Skeleton';
 import EmptyState from '../common/EmptyState';
 
@@ -11,7 +12,7 @@ export default function TeacherScheduleTab({ schedules = [], classes = [], loadi
 
   const filteredSchedules = schedules.filter((s) => {
     if (selectedDay === 'ALL') return true;
-    return s.dayOfWeek === selectedDay;
+    return parseDayOfWeek(s) === selectedDay;
   });
 
   return (
@@ -73,7 +74,8 @@ export default function TeacherScheduleTab({ schedules = [], classes = [], loadi
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredSchedules.map((s, idx) => {
             const classMatch = classes.find((c) => c.creditClassId === s.creditClassId);
-            const weekday = WEEKDAYS.find((w) => w.key === s.dayOfWeek);
+            const dayKey = parseDayOfWeek(s);
+            const dayLabel = getDayLabel(dayKey);
 
             return (
               <div
@@ -82,7 +84,7 @@ export default function TeacherScheduleTab({ schedules = [], classes = [], loadi
               >
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    {weekday ? weekday.label : s.dayOfWeek || 'Lịch dạy'}
+                    {dayLabel}
                   </span>
                   <span className="text-xs font-semibold text-slate-400">
                     {msg.enum.shift[s.classShift] || s.classShift || 'Ca học'}
@@ -95,7 +97,7 @@ export default function TeacherScheduleTab({ schedules = [], classes = [], loadi
                   </h4>
                   <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
                     <Layers className="h-3.5 w-3.5 text-slate-500" />
-                    <span>Lớp tín chỉ #{s.creditClassId}</span>
+                    <span>{s.creditClassName || classMatch?.creditClassName || `Lớp tín chỉ #${s.creditClassId}`}</span>
                   </div>
                 </div>
 

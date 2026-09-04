@@ -44,18 +44,25 @@ export function useTeacherProfile({ currentUser, onNotify }) {
 
       // 2. Fetch Classes assigned to this teacher
       try {
-        const cRes = await creditClassApi.getAll({ teacherId: activeTeacherId, size: 50 });
-        const cData = cRes.data || cRes;
-        let cList = Array.isArray(cData) ? cData : (cData.content || []);
-        
-        if (cList.length === 0 && activeTeacherId) {
-          const allRes = await creditClassApi.getAll({ size: 100 });
-          const allData = allRes.data || allRes;
-          const allList = Array.isArray(allData) ? allData : (allData.content || []);
-          cList = allList.filter(c => 
-            c.teacherId === activeTeacherId || 
-            (found?.fullName && c.teacherName === found.fullName)
-          );
+        let cList = [];
+        try {
+          const myClsRes = await creditClassApi.getMyClasses();
+          const myClsData = myClsRes.data || myClsRes;
+          cList = Array.isArray(myClsData) ? myClsData : (myClsData.content || []);
+        } catch {
+          const cRes = await creditClassApi.getAll({ teacherId: activeTeacherId, size: 50 });
+          const cData = cRes.data || cRes;
+          cList = Array.isArray(cData) ? cData : (cData.content || []);
+          
+          if (cList.length === 0 && activeTeacherId) {
+            const allRes = await creditClassApi.getAll({ size: 100 });
+            const allData = allRes.data || allRes;
+            const allList = Array.isArray(allData) ? allData : (allData.content || []);
+            cList = allList.filter(c => 
+              c.teacherId === activeTeacherId || 
+              (found?.fullName && c.teacherName === found.fullName)
+            );
+          }
         }
         setClasses(cList);
       } catch (cErr) {
@@ -64,9 +71,16 @@ export function useTeacherProfile({ currentUser, onNotify }) {
 
       // 3. Fetch Schedule
       try {
-        const sRes = await scheduleApi.getAll({ teacherId: activeTeacherId, size: 100 });
-        const sData = sRes.data || sRes;
-        const sList = Array.isArray(sData) ? sData : (sData.content || []);
+        let sList = [];
+        try {
+          const mySchRes = await scheduleApi.getMySchedules();
+          const mySchData = mySchRes.data || mySchRes;
+          sList = Array.isArray(mySchData) ? mySchData : (mySchData.content || []);
+        } catch {
+          const sRes = await scheduleApi.getAll({ teacherId: activeTeacherId, size: 100 });
+          const sData = sRes.data || sRes;
+          sList = Array.isArray(sData) ? sData : (sData.content || []);
+        }
         setSchedules(sList);
       } catch (sErr) {
         console.warn('Lỗi khi tải thời khóa biểu:', sErr);

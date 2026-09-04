@@ -10,14 +10,19 @@ import com.student.management.entity.Student;
 import com.student.management.entity.Subject;
 import com.student.management.enums.Semester;
 import com.student.management.enums.StudyPhase;
+import com.student.management.entity.CreditClass;
+import com.student.management.exception.BusinessException;
+import com.student.management.exception.ErrorCode;
 import com.student.management.exception.NotFoundException;
 import com.student.management.mapping.AcademicGradeMapper;
 import com.student.management.repository.AcademicGradeRepository;
+import com.student.management.repository.CreditClassStudentRepository;
 import com.student.management.repository.StudentRepository;
 import com.student.management.repository.SubjectRepository;
 import com.student.management.service.AcademicGradeService;
 import com.student.management.util.GradeCalculationUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -46,6 +51,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
     private final AcademicGradeRepository academicGradeRepository;
     private final StudentRepository studentRepository;
     private final SubjectRepository subjectRepository;
+    private final CreditClassStudentRepository creditClassStudentRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -92,6 +98,15 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
         Subject subject = subjectRepository.findById(dto.getSubjectId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy môn học: " + dto.getSubjectId()));
 
+        List<CreditClass> creditClasses = creditClassStudentRepository.findCreditClassesByStudentAndSubjectAndAcademicYear(
+                dto.getStudentId(), dto.getSubjectId(), dto.getAcademicYear()
+        );
+        for (CreditClass cc : creditClasses) {
+            if (Boolean.TRUE.equals(cc.getLocked())) {
+                throw new BusinessException(ErrorCode.GRADEBOOK_CLASS_LOCKED);
+            }
+        }
+
         if (academicGradeRepository.findExistingGrade(dto.getStudentId(), dto.getSubjectId(), dto.getSemester(), dto.getAcademicYear(), dto.getStudyPhase()).isPresent()) {
             throw new IllegalArgumentException("Điểm số đã tồn tại cho môn học, học kỳ, niên khóa và giai đoạn này.");
         }
@@ -125,6 +140,19 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
     public AcademicGradeResponseDto update(Integer gradeId, AcademicGradeUpdateDto dto) {
         AcademicGrade grade = academicGradeRepository.findById(gradeId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy Grade: " + gradeId));
+
+        if (dto.getVersion() != null && grade.getVersion() != null && !dto.getVersion().equals(grade.getVersion())) {
+            throw new ObjectOptimisticLockingFailureException(AcademicGrade.class, gradeId);
+        }
+
+        List<CreditClass> creditClasses = creditClassStudentRepository.findCreditClassesByStudentAndSubjectAndAcademicYear(
+                grade.getStudent().getStudentId(), grade.getSubject().getSubjectId(), grade.getAcademicYear()
+        );
+        for (CreditClass cc : creditClasses) {
+            if (Boolean.TRUE.equals(cc.getLocked())) {
+                throw new BusinessException(ErrorCode.GRADEBOOK_CLASS_LOCKED);
+            }
+        }
 
         grade.setSemester(dto.getSemester());
         grade.setStudyPhase(dto.getStudyPhase());
@@ -177,6 +205,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
                         .scoreScale10(dto.getScoreScale10())
                         .scoreScale4(dto.getScoreScale4())
                         .letterGrade(dto.getLetterGrade())
+                        .version(dto.getVersion())
                         .build();
                 results.add(update(dto.getGradeId(), updateDto));
             } else {
@@ -193,6 +222,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
                             .scoreScale10(dto.getScoreScale10())
                             .scoreScale4(dto.getScoreScale4())
                             .letterGrade(dto.getLetterGrade())
+                            .version(dto.getVersion() != null ? dto.getVersion() : existing.get().getVersion())
                             .build();
                     results.add(update(existing.get().getGradeId(), updateDto));
                 } else {
@@ -230,6 +260,7 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
                 }
             }
 
+            List<String> rowErrors = new ArrayList<>();
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
@@ -274,12 +305,18 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
                 try {
                     list.add(create(dto));
                 } catch (Exception e) {
-                    logger.warn("Không thể lưu điểm tại dòng {}: {}", i, e.getMessage());
+                    logger.warn("Không thể lưu điểm tại dòng {}: {}", i + 1, e.getMessage());
+                    rowErrors.add("Dòng " + (i + 1) + ": " + e.getMessage());
                 }
             }
+            if (!rowErrors.isEmpty() && list.isEmpty()) {
+                throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Không thể nhập điểm từ file Excel: " + String.join("; ", rowErrors));
+            }
+        } catch (BusinessException be) {
+            throw be;
         } catch (Exception e) {
             logger.error("Lỗi khi nhập grade từ file Excel: ", e);
-            throw new RuntimeException("Lỗi khi nhập grade từ file Excel: " + e.getMessage());
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Lỗi khi nhập điểm từ file Excel: " + e.getMessage());
         }
         return list;
     }

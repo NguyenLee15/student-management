@@ -61,4 +61,18 @@ public interface AcademicGradeRepository extends JpaRepository<AcademicGrade, In
            "SUM(CASE WHEN g.scoreScale10 < 4.0 THEN 1L ELSE 0L END) " +
            "FROM AcademicGrade g")
     List<Object[]> getGradeAggregateStats();
+
+    @EntityGraph(attributePaths = {"student", "subject"})
+    @Override
+    Optional<AcademicGrade> findById(Integer id);
+
+    @EntityGraph(attributePaths = {"student", "subject"})
+    @Query("SELECT g FROM AcademicGrade g WHERE g.subject.subjectId = :subjectId " +
+           "AND g.academicYear = :academicYear " +
+           "AND g.student.studentId IN :studentIds")
+    List<AcademicGrade> findBySubjectAndAcademicYearAndStudentIds(
+            @Param("subjectId") String subjectId,
+            @Param("academicYear") String academicYear,
+            @Param("studentIds") List<String> studentIds
+    );
 }

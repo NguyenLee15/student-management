@@ -113,7 +113,9 @@ export const classroomApi = {
 // 9. Credit Classes (Lớp tín chỉ) API
 export const creditClassApi = {
   getAll: (params) => axiosClient.get('/credit-classes', { params }),
+  getMyClasses: () => axiosClient.get('/credit-classes/my-classes'),
   getById: (id) => axiosClient.get(`/credit-classes/${id}`),
+  getGradebook: (id) => axiosClient.get(`/credit-classes/${id}/gradebook`),
   create: (data) => axiosClient.post('/credit-classes', data),
   update: (id, data) => axiosClient.put(`/credit-classes/${id}`, data),
   delete: (id) => axiosClient.delete(`/credit-classes/${id}`),
@@ -125,6 +127,7 @@ export const creditClassApi = {
 // 10. Semester Schedules (Lịch học / Thời khóa biểu) API
 export const scheduleApi = {
   getAll: (params) => axiosClient.get('/semester-schedules', { params }),
+  getMySchedules: () => axiosClient.get('/semester-schedules/my-schedules'),
   getById: (id) => axiosClient.get(`/semester-schedules/${id}`),
   create: (data) => axiosClient.post('/semester-schedules', data),
   update: (id, data) => axiosClient.put(`/semester-schedules/${id}`, data),

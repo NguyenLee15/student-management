@@ -49,5 +49,6 @@ public class AcademicGradeUpdateDto {
     private BigDecimal finalExamScore;
 
     private String letterGrade;
+    private Long version;
 }
 

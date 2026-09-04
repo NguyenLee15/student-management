@@ -69,7 +69,7 @@ export default function TeacherClassesTab({
                     <div className="flex items-center gap-3 text-xs text-slate-400 mt-2">
                       <span className="flex items-center gap-1">
                         <Users className="h-3 w-3 text-cyan-400" />
-                        {c.currentEnrollment || 0}/{c.maxStudents || 50} SV
+                        {c.enrolledCount ?? c.currentEnrollment ?? 0}/{c.maxStudents || 50} SV
                       </span>
                       <span className="flex items-center gap-1">
                         <BookOpen className="h-3 w-3 text-indigo-400" />

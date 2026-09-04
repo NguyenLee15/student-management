@@ -11,11 +11,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-
 import java.util.List;
-
+import java.util.Optional;
 
 public interface SemesterScheduleRepository extends JpaRepository<SemesterSchedule, Long> {
+
+    @Override
+    @EntityGraph(attributePaths = {"creditClass", "subject", "teacher", "classroom"})
+    @org.springframework.lang.NonNull
+    Optional<SemesterSchedule> findById(@org.springframework.lang.NonNull Long id);
 
     @Query("SELECT ss FROM SemesterSchedule ss WHERE " +
            "(:creditClassId IS NULL OR ss.creditClass.creditClassId = :creditClassId) AND " +
@@ -47,4 +51,3 @@ public interface SemesterScheduleRepository extends JpaRepository<SemesterSchedu
     @EntityGraph(attributePaths = {"creditClass", "subject", "teacher", "classroom"})
     List<SemesterSchedule> findByCreditClass_CreditClassId(Long creditClassId);
 }
-

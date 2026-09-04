@@ -30,6 +30,7 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     @Query("SELECT s FROM Student s WHERE s.studentClass.classId = :classId")
     List<Student> findByClassId(@Param("classId") String classId);
 
+    @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})
     @Query("SELECT DISTINCT s FROM Student s WHERE " +
            "s.studentId IN (SELECT e.student.studentId FROM Enrollment e WHERE e.creditClass.creditClassId = :creditClassId AND e.status = com.student.management.enums.EnrollmentStatus.ENROLLED) " +
            "OR s.studentId IN (SELECT ccs.student.studentId FROM CreditClassStudent ccs WHERE ccs.creditClass.creditClassId = :creditClassId)")

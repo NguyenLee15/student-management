@@ -61,6 +61,7 @@ export default function TeacherHeader({
         {/* Logout */}
         <button
           onClick={onLogout}
+          aria-label="Đăng xuất khỏi hệ thống"
           className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
           title="Đăng xuất khỏi hệ thống"
         >

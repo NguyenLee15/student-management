@@ -15,9 +15,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.student.management.dto.resp.CreditClassGradebookResponseDto;
+import com.student.management.dto.resp.GradebookItemDto;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -56,8 +61,69 @@ public class CreditClassServiceImpl implements CreditClassService {
     @Transactional(readOnly = true)
     public CreditClassResponseDto getById(Long creditClassId) {
         CreditClass cc = creditClassRepository.findById(creditClassId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp tín chỉ ID: " + creditClassId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy lớp tín chỉ ID: " + creditClassId));
         return CreditClassMapper.toDto(cc);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CreditClassGradebookResponseDto getGradebook(Long creditClassId) {
+        CreditClass cc = creditClassRepository.findById(creditClassId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy lớp tín chỉ ID: " + creditClassId));
+
+        List<Student> students = studentRepository.findByCreditClassId(creditClassId);
+        List<String> studentIds = students.stream().map(Student::getStudentId).toList();
+
+        Map<String, AcademicGrade> gradeMap = new HashMap<>();
+        if (!studentIds.isEmpty() && cc.getSubject() != null && cc.getAcademicYear() != null) {
+            List<AcademicGrade> grades = academicGradeRepository.findBySubjectAndAcademicYearAndStudentIds(
+                    cc.getSubject().getSubjectId(),
+                    cc.getAcademicYear().getAcademicYearId(),
+                    studentIds
+            );
+            for (AcademicGrade g : grades) {
+                if (g.getStudent() != null) {
+                    gradeMap.put(g.getStudent().getStudentId(), g);
+                }
+            }
+        }
+
+        List<GradebookItemDto> items = new ArrayList<>();
+        for (Student s : students) {
+            AcademicGrade g = gradeMap.get(s.getStudentId());
+            GradebookItemDto item = GradebookItemDto.builder()
+                    .studentId(s.getStudentId())
+                    .studentName(s.getFullName())
+                    .className(s.getStudentClass() != null ? s.getStudentClass().getClassName() : null)
+                    .gradeId(g != null ? g.getGradeId() : null)
+                    .attendanceScore(g != null ? g.getAttendanceScore() : null)
+                    .midtermScore(g != null ? g.getMidtermScore() : null)
+                    .finalExamScore(g != null ? g.getFinalExamScore() : null)
+                    .scoreScale10(g != null ? g.getScoreScale10() : null)
+                    .scoreScale4(g != null ? g.getScoreScale4() : null)
+                    .letterGrade(g != null ? g.getLetterGrade() : null)
+                    .isPassed(g != null && g.getScoreScale10() != null && g.getScoreScale10().compareTo(new BigDecimal("4.0")) >= 0)
+                    .version(g != null ? g.getVersion() : null)
+                    .build();
+            items.add(item);
+        }
+
+        return CreditClassGradebookResponseDto.builder()
+                .creditClassId(cc.getCreditClassId())
+                .creditClassName(cc.getCreditClassName())
+                .subjectId(cc.getSubject() != null ? cc.getSubject().getSubjectId() : null)
+                .subjectName(cc.getSubject() != null ? cc.getSubject().getSubjectName() : null)
+                .credits(cc.getSubject() != null ? cc.getSubject().getCredits() : null)
+                .teacherId(cc.getTeacher() != null ? cc.getTeacher().getTeacherId() : null)
+                .teacherName(cc.getTeacher() != null ? cc.getTeacher().getFullName() : null)
+                .semester(cc.getSemester() != null ? cc.getSemester().getName() : null)
+                .academicYear(cc.getAcademicYear() != null ? cc.getAcademicYear().getAcademicYearId() : null)
+                .attendanceWeight(cc.getAttendanceWeight())
+                .midtermWeight(cc.getMidtermWeight())
+                .finalExamWeight(cc.getFinalExamWeight())
+                .locked(Boolean.TRUE.equals(cc.getLocked()))
+                .items(items)
+                .build();
     }
 
     @Override
@@ -84,7 +150,7 @@ public class CreditClassServiceImpl implements CreditClassService {
     @Transactional
     public CreditClassResponseDto update(Long creditClassId, CreditClassRequestDto dto) {
         CreditClass cc = creditClassRepository.findById(creditClassId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp tín chỉ ID: " + creditClassId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy lớp tín chỉ ID: " + creditClassId));
 
         Subject subject = subjectRepository.findById(dto.getSubjectId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy môn học: " + dto.getSubjectId()));
@@ -152,7 +218,7 @@ public class CreditClassServiceImpl implements CreditClassService {
     @Transactional
     public void delete(Long creditClassId) {
         if (!creditClassRepository.existsById(creditClassId)) {
-            throw new NotFoundException("Không tìm thấy lớp tín chỉ ID: " + creditClassId);
+            throw new BusinessException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy lớp tín chỉ ID: " + creditClassId);
         }
         creditClassRepository.deleteById(creditClassId);
     }
@@ -161,7 +227,7 @@ public class CreditClassServiceImpl implements CreditClassService {
     @Transactional
     public void addStudentToCreditClass(Long creditClassId, String studentId) {
         CreditClass cc = creditClassRepository.findById(creditClassId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp tín chỉ ID: " + creditClassId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy lớp tín chỉ ID: " + creditClassId));
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy sinh viên ID: " + studentId));
 

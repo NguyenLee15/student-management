@@ -23,7 +23,7 @@ export const msg = {
   },
   enum: {
     gender: { MALE: 'Nam', FEMALE: 'Nữ', OTHER: 'Khác' },
-    semester: { SEMESTER_1: 'Học kỳ 1', SEMESTER_2: 'Học kỳ 2', SEMESTER_SUMMER: 'Học kỳ phụ' },
+    semester: { SEMESTER_1: 'Học kỳ 1', SEMESTER_2: 'Học kỳ 2', SUMMER_SEMESTER: 'Học kỳ hè', SEMESTER_SUMMER: 'Học kỳ hè', SUMMER: 'Học kỳ hè' },
     building: { BUILDING_A: 'Tòa A', BUILDING_B: 'Tòa B', BUILDING_C: 'Tòa C', BUILDING_D: 'Tòa D' },
     shift: { SHIFT_1: 'Ca 1 (07:00 - 09:15)', SHIFT_2: 'Ca 2 (09:30 - 11:45)', SHIFT_3: 'Ca 3 (13:00 - 15:15)', SHIFT_4: 'Ca 4 (15:30 - 17:45)', SHIFT_5: 'Ca 5 (18:00 - 20:15)', MORNING: 'Ca Sáng', AFTERNOON: 'Ca Chiều', EVENING: 'Ca Tối' },
     subjectType: { MAJOR: 'Chuyên ngành', GENERAL_EDUCATION: 'Đại cương', BASIC: 'Cơ sở ngành', SPECIALIZED: 'Chuyên sâu', ELECTIVE: 'Tự chọn' },

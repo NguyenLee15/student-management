@@ -15,8 +15,12 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-
 public interface CreditClassRepository extends JpaRepository<CreditClass, Long> {
+
+    @Override
+    @EntityGraph(attributePaths = {"subject", "teacher", "classroom", "academicYear", "semester"})
+    @org.springframework.lang.NonNull
+    Optional<CreditClass> findById(@org.springframework.lang.NonNull Long id);
 
     @EntityGraph(attributePaths = {"subject", "teacher", "classroom", "academicYear", "semester"})
     @org.springframework.lang.NonNull

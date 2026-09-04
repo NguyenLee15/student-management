@@ -38,6 +38,7 @@ export function useTeacherPortal({ currentUser, onNotify }) {
     handleQuickFillAttendance,
     handleSaveAllGrades,
     handleSaveSingleGrade,
+    hasUnsavedGrades,
   } = useTeacherGrades({ onNotify });
 
   // Auto-select first class when classes are loaded and none selected yet
@@ -67,6 +68,7 @@ export function useTeacherPortal({ currentUser, onNotify }) {
     totalGradedCount,
     gradeProgressPercent,
     gradeStats,
+    hasUnsavedGrades,
     loadTeacherData,
     handleSelectClass,
     handleSelectClassSafe,

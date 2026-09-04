@@ -1,5 +1,5 @@
 // cSpell:disable
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTeacherPortal } from '../hooks/useTeacherPortal';
 import {
   TeacherHeader,
@@ -33,6 +33,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     totalGradedCount,
     gradeProgressPercent,
     gradeStats,
+    hasUnsavedGrades,
     handleSelectClassSafe,
     pendingClassSwitch,
     confirmClassSwitch,
@@ -44,6 +45,18 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     handleSaveAllGrades,
     handleSaveSingleGrade,
   } = useTeacherPortal({ currentUser, onNotify });
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedGrades) {
+        e.preventDefault();
+        e.returnValue = 'Thầy/Cô có điểm chưa lưu. Rời khỏi trang lúc này sẽ làm mất dữ liệu chưa lưu.';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedGrades]);
 
   return (
     <div className="h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-white overflow-hidden">

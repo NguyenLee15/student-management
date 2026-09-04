@@ -7,6 +7,7 @@ import com.student.management.dto.resp.ApiResponse;
 import com.student.management.dto.resp.SemesterScheduleResponseDto;
 import com.student.management.enums.ClassShift;
 import com.student.management.enums.Semester;
+import com.student.management.security.SecurityService;
 import com.student.management.service.SemesterScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/semester-schedules")
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class SemesterScheduleRestController {
 
     private final SemesterScheduleService semesterScheduleService;
+    private final SecurityService securityService;
 
     @GetMapping
     @Operation(summary = "Lấy danh sách lịch học có lọc và phân trang")
@@ -44,6 +48,14 @@ public class SemesterScheduleRestController {
                 creditClassId, subjectId, semester, academicYear, teacherId, roomId, classShift, PageRequest.of(page, size)
         );
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lịch trình thành công", result));
+    }
+
+    @GetMapping("/my-schedules")
+    @Operation(summary = "Lấy lịch giảng dạy của giảng viên đang đăng nhập")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<ApiResponse<List<SemesterScheduleResponseDto>>> getMySchedules() {
+        String teacherId = securityService.getCurrentTeacherId();
+        return ResponseEntity.ok(ApiResponse.success("Lấy thời khóa biểu giảng viên thành công", semesterScheduleService.getByTeacherId(teacherId)));
     }
 
     @GetMapping("/{id}")

@@ -36,12 +36,14 @@ export default function TeacherSidebar({
 
       {/* Sidebar Panel */}
       <aside
+        role="navigation"
+        aria-label="Thanh điều hướng Giảng viên"
         className={`
           fixed md:static top-16 bottom-0 left-0 w-64 bg-slate-900 border-r border-slate-800/80 p-4 flex flex-col justify-between z-40 transition-transform duration-300 ease-in-out shrink-0
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
       >
-        <div className="space-y-1">
+        <div className="space-y-1" role="tablist" aria-label="Các tab nghiệp vụ giảng dạy">
           <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Nghiệp Vụ Giảng Dạy
           </div>
@@ -51,6 +53,8 @@ export default function TeacherSidebar({
             return (
               <button
                 key={item.id}
+                role="tab"
+                aria-selected={isActive}
                 onClick={() => handleNavClick(item.id)}
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive

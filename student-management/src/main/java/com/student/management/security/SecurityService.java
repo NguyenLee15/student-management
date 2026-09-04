@@ -66,10 +66,10 @@ public class SecurityService {
         if (cc.getTeacher() == null) return false;
 
         // Check against teacher's code or id
-        String teacherId = (user.getTeacherId() != null && !user.getTeacherId().trim().isEmpty())
-                ? user.getTeacherId()
-                : user.getUserName();
-        return teacherId.equalsIgnoreCase(cc.getTeacher().getTeacherId());
+        if (user.getTeacherId() == null || user.getTeacherId().trim().isEmpty()) {
+            return false;
+        }
+        return user.getTeacherId().equalsIgnoreCase(cc.getTeacher().getTeacherId());
     }
 
     public boolean isStudentRole() {
@@ -118,7 +118,17 @@ public class SecurityService {
         if (user.getTeacherId() != null && !user.getTeacherId().trim().isEmpty()) {
             return user.getTeacherId();
         }
-        return user.getUserName();
+        throw new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.ACCESS_DENIED, "Tài khoản chưa được liên kết với mã giảng viên.");
+    }
+
+    public boolean isSelfGrade(Integer gradeId) {
+        if (gradeId == null) return false;
+        if (isAdminRole()) return true;
+        if (!isStudentRole()) return false;
+        String studentId = getCurrentStudentId();
+        return academicGradeRepository.findById(gradeId)
+                .map(g -> g.getStudent() != null && studentId.equals(g.getStudent().getStudentId()))
+                .orElse(false);
     }
 
     public boolean isClassInstructorByGradeId(Integer gradeId) {
@@ -133,7 +143,13 @@ public class SecurityService {
         com.student.management.entity.AcademicGrade grade = gradeOpt.get();
         String studentId = grade.getStudent() != null ? grade.getStudent().getStudentId() : null;
         String subjectId = grade.getSubject() != null ? grade.getSubject().getSubjectId() : null;
+        String academicYear = grade.getAcademicYear();
         if (studentId == null || subjectId == null) return false;
+
+        if (academicYear != null && !academicYear.isBlank()) {
+            return creditClassStudentRepository.existsByStudentAndTeacherAndSubjectAndAcademicYear(studentId, teacherId, subjectId, academicYear)
+                    || enrollmentRepository.existsByStudentAndTeacherAndSubjectAndAcademicYear(studentId, teacherId, subjectId, academicYear);
+        }
 
         return creditClassStudentRepository.existsByStudentAndTeacherAndSubject(studentId, teacherId, subjectId)
                 || enrollmentRepository.existsByStudentAndTeacherAndSubject(studentId, teacherId, subjectId);
@@ -147,7 +163,13 @@ public class SecurityService {
         String teacherId = getCurrentTeacherId();
         String studentId = dto.getStudentId();
         String subjectId = dto.getSubjectId();
+        String academicYear = dto.getAcademicYear();
         if (studentId == null || subjectId == null) return false;
+
+        if (academicYear != null && !academicYear.isBlank()) {
+            return creditClassStudentRepository.existsByStudentAndTeacherAndSubjectAndAcademicYear(studentId, teacherId, subjectId, academicYear)
+                    || enrollmentRepository.existsByStudentAndTeacherAndSubjectAndAcademicYear(studentId, teacherId, subjectId, academicYear);
+        }
 
         return creditClassStudentRepository.existsByStudentAndTeacherAndSubject(studentId, teacherId, subjectId)
                 || enrollmentRepository.existsByStudentAndTeacherAndSubject(studentId, teacherId, subjectId);

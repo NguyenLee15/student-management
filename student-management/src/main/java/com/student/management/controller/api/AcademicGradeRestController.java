@@ -59,22 +59,16 @@ public class AcademicGradeRestController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Lấy thông tin điểm số theo ID")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('TEACHER') and @securityService.isClassInstructorByGradeId(#id)) or (hasRole('STUDENT') and @securityService.isSelfGrade(#id))")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> getById(@PathVariable Integer id) {
         AcademicGradeResponseDto grade = academicGradeService.getById(id);
-        if (securityService.isStudentRole() && !grade.getStudentId().equals(securityService.getCurrentStudentId())) {
-            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không có quyền xem điểm của sinh viên khác.");
-        }
         return ResponseEntity.ok(ApiResponse.success(grade));
     }
 
     @GetMapping("/transcript/{studentId}")
     @Operation(summary = "Lấy bảng điểm học tập đầy đủ của sinh viên theo Thông tư 08/2021/TT-BGDĐT")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('STUDENT') and @securityService.isSelfStudent(#studentId))")
     public ResponseEntity<ApiResponse<TranscriptResponseDto>> getTranscript(@PathVariable String studentId) {
-        if (securityService.isStudentRole() && !studentId.equals(securityService.getCurrentStudentId())) {
-            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không có quyền xem bảng điểm của sinh viên khác.");
-        }
         return ResponseEntity.ok(ApiResponse.success("Tính toán bảng điểm thành công", academicGradeService.getTranscriptByStudentId(studentId)));
     }
 

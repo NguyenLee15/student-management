@@ -46,6 +46,7 @@ public class AcademicGradeMapper {
                 .attendanceScore(grade.getAttendanceScore())
                 .midtermScore(grade.getMidtermScore())
                 .finalExamScore(grade.getFinalExamScore())
+                .version(grade.getVersion())
                 .build();
     }
 
