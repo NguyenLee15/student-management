@@ -74,6 +74,12 @@ public class UserServiceImpl implements UserService {
             if (dto.getRole() != null) {
                 user.setRole(dto.getRole());
             }
+            if (dto.getStudentId() != null) {
+                user.setStudentId(dto.getStudentId());
+            }
+            if (dto.getTeacherId() != null) {
+                user.setTeacherId(dto.getTeacherId());
+            }
             return UserMapper.toDto(userRepository.save(user));
         } else {
             return create(dto);

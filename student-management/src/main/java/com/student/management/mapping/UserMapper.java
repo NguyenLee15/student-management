@@ -16,6 +16,7 @@ public class UserMapper {
                 .password(dto.getPassword())
                 .role(dto.getRole())
                 .studentId(dto.getStudentId())
+                .teacherId(dto.getTeacherId())
                 .build();
     }
 
@@ -26,6 +27,7 @@ public class UserMapper {
                 .userName(user.getUserName())
                 .role(user.getRole())
                 .studentId(user.getStudentId())
+                .teacherId(user.getTeacherId())
                 .build();
     }
 

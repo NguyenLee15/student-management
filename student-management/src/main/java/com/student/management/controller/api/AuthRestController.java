@@ -69,6 +69,7 @@ public class AuthRestController {
         responseData.put("userName", user.getUserName());
         responseData.put("role", user.getRole());
         responseData.put("studentId", user.getStudentId());
+        responseData.put("teacherId", user.getTeacherId());
         responseData.put("expiresInMs", 900000); // 15 mins
 
         return ResponseEntity.ok(ApiResponse.success("Đăng nhập thành công", responseData));
@@ -123,6 +124,7 @@ public class AuthRestController {
         responseData.put("userName", user.getUserName());
         responseData.put("role", user.getRole());
         responseData.put("studentId", user.getStudentId());
+        responseData.put("teacherId", user.getTeacherId());
         responseData.put("expiresInMs", 900000);
 
         return ResponseEntity.ok(ApiResponse.success("Làm mới token thành công", responseData));

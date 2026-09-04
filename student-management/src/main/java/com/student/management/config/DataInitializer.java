@@ -71,9 +71,10 @@ public class DataInitializer implements CommandLineRunner {
                     .userName("teacher")
                     .password(passwordEncoder.encode("teacher123"))
                     .role(Role.TEACHER)
+                    .teacherId("GV001")
                     .build();
             userRepository.save(teacher);
-            logger.info("Initialized default TEACHER user (teacher / teacher123)");
+            logger.info("Initialized default TEACHER user (teacher / teacher123, teacherId: GV001)");
         }
 
         if (userRepository.findByUserName("student").isEmpty()) {

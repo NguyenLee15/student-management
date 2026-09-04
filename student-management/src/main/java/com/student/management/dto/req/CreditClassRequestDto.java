@@ -31,8 +31,9 @@ public class CreditClassRequestDto {
     @NotBlank(message = "Mã năm học là bắt buộc")
     private String academicYearId;
 
-    @NotNull(message = "Học kỳ là bắt buộc")
     private Semester semester;
+
+    private Long semesterId;
 
     @NotNull(message = "Max students là bắt buộc")
     @Min(value = 1, message = "Max students must be at least 1")

@@ -33,7 +33,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -217,29 +219,62 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
         try (Workbook workbook = com.student.management.util.ExcelValidationUtils.validateAndOpenWorkbook(file)) {
             Sheet sheet = workbook.getSheetAt(0);
             DataFormatter formatter = new DataFormatter();
+            if (sheet.getLastRowNum() < 1) return list;
+
+            Row headerRow = sheet.getRow(0);
+            Map<String, Integer> colIndex = new HashMap<>();
+            if (headerRow != null) {
+                for (int c = 0; c < headerRow.getLastCellNum(); c++) {
+                    String col = formatter.formatCellValue(headerRow.getCell(c)).trim().toLowerCase();
+                    colIndex.put(col, c);
+                }
+            }
 
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                String studentId = formatter.formatCellValue(row.getCell(0)).trim();
-                String subjectId = formatter.formatCellValue(row.getCell(1)).trim();
+                String studentId = getCellValue(row, formatter, colIndex, "mã sinh viên", 0);
+                String subjectId = getCellValue(row, formatter, colIndex, "mã môn học", 2);
+                if (subjectId.isEmpty()) {
+                    subjectId = getCellValue(row, formatter, colIndex, "mã môn", 1);
+                }
                 if (studentId.isEmpty() || subjectId.isEmpty()) continue;
+
+                String semesterStr = getCellValue(row, formatter, colIndex, "học kỳ", 4);
+                String academicYear = getCellValue(row, formatter, colIndex, "academic year", 5);
+                if (academicYear.isEmpty()) {
+                    academicYear = getCellValue(row, formatter, colIndex, "năm học", 5);
+                }
+                if (academicYear.isEmpty()) {
+                    academicYear = "2026-2027";
+                }
+
+                BigDecimal score10 = parseScore(getCellValue(row, formatter, colIndex, "điểm hệ 10", 6));
+                BigDecimal score4 = parseScore(getCellValue(row, formatter, colIndex, "điểm hệ 4", 7));
+                String letterGrade = getCellValue(row, formatter, colIndex, "điểm chữ", 8);
+
+                BigDecimal attScore = parseScore(getCellValue(row, formatter, colIndex, "chuyên cần", -1));
+                BigDecimal midScore = parseScore(getCellValue(row, formatter, colIndex, "giữa kỳ", -1));
+                BigDecimal finScore = parseScore(getCellValue(row, formatter, colIndex, "cuối kỳ", -1));
 
                 AcademicGradeRequestDto dto = new AcademicGradeRequestDto();
                 dto.setStudentId(studentId);
                 dto.setSubjectId(subjectId);
-                dto.setSemester(Semester.SEMESTER_1);
-                dto.setAcademicYear("2025-2026");
+                dto.setSemester(parseSemester(semesterStr));
+                dto.setAcademicYear(academicYear);
                 dto.setStudyPhase(StudyPhase.PHASE_1);
-                dto.setScoreScale10(new BigDecimal("8.0"));
-                dto.setScoreScale4(new BigDecimal("3.5"));
-                dto.setLetterGrade("B+");
+                dto.setAttendanceScore(attScore);
+                dto.setMidtermScore(midScore);
+                dto.setFinalExamScore(finScore);
+                dto.setScoreScale10(score10);
+                dto.setScoreScale4(score4);
+                dto.setLetterGrade(letterGrade.isEmpty() ? null : letterGrade);
 
                 try {
                     list.add(create(dto));
                 } catch (Exception e) {
-                    throw new RuntimeException("Lỗi tại dòng " + i + ": " + e.getMessage(), e);
+                    logger.warn("Không thể lưu điểm tại dòng {}: {}", i, e.getMessage());
                 }
             }
         } catch (Exception e) {
@@ -247,6 +282,35 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
             throw new RuntimeException("Lỗi khi nhập grade từ file Excel: " + e.getMessage());
         }
         return list;
+    }
+
+    private String getCellValue(Row row, DataFormatter formatter, Map<String, Integer> colIndex, String headerKey, int defaultCol) {
+        for (Map.Entry<String, Integer> entry : colIndex.entrySet()) {
+            if (entry.getKey().contains(headerKey)) {
+                return formatter.formatCellValue(row.getCell(entry.getValue())).trim();
+            }
+        }
+        if (defaultCol >= 0 && defaultCol < row.getLastCellNum()) {
+            return formatter.formatCellValue(row.getCell(defaultCol)).trim();
+        }
+        return "";
+    }
+
+    private BigDecimal parseScore(String value) {
+        if (value == null || value.trim().isEmpty()) return null;
+        try {
+            return new BigDecimal(value.trim().replace(',', '.'));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Semester parseSemester(String value) {
+        if (value == null || value.trim().isEmpty()) return Semester.SEMESTER_1;
+        String v = value.trim().toUpperCase();
+        if (v.contains("2") || v.contains("SEMESTER_2")) return Semester.SEMESTER_2;
+        if (v.contains("HÈ") || v.contains("HE") || v.contains("SUMMER")) return Semester.SUMMER_SEMESTER;
+        return Semester.SEMESTER_1;
     }
 
     @Override

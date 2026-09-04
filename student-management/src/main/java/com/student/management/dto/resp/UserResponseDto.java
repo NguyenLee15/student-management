@@ -16,4 +16,5 @@ public class UserResponseDto {
     private String userName;
     private Role role;
     private String studentId;
+    private String teacherId;
 }

@@ -40,4 +40,7 @@ public class User extends BaseEntity {
 
     @Column(name = "student_id", length = 50)
     private String studentId;
+
+    @Column(name = "teacher_id", length = 50)
+    private String teacherId;
 }

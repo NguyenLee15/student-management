@@ -69,10 +69,7 @@ public class CreditClassServiceImpl implements CreditClassService {
         AcademicYear academicYear = academicYearRepository.findById(dto.getAcademicYearId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy niên khóa: " + dto.getAcademicYearId()));
 
-        Semester semester = null;
-        if (dto.getSemester() != null) {
-            semester = semesterRepository.findAll().stream().findFirst().orElse(null);
-        }
+        Semester semester = resolveSemester(dto, academicYear);
 
         CreditClass cc = CreditClassMapper.toEntity(dto, subject, teacher, classroom, academicYear);
         cc.setSemester(semester);
@@ -102,7 +99,50 @@ public class CreditClassServiceImpl implements CreditClassService {
         cc.setAcademicYear(academicYear);
         cc.setMaxStudents(dto.getMaxStudents());
 
+        Semester semester = resolveSemester(dto, academicYear);
+        if (semester != null) {
+            cc.setSemester(semester);
+        }
+
         return CreditClassMapper.toDto(creditClassRepository.save(cc));
+    }
+
+    private Semester resolveSemester(CreditClassRequestDto dto, AcademicYear academicYear) {
+        if (dto.getSemesterId() != null) {
+            return semesterRepository.findById(dto.getSemesterId()).orElse(null);
+        }
+        if (dto.getSemester() != null) {
+            String enumName = dto.getSemester().name();
+            String codeSuffix = enumName.contains("1") ? "1" : (enumName.contains("2") ? "2" : "3");
+            String nameKeyword = enumName.contains("1") ? "1" : (enumName.contains("2") ? "2" : "hè");
+
+            if (academicYear != null) {
+                java.util.List<Semester> yearSemesters = semesterRepository.findByAcademicYear_AcademicYearId(academicYear.getAcademicYearId());
+                for (Semester s : yearSemesters) {
+                    if (s.getSemesterCode() != null && s.getSemesterCode().endsWith(codeSuffix)) {
+                        return s;
+                    }
+                    if (s.getName() != null && s.getName().toLowerCase().contains(nameKeyword)) {
+                        return s;
+                    }
+                }
+                if (!yearSemesters.isEmpty()) {
+                    return yearSemesters.get(0);
+                }
+            }
+
+            java.util.List<Semester> active = semesterRepository.findAllActiveSemesters();
+            for (Semester s : active) {
+                if (s.getSemesterCode() != null && s.getSemesterCode().endsWith(codeSuffix)) {
+                    return s;
+                }
+                if (s.getName() != null && s.getName().toLowerCase().contains(nameKeyword)) {
+                    return s;
+                }
+            }
+            return semesterRepository.findAll().stream().findFirst().orElse(null);
+        }
+        return null;
     }
 
     @Override

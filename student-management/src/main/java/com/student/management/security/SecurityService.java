@@ -64,7 +64,10 @@ public class SecurityService {
         if (cc.getTeacher() == null) return false;
 
         // Check against teacher's code or id
-        return user.getUserName() != null && user.getUserName().equalsIgnoreCase(cc.getTeacher().getTeacherId());
+        String teacherId = (user.getTeacherId() != null && !user.getTeacherId().trim().isEmpty())
+                ? user.getTeacherId()
+                : user.getUserName();
+        return teacherId.equalsIgnoreCase(cc.getTeacher().getTeacherId());
     }
 
     public boolean isStudentRole() {
@@ -115,6 +118,9 @@ public class SecurityService {
                 return "GV001";
             }
             throw new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.ACCESS_DENIED, "Tài khoản không phải là giảng viên.");
+        }
+        if (user.getTeacherId() != null && !user.getTeacherId().trim().isEmpty()) {
+            return user.getTeacherId();
         }
         return user.getUserName();
     }

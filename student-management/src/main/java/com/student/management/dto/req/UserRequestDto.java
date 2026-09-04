@@ -28,5 +28,7 @@ public class UserRequestDto {
     private Role role;
 
     private String studentId;
+
+    private String teacherId;
 }
 
