@@ -77,3 +77,4 @@ export default function StudentTranscriptTable({ grades = [], loading = false })
     </div>
   );
 }
+
