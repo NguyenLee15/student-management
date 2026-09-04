@@ -14,6 +14,10 @@ import java.util.List;
 
 public interface StudentClassRepository extends JpaRepository<StudentClass, String> {
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"faculty"})
+    @org.springframework.lang.NonNull
+    Page<StudentClass> findAll(@org.springframework.lang.NonNull Pageable pageable);
+
     @Query("SELECT sc FROM StudentClass sc WHERE sc.faculty.facultyId = :facultyId")
     List<StudentClass> findByFacultyId(@Param("facultyId") String facultyId);
 

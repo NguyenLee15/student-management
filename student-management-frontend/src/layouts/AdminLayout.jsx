@@ -14,6 +14,8 @@ import ScheduleModule from '../components/modules/ScheduleModule';
 import GradeModule from '../components/modules/GradeModule';
 import UserModule from '../components/modules/UserModule';
 import AuditLogModule from '../components/modules/AuditLogModule';
+import RegistrationPeriodModule from '../components/modules/RegistrationPeriodModule';
+import TuitionPolicyModule from '../components/modules/TuitionPolicyModule';
 import { Home, ChevronRight } from 'lucide-react';
 
 const TAB_TITLES = {
@@ -23,6 +25,8 @@ const TAB_TITLES = {
   'student-classes': { title: 'Lớp Sinh Viên Hành Chính', group: 'Quản Lý Đào Tạo' },
   'subjects': { title: 'Môn Học & Chương Trình Đào Tạo', group: 'Quản Lý Đào Tạo' },
   'classrooms': { title: 'Phòng Học & Giảng Đường', group: 'Quản Lý Đào Tạo' },
+  'registration-periods': { title: 'Đợt Đăng Ký Tín Chỉ & Thời Gian', group: 'Giảng Dạy & Học Tập' },
+  'tuition-policies': { title: 'Chính Sách & Đơn Giá Học Phí', group: 'Giảng Dạy & Học Tập' },
   'credit-classes': { title: 'Lớp Tín Chỉ (Học Phần)', group: 'Giảng Dạy & Học Tập' },
   'schedules': { title: 'Thời Khóa Biểu & Lịch Học', group: 'Giảng Dạy & Học Tập' },
   'grades': { title: 'Quản Lý Điểm Số & GPA', group: 'Giảng Dạy & Học Tập' },

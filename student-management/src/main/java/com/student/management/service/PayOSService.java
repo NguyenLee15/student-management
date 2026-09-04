@@ -262,8 +262,19 @@ public class PayOSService {
      */
     @Transactional(rollbackFor = Exception.class)
     public PaymentTransactionResponseDto syncTransactionStatus(Long orderCode) {
+        return syncTransactionStatus(orderCode, null);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public PaymentTransactionResponseDto syncTransactionStatus(Long orderCode, String studentId) {
         PaymentTransaction txn = paymentTransactionRepository.findByOrderCodeForUpdate(orderCode)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Không tìm thấy giao dịch với mã: " + orderCode));
+
+        if (studentId != null && !studentId.isBlank()) {
+            if (txn.getStudent() == null || !studentId.equals(txn.getStudent().getStudentId())) {
+                throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không có quyền đồng bộ giao dịch của sinh viên khác");
+            }
+        }
 
         if (txn.getStatus() == PaymentTransactionStatus.PAID) {
             return toDto(txn);

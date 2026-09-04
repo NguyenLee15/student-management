@@ -4,11 +4,17 @@ import { Users, Edit3, Trash2 } from 'lucide-react';
 import { msg } from '../../../lib/messages';
 import EmptyState from '../../common/EmptyState';
 import Skeleton from '../../common/Skeleton';
+import Pagination from '../../common/Pagination';
 
 export default function CreditClassTable({
   creditClasses = [],
   loading = false,
   isAdmin = false,
+  page = 0,
+  size = 10,
+  totalPages = 1,
+  totalElements = 0,
+  onPageChange,
   onOpenStudents,
   onOpenEdit,
   onOpenDelete,
@@ -42,7 +48,7 @@ export default function CreditClassTable({
             ) : creditClasses.length === 0 ? (
               <tr>
                 <td colSpan="6" className="p-0">
-                  <EmptyState title="Chưa có lớp tín chỉ" message="Chưa có lớp học phần nào được mở trong học kỳ này." />
+                  <EmptyState title="Chưa có lớp tín chỉ" message="Chưa có lớp học phần nào khớp với bộ lọc hoặc học kỳ đã chọn." />
                 </td>
               </tr>
             ) : (
@@ -111,7 +117,14 @@ export default function CreditClassTable({
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        size={size}
+        totalPages={totalPages}
+        totalElements={totalElements}
+        onPageChange={onPageChange}
+      />
     </div>
   );
 }
-

@@ -60,6 +60,11 @@ public class TuitionInvoice extends BaseEntity {
     @NotNull(message = "Hạn thanh toán là bắt buộc")
     private LocalDate dueDate;
 
+    @Version
+    @Column(name = "version")
+    @Builder.Default
+    private Long version = 0L;
+
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TuitionItem> items = new ArrayList<>();

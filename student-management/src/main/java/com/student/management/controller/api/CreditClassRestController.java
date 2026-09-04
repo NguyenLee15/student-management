@@ -63,7 +63,7 @@ public class CreditClassRestController {
 
     @PostMapping
     @Operation(summary = "Mở lớp tín chỉ mới")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<CreditClassResponseDto>> create(@Valid @RequestBody CreditClassRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Thêm mới lớp tín chỉ thành công", creditClassService.create(dto)));
@@ -71,14 +71,14 @@ public class CreditClassRestController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Cập nhật lớp tín chỉ")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('TEACHER') and @securityService.isClassInstructor(#id))")
     public ResponseEntity<ApiResponse<CreditClassResponseDto>> update(@PathVariable Long id, @Valid @RequestBody CreditClassRequestDto dto) {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật lớp tín chỉ thành công", creditClassService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Hủy lớp tín chỉ")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         creditClassService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Xóa lớp tín chỉ thành công", null));

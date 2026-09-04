@@ -1,11 +1,11 @@
+// cSpell:disable
 import { msg } from '../../lib/messages';
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, CalendarRange, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 import { academicYearApi } from '../../api';
-import Modal from '../common/Modal';
 import ConfirmDialog from '../common/ConfirmDialog';
-import EmptyState from '../common/EmptyState';
-import Skeleton from '../common/Skeleton';
+import AcademicYearGrid from './academicYear/AcademicYearGrid';
+import AcademicYearFormModal from './academicYear/AcademicYearFormModal';
 
 export default function AcademicYearModule({ onNotify, currentUser }) {
   const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
@@ -84,133 +84,54 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
           <p className="text-xs text-slate-400 mt-1">Quản lý các khóa tuyển sinh và niên khóa đào tạo</p>
         </div>
 
-        {isAdmin && (
+        <div className="flex items-center gap-2.5">
           <button
-            onClick={handleOpenCreate}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95"
+            onClick={loadYears}
+            title="Làm mới"
+            className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition active:scale-95"
           >
-            <Plus className="h-4 w-4" />
-            <span>Thêm Niên Khóa Mới</span>
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
           </button>
-        )}
+
+          {isAdmin && (
+            <button
+              onClick={handleOpenCreate}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/20 transition active:scale-95"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Thêm Niên Khóa Mới</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="panel-card p-6 space-y-4 animate-pulse">
-              <div className="h-10 w-10 bg-slate-800 rounded-xl"></div>
-              <div className="h-5 w-3/4 bg-slate-800 rounded-lg"></div>
-              <div className="h-4 w-1/2 bg-slate-800 rounded-lg"></div>
-            </div>
-          ))}
-        </div>
-      ) : years.length === 0 ? (
-        <EmptyState
-          title="Chưa có niên khóa nào"
-          description="Hiện chưa có dữ liệu niên khóa. Hãy thêm niên khóa mới để bắt đầu xếp lớp."
-          actionText={isAdmin ? "Thêm Niên Khóa Mới" : undefined}
-          onAction={isAdmin ? handleOpenCreate : undefined}
-        />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {years.map((y) => (
-            <div
-              key={y.academicYearId}
-              className="panel-card p-6 space-y-4 hover:border-violet-500/40 transition group"
-            >
-              <div className="flex items-center justify-between">
-                <div className="p-3 rounded-xl bg-violet-500/10 text-violet-400 group-hover:scale-105 transition">
-                  <CalendarRange className="h-6 w-6" />
-                </div>
-                <span className="px-2.5 py-1 text-xs font-mono font-bold bg-slate-900 border border-slate-800 text-violet-300 rounded-lg">
-                  {y.academicYearId}
-                </span>
-              </div>
+      <AcademicYearGrid
+        years={years}
+        loading={loading}
+        isAdmin={isAdmin}
+        onOpenCreate={handleOpenCreate}
+        onOpenEdit={handleOpenEdit}
+        onOpenDelete={(y) => setDeleteTarget(y)}
+      />
 
-              <div>
-                <h3 className="text-base font-bold text-white tracking-tight">{y.academicYearName}</h3>
-                <p className="text-xs text-slate-400 mt-1">Khóa đào tạo chính quy</p>
-              </div>
-
-              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                <span className="text-slate-400">Trạng thái: <span className="text-emerald-400 font-semibold">Đang hoạt động</span></span>
-                {isAdmin && (
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleOpenEdit(y)}
-                      className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-violet-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-violet-500 transition"
-                    >
-                      <Edit3 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => setDeleteTarget(y)}
-                      className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Modal */}
-      <Modal
+      <AcademicYearFormModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={isEdit ? `Sửa Niên Khóa: ${formData.academicYearId}` : 'Thêm niên khóa'}
-      >
-        <form onSubmit={handleSave} className="space-y-4 text-xs">
-          <div>
-            <label className="block text-slate-300 font-semibold mb-1">Mã Khóa *</label>
-            <input
-              type="text"
-              required
-              disabled={isEdit}
-              placeholder="VD: K65, K66"
-              value={formData.academicYearId}
-              onChange={(e) => setFormData({ ...formData, academicYearId: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-violet-500 disabled:opacity-50"
-            />
-          </div>
-
-          <div>
-            <label className="block text-slate-300 font-semibold mb-1">Tên Khóa Học *</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Khóa 65 (2020 - 2025)"
-              value={formData.academicYearName}
-              onChange={(e) => setFormData({ ...formData, academicYearName: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-violet-500"
-            />
-          </div>
-
-          <div className="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >Hủy</button>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-lg shadow-violet-600/30 transition"
-            >
-              {isEdit ? 'Lưu thay đổi' : 'Thêm Niên Khóa'}
-            </button>
-          </div>
-        </form>
-      </Modal>
+        isEdit={isEdit}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSave}
+      />
 
       <ConfirmDialog
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        title="Xác nhận xóa niên khóa"
+        message={deleteTarget ? `Bạn có chắc chắn muốn xóa niên khóa '${deleteTarget.academicYearName}' (${deleteTarget.academicYearId})?` : ''}
+        confirmText="Xóa niên khóa"
+        cancelText="Hủy"
         onConfirm={handleConfirmDelete}
-        title="Xóa niên khóa"
-        message={msg.confirm.delete('niên khóa', deleteTarget?.academicYearName, deleteTarget?.academicYearId)}
+        onClose={() => setDeleteTarget(null)}
+        isDanger={true}
       />
     </div>
   );

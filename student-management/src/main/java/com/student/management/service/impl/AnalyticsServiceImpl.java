@@ -1,12 +1,11 @@
 // cSpell:disable
 package com.student.management.service.impl;
 
-import com.student.management.entity.AcademicGrade;
 import com.student.management.entity.Faculty;
-import com.student.management.entity.Student;
 import com.student.management.repository.*;
 import com.student.management.service.AnalyticsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -32,23 +31,19 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         long totalSubjects = subjectRepository.count();
         long totalCreditClasses = creditClassRepository.count();
 
-        List<AcademicGrade> allGrades = academicGradeRepository.findAll();
+        List<Object[]> statsList = academicGradeRepository.getGradeAggregateStats();
         double avgScore = 0.0;
-        long passCount = 0;
+        long totalGrades = 0L;
+        long passCount = 0L;
 
-        if (!allGrades.isEmpty()) {
-            double totalScore = 0;
-            for (AcademicGrade g : allGrades) {
-                double s = g.getScoreScale10() != null ? g.getScoreScale10().doubleValue() : 8.0;
-                totalScore += s;
-                if (s >= 4.0) {
-                    passCount++;
-                }
-            }
-            avgScore = totalScore / allGrades.size();
+        if (statsList != null && !statsList.isEmpty() && statsList.get(0) != null) {
+            Object[] stats = statsList.get(0);
+            totalGrades = stats[0] != null ? ((Number) stats[0]).longValue() : 0L;
+            avgScore = stats[1] != null ? ((Number) stats[1]).doubleValue() : 0.0;
+            passCount = stats[2] != null ? ((Number) stats[2]).longValue() : 0L;
         }
 
-        double passRate = allGrades.isEmpty() ? 96.5 : (double) passCount / allGrades.size() * 100;
+        double passRate = totalGrades == 0 ? 96.5 : (double) passCount / totalGrades * 100;
         double avgGpa4 = avgScore > 0 ? (avgScore / 10.0) * 4.0 : 3.48;
 
         Map<String, Object> summary = new HashMap<>();
@@ -66,14 +61,15 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     @Override
     public List<Map<String, Object>> getFacultyDistribution() {
         List<Faculty> faculties = facultyRepository.findAll();
-        List<Student> students = studentRepository.findAll();
+        List<Object[]> counts = studentRepository.countStudentsGroupByFaculty();
 
         Map<String, Long> countMap = new HashMap<>();
-        for (Student s : students) {
-            String facId = (s.getStudentClass() != null && s.getStudentClass().getFaculty() != null)
-                    ? s.getStudentClass().getFaculty().getFacultyId()
-                    : "OTHER";
-            countMap.put(facId, countMap.getOrDefault(facId, 0L) + 1);
+        if (counts != null) {
+            for (Object[] row : counts) {
+                if (row != null && row.length >= 2 && row[0] != null) {
+                    countMap.put((String) row[0], ((Number) row[1]).longValue());
+                }
+            }
         }
 
         List<Map<String, Object>> list = new ArrayList<>();
@@ -90,20 +86,20 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public Map<String, Object> getGpaDistribution() {
-        List<AcademicGrade> allGrades = academicGradeRepository.findAll();
-        long excellent = 0; // >= 8.5
-        long good = 0;      // 7.0 - 8.4
-        long fair = 0;      // 5.5 - 6.9
-        long average = 0;   // 4.0 - 5.4
-        long warning = 0;   // < 4.0
+        List<Object[]> statsList = academicGradeRepository.getGradeAggregateStats();
+        long excellent = 0L;
+        long good = 0L;
+        long fair = 0L;
+        long average = 0L;
+        long warning = 0L;
 
-        for (AcademicGrade g : allGrades) {
-            double s = g.getScoreScale10() != null ? g.getScoreScale10().doubleValue() : 8.0;
-            if (s >= 8.5) excellent++;
-            else if (s >= 7.0) good++;
-            else if (s >= 5.5) fair++;
-            else if (s >= 4.0) average++;
-            else warning++;
+        if (statsList != null && !statsList.isEmpty() && statsList.get(0) != null) {
+            Object[] stats = statsList.get(0);
+            excellent = stats[3] != null ? ((Number) stats[3]).longValue() : 0L;
+            good = stats[4] != null ? ((Number) stats[4]).longValue() : 0L;
+            fair = stats[5] != null ? ((Number) stats[5]).longValue() : 0L;
+            average = stats[6] != null ? ((Number) stats[6]).longValue() : 0L;
+            warning = stats[7] != null ? ((Number) stats[7]).longValue() : 0L;
         }
 
         Map<String, Object> dist = new HashMap<>();
@@ -114,5 +110,11 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         dist.put("warning", warning);
 
         return dist;
+    }
+
+    @Override
+    @CacheEvict(value = "systemSummary", allEntries = true)
+    public void clearSystemSummaryCache() {
+        // Cache evicted via annotation
     }
 }

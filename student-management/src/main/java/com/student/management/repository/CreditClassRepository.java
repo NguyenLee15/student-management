@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public interface CreditClassRepository extends JpaRepository<CreditClass, Long> {
 
-    @EntityGraph(attributePaths = {"subject", "teacher", "classroom"})
+    @EntityGraph(attributePaths = {"subject", "teacher", "classroom", "academicYear", "semester"})
     @org.springframework.lang.NonNull
     Page<CreditClass> findAll(@org.springframework.lang.NonNull Pageable pageable);
 
@@ -26,11 +26,11 @@ public interface CreditClassRepository extends JpaRepository<CreditClass, Long> 
     @Query("SELECT c FROM CreditClass c WHERE c.creditClassId = :id")
     Optional<CreditClass> findByIdForUpdate(@Param("id") Long id);
 
-    @EntityGraph(attributePaths = {"subject", "teacher", "classroom"})
+    @EntityGraph(attributePaths = {"subject", "teacher", "classroom", "academicYear", "semester"})
     @Query("SELECT c FROM CreditClass c WHERE c.teacher.teacherId = :teacherId")
     List<CreditClass> findByTeacherId(@Param("teacherId") String teacherId);
 
-    @EntityGraph(attributePaths = {"subject", "teacher", "classroom"})
+    @EntityGraph(attributePaths = {"subject", "teacher", "classroom", "academicYear", "semester"})
     @Query("SELECT c FROM CreditClass c WHERE c.semester.id = :semesterId")
     List<CreditClass> findBySemesterId(@Param("semesterId") Long semesterId);
 }

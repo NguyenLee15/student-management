@@ -4,6 +4,8 @@ package com.student.management.service.impl;
 import com.student.management.dto.req.CreditClassRequestDto;
 import com.student.management.dto.resp.CreditClassResponseDto;
 import com.student.management.entity.*;
+import com.student.management.exception.BusinessException;
+import com.student.management.exception.ErrorCode;
 import com.student.management.exception.NotFoundException;
 import com.student.management.mapping.CreditClassMapper;
 import com.student.management.repository.*;
@@ -30,6 +32,7 @@ public class CreditClassServiceImpl implements CreditClassService {
     private final CreditClassStudentRepository creditClassStudentRepository;
     private final AcademicGradeRepository academicGradeRepository;
     private final SemesterRepository semesterRepository;
+    private final SemesterScheduleRepository semesterScheduleRepository;
 
     @Override
     @Transactional(readOnly = true)

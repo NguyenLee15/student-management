@@ -30,6 +30,33 @@ public class AsyncImportService {
     private final StudentClassRepository studentClassRepository;
     private final AcademicYearRepository academicYearRepository;
 
+    public String startExcelImport(byte[] fileBytes) {
+        String taskId = java.util.UUID.randomUUID().toString();
+        ImportTask task = new ImportTask();
+        task.setTaskId(taskId);
+        task.setStatus("PENDING");
+        importTaskRepository.save(task);
+
+        processExcelImport(taskId, fileBytes);
+        return taskId;
+    }
+
+    public com.student.management.dto.resp.ImportTaskResponseDto getTaskStatus(String taskId) {
+        ImportTask task = importTaskRepository.findById(taskId)
+                .orElseThrow(() -> new com.student.management.exception.BusinessException(
+                        com.student.management.exception.ErrorCode.RESOURCE_NOT_FOUND, "Không tìm thấy tiến trình import: " + taskId));
+        return com.student.management.dto.resp.ImportTaskResponseDto.builder()
+                .taskId(task.getTaskId())
+                .status(task.getStatus())
+                .totalRows(task.getTotalRows())
+                .processedRows(task.getProcessedRows())
+                .errorCount(task.getErrorCount())
+                .errorDetails(task.getErrorDetails())
+                .createdAt(task.getCreatedAt())
+                .completedAt(task.getCompletedAt())
+                .build();
+    }
+
     @Async("taskExecutor")
     public void processExcelImport(String taskId, byte[] fileBytes) {
         ImportTask task = importTaskRepository.findById(taskId).orElse(null);

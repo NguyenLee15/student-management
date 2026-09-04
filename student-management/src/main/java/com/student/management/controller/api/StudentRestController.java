@@ -3,14 +3,13 @@ package com.student.management.controller.api;
 
 import com.student.management.dto.req.StudentRequestDto;
 import com.student.management.dto.resp.ApiResponse;
+import com.student.management.dto.resp.ImportTaskResponseDto;
 import com.student.management.dto.resp.StudentResponseDto;
 import com.student.management.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import com.student.management.service.AsyncImportService;
-import com.student.management.entity.ImportTask;
-import com.student.management.repository.ImportTaskRepository;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -35,10 +34,7 @@ import java.util.Map;
 public class StudentRestController {
 
     private final StudentService studentService;
-
     private final AsyncImportService asyncImportService;
-    
-    private final ImportTaskRepository importTaskRepository;
 
     @GetMapping
     @Operation(summary = "Tìm kiếm và lọc sinh viên có phân trang")
@@ -97,34 +93,21 @@ public class StudentRestController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Map<String, String>>> importExcel(@RequestParam("file") MultipartFile file) {
         try {
-            String taskId = java.util.UUID.randomUUID().toString();
-            
-            ImportTask task = new ImportTask();
-            task.setTaskId(taskId);
-            task.setStatus("PENDING");
-            importTaskRepository.save(task);
-            
-            byte[] fileBytes = file.getBytes();
-            asyncImportService.processExcelImport(taskId, fileBytes);
-            
+            String taskId = asyncImportService.startExcelImport(file.getBytes());
             java.util.Map<String, String> data = new java.util.HashMap<>();
             data.put("taskId", taskId);
-            
             return ResponseEntity.accepted().body(ApiResponse.success("Quá trình nhập dữ liệu Excel đã được bắt đầu xử lý bất đồng bộ", data));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Lỗi đọc file: " + e.getMessage()));
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Lỗi xử lý file import: " + e.getMessage()));
         }
     }
 
     @GetMapping("/import-tasks/{taskId}")
     @Operation(summary = "Lấy trạng thái tiến trình nhập file bất đồng bộ")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<ImportTask>> getImportTask(@PathVariable String taskId) {
-        return importTaskRepository.findById(taskId)
-                .map(task -> ResponseEntity.ok(ApiResponse.success(task)))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Task not found")));
+    public ResponseEntity<ApiResponse<ImportTaskResponseDto>> getImportTask(@PathVariable String taskId) {
+        return ResponseEntity.ok(ApiResponse.success(asyncImportService.getTaskStatus(taskId)));
     }
 
     @GetMapping("/export")

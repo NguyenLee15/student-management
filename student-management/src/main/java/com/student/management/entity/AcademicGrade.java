@@ -83,4 +83,9 @@ public class AcademicGrade extends BaseEntity {
 
     @Column(name = "letter_grade", nullable = false, length = 5)
     private String letterGrade;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    @Builder.Default
+    private Long version = 0L;
 }

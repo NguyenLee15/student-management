@@ -13,11 +13,16 @@ import java.util.List;
 
 
 public interface TeacherRepository extends JpaRepository<Teacher, String> {
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"faculty"})
+    @org.springframework.lang.NonNull
+    Page<Teacher> findAll(@org.springframework.lang.NonNull Pageable pageable);
     java.util.Optional<Teacher> findByEmail(String email);
 
     @Query("SELECT t FROM Teacher t WHERE t.faculty.facultyId = :facultyId")
     List<Teacher> findByFacultyId(@Param("facultyId") String facultyId);
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"faculty"})
     @Query("SELECT t FROM Teacher t WHERE " +
            "(:keyword IS NULL OR LOWER(t.teacherId) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
            "(:facultyId IS NULL OR t.faculty.facultyId = :facultyId)")

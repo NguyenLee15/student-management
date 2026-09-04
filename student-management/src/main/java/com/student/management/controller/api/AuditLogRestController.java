@@ -2,7 +2,7 @@
 package com.student.management.controller.api;
 
 import com.student.management.dto.resp.ApiResponse;
-import com.student.management.entity.AuditLog;
+import com.student.management.dto.resp.AuditLogResponseDto;
 import com.student.management.service.AuditLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,10 +24,10 @@ public class AuditLogRestController {
     @GetMapping
     @Operation(summary = "Lấy danh sách nhật ký hoạt động có phân trang và lọc")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Page<AuditLog>>> getAuditLogs(
+    public ResponseEntity<ApiResponse<Page<AuditLogResponseDto>>> getAuditLogs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
-        Page<AuditLog> result = auditLogService.getAll(PageRequest.of(page, size));
+        Page<AuditLogResponseDto> result = auditLogService.getAll(PageRequest.of(page, size));
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lịch sử hệ thống thành công", result));
     }
 }

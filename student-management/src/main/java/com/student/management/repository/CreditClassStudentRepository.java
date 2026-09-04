@@ -17,5 +17,12 @@ public interface CreditClassStudentRepository extends JpaRepository<CreditClassS
 
     @Query("SELECT ccs FROM CreditClassStudent ccs WHERE ccs.student.studentId = :studentId")
     List<CreditClassStudent> findByStudentId(@Param("studentId") String studentId);
-}
 
+    @Query("SELECT (COUNT(ccs) > 0) FROM CreditClassStudent ccs " +
+           "WHERE ccs.student.studentId = :studentId " +
+           "AND ccs.creditClass.teacher.teacherId = :teacherId " +
+           "AND ccs.creditClass.subject.subjectId = :subjectId")
+    boolean existsByStudentAndTeacherAndSubject(@Param("studentId") String studentId,
+                                                @Param("teacherId") String teacherId,
+                                                @Param("subjectId") String subjectId);
+}

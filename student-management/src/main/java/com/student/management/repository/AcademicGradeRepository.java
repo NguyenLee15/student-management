@@ -11,10 +11,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-
 import java.util.List;
 import java.util.Optional;
-
 
 public interface AcademicGradeRepository extends JpaRepository<AcademicGrade, Integer> {
 
@@ -53,4 +51,14 @@ public interface AcademicGradeRepository extends JpaRepository<AcademicGrade, In
             @Param("studyPhase") StudyPhase studyPhase,
             Pageable pageable
     );
+
+    @Query("SELECT COUNT(g), AVG(COALESCE(g.scoreScale10, 0.0)), " +
+           "SUM(CASE WHEN g.scoreScale10 >= 4.0 THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN g.scoreScale10 >= 8.5 THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN g.scoreScale10 >= 7.0 AND g.scoreScale10 < 8.5 THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN g.scoreScale10 >= 5.5 AND g.scoreScale10 < 7.0 THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN g.scoreScale10 >= 4.0 AND g.scoreScale10 < 5.5 THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN g.scoreScale10 < 4.0 THEN 1L ELSE 0L END) " +
+           "FROM AcademicGrade g")
+    List<Object[]> getGradeAggregateStats();
 }

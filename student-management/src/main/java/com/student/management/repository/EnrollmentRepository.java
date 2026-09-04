@@ -38,4 +38,13 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     @EntityGraph(attributePaths = {"student", "creditClass", "creditClass.subject", "semester"})
     List<Enrollment> findByCreditClass_CreditClassIdAndStatus(Long creditClassId, EnrollmentStatus status);
+
+    @Query("SELECT (COUNT(e) > 0) FROM Enrollment e " +
+           "WHERE e.student.studentId = :studentId " +
+           "AND e.creditClass.teacher.teacherId = :teacherId " +
+           "AND e.creditClass.subject.subjectId = :subjectId " +
+           "AND e.status = 'ENROLLED'")
+    boolean existsByStudentAndTeacherAndSubject(@Param("studentId") String studentId,
+                                                @Param("teacherId") String teacherId,
+                                                @Param("subjectId") String subjectId);
 }

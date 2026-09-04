@@ -55,7 +55,7 @@ public class SemesterScheduleRestController {
 
     @PostMapping
     @Operation(summary = "Tạo lịch học mới")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<SemesterScheduleResponseDto>> create(@Valid @RequestBody SemesterScheduleRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Thêm mới lịch trình thành công", semesterScheduleService.create(dto)));
@@ -63,14 +63,14 @@ public class SemesterScheduleRestController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Cập nhật lịch học")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<SemesterScheduleResponseDto>> update(@PathVariable Long id, @Valid @RequestBody SemesterScheduleUpdateDto dto) {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật lịch trình thành công", semesterScheduleService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Xóa lịch học")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         semesterScheduleService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Xóa lịch trình thành công", null));

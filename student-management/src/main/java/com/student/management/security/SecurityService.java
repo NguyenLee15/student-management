@@ -17,8 +17,10 @@ import java.util.Optional;
 public class SecurityService {
 
     private final UserRepository userRepository;
-
     private final CreditClassRepository creditClassRepository;
+    private final com.student.management.repository.AcademicGradeRepository academicGradeRepository;
+    private final com.student.management.repository.CreditClassStudentRepository creditClassStudentRepository;
+    private final com.student.management.repository.EnrollmentRepository enrollmentRepository;
 
     public boolean isSelfStudent(String studentId) {
         if (studentId == null || studentId.isEmpty()) return false;
@@ -97,9 +99,6 @@ public class SecurityService {
         User user = userRepository.findByUserName(username)
                 .orElseThrow(() -> new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.USER_NOT_FOUND));
         if (user.getStudentId() == null || user.getStudentId().trim().isEmpty()) {
-            if (isAdminRole()) {
-                return "SV001";
-            }
             throw new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.ACCESS_DENIED, "Tài khoản chưa liên kết mã sinh viên.");
         }
         return user.getStudentId();
@@ -114,15 +113,44 @@ public class SecurityService {
         User user = userRepository.findByUserName(username)
                 .orElseThrow(() -> new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.USER_NOT_FOUND));
         if (user.getRole() != com.student.management.enums.Role.TEACHER) {
-            if (isAdminRole()) {
-                return "GV001";
-            }
             throw new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.ACCESS_DENIED, "Tài khoản không phải là giảng viên.");
         }
         if (user.getTeacherId() != null && !user.getTeacherId().trim().isEmpty()) {
             return user.getTeacherId();
         }
         return user.getUserName();
+    }
+
+    public boolean isClassInstructorByGradeId(Integer gradeId) {
+        if (gradeId == null) return false;
+        if (isAdminRole()) return true;
+        if (!isTeacherRole()) return false;
+
+        String teacherId = getCurrentTeacherId();
+        Optional<com.student.management.entity.AcademicGrade> gradeOpt = academicGradeRepository.findById(gradeId);
+        if (gradeOpt.isEmpty()) return false;
+
+        com.student.management.entity.AcademicGrade grade = gradeOpt.get();
+        String studentId = grade.getStudent() != null ? grade.getStudent().getStudentId() : null;
+        String subjectId = grade.getSubject() != null ? grade.getSubject().getSubjectId() : null;
+        if (studentId == null || subjectId == null) return false;
+
+        return creditClassStudentRepository.existsByStudentAndTeacherAndSubject(studentId, teacherId, subjectId)
+                || enrollmentRepository.existsByStudentAndTeacherAndSubject(studentId, teacherId, subjectId);
+    }
+
+    public boolean isInstructorForGradeRequest(com.student.management.dto.req.AcademicGradeRequestDto dto) {
+        if (dto == null) return false;
+        if (isAdminRole()) return true;
+        if (!isTeacherRole()) return false;
+
+        String teacherId = getCurrentTeacherId();
+        String studentId = dto.getStudentId();
+        String subjectId = dto.getSubjectId();
+        if (studentId == null || subjectId == null) return false;
+
+        return creditClassStudentRepository.existsByStudentAndTeacherAndSubject(studentId, teacherId, subjectId)
+                || enrollmentRepository.existsByStudentAndTeacherAndSubject(studentId, teacherId, subjectId);
     }
 }
 

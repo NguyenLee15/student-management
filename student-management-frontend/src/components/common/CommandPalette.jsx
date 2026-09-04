@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Users, UserSquare2, BookOpen, Building2, Layers, Award, CalendarDays, X, ArrowRight } from 'lucide-react';
+import { Search, Users, UserSquare2, BookOpen, Building2, Layers, Award, CalendarDays, X, ArrowRight, CalendarClock, Receipt } from 'lucide-react';
 import { studentApi, teacherApi } from '../../api';
 
 export default function CommandPalette({ isOpen, onClose, onNavigate }) {
@@ -75,6 +75,8 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }) {
 
   const quickNavs = [
     { label: 'Cổng Sinh Viên', tab: 'student-portal', icon: Award },
+    { label: 'Đợt Đăng Ký Tín Chỉ', tab: 'registration-periods', icon: CalendarClock },
+    { label: 'Chính Sách Học Phí', tab: 'tuition-policies', icon: Receipt },
     { label: 'Cổng Giảng Viên', tab: 'teacher-portal', icon: UserSquare2 },
     { label: 'Danh sách Sinh viên', tab: 'students', icon: Users },
     { label: 'Danh sách Giảng viên', tab: 'teachers', icon: UserSquare2 },

@@ -26,6 +26,8 @@ export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUs
     {
       title: 'GIẢNG DẠY & HỌC TẬP',
       items: [
+        { id: 'registration-periods', label: 'Đợt Đăng Ký Tín Chỉ', icon: CalendarClock, badge: null },
+        { id: 'tuition-policies', label: 'Chính Sách Học Phí', icon: Receipt, badge: null },
         { id: 'credit-classes', label: 'Lớp Tín Chỉ (Học Phần)', icon: Layers, badge: counts.creditClasses },
         { id: 'schedules', label: 'Thời Khóa Biểu & Lịch Học', icon: CalendarDays, badge: counts.schedules },
         { id: 'grades', label: 'Quản Lý Điểm Số & GPA', icon: Award, badge: counts.grades },

@@ -111,6 +111,13 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler({org.springframework.orm.ObjectOptimisticLockingFailureException.class, jakarta.persistence.OptimisticLockException.class})
+    public ResponseEntity<ApiResponse<Void>> handleOptimisticLocking(Exception ex) {
+        logger.warn("Optimistic locking conflict: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(HttpStatus.CONFLICT.value(), "Dữ liệu đã được cập nhật bởi một phiên làm việc khác. Vui lòng tải lại trang và thử lại."));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex) {
         logger.error("Unhandled Internal Server Error: ", ex);

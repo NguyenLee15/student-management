@@ -31,7 +31,20 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
-    public Page<AuditLog> getAll(Pageable pageable) {
-        return auditLogRepository.findAllByOrderByTimestampDesc(pageable);
+    public Page<com.student.management.dto.resp.AuditLogResponseDto> getAll(Pageable pageable) {
+        return auditLogRepository.findAllByOrderByTimestampDesc(pageable)
+                .map(this::toDto);
+    }
+
+    private com.student.management.dto.resp.AuditLogResponseDto toDto(AuditLog log) {
+        return com.student.management.dto.resp.AuditLogResponseDto.builder()
+                .id(log.getId())
+                .action(log.getAction())
+                .entityName(log.getEntityName())
+                .entityId(log.getEntityId())
+                .details(log.getDetails())
+                .performedBy(log.getPerformedBy())
+                .timestamp(log.getTimestamp())
+                .build();
     }
 }

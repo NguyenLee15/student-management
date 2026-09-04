@@ -6,6 +6,8 @@ import com.student.management.dto.resp.SubjectResponseDto;
 import com.student.management.entity.Faculty;
 import com.student.management.entity.Subject;
 import com.student.management.enums.SubjectType;
+import com.student.management.exception.BusinessException;
+import com.student.management.exception.ErrorCode;
 import com.student.management.exception.NotFoundException;
 import com.student.management.mapping.SubjectMapper;
 import com.student.management.repository.FacultyRepository;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -82,7 +85,7 @@ public class SubjectServiceImpl implements SubjectService {
     @CacheEvict(value = "subjects", allEntries = true)
     public SubjectResponseDto create(SubjectRequestDto dto) {
         if (subjectRepository.existsById(dto.getSubjectId())) {
-            throw new IllegalArgumentException("Mã môn học đã tồn tại: " + dto.getSubjectId());
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Mã môn học đã tồn tại: " + dto.getSubjectId());
         }
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + dto.getFacultyId()));
@@ -90,12 +93,13 @@ public class SubjectServiceImpl implements SubjectService {
         Subject prerequisiteSubject = null;
         if (dto.getPrerequisiteSubjectId() != null && !dto.getPrerequisiteSubjectId().isBlank()) {
             if (dto.getPrerequisiteSubjectId().equalsIgnoreCase(dto.getSubjectId())) {
-                throw new IllegalArgumentException("Môn học không thể tự làm môn tiên quyết của chính nó");
+                throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Môn học không thể tự làm môn tiên quyết của chính nó");
             }
             prerequisiteSubject = subjectRepository.findById(dto.getPrerequisiteSubjectId())
                     .orElseThrow(() -> new NotFoundException("Môn tiên quyết không tồn tại: " + dto.getPrerequisiteSubjectId()));
         }
 
+        validateWeights(dto.getAttendanceWeight(), dto.getMidtermWeight(), dto.getFinalExamWeight());
         Subject subject = SubjectMapper.toEntity(dto, faculty, prerequisiteSubject);
         return SubjectMapper.toDto(subjectRepository.save(subject));
     }
@@ -124,6 +128,11 @@ public class SubjectServiceImpl implements SubjectService {
         subject.setCredits(dto.getCredits());
         subject.setFaculty(faculty);
         subject.setPrerequisiteSubject(prerequisiteSubject);
+        validateWeights(
+            dto.getAttendanceWeight() != null ? dto.getAttendanceWeight() : subject.getAttendanceWeight(),
+            dto.getMidtermWeight() != null ? dto.getMidtermWeight() : subject.getMidtermWeight(),
+            dto.getFinalExamWeight() != null ? dto.getFinalExamWeight() : subject.getFinalExamWeight()
+        );
         if (dto.getAttendanceWeight() != null) subject.setAttendanceWeight(dto.getAttendanceWeight());
         if (dto.getMidtermWeight() != null) subject.setMidtermWeight(dto.getMidtermWeight());
         if (dto.getFinalExamWeight() != null) subject.setFinalExamWeight(dto.getFinalExamWeight());
@@ -165,6 +174,15 @@ public class SubjectServiceImpl implements SubjectService {
         } catch (IOException e) {
             logger.error("Lỗi khi xuất danh sách subject ra file Excel: ", e);
             throw new RuntimeException("Lỗi khi xuất danh sách subject ra file Excel: " + e.getMessage());
+        }
+    }
+    private void validateWeights(BigDecimal attendance, BigDecimal midterm, BigDecimal finalExam) {
+        if (attendance != null && midterm != null && finalExam != null) {
+            BigDecimal sum = attendance.add(midterm).add(finalExam);
+            if (sum.compareTo(new BigDecimal("1.00")) != 0) {
+                throw new BusinessException(ErrorCode.INVALID_GRADE_WEIGHT_SUM,
+                    "Tổng trọng số điểm (Chuyên cần + Giữa kỳ + Cuối kỳ) phải bằng đúng 1.00. Hiện tại: " + sum);
+            }
         }
     }
 }

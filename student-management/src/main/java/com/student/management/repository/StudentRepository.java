@@ -24,6 +24,9 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     @Query("SELECT s FROM Student s WHERE s.studentId = :studentId")
     java.util.Optional<Student> findByIdForUpdate(@Param("studentId") String studentId);
 
+    @Query("SELECT s.studentClass.faculty.facultyId, COUNT(s) FROM Student s WHERE s.studentClass IS NOT NULL AND s.studentClass.faculty IS NOT NULL GROUP BY s.studentClass.faculty.facultyId")
+    List<Object[]> countStudentsGroupByFaculty();
+
     @Query("SELECT s FROM Student s WHERE s.studentClass.classId = :classId")
     List<Student> findByClassId(@Param("classId") String classId);
 

@@ -182,6 +182,9 @@ public class StudentServiceImpl implements StudentService {
             Sheet sheet = workbook.getSheetAt(0);
             DataFormatter formatter = new DataFormatter();
 
+            String defaultClassId = studentClassRepository.findAll().stream().findFirst().map(StudentClass::getClassId).orElse(null);
+            String defaultAcademicYearId = academicYearRepository.findAll().stream().findFirst().map(AcademicYear::getAcademicYearId).orElse(null);
+
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
@@ -215,18 +218,10 @@ public class StudentServiceImpl implements StudentService {
                 dto.setEmail(formatter.formatCellValue(row.getCell(4)).trim());
 
                 String classId = formatter.formatCellValue(row.getCell(5)).trim();
-                if (classId.isEmpty()) {
-                    studentClassRepository.findAll().stream().findFirst().ifPresent(c -> dto.setClassId(c.getClassId()));
-                } else {
-                    dto.setClassId(classId);
-                }
+                dto.setClassId(classId.isEmpty() ? defaultClassId : classId);
 
                 String academicYearId = formatter.formatCellValue(row.getCell(6)).trim();
-                if (academicYearId.isEmpty()) {
-                    academicYearRepository.findAll().stream().findFirst().ifPresent(y -> dto.setAcademicYearId(y.getAcademicYearId()));
-                } else {
-                    dto.setAcademicYearId(academicYearId);
-                }
+                dto.setAcademicYearId(academicYearId.isEmpty() ? defaultAcademicYearId : academicYearId);
 
                 if (dto.getClassId() != null && dto.getAcademicYearId() != null) {
                     imported.add(saveOrUpdate(dto));

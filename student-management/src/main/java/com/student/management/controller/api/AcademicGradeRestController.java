@@ -80,7 +80,7 @@ public class AcademicGradeRestController {
 
     @PostMapping
     @Operation(summary = "Nhập điểm mới")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('TEACHER') and @securityService.isInstructorForGradeRequest(#dto))")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> create(@Valid @RequestBody AcademicGradeRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Thêm mới Grade thành công", academicGradeService.create(dto)));
@@ -91,19 +91,26 @@ public class AcademicGradeRestController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<ApiResponse<java.util.List<AcademicGradeResponseDto>>> saveBatch(
             @Valid @RequestBody java.util.List<AcademicGradeRequestDto> dtos) {
+        if (securityService.isTeacherRole() && !securityService.isAdminRole()) {
+            for (AcademicGradeRequestDto dto : dtos) {
+                if (!securityService.isInstructorForGradeRequest(dto)) {
+                    throw new BusinessException(ErrorCode.ACCESS_DENIED, "Giảng viên không có quyền nhập điểm cho sinh viên " + dto.getStudentId() + " ở môn học " + dto.getSubjectId());
+                }
+            }
+        }
         return ResponseEntity.ok(ApiResponse.success("Lưu điểm hàng loạt thành công", academicGradeService.saveBatch(dtos)));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Cập nhật điểm")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('TEACHER') and @securityService.isClassInstructorByGradeId(#id))")
     public ResponseEntity<ApiResponse<AcademicGradeResponseDto>> update(@PathVariable Integer id, @Valid @RequestBody AcademicGradeUpdateDto dto) {
         return ResponseEntity.ok(ApiResponse.success("Cập nhật Grade thành công", academicGradeService.update(id, dto)));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Xóa bản ghi điểm")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('TEACHER') and @securityService.isClassInstructorByGradeId(#id))")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Integer id) {
         academicGradeService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Xóa Grade thành công", null));

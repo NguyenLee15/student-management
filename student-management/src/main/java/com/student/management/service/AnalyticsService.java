@@ -8,4 +8,5 @@ public interface AnalyticsService {
     Map<String, Object> getSystemSummary();
     List<Map<String, Object>> getFacultyDistribution();
     Map<String, Object> getGpaDistribution();
+    void clearSystemSummaryCache();
 }

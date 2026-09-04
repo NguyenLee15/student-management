@@ -15,6 +15,11 @@ import java.util.List;
 
 public interface SubjectRepository extends JpaRepository<Subject, String> {
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"faculty", "prerequisiteSubject"})
+    @org.springframework.lang.NonNull
+    Page<Subject> findAll(@org.springframework.lang.NonNull Pageable pageable);
+
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"faculty", "prerequisiteSubject"})
     @Query("SELECT s FROM Subject s WHERE s.subjectType = :subjectType")
     Page<Subject> findBySubjectType(@Param("subjectType") SubjectType subjectType, Pageable pageable);
 
