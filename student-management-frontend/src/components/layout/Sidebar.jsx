@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   BarChart3, Users, UserSquare2, Building2, CalendarRange, 
   School, BookOpen, DoorOpen, Layers, CalendarDays, Award, 
-  ShieldAlert, Sparkles, FileText, ChevronRight, Activity
+  ShieldAlert, Sparkles, FileText, ChevronRight, Activity,
+  CalendarClock, Receipt
 } from 'lucide-react';
 
 export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUser = null, isMobileMenuOpen = false }) {
