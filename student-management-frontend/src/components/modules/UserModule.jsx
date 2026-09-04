@@ -1,12 +1,11 @@
-import { msg } from '../../lib/messages';
+// cSpell:disable
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Trash2, ShieldAlert, Key, UserCheck, RefreshCw, Search } from 'lucide-react';
+import { Plus, RefreshCw, Search } from 'lucide-react';
 import { userApi } from '../../api';
-import Modal from '../common/Modal';
+import { msg } from '../../lib/messages';
 import ConfirmDialog from '../common/ConfirmDialog';
-import Pagination from '../common/Pagination';
-import Skeleton from '../common/Skeleton';
-import EmptyState from '../common/EmptyState';
+import UserTable from './user/UserTable';
+import UserFormModal from './user/UserFormModal';
 
 export default function UserModule({ onNotify }) {
   const [users, setUsers] = useState([]);
@@ -101,7 +100,7 @@ export default function UserModule({ onNotify }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Quản Lý Tài Khoản & Phân Quyền Người Dùng</h1>
@@ -152,170 +151,26 @@ export default function UserModule({ onNotify }) {
         </div>
       </div>
 
-      <div className="panel-card overflow-hidden shadow-sm">
-        <div className="overflow-x-auto" aria-live="polite">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-              <tr>
-                <th className="px-5 py-3.5">Tên đăng nhập</th>
-                <th className="px-5 py-3.5">Quyền Hạn</th>
-                <th className="px-5 py-3.5">Trạng thái</th>
-                <th className="px-5 py-3.5 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {loading ? (
-                [...Array(5)].map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2.5">
-                        <Skeleton className="h-8 w-8 rounded-full" />
-                        <Skeleton className="h-4 w-28" />
-                      </div>
-                    </td>
-                    <td className="px-5 py-4"><Skeleton className="h-5 w-24 rounded-lg" /></td>
-                    <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
-                    <td className="px-5 py-4 text-right"><Skeleton className="h-8 w-8 rounded-lg ml-auto" /></td>
-                  </tr>
-                ))
-              ) : filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="p-0">
-                    <EmptyState title="Không tìm thấy tài khoản" message="Không có tài khoản nào khớp với điều kiện tìm kiếm hoặc bộ lọc hiện tại." />
-                  </td>
-                </tr>
-              ) : (
-                filteredUsers.map((u) => (
-                  <tr key={u.userName} className="hover:bg-slate-800/40 transition">
-                    <td className="px-5 py-3.5 font-bold text-white font-mono flex items-center gap-2.5">
-                      <div className="h-8 w-8 rounded-full bg-rose-500/20 text-rose-300 flex items-center justify-center font-bold text-xs">
-                        {u.userName?.charAt(0)?.toUpperCase()}
-                      </div>
-                      <span>{u.userName}</span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <span className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold ${
-                        u.role === 'ROLE_ADMIN' || u.role === 'ADMIN'
-                          ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                          : u.role === 'ROLE_STUDENT' || u.role === 'STUDENT'
-                          ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                          : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                      }`}>
-                        {msg.enum.role[u.role] || u.role}
-                      </span>
-                      {u.studentId && (
-                        <span className="ml-2 px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">
-                          {u.studentId}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>Hoạt động</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      {u.userName !== 'admin' && (
-                        <button
-                          onClick={() => setDeleteTarget(u)}
-                          title="Xóa người dùng"
-                          className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Main User Table Component */}
+      <UserTable
+        users={filteredUsers}
+        loading={loading}
+        page={page}
+        size={size}
+        totalPages={totalPages}
+        totalElements={totalElements}
+        onPageChange={(p) => setPage(p)}
+        onOpenDelete={(u) => setDeleteTarget(u)}
+      />
 
-        <Pagination
-          page={page}
-          size={size}
-          totalPages={totalPages}
-          totalElements={totalElements}
-          onPageChange={(p) => setPage(p)}
-        />
-      </div>
-
-      <Modal
+      {/* Create User Modal */}
+      <UserFormModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title="Tạo Tài Khoản Người Dùng Mới"
-        subtitle="Nhập tên đăng nhập, mật khẩu và phân quyền truy cập"
-        maxWidth="max-w-md"
-      >
-        <form onSubmit={handleSave} className="space-y-4 text-xs">
-          <div>
-            <label className="block text-slate-300 font-semibold mb-1">Tên Đăng Nhập*</label>
-            <input
-              type="text"
-              required
-              placeholder="VD: giangvien_an"
-              value={formData.userName}
-              onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-red-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-slate-300 font-semibold mb-1">Mật Khẩu Khởi Tạo*</label>
-            <input
-              type="password"
-              required
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-red-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-slate-300 font-semibold mb-1">Vai Trò Phân Quyền*</label>
-            <select
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-red-500"
-            >
-              <option value="ROLE_TEACHER">Giảng viên</option>
-              <option value="ROLE_STUDENT">Sinh viên</option>
-              <option value="ROLE_ADMIN">Quản trị viên</option>
-            </select>
-          </div>
-
-          {formData.role === 'ROLE_STUDENT' && (
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Mã Sinh Viên Liên Kết *</label>
-              <input
-                type="text"
-                required
-                placeholder="VD: SV20210001"
-                value={formData.studentId || ''}
-                onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-red-500"
-              />
-            </div>
-          )}
-
-          <div className="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-            >Hủy</button>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold shadow-lg shadow-red-600/30 transition"
-            >
-              Tạo Tài Khoản
-            </button>
-          </div>
-        </form>
-      </Modal>
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleSave}
+      />
 
       <ConfirmDialog
         isOpen={!!deleteTarget}
