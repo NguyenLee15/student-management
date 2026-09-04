@@ -1,6 +1,5 @@
-// cSpell:disable
-import React from 'react';
-import { CreditCard, X, CheckCircle2, RefreshCw, ArrowRight } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { CreditCard, X, CheckCircle2, RefreshCw, ArrowRight, Send } from 'lucide-react';
 
 export default function TuitionPaymentModal({
   isOpen,
@@ -13,6 +12,24 @@ export default function TuitionPaymentModal({
   isPaying,
   onProcessPayment,
 }) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  // When switching to PayOS, lock amount to remaining balance
+  useEffect(() => {
+    if (payMethod === 'PAYOS' && invoice?.remainingAmount) {
+      setPayAmount(invoice.remainingAmount);
+    }
+  }, [payMethod, invoice, setPayAmount]);
+
   if (!isOpen) return null;
 
   return (
@@ -40,7 +57,7 @@ export default function TuitionPaymentModal({
         <form onSubmit={onProcessPayment} className="space-y-4">
           <div>
             <label htmlFor="tuition-pay-amount" className="block text-xs font-bold uppercase text-slate-500 mb-1.5">
-              Số tiền thanh toán (VNĐ)
+              Số tiền thanh toán (VNĐ) {payMethod === 'PAYOS' && <span className="text-blue-600 font-normal">(Cố định theo dư nợ)</span>}
             </label>
             <input
               id="tuition-pay-amount"
@@ -48,9 +65,14 @@ export default function TuitionPaymentModal({
               min="10000"
               max={invoice?.remainingAmount || 100000000}
               value={payAmount}
+              readOnly={payMethod === 'PAYOS'}
               onChange={(e) => setPayAmount(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-lg text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-4 py-3 border rounded-xl font-bold text-lg focus:outline-none ${
+                payMethod === 'PAYOS'
+                  ? 'bg-slate-100 border-slate-300 text-slate-600 cursor-not-allowed'
+                  : 'bg-slate-50 border-slate-200 text-slate-800 focus:ring-2 focus:ring-blue-500'
+              }`}
             />
           </div>
 
@@ -83,7 +105,7 @@ export default function TuitionPaymentModal({
 
           {payMethod === 'PAYOS' ? (
             <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 text-xs text-blue-800">
-              ⚡ Giao dịch VietQR được mã hóa bảo mật và tự động ghi nhận vào sổ cái sinh viên ngay sau khi thanh toán thành công.
+              ⚡ Cổng VietQR PayOS sẽ tạo mã QR thanh toán toàn bộ công nợ còn lại ({Number(invoice?.remainingAmount || 0).toLocaleString('vi-VN')} đ) của học kỳ này và tự động gạch nợ sau khi quét.
             </div>
           ) : (
             <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 space-y-1">
@@ -117,13 +139,32 @@ export default function TuitionPaymentModal({
               )}
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-xs"
-            >
-              Đã Nắm Rõ Hướng Dẫn - Đóng Hộp Thoại
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-xs"
+              >
+                Đóng
+              </button>
+              <button
+                type="submit"
+                disabled={isPaying || !payAmount}
+                className="flex-[2] py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow transition-colors text-xs flex items-center justify-center gap-1.5"
+              >
+                {isPaying ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Đang gửi xác nhận...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>Gửi Xác Nhận Nộp {Number(payAmount || 0).toLocaleString('vi-VN')} đ</span>
+                  </>
+                )}
+              </button>
+            </div>
           )}
         </form>
       </div>

@@ -208,8 +208,11 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
 
         // 7. Ước tính tổng học phí giỏ đăng ký
         BigDecimal estimatedTuition = BigDecimal.ZERO;
+        LocalDate today = LocalDate.now();
+        java.util.Map<Long, BigDecimal> unitPriceCache = new java.util.HashMap<>();
         for (CreditClass cc : cartClasses) {
-            BigDecimal unitPrice = tuitionPolicyService.getEffectiveUnitPrice(student, cc, LocalDate.now());
+            BigDecimal unitPrice = unitPriceCache.computeIfAbsent(cc.getId(),
+                    id -> tuitionPolicyService.getEffectiveUnitPrice(student, cc, today));
             int credits = cc.getSubject() != null && cc.getSubject().getCredits() != null ? cc.getSubject().getCredits() : 3;
             estimatedTuition = estimatedTuition.add(unitPrice.multiply(BigDecimal.valueOf(credits)));
         }
@@ -410,18 +413,56 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     }
 
     private boolean isScheduleOverlap(SemesterSchedule s1, SemesterSchedule s2) {
+        if (s1 == null || s2 == null) {
+            return false;
+        }
+        // 1. Kiểm tra khoảng thời gian diễn ra: nếu hai lớp học ở hai giai đoạn không giao nhau thì không xung đột
+        if (s1.getStartDate() != null && s1.getEndDate() != null && s2.getStartDate() != null && s2.getEndDate() != null) {
+            boolean isDisjoint = s1.getEndDate().isBefore(s2.getStartDate()) || s1.getStartDate().isAfter(s2.getEndDate());
+            if (isDisjoint) {
+                return false;
+            }
+        }
+
+        // 2. Chuỗi thời gian học giống hệt
         if (s1.getStudyTime() != null && s2.getStudyTime() != null && s1.getStudyTime().equalsIgnoreCase(s2.getStudyTime())) {
             return true;
         }
+
+        // 3. Trùng ca học và trùng thứ trong tuần
         if (s1.getClassShift() != null && s2.getClassShift() != null && s1.getClassShift() == s2.getClassShift()) {
             if (s1.getStudyTime() != null && s2.getStudyTime() != null) {
-                // Ví dụ: Thứ 2 vs Thứ 2
+                Set<String> days1 = extractDaysOfWeek(s1.getStudyTime());
+                Set<String> days2 = extractDaysOfWeek(s2.getStudyTime());
+                if (!days1.isEmpty() && !days2.isEmpty()) {
+                    for (String d : days1) {
+                        if (days2.contains(d)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
                 String d1 = s1.getStudyTime().split(",")[0].trim();
                 String d2 = s2.getStudyTime().split(",")[0].trim();
                 return d1.equalsIgnoreCase(d2);
             }
+            return true;
         }
         return false;
+    }
+
+    private Set<String> extractDaysOfWeek(String studyTime) {
+        Set<String> days = new HashSet<>();
+        if (studyTime == null) return days;
+        String lower = studyTime.toLowerCase();
+        if (lower.contains("thứ 2") || lower.contains("thứ hai") || lower.contains("t2") || lower.contains("monday")) days.add("T2");
+        if (lower.contains("thứ 3") || lower.contains("thứ ba") || lower.contains("t3") || lower.contains("tuesday")) days.add("T3");
+        if (lower.contains("thứ 4") || lower.contains("thứ tư") || lower.contains("t4") || lower.contains("wednesday")) days.add("T4");
+        if (lower.contains("thứ 5") || lower.contains("thứ năm") || lower.contains("t5") || lower.contains("thursday")) days.add("T5");
+        if (lower.contains("thứ 6") || lower.contains("thứ sáu") || lower.contains("t6") || lower.contains("friday")) days.add("T6");
+        if (lower.contains("thứ 7") || lower.contains("thứ bảy") || lower.contains("t7") || lower.contains("saturday")) days.add("T7");
+        if (lower.contains("chủ nhật") || lower.contains("cn") || lower.contains("sunday")) days.add("CN");
+        return days;
     }
 
     private Long resolveSemesterId(Long semesterId) {

@@ -1,7 +1,6 @@
 // cSpell:disable
 package com.student.management.repository;
 
-import com.student.management.entity.CreditClass;
 import com.student.management.entity.CreditClassStudent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -36,12 +35,4 @@ public interface CreditClassStudentRepository extends JpaRepository<CreditClassS
                                                                @Param("teacherId") String teacherId,
                                                                @Param("subjectId") String subjectId,
                                                                @Param("academicYear") String academicYear);
-
-    @Query("SELECT ccs.creditClass FROM CreditClassStudent ccs " +
-           "WHERE ccs.student.studentId = :studentId " +
-           "AND ccs.creditClass.subject.subjectId = :subjectId " +
-           "AND ccs.creditClass.academicYear.academicYearId = :academicYear")
-    List<CreditClass> findCreditClassesByStudentAndSubjectAndAcademicYear(@Param("studentId") String studentId,
-                                                                         @Param("subjectId") String subjectId,
-                                                                         @Param("academicYear") String academicYear);
 }

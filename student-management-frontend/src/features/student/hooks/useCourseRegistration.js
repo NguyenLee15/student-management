@@ -13,6 +13,7 @@ export function useCourseRegistration({ onNotify }) {
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [withdrawTarget, setWithdrawTarget] = useState(null);
@@ -39,7 +40,8 @@ export function useCourseRegistration({ onNotify }) {
       setMyEnrollments(enrollmentsRes.data || []);
     } catch (err) {
       console.error('Lỗi khi tải danh sách môn học đăng ký', err);
-      setErrorMessage(err.response?.data?.message || 'Không thể tải dữ liệu đợt đăng ký tín chỉ.');
+      const errMsg = err.response?.data?.message || err.message || 'Không thể tải dữ liệu đợt đăng ký tín chỉ.';
+      setErrorMessage(errMsg);
     } finally {
       setLoading(false);
     }
@@ -50,12 +52,15 @@ export function useCourseRegistration({ onNotify }) {
   }, [loadRegistrationData]);
 
   const validateCurrentCart = useCallback(async () => {
+    setIsValidating(true);
     try {
       const classIds = cart.map(c => c.creditClassId || c.id);
       const res = await studentRegistrationApi.validateCart(classIds);
       setValidationResult(res.data);
     } catch (err) {
       console.error('Lỗi kiểm tra điều kiện tiên quyết', err);
+    } finally {
+      setIsValidating(false);
     }
   }, [cart]);
 
@@ -97,12 +102,13 @@ export function useCourseRegistration({ onNotify }) {
       await loadRegistrationData();
     } catch (err) {
       console.error('Đăng ký học phần thất bại', err);
-      const errorData = err.response?.data;
-      const errMsg = errorData?.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại điều kiện giỏ môn học.';
+      const errorData = err.response?.data || err.raw?.response?.data;
+      const errMsg = errorData?.message || err.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại điều kiện giỏ môn học.';
       setErrorMessage(errMsg);
       onNotify?.('error', errMsg);
-      if (errorData?.details) {
-        setValidationResult({ valid: false, violations: Array.isArray(errorData.details) ? errorData.details : [errorData.details] });
+      const violations = errorData?.details || errorData?.violations;
+      if (violations) {
+        setValidationResult({ valid: false, violations: Array.isArray(violations) ? violations : [violations] });
       }
     } finally {
       setIsSubmitting(false);
@@ -125,7 +131,7 @@ export function useCourseRegistration({ onNotify }) {
       onNotify?.('success', successMsg);
       await loadRegistrationData();
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Không thể rút học phần.';
+      const errMsg = err.response?.data?.message || err.message || 'Không thể rút học phần.';
       setErrorMessage(errMsg);
       onNotify?.('error', errMsg);
     }
@@ -160,6 +166,7 @@ export function useCourseRegistration({ onNotify }) {
     searchKeyword,
     setSearchKeyword,
     isSubmitting,
+    isValidating,
     successMessage,
     setSuccessMessage,
     errorMessage,

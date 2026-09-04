@@ -236,7 +236,7 @@ public class CreditClassServiceImpl implements CreditClassService {
         boolean alreadyEnrolled = existing.stream()
                 .anyMatch(ccs -> ccs.getStudent() != null && ccs.getStudent().getStudentId().equals(studentId));
         if (alreadyEnrolled) {
-            throw new IllegalArgumentException("Sinh viên " + student.getFullName() + " (" + studentId + ") đã đăng ký vào lớp tín chỉ này rồi.");
+            throw new BusinessException(ErrorCode.REGISTRATION_DUPLICATE_SUBJECT, "Sinh viên " + student.getFullName() + " (" + studentId + ") đã đăng ký vào lớp tín chỉ này rồi.");
         }
 
         // 2. Kiểm tra điều kiện môn học tiên quyết (Prerequisite validation)
@@ -248,7 +248,7 @@ public class CreditClassServiceImpl implements CreditClassService {
                 g.getScoreScale4() != null && g.getScoreScale4().compareTo(BigDecimal.ZERO) > 0 && !"F".equalsIgnoreCase(g.getLetterGrade())
             );
             if (!passedPrereq) {
-                throw new IllegalArgumentException("Sinh viên chưa hoàn thành môn học tiên quyết bắt buộc: " 
+                throw new BusinessException(ErrorCode.REGISTRATION_PREREQUISITE_FAILED, "Sinh viên chưa hoàn thành môn học tiên quyết bắt buộc: " 
                         + prereq.getSubjectName() + " (" + prereq.getSubjectId() + ").");
             }
         }
@@ -257,7 +257,7 @@ public class CreditClassServiceImpl implements CreditClassService {
         int currentEnrolled = cc.getEnrolledCount() != null ? cc.getEnrolledCount() : 0;
         int maxCapacity = cc.getMaxStudents() != null ? cc.getMaxStudents() : 50;
         if (currentEnrolled >= maxCapacity) {
-            throw new IllegalArgumentException("Lớp tín chỉ đã đủ sĩ số tối đa (" + maxCapacity + " sinh viên). Không thể đăng ký thêm.");
+            throw new BusinessException(ErrorCode.REGISTRATION_CLASS_FULL, "Lớp tín chỉ đã đủ sĩ số tối đa (" + maxCapacity + " sinh viên). Không thể đăng ký thêm.");
         }
 
         // 4. Mutate enrolledCount để kích hoạt Hibernate @Version Optimistic Locking

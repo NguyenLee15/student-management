@@ -76,7 +76,7 @@ public class TeacherServiceImpl implements TeacherService {
     @Transactional
     public TeacherResponseDto create(TeacherRequestDto dto) {
         if (teacherRepository.existsById(dto.getTeacherId())) {
-            throw new IllegalArgumentException("Mã giảng viên đã tồn tại: " + dto.getTeacherId());
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Mã giảng viên đã tồn tại: " + dto.getTeacherId());
         }
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + dto.getFacultyId()));

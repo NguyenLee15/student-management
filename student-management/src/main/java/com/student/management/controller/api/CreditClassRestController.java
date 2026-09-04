@@ -3,7 +3,6 @@ package com.student.management.controller.api;
 
 import com.student.management.dto.req.CreditClassRequestDto;
 import com.student.management.dto.resp.ApiResponse;
-import com.student.management.dto.resp.CreditClassGradebookResponseDto;
 import com.student.management.dto.resp.CreditClassResponseDto;
 import com.student.management.exception.BusinessException;
 import com.student.management.exception.ErrorCode;
@@ -94,16 +93,16 @@ public class CreditClassRestController {
     }
 
     @PostMapping("/{classId}/students/{studentId}")
-    @Operation(summary = "Đăng ký học phần (Student enrollment with Optimistic Locking)")
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('STUDENT') and @securityService.isSelfStudent(#studentId))")
+    @Operation(summary = "Đăng ký học phần (Admin manual assignment)")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> addStudent(@PathVariable Long classId, @PathVariable String studentId) {
         creditClassService.addStudentToCreditClass(classId, studentId);
         return ResponseEntity.ok(ApiResponse.success("Đăng ký lớp tín chỉ thành công", null));
     }
 
     @DeleteMapping("/{classId}/students/{studentId}")
-    @Operation(summary = "Hủy đăng ký học phần (Student unenrollment)")
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('STUDENT') and @securityService.isSelfStudent(#studentId))")
+    @Operation(summary = "Hủy đăng ký học phần (Admin manual removal)")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> removeStudent(@PathVariable Long classId, @PathVariable String studentId) {
         creditClassService.removeStudentFromCreditClass(classId, studentId);
         return ResponseEntity.ok(ApiResponse.success("Hủy đăng ký lớp tín chỉ thành công", null));
@@ -114,12 +113,5 @@ public class CreditClassRestController {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('TEACHER') and @securityService.isClassInstructor(#id))")
     public ResponseEntity<ApiResponse<List<StudentResponseDto>>> getStudentsByCreditClass(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách sinh viên theo lớp tín chỉ thành công", studentService.getStudentsByCreditClassId(id)));
-    }
-
-    @GetMapping("/{id}/gradebook")
-    @Operation(summary = "Lấy bảng điểm lớp học phần (Gradebook) chi tiết kèm trọng số và danh sách sinh viên")
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('TEACHER') and @securityService.isClassInstructor(#id))")
-    public ResponseEntity<ApiResponse<CreditClassGradebookResponseDto>> getGradebook(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.success("Lấy sổ điểm lớp học phần thành công", creditClassService.getGradebook(id)));
     }
 }

@@ -10,7 +10,9 @@ export default function TuitionSummaryCard({ invoice, onOpenPayModal }) {
       <div className="space-y-1">
         <span className="text-xs uppercase font-bold text-slate-400">Mã Hóa Đơn</span>
         <div className="font-mono font-bold text-lg text-blue-300">{invoice.invoiceCode}</div>
-        <div className="text-xs text-slate-400">Hạn: {invoice.dueDate}</div>
+        <div className="text-xs text-slate-400">
+          Hạn: {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString('vi-VN') : 'Theo thông báo'}
+        </div>
       </div>
 
       <div className="space-y-1">

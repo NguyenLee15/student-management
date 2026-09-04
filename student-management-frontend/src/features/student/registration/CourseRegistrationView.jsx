@@ -24,6 +24,7 @@ export default function CourseRegistrationView({ onNotify }) {
     searchKeyword,
     setSearchKeyword,
     isSubmitting,
+    isValidating,
     successMessage,
     setSuccessMessage,
     errorMessage,
@@ -142,6 +143,7 @@ export default function CourseRegistrationView({ onNotify }) {
         onRemoveFromCart={handleRemoveFromCart}
         onClearCart={() => setCart([])}
         validationResult={validationResult}
+        isValidating={isValidating}
         isSubmitting={isSubmitting}
         onSubmitRegistration={handleSubmitBatch}
       />

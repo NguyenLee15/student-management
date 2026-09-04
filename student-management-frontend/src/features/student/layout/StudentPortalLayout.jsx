@@ -9,18 +9,21 @@ import CourseRegistrationView from '../registration/CourseRegistrationView';
 import MatrixTimetableView from '../timetable/MatrixTimetableView';
 import StudentTranscriptView from '../grades/StudentTranscriptView';
 import TuitionLedgerView from '../tuition/TuitionLedgerView';
-import { studentPortalApi } from '../../../api';
+import ProfileSettingsModal from '../../../components/profile/ProfileSettingsModal';
+import { useStudentPortal } from '../hooks/useStudentPortal';
 
 export default function StudentPortalLayout({ user, onLogout, onNotify, onSwitchToAdmin }) {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [profile, setProfile] = useState(null);
-
-  useEffect(() => {
-    studentPortalApi.getMyOverview()
-      .then(res => setProfile(res.data))
-      .catch(err => console.warn('Không thể tải profile sinh viên', err));
-  }, []);
+  const {
+    activeTab,
+    setActiveTab,
+    isMobileMenuOpen,
+    setIsMobileMenuOpen,
+    isProfileModalOpen,
+    setIsProfileModalOpen,
+    profile,
+    studentDisplayName,
+    studentDisplayId,
+  } = useStudentPortal({ user, onNotify });
 
   const navItems = [
     { id: 'dashboard', label: 'Bảng Tổng Quan', icon: LayoutDashboard },
@@ -29,9 +32,6 @@ export default function StudentPortalLayout({ user, onLogout, onNotify, onSwitch
     { id: 'grades', label: 'Bảng Điểm Học Tập', icon: Award },
     { id: 'tuition', label: 'Sổ Cái Học Phí', icon: CreditCard },
   ];
-
-  const studentDisplayName = profile?.fullName || user?.fullName || user?.username || 'Sinh Viên';
-  const studentDisplayId = profile?.studentId || user?.studentId || user?.username || 'SV001';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -42,6 +42,7 @@ export default function StudentPortalLayout({ user, onLogout, onNotify, onSwitch
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Mở menu điều hướng"
+              aria-expanded={isMobileMenuOpen}
               className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -75,18 +76,25 @@ export default function StudentPortalLayout({ user, onLogout, onNotify, onSwitch
               </button>
             )}
 
-            <div className="flex items-center gap-2.5 pl-3 border-l border-slate-800">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow">
-                {studentDisplayName.charAt(0).toUpperCase()}
-              </div>
-              <div className="hidden md:block text-left">
-                <div className="text-xs font-bold text-white truncate max-w-[140px]" title={studentDisplayName}>
-                  {studentDisplayName}
+            <div className="flex items-center gap-1 pl-3 border-l border-slate-800">
+              <button
+                onClick={() => setIsProfileModalOpen(true)}
+                className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-slate-800 transition-colors text-left"
+                title="Xem thông tin tài khoản & Đổi mật khẩu"
+                aria-label="Xem thông tin tài khoản và đổi mật khẩu"
+              >
+                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow">
+                  {studentDisplayName.charAt(0).toUpperCase()}
                 </div>
-                <div className="text-[10px] text-blue-400 font-mono">
-                  Mã SV: {studentDisplayId}
+                <div className="hidden md:block text-left">
+                  <div className="text-xs font-bold text-white truncate max-w-[140px]" title={studentDisplayName}>
+                    {studentDisplayName}
+                  </div>
+                  <div className="text-[10px] text-blue-400 font-mono">
+                    Mã SV: {studentDisplayId}
+                  </div>
                 </div>
-              </div>
+              </button>
               <button
                 onClick={onLogout}
                 aria-label="Đăng xuất khỏi hệ thống"
@@ -156,7 +164,7 @@ export default function StudentPortalLayout({ user, onLogout, onNotify, onSwitch
         </aside>
 
         {/* View Content Area */}
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0" role="tabpanel" id="student-tabpanel" aria-labelledby={activeTab}>
           {activeTab === 'dashboard' && (
             <StudentDashboardView onNotify={onNotify} onNavigateTab={(tab) => setActiveTab(tab)} />
           )}
@@ -166,6 +174,12 @@ export default function StudentPortalLayout({ user, onLogout, onNotify, onSwitch
           {activeTab === 'tuition' && <TuitionLedgerView onNotify={onNotify} onNavigateTab={(tab) => setActiveTab(tab)} />}
         </main>
       </div>
+
+      {/* Profile & Change Password Modal */}
+      <ProfileSettingsModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
     </div>
   );
 }

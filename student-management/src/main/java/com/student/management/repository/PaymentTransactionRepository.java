@@ -24,6 +24,7 @@ public interface PaymentTransactionRepository extends JpaRepository<PaymentTrans
     @Query("SELECT t FROM PaymentTransaction t WHERE t.orderCode = :orderCode")
     Optional<PaymentTransaction> findByOrderCodeForUpdate(@Param("orderCode") Long orderCode);
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"student", "invoice"})
     List<PaymentTransaction> findByStudent_StudentIdOrderByCreatedAtDesc(String studentId);
 
     List<PaymentTransaction> findByInvoice_IdOrderByCreatedAtDesc(Long invoiceId);

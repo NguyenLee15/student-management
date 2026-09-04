@@ -8,6 +8,7 @@ import TimetableMatrixGrid from './TimetableMatrixGrid';
 export default function MatrixTimetableView({ onNotify }) {
   const [timetable, setTimetable] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedSemester, setSelectedSemester] = useState(1);
   const [semesters, setSemesters] = useState([]);
 
@@ -57,12 +58,15 @@ export default function MatrixTimetableView({ onNotify }) {
 
   const loadTimetable = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await studentPortalApi.getMyTimetable(selectedSemester);
       setTimetable(res.data || []);
     } catch (err) {
       console.error('Lỗi khi tải thời khóa biểu', err);
-      onNotify?.('error', 'Không thể tải thời khóa biểu học tập');
+      const msg = err.response?.data?.message || err.message || 'Không thể tải thời khóa biểu học tập';
+      setError(msg);
+      onNotify?.('error', msg);
     } finally {
       setLoading(false);
     }
@@ -221,6 +225,16 @@ export default function MatrixTimetableView({ onNotify }) {
             <Skeleton className="h-20 w-full rounded-xl" />
             <Skeleton className="h-20 w-full rounded-xl" />
           </div>
+        </div>
+      ) : error ? (
+        <div className="bg-rose-50 border border-rose-200 p-8 rounded-2xl text-center space-y-3 shadow-sm">
+          <p className="text-base font-bold text-rose-700">{error}</p>
+          <button
+            onClick={loadTimetable}
+            className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow transition-colors"
+          >
+            Thử Lại
+          </button>
         </div>
       ) : timetable.length === 0 ? (
         <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400 space-y-3 shadow-sm">

@@ -55,7 +55,7 @@ export default function StudentTranscriptTable({ grades = [], loading = false })
                 <td className="p-2 text-center font-bold">
                   <span
                     className={`px-2 py-0.5 rounded text-[11px] ${
-                      g.letterGrade === 'A'
+                      g.letterGrade?.startsWith('A')
                         ? 'bg-emerald-100 text-emerald-800'
                         : g.letterGrade?.startsWith('B')
                         ? 'bg-blue-100 text-blue-800'

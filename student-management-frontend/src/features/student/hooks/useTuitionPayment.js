@@ -165,6 +165,7 @@ export function useTuitionPayment({ onNotify }) {
     loading,
     selectedSemester,
     setSelectedSemester,
+    semesters,
     isPayModalOpen,
     setIsPayModalOpen,
     payAmount,

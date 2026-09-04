@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   X, ShoppingCart, AlertTriangle, CheckCircle2, 
-  Trash2, BookOpen, Clock, MapPin, User, ArrowRight, ShieldAlert 
+  Trash2, BookOpen, Clock, MapPin, User, ArrowRight, ShieldAlert, RefreshCw 
 } from 'lucide-react';
 
 export default function RegistrationCartDrawer({
@@ -16,6 +16,17 @@ export default function RegistrationCartDrawer({
   isSubmitting,
   onSubmitRegistration
 }) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const totalCredits = cartItems.reduce((acc, item) => acc + (item.credits || 0), 0);
@@ -27,7 +38,7 @@ export default function RegistrationCartDrawer({
   const hasErrors = validationResult?.violations?.some(v => v.severity === 'ERROR');
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true" aria-label="Giỏ đăng ký học phần">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
@@ -59,6 +70,14 @@ export default function RegistrationCartDrawer({
 
           {/* Body Content */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Validation Progress Indicator */}
+            {isValidating && (
+              <div className="p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl text-xs font-bold flex items-center gap-2 animate-pulse">
+                <RefreshCw className="w-4 h-4 animate-spin flex-shrink-0" />
+                <span>Đang kiểm tra xung đột lịch và điều kiện tiên quyết...</span>
+              </div>
+            )}
+
             {/* Validation Banner (Hiển thị toàn bộ vi phạm tích lũy) */}
             {validationResult?.violations?.length > 0 && (
               <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2">
@@ -122,6 +141,7 @@ export default function RegistrationCartDrawer({
                         onClick={() => onRemoveFromCart(item.creditClassId || item.id)}
                         className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                         title="Bỏ khỏi giỏ"
+                        aria-label={`Bỏ môn ${item.subjectName || item.creditClassName || ''} khỏi giỏ`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

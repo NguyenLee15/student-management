@@ -125,10 +125,14 @@ axiosClient.interceptors.response.use(
       return Promise.reject({ status: 0, message: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra đường truyền mạng.', raw: error });
     }
     
-    // Import msg dynamically if needed, or just safe fallback
-    const hasVietnamese = /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i.test(message);
-    const safeMsg = hasVietnamese ? message : 'Đã xảy ra lỗi không xác định (hệ thống)';
-    return Promise.reject({ status, message: safeMsg, raw: error });
+    // Preserve backend message and attach response object for detail inspection
+    const safeMsg = message || 'Đã xảy ra lỗi không xác định (hệ thống)';
+    return Promise.reject({ 
+      status, 
+      message: safeMsg, 
+      response: error.response,
+      raw: error 
+    });
   }
 );
 

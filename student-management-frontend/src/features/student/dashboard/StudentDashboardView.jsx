@@ -7,25 +7,30 @@ import StudentKpiGrid from './StudentKpiGrid';
 import StudentTodaySchedule from './StudentTodaySchedule';
 import StudentQuickActions from './StudentQuickActions';
 
-export default function StudentDashboardView({ onNavigateTab }) {
+export default function StudentDashboardView({ onNavigateTab, onNotify }) {
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadOverview();
-  }, []);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const loadOverview = async () => {
     setLoading(true);
+    setErrorMsg(null);
     try {
       const res = await studentPortalApi.getMyOverview();
       setOverview(res.data);
     } catch (err) {
       console.error('Lỗi khi tải dữ liệu tổng quan', err);
+      const msg = err.response?.data?.message || err.message || 'Không thể tải dữ liệu tổng quan sinh viên.';
+      setErrorMsg(msg);
+      onNotify?.('error', msg);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadOverview();
+  }, []);
 
   if (loading) {
     return (
@@ -46,6 +51,20 @@ export default function StudentDashboardView({ onNavigateTab }) {
           <Skeleton className="lg:col-span-2 h-96 w-full rounded-2xl" />
           <Skeleton className="h-96 w-full rounded-2xl" />
         </div>
+      </div>
+    );
+  }
+
+  if (errorMsg && !overview) {
+    return (
+      <div className="bg-rose-50 border border-rose-200 p-6 rounded-2xl text-center space-y-3">
+        <p className="text-sm font-bold text-rose-700">{errorMsg}</p>
+        <button
+          onClick={loadOverview}
+          className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow transition-colors"
+        >
+          Thử Lại
+        </button>
       </div>
     );
   }

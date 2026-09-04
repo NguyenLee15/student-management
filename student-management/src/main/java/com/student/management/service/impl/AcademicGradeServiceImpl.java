@@ -98,15 +98,6 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
         Subject subject = subjectRepository.findById(dto.getSubjectId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy môn học: " + dto.getSubjectId()));
 
-        List<CreditClass> creditClasses = creditClassStudentRepository.findCreditClassesByStudentAndSubjectAndAcademicYear(
-                dto.getStudentId(), dto.getSubjectId(), dto.getAcademicYear()
-        );
-        for (CreditClass cc : creditClasses) {
-            if (Boolean.TRUE.equals(cc.getLocked())) {
-                throw new BusinessException(ErrorCode.GRADEBOOK_CLASS_LOCKED);
-            }
-        }
-
         if (academicGradeRepository.findExistingGrade(dto.getStudentId(), dto.getSubjectId(), dto.getSemester(), dto.getAcademicYear(), dto.getStudyPhase()).isPresent()) {
             throw new IllegalArgumentException("Điểm số đã tồn tại cho môn học, học kỳ, niên khóa và giai đoạn này.");
         }
@@ -143,15 +134,6 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
 
         if (dto.getVersion() != null && grade.getVersion() != null && !dto.getVersion().equals(grade.getVersion())) {
             throw new ObjectOptimisticLockingFailureException(AcademicGrade.class, gradeId);
-        }
-
-        List<CreditClass> creditClasses = creditClassStudentRepository.findCreditClassesByStudentAndSubjectAndAcademicYear(
-                grade.getStudent().getStudentId(), grade.getSubject().getSubjectId(), grade.getAcademicYear()
-        );
-        for (CreditClass cc : creditClasses) {
-            if (Boolean.TRUE.equals(cc.getLocked())) {
-                throw new BusinessException(ErrorCode.GRADEBOOK_CLASS_LOCKED);
-            }
         }
 
         grade.setSemester(dto.getSemester());
