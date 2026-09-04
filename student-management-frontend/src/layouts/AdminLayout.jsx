@@ -46,8 +46,7 @@ export default function AdminLayout({
   onLogout,
   showToast,
   counts,
-  facultiesList,
-  onRoleSwitch
+  facultiesList
 }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -67,7 +66,6 @@ export default function AdminLayout({
         onLogout={onLogout}
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         isMobileMenuOpen={isMobileMenuOpen}
-        onRoleSwitch={onRoleSwitch}
       />
 
       {/* Mobile Backdrop */}

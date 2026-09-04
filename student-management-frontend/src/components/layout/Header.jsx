@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  GraduationCap, RefreshCw, LogOut, FileText, Menu, X, 
-  Settings, Shield, UserSquare2, Sparkles, Command
+  GraduationCap, RefreshCw, LogOut, Menu, X, 
+  Settings, Command
 } from 'lucide-react';
 import ProfileSettingsModal from '../profile/ProfileSettingsModal';
 
@@ -14,8 +14,7 @@ export default function Header({
   onLogout,
   onOpenCommand,
   onToggleMobileMenu,
-  isMobileMenuOpen,
-  onRoleSwitch
+  isMobileMenuOpen
 }) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
@@ -103,28 +102,6 @@ export default function Header({
                 <Settings className="h-3.5 w-3.5 text-slate-400 hover:text-white transition" />
               </button>
               
-              {/* Optional Role Switcher for Developer/Admin Sandbox */}
-              {onRoleSwitch && (
-                <div className="hidden xl:flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-xl border border-slate-800 text-[11px]">
-                  <span className="text-slate-500 text-[10px] font-medium mr-0.5">Mô phỏng:</span>
-                  <button
-                    onClick={() => onRoleSwitch('ROLE_TEACHER')}
-                    title="Chuyển sang xem thử Cổng Giảng Viên"
-                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition text-[11px]"
-                  >
-                    <UserSquare2 className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Giảng viên</span>
-                  </button>
-                  <button
-                    onClick={() => onRoleSwitch('ROLE_STUDENT')}
-                    title="Chuyển sang xem thử Cổng Sinh Viên"
-                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition text-[11px]"
-                  >
-                    <GraduationCap className="w-3.5 h-3.5 text-blue-400" />
-                    <span>Sinh viên</span>
-                  </button>
-                </div>
-              )}
 
               <button
                 onClick={onLogout}

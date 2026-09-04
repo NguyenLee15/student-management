@@ -240,7 +240,6 @@ export default function App() {
           showToast={showToast}
           counts={counts}
           facultiesList={facultiesList}
-          onRoleSwitch={handleRoleSwitch}
         />
       )}
 
