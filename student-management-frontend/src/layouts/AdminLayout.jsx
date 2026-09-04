@@ -147,6 +147,14 @@ export default function AdminLayout({
             <ClassroomModule onNotify={showToast} currentUser={currentUser} />
           )}
 
+          {activeTab === 'registration-periods' && (
+            <RegistrationPeriodModule onNotify={showToast} currentUser={currentUser} />
+          )}
+
+          {activeTab === 'tuition-policies' && (
+            <TuitionPolicyModule onNotify={showToast} currentUser={currentUser} />
+          )}
+
           {activeTab === 'credit-classes' && (
             <CreditClassModule onNotify={showToast} currentUser={currentUser} />
           )}
