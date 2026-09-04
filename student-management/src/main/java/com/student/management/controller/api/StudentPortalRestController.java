@@ -58,7 +58,7 @@ public class StudentPortalRestController {
     @Operation(summary = "Lấy hóa đơn học phí và công nợ của sinh viên theo học kỳ")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
     public ResponseEntity<ApiResponse<TuitionInvoiceResponseDto>> getMyTuition(
-            @RequestParam(required = false, defaultValue = "1") Long semesterId) {
+            @RequestParam(required = false) Long semesterId) {
         String studentId = securityService.getCurrentStudentId();
         TuitionInvoiceResponseDto invoice = tuitionService.getStudentInvoiceBySemester(studentId, semesterId);
         return ResponseEntity.ok(ApiResponse.success("Lấy thông tin học phí thành công", invoice));

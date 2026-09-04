@@ -68,6 +68,7 @@ export default function EnrolledClassesTable({
                   <td className="px-5 py-4 text-center">
                     <button
                       onClick={() => onDropCourse(enr.id, enr.subjectName)}
+                      aria-label={`Rút học phần ${enr.subjectName}`}
                       className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                       title="Rút môn học"
                     >

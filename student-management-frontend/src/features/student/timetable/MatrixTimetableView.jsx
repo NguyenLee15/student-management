@@ -1,7 +1,7 @@
 // cSpell:disable
 import React, { useState, useEffect } from 'react';
 import { Calendar, Download, Printer } from 'lucide-react';
-import { studentPortalApi } from '../../../api';
+import { studentPortalApi, registrationPeriodApi } from '../../../api';
 import Skeleton from '../../../components/common/Skeleton';
 import TimetableMatrixGrid from './TimetableMatrixGrid';
 
@@ -9,6 +9,7 @@ export default function MatrixTimetableView({ onNotify }) {
   const [timetable, setTimetable] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSemester, setSelectedSemester] = useState(1);
+  const [semesters, setSemesters] = useState([]);
 
   const daysOfWeek = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
   const timeSlots = [
@@ -18,6 +19,37 @@ export default function MatrixTimetableView({ onNotify }) {
     { key: '10-12', label: 'Chiều (Tiết 10-12)', time: '15:35 - 18:00', shift: 'AFTERNOON' },
     { key: '13-15', label: 'Tối (Tiết 13-15)', time: '18:15 - 20:45', shift: 'EVENING' },
   ];
+
+  useEffect(() => {
+    async function loadTimetableSemesters() {
+      try {
+        const res = await registrationPeriodApi.getAll();
+        const periods = res.data || [];
+        const semesterList = [];
+        const seenIds = new Set();
+        periods.forEach((p) => {
+          if (p.semesterId && !seenIds.has(p.semesterId)) {
+            seenIds.add(p.semesterId);
+            semesterList.push({
+              id: p.semesterId,
+              name: p.semesterName ? `${p.semesterName} (${p.academicYearName || ''})` : `Học kỳ ${p.semesterId}`,
+              active: p.active,
+            });
+          }
+        });
+        if (semesterList.length > 0) {
+          setSemesters(semesterList);
+          const activeSem = semesterList.find((s) => s.active);
+          if (activeSem) {
+            setSelectedSemester(activeSem.id);
+          }
+        }
+      } catch (err) {
+        console.warn('Không thể tải danh sách học kỳ', err);
+      }
+    }
+    loadTimetableSemesters();
+  }, []);
 
   useEffect(() => {
     loadTimetable();
@@ -141,9 +173,20 @@ export default function MatrixTimetableView({ onNotify }) {
             value={selectedSemester}
             onChange={(e) => setSelectedSemester(Number(e.target.value))}
             className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            aria-label="Chọn học kỳ hiển thị thời khóa biểu"
           >
-            <option value={1}>Học kỳ 1 (2026-2027)</option>
-            <option value={2}>Học kỳ 2 (2026-2027)</option>
+            {semesters && semesters.length > 0 ? (
+              semesters.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))
+            ) : (
+              <>
+                <option value={1}>Học kỳ 1 (2026-2027)</option>
+                <option value={2}>Học kỳ 2 (2026-2027)</option>
+              </>
+            )}
           </select>
 
           <button

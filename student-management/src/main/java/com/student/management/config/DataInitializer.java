@@ -34,6 +34,7 @@ public class DataInitializer implements CommandLineRunner {
     private final RegistrationPeriodRepository registrationPeriodRepository;
     private final TuitionPolicyRepository tuitionPolicyRepository;
     private final CreditClassRepository creditClassRepository;
+    private final SemesterScheduleRepository semesterScheduleRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -388,77 +389,58 @@ public class DataInitializer implements CommandLineRunner {
             Subject netSub = subjectRepository.findById("NET06").orElse(null);
 
             if (hk1 != null && year != null && gv1 != null && cr1 != null && javaSub != null) {
-                CreditClass c1 = CreditClass.builder()
-                        .creditClassName("Lớp Java căn bản - Nhóm 01")
-                        .subject(javaSub)
-                        .teacher(gv1)
-                        .classroom(cr1)
-                        .academicYear(year)
-                        .semester(hk1)
-                        .maxStudents(40)
-                        .enrolledCount(0)
-                        .attendanceWeight(new java.math.BigDecimal("0.10"))
-                        .midtermWeight(new java.math.BigDecimal("0.30"))
-                        .finalExamWeight(new java.math.BigDecimal("0.60"))
-                        .locked(false)
-                        .build();
-                creditClassRepository.save(c1);
+                seedOneCreditClass("Lớp Java căn bản - Nhóm 01", javaSub, gv1, cr1, year, hk1,
+                        "Thứ 2 (Tiết 1-3)", ClassShift.MORNING, "0.10", "0.30", "0.60");
 
                 if (dsaSub != null) {
-                    CreditClass c2 = CreditClass.builder()
-                            .creditClassName("Lớp Cấu trúc dữ liệu - Nhóm 01")
-                            .subject(dsaSub)
-                            .teacher(gv1)
-                            .classroom(cr1)
-                            .academicYear(year)
-                            .semester(hk1)
-                            .maxStudents(40)
-                            .enrolledCount(0)
-                            .attendanceWeight(new java.math.BigDecimal("0.20"))
-                            .midtermWeight(new java.math.BigDecimal("0.20"))
-                            .finalExamWeight(new java.math.BigDecimal("0.60"))
-                            .locked(false)
-                            .build();
-                    creditClassRepository.save(c2);
+                    seedOneCreditClass("Lớp Cấu trúc dữ liệu - Nhóm 01", dsaSub, gv1, cr1, year, hk1,
+                            "Thứ 3 (Tiết 4-6)", ClassShift.MORNING, "0.20", "0.20", "0.60");
                 }
 
                 if (dbSub != null && gv2 != null) {
-                    CreditClass c3 = CreditClass.builder()
-                            .creditClassName("Lớp Cơ sở dữ liệu - Nhóm 01")
-                            .subject(dbSub)
-                            .teacher(gv2)
-                            .classroom(cr1)
-                            .academicYear(year)
-                            .semester(hk1)
-                            .maxStudents(40)
-                            .enrolledCount(0)
-                            .attendanceWeight(new java.math.BigDecimal("0.10"))
-                            .midtermWeight(new java.math.BigDecimal("0.30"))
-                            .finalExamWeight(new java.math.BigDecimal("0.60"))
-                            .locked(false)
-                            .build();
-                    creditClassRepository.save(c3);
+                    seedOneCreditClass("Lớp Cơ sở dữ liệu - Nhóm 01", dbSub, gv2, cr1, year, hk1,
+                            "Thứ 4 (Tiết 7-9)", ClassShift.AFTERNOON, "0.10", "0.30", "0.60");
                 }
 
                 if (netSub != null) {
-                    CreditClass c4 = CreditClass.builder()
-                            .creditClassName("Lớp Mạng máy tính - Nhóm 01")
-                            .subject(netSub)
-                            .teacher(gv1)
-                            .classroom(cr1)
-                            .academicYear(year)
-                            .semester(hk1)
-                            .maxStudents(40)
-                            .enrolledCount(0)
-                            .attendanceWeight(new java.math.BigDecimal("0.10"))
-                            .midtermWeight(new java.math.BigDecimal("0.30"))
-                            .finalExamWeight(new java.math.BigDecimal("0.60"))
-                            .locked(false)
-                            .build();
-                    creditClassRepository.save(c4);
+                    seedOneCreditClass("Lớp Mạng máy tính - Nhóm 01", netSub, gv1, cr1, year, hk1,
+                            "Thứ 5 (Tiết 7-9)", ClassShift.AFTERNOON, "0.10", "0.30", "0.60");
                 }
-                logger.info("Initialized 4 sample CreditClasses with snapshot weights");
+                logger.info("Initialized 4 sample CreditClasses with schedules and snapshot weights");
             }
+        }
+    }
+
+    private void seedOneCreditClass(String name, Subject sub, Teacher teacher, Classroom cr, AcademicYear year, Semester sem,
+                                    String studyTime, ClassShift shift, String w1, String w2, String w3) {
+        CreditClass cc = creditClassRepository.save(CreditClass.builder()
+                .creditClassName(name)
+                .subject(sub)
+                .teacher(teacher)
+                .classroom(cr)
+                .academicYear(year)
+                .semester(sem)
+                .maxStudents(40)
+                .enrolledCount(0)
+                .attendanceWeight(new java.math.BigDecimal(w1))
+                .midtermWeight(new java.math.BigDecimal(w2))
+                .finalExamWeight(new java.math.BigDecimal(w3))
+                .locked(false)
+                .build());
+
+        if (semesterScheduleRepository.findByCreditClass_CreditClassId(cc.getId()).isEmpty()) {
+            semesterScheduleRepository.save(SemesterSchedule.builder()
+                    .creditClass(cc)
+                    .subject(sub)
+                    .teacher(teacher)
+                    .classroom(cr)
+                    .semester(com.student.management.enums.Semester.SEMESTER_1)
+                    .academicYear(year.getAcademicYearId())
+                    .studyTime(studyTime)
+                    .classShift(shift)
+                    .startDate(sem.getStartDate())
+                    .endDate(sem.getEndDate())
+                    .build());
         }
     }
 }

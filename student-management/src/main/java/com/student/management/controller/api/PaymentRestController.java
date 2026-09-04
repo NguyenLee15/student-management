@@ -7,6 +7,8 @@ import com.student.management.dto.resp.PaymentTransactionResponseDto;
 import com.student.management.exception.BusinessException;
 import com.student.management.exception.ErrorCode;
 import com.student.management.security.SecurityService;
+import com.student.management.entity.PaymentTransaction;
+import com.student.management.repository.PaymentTransactionRepository;
 import com.student.management.service.PayOSService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,12 +51,15 @@ public class PaymentRestController {
     @Operation(summary = "Chủ động kiểm tra và đồng bộ trạng thái giao dịch từ PayOS")
     @PreAuthorize("hasAnyRole('ADMIN', 'STUDENT')")
     public ResponseEntity<ApiResponse<PaymentTransactionResponseDto>> syncStatus(@PathVariable Long orderCode) {
-        PaymentTransactionResponseDto transaction = payOSService.syncTransactionStatus(orderCode);
-        
-        if (securityService.isStudentRole() && !transaction.getStudentId().equals(securityService.getCurrentStudentId())) {
-            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không có quyền đồng bộ giao dịch của sinh viên khác");
+        if (securityService.isStudentRole()) {
+            PaymentTransaction txn = paymentTransactionRepository.findByOrderCode(orderCode)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Không tìm thấy giao dịch với mã: " + orderCode));
+            if (!txn.getStudent().getStudentId().equals(securityService.getCurrentStudentId())) {
+                throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không có quyền đồng bộ giao dịch của sinh viên khác");
+            }
         }
-        
+
+        PaymentTransactionResponseDto transaction = payOSService.syncTransactionStatus(orderCode);
         return ResponseEntity.ok(ApiResponse.success("Đồng bộ trạng thái giao dịch thành công", transaction));
     }
 

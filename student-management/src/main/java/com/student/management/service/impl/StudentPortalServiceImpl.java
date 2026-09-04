@@ -10,6 +10,7 @@ import com.student.management.entity.*;
 import com.student.management.exception.BusinessException;
 import com.student.management.exception.ErrorCode;
 import com.student.management.repository.AcademicGradeRepository;
+import com.student.management.repository.SemesterRepository;
 import com.student.management.repository.EnrollmentRepository;
 import com.student.management.repository.SemesterScheduleRepository;
 import com.student.management.repository.StudentRepository;
@@ -40,6 +41,7 @@ public class StudentPortalServiceImpl implements StudentPortalService {
     private final TuitionService tuitionService;
     private final AcademicGradeService academicGradeService;
     private final RegistrationPeriodService registrationPeriodService;
+    private final SemesterRepository semesterRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -61,11 +63,7 @@ public class StudentPortalServiceImpl implements StudentPortalService {
         int progressPct = Math.min(100, (int) Math.round((double) totalCredits / requiredCredits * 100));
 
         // 2. Xác định học kỳ đang hoạt động linh hoạt
-        Long activeSemesterId = 1L;
-        List<RegistrationPeriodResponseDto> activePeriods = registrationPeriodService.getCurrentlyActivePeriods();
-        if (activePeriods != null && !activePeriods.isEmpty() && activePeriods.get(0).getSemesterId() != null) {
-            activeSemesterId = activePeriods.get(0).getSemesterId();
-        }
+        Long activeSemesterId = resolveActiveSemesterId(null);
 
         // 3. Môn học và tín chỉ đăng ký học kỳ này
         List<Enrollment> enrollments = enrollmentRepository.findActiveEnrollmentsByStudentAndSemester(studentId, activeSemesterId);
@@ -114,7 +112,7 @@ public class StudentPortalServiceImpl implements StudentPortalService {
     @Override
     @Transactional(readOnly = true)
     public List<StudentTimetableEntryDto> getMyTimetable(String studentId, Long semesterId) {
-        Long semId = semesterId != null ? semesterId : 1L;
+        Long semId = resolveActiveSemesterId(semesterId);
         List<Enrollment> enrollments = enrollmentRepository.findActiveEnrollmentsByStudentAndSemester(studentId, semId);
 
         List<Long> classIds = enrollments.stream()
@@ -143,6 +141,19 @@ public class StudentPortalServiceImpl implements StudentPortalService {
                         .endDate(s.getEndDate())
                         .build())
                 .toList();
+    }
+
+    private Long resolveActiveSemesterId(Long semesterId) {
+        if (semesterId != null) return semesterId;
+        List<RegistrationPeriodResponseDto> activePeriods = registrationPeriodService.getCurrentlyActivePeriods();
+        if (activePeriods != null && !activePeriods.isEmpty() && activePeriods.get(0).getSemesterId() != null) {
+            return activePeriods.get(0).getSemesterId();
+        }
+        List<Semester> activeSemesters = semesterRepository.findAllActiveSemesters();
+        if (!activeSemesters.isEmpty()) {
+            return activeSemesters.get(0).getId();
+        }
+        return 1L;
     }
 
     private boolean matchesDayOfWeek(String studyTime, DayOfWeek dow) {

@@ -1,4 +1,4 @@
-import { msg } from '../../../lib/messages';
+
 import React from 'react';
 import { 
   X, ShoppingCart, AlertTriangle, CheckCircle2, 
@@ -20,7 +20,7 @@ export default function RegistrationCartDrawer({
 
   const totalCredits = cartItems.reduce((acc, item) => acc + (item.credits || 0), 0);
   const estimatedTuition = cartItems.reduce((acc, item) => {
-    const price = item.unitPrice || item.tuitionPerCredit || item.pricePerCredit || 500000;
+    const price = item.unitPrice || item.tuitionPerCredit || item.pricePerCredit || 450000;
     return acc + price * (item.credits || 0);
   }, 0);
 
@@ -141,7 +141,7 @@ export default function RegistrationCartDrawer({
                         <span>{item.roomName || 'Chưa xếp phòng'}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-blue-700 font-semibold">
-                        <span>{((item.unitPrice || item.tuitionPerCredit || item.pricePerCredit || 500000) * (item.credits || 3)).toLocaleString('vi-VN')} đ</span>
+                        <span>{((item.unitPrice || item.tuitionPerCredit || item.pricePerCredit || 450000) * (item.credits || 3)).toLocaleString('vi-VN')} đ</span>
                       </div>
                     </div>
                   </div>

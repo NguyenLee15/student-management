@@ -41,6 +41,7 @@ export default function StudentPortalLayout({ user, onLogout, onNotify, onSwitch
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Mở menu điều hướng"
               className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -88,6 +89,7 @@ export default function StudentPortalLayout({ user, onLogout, onNotify, onSwitch
               </div>
               <button
                 onClick={onLogout}
+                aria-label="Đăng xuất khỏi hệ thống"
                 className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors ml-1"
                 title="Đăng xuất"
               >
@@ -114,13 +116,16 @@ export default function StudentPortalLayout({ user, onLogout, onNotify, onSwitch
             isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
-          <div className="md:sticky md:top-24 space-y-1">
+          <div className="md:sticky md:top-24 space-y-1" role="tablist" aria-label="Menu chức năng Cổng Sinh Viên">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-label={item.label}
                   onClick={() => {
                     setActiveTab(item.id);
                     setIsMobileMenuOpen(false);

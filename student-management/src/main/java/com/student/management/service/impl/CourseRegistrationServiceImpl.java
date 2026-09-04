@@ -40,6 +40,8 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     private final RegistrationPeriodService registrationPeriodService;
     private final TuitionPolicyService tuitionPolicyService;
     private final TuitionService tuitionService;
+    private final CreditClassStudentRepository creditClassStudentRepository;
+    private final SemesterRepository semesterRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -371,16 +373,40 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     @Override
     @Transactional(readOnly = true)
     public List<CreditClassResponseDto> getAvailableClassesForRegistration(String studentId, Long semesterId) {
-        Long semId = semesterId;
-        if (semId == null) {
-            List<RegistrationPeriodResponseDto> activePeriods = registrationPeriodService.getCurrentlyActivePeriods();
-            semId = !activePeriods.isEmpty() ? activePeriods.get(0).getSemesterId() : 1L;
+        Long semId = resolveSemesterId(semesterId);
+        List<CreditClass> classes = creditClassRepository.findBySemesterId(semId);
+        if (classes.isEmpty()) {
+            return List.of();
         }
 
-        List<CreditClass> classes = creditClassRepository.findBySemesterId(semId);
-        return classes.stream()
-                .map(CreditClassMapper::toDto)
-                .toList();
+        Student student = null;
+        if (studentId != null && !studentId.isBlank()) {
+            student = studentRepository.findById(studentId).orElse(null);
+        }
+
+        List<Long> classIds = classes.stream().map(CreditClass::getId).toList();
+        List<SemesterSchedule> schedules = semesterScheduleRepository.findByCreditClass_CreditClassIdIn(classIds);
+        Map<Long, SemesterSchedule> scheduleMap = new HashMap<>();
+        for (SemesterSchedule ss : schedules) {
+            if (ss.getCreditClass() != null && !scheduleMap.containsKey(ss.getCreditClass().getId())) {
+                scheduleMap.put(ss.getCreditClass().getId(), ss);
+            }
+        }
+
+        Student finalStudent = student;
+        LocalDate today = LocalDate.now();
+
+        return classes.stream().map(cc -> {
+            CreditClassResponseDto dto = CreditClassMapper.toDto(cc);
+            SemesterSchedule ss = scheduleMap.get(cc.getId());
+            if (ss != null) {
+                dto.setStudyTime(ss.getStudyTime());
+                dto.setShiftName(ss.getClassShift() != null ? ss.getClassShift().getDisplayName() : null);
+            }
+            BigDecimal unitPrice = tuitionPolicyService.getEffectiveUnitPrice(finalStudent, cc, today);
+            dto.setUnitPrice(unitPrice);
+            return dto;
+        }).toList();
     }
 
     private boolean isScheduleOverlap(SemesterSchedule s1, SemesterSchedule s2) {

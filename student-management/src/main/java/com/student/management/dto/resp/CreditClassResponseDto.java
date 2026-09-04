@@ -33,4 +33,7 @@ public class CreditClassResponseDto {
     private BigDecimal midtermWeight;
     private BigDecimal finalExamWeight;
     private Boolean locked;
+    private String studyTime;
+    private String shiftName;
+    private BigDecimal unitPrice;
 }

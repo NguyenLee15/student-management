@@ -1,12 +1,13 @@
 // cSpell:disable
 import { useState, useEffect, useCallback } from 'react';
 import { msg } from '../../../lib/messages';
-import { studentPortalApi, paymentApi } from '../../../api';
+import { studentPortalApi, paymentApi, registrationPeriodApi } from '../../../api';
 
 export function useTuitionPayment({ onNotify }) {
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSemester, setSelectedSemester] = useState(1);
+  const [semesters, setSemesters] = useState([]);
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [payAmount, setPayAmount] = useState('');
   const [payMethod, setPayMethod] = useState('PAYOS');
@@ -59,6 +60,39 @@ export function useTuitionPayment({ onNotify }) {
       setIsSyncing(false);
     }
   }, [currentOrderCode, onNotify, loadInvoice]);
+
+  useEffect(() => {
+    async function loadSemesters() {
+      try {
+        const res = await registrationPeriodApi.getAll();
+        const periods = res.data || [];
+        const semesterList = [];
+        const seenIds = new Set();
+        periods.forEach((p) => {
+          if (p.semesterId && !seenIds.has(p.semesterId)) {
+            seenIds.add(p.semesterId);
+            semesterList.push({
+              id: p.semesterId,
+              name: p.semesterName ? `${p.semesterName} (${p.academicYearName || ''})` : `Học kỳ ${p.semesterId}`,
+              active: p.active,
+            });
+          }
+        });
+        if (semesterList.length > 0) {
+          setSemesters(semesterList);
+          const activeSem = semesterList.find((s) => s.active);
+          if (activeSem) {
+            setSelectedSemester(activeSem.id);
+          } else {
+            setSelectedSemester(semesterList[0].id);
+          }
+        }
+      } catch (err) {
+        console.warn('Không thể tải danh sách học kỳ:', err);
+      }
+    }
+    loadSemesters();
+  }, []);
 
   useEffect(() => {
     loadInvoice();

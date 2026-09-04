@@ -77,8 +77,11 @@ export default function AvailableClassesTable({
                       {item.teacherName || 'Chưa phân công'}
                     </td>
                     <td className="px-4 py-4 text-xs text-slate-600">
-                      <div className="font-semibold text-slate-800">{item.roomName || 'Chưa xếp phòng'}</div>
-                      <div className="text-slate-400">{item.semester ? msg.enum.semester[item.semester] : 'Học kỳ 1'}</div>
+                      <div className="font-semibold text-slate-800">{item.studyTime || item.roomName || 'Chưa xếp phòng'}</div>
+                      <div className="text-slate-500">
+                        {item.studyTime && item.roomName ? `${item.roomName} • ` : ''}
+                        {item.shiftName ? `Ca ${item.shiftName}` : (item.semester ? msg.enum.semester[item.semester] : 'Học kỳ 1')}
+                      </div>
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex flex-col items-center gap-1">
@@ -98,7 +101,10 @@ export default function AvailableClassesTable({
                       </div>
                     </td>
                     <td className="px-4 py-4 text-right font-bold text-slate-800">
-                      {((item.credits || 3) * (item.tuitionPerCredit || item.pricePerCredit || 500000)).toLocaleString('vi-VN')} đ
+                      {((item.credits || 3) * (item.unitPrice || item.tuitionPerCredit || item.pricePerCredit || 450000)).toLocaleString('vi-VN')} đ
+                      <div className="text-[10px] text-slate-400 font-normal">
+                        ({(item.unitPrice || item.tuitionPerCredit || item.pricePerCredit || 450000).toLocaleString('vi-VN')} đ/TC)
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-center">
                       {isAlreadyEnrolled ? (

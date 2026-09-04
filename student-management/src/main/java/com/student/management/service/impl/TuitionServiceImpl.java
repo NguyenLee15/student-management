@@ -12,6 +12,7 @@ import com.student.management.enums.TuitionItemStatus;
 import com.student.management.exception.BusinessException;
 import com.student.management.exception.ErrorCode;
 import com.student.management.repository.*;
+import com.student.management.security.SecurityService;
 import com.student.management.service.TuitionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class TuitionServiceImpl implements TuitionService {
 
     private final TuitionInvoiceRepository tuitionInvoiceRepository;
     private final TuitionItemRepository tuitionItemRepository;
+    private final SecurityService securityService;
 
     @Override
     @Transactional(readOnly = true)
@@ -116,6 +118,12 @@ public class TuitionServiceImpl implements TuitionService {
 
         if (!invoice.getStudent().getStudentId().equals(studentId)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED, "Bạn không có quyền thanh toán cho hóa đơn của sinh viên khác.");
+        }
+
+        if (securityService != null && securityService.isStudentRole()) {
+            if (requestDto.getPaymentMethod() == null || requestDto.getPaymentMethod() != PaymentMethod.PAYOS) {
+                throw new BusinessException(ErrorCode.ACCESS_DENIED, "Sinh viên không thể tự xác nhận thanh toán tiền mặt hoặc chuyển khoản thủ công.");
+            }
         }
 
         if (invoice.getStatus() == TuitionInvoiceStatus.PAID || invoice.getRemainingAmount().compareTo(BigDecimal.ZERO) <= 0) {

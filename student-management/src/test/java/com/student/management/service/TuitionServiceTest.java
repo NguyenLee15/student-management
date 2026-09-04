@@ -10,6 +10,7 @@ import com.student.management.enums.TuitionItemStatus;
 import com.student.management.repository.*;
 import com.student.management.repository.TuitionInvoiceRepository;
 import com.student.management.repository.TuitionItemRepository;
+import com.student.management.security.SecurityService;
 import com.student.management.service.impl.TuitionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,9 @@ class TuitionServiceTest {
 
     @Mock
     private TuitionItemRepository tuitionItemRepository;
+
+    @Mock
+    private SecurityService securityService;
 
     @InjectMocks
     private TuitionServiceImpl tuitionService;
@@ -164,5 +168,30 @@ class TuitionServiceTest {
         assertEquals(new BigDecimal("1350000.00"), sampleInvoice.getPaidAmount());
         assertEquals(BigDecimal.ZERO, sampleInvoice.getRemainingAmount());
         assertEquals(TuitionInvoiceStatus.PAID, sampleInvoice.getStatus());
+    }
+    @Test
+    @DisplayName("Chống gian lận học phí: Sinh viên không được tự gạch nợ tiền mặt hoặc chuyển khoản thủ công")
+    void testRecordPayment_studentRole_cannotPayCash_throwsAccessDenied() {
+        sampleInvoice.setTotalAmount(new BigDecimal("1350000.00"));
+        sampleInvoice.setRemainingAmount(new BigDecimal("1350000.00"));
+
+        when(tuitionInvoiceRepository.findById(1001L)).thenReturn(Optional.of(sampleInvoice));
+        when(securityService.isStudentRole()).thenReturn(true);
+
+        TuitionPaymentRequestDto paymentRequest = TuitionPaymentRequestDto.builder()
+                .invoiceId(1001L)
+                .amount(new BigDecimal("1350000.00"))
+                .paymentMethod(PaymentMethod.CASH)
+                .note("Tự nộp tiền mặt")
+                .build();
+
+        com.student.management.exception.BusinessException ex = assertThrows(
+                com.student.management.exception.BusinessException.class,
+                () -> tuitionService.recordPayment("SV001", paymentRequest)
+        );
+
+        assertEquals(com.student.management.exception.ErrorCode.ACCESS_DENIED, ex.getErrorCode());
+        assertEquals(BigDecimal.ZERO, sampleInvoice.getPaidAmount());
+        assertNotEquals(TuitionInvoiceStatus.PAID, sampleInvoice.getStatus());
     }
 }
