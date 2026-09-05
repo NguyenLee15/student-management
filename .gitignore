@@ -17,11 +17,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Environment & Secrets
+# Environment & Secrets (Ignore ALL .env variations and templates)
 .env
 .env.*
 *.env
-!.env.example
+*.env.*
 *.pem
 *.key
 *.pfx
