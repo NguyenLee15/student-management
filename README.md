@@ -2,6 +2,7 @@
 
 <div align="center">
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-lee--eduportal.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://lee-eduportal.vercel.app/)
 ![Java 21](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.5-brightgreen?style=for-the-badge&logo=springboot&logoColor=white)
 ![React 18](https://img.shields.io/badge/React-18.3-blue?style=for-the-badge&logo=react&logoColor=white)
@@ -15,7 +16,9 @@
 **An enterprise-grade, high-concurrency university management platform engineered for modern higher education institutions.**  
 *Built with Spring Boot 3, Java 21, React 18 SPA, and production-ready microservices-inspired Clean Architecture.*
 
-[Key Features](#-core-portals--business-capabilities) • [Architecture](#-system-architecture--engineering-highlights) • [Technical Deep-Dives](#-enterprise-engineering-deep-dives) • [Quick Start](#-quick-start--installation) • [API & Swagger](#-api-specification--documentation)
+🌐 **Live Demo:** [https://lee-eduportal.vercel.app/](https://lee-eduportal.vercel.app/)
+
+[🚀 Live Demo](https://lee-eduportal.vercel.app/) • [Key Features](#-core-portals--business-capabilities) • [Architecture](#-system-architecture--engineering-highlights) • [Technical Deep-Dives](#-enterprise-engineering-deep-dives) • [Quick Start](#-quick-start--installation) • [API & Swagger](#-api-specification--documentation)
 
 </div>
 
@@ -130,6 +133,13 @@ Many student management systems suffer from Insecure Direct Object References (e
 ---
 
 ## 🚀 5. Quick Start & Installation
+
+### 🌐 Live Production Demo (Instant Cloud Access)
+Experience the full application deployed and running in the cloud without local setup:
+👉 **[https://lee-eduportal.vercel.app/](https://lee-eduportal.vercel.app/)**  
+*(Use the seeded demo credentials in Section 6 below to test Admin, Teacher, or Student portal).*
+
+---
 
 ### Prerequisites
 - **Java Development Kit (JDK):** Version 21 LTS
@@ -270,7 +280,7 @@ StudentManager/
 
 - **Lead Engineer / Author:** Nguyen Le ([@NguyenLee15](https://github.com/NguyenLee15))
 - **Specialization:** Fullstack Engineering • Cloud-Native Java (Spring Boot) & Modern Frontend (React)
-- **Project Type:** Graduation Thesis (Đồ Án Tốt Nghiệp) / University ERP Showcase
+- **Project Type:** Major Course Project (Bài Tập Lớn) / University ERP Showcase
 
 ---
 
