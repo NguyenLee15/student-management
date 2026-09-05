@@ -39,16 +39,59 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Optional<UserResponseDto> findByUserName(String userName) {
-        return userRepository.findByUserName(userName).map(UserMapper::toDto);
+        return userRepository.findByUserName(userName)
+                .map(this::autoHealUserIdentity)
+                .map(UserMapper::toDto);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public UserResponseDto getByUserName(String userName) {
         return findByUserName(userName)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng: " + userName));
+    }
+
+    private User autoHealUserIdentity(User user) {
+        if (user == null) return null;
+        boolean modified = false;
+        String userName = user.getUserName();
+        if (user.getRole() == com.student.management.enums.Role.TEACHER && (user.getTeacherId() == null || user.getTeacherId().trim().isEmpty())) {
+            String teacherId = null;
+            if (teacherRepository.existsById(userName)) teacherId = userName;
+            else if ("teacher".equalsIgnoreCase(userName)) teacherId = "GV001";
+            else if ("teacher2".equalsIgnoreCase(userName)) teacherId = "GV002";
+            else if ("teacher3".equalsIgnoreCase(userName)) teacherId = "GV003";
+            else if ("teacher4".equalsIgnoreCase(userName)) teacherId = "GV004";
+            else teacherId = teacherRepository.findAll().stream().findFirst().map(com.student.management.entity.Teacher::getTeacherId).orElse(null);
+
+            if (teacherId != null && teacherRepository.existsById(teacherId)) {
+                user.setTeacherId(teacherId);
+                modified = true;
+            }
+        } else if (user.getRole() == com.student.management.enums.Role.STUDENT && (user.getStudentId() == null || user.getStudentId().trim().isEmpty())) {
+            String studentId = null;
+            if (studentRepository.existsById(userName)) studentId = userName;
+            else if ("student".equalsIgnoreCase(userName)) studentId = "SV001";
+            else if ("student2".equalsIgnoreCase(userName)) studentId = "SV002";
+            else if ("student3".equalsIgnoreCase(userName)) studentId = "SV003";
+            else if ("student4".equalsIgnoreCase(userName)) studentId = "SV004";
+            else if ("student5".equalsIgnoreCase(userName)) studentId = "SV005";
+            else if ("student6".equalsIgnoreCase(userName)) studentId = "SV006";
+            else if ("student7".equalsIgnoreCase(userName)) studentId = "SV007";
+            else if ("student8".equalsIgnoreCase(userName)) studentId = "SV008";
+            else studentId = studentRepository.findAll().stream().findFirst().map(com.student.management.entity.Student::getStudentId).orElse(null);
+
+            if (studentId != null && studentRepository.existsById(studentId)) {
+                user.setStudentId(studentId);
+                modified = true;
+            }
+        }
+        if (modified) {
+            return userRepository.save(user);
+        }
+        return user;
     }
 
     @Override

@@ -66,7 +66,7 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public TeacherResponseDto getCurrentTeacher() {
         String teacherId = securityService.getCurrentTeacherId();
         return getById(teacherId);

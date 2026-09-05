@@ -40,32 +40,53 @@ public class BaseDataSeeder {
     }
 
     private void seedUsers() {
-        createUserIfNotExists("admin", "admin123", Role.ADMIN, null, null);
-        createUserIfNotExists("teacher", "teacher123", Role.TEACHER, "GV001", null);
-        createUserIfNotExists("teacher2", "teacher123", Role.TEACHER, "GV002", null);
-        createUserIfNotExists("teacher3", "teacher123", Role.TEACHER, "GV003", null);
-        createUserIfNotExists("teacher4", "teacher123", Role.TEACHER, "GV004", null);
-        createUserIfNotExists("student", "student123", Role.STUDENT, null, "SV001");
-        createUserIfNotExists("student2", "student123", Role.STUDENT, null, "SV002");
-        createUserIfNotExists("student3", "student123", Role.STUDENT, null, "SV003");
-        createUserIfNotExists("student4", "student123", Role.STUDENT, null, "SV004");
-        createUserIfNotExists("student5", "student123", Role.STUDENT, null, "SV005");
-        createUserIfNotExists("student6", "student123", Role.STUDENT, null, "SV006");
-        createUserIfNotExists("student7", "student123", Role.STUDENT, null, "SV007");
-        createUserIfNotExists("student8", "student123", Role.STUDENT, null, "SV008");
+        createOrUpdateUser("admin", "admin123", Role.ADMIN, null, null);
+        createOrUpdateUser("teacher", "teacher123", Role.TEACHER, "GV001", null);
+        createOrUpdateUser("teacher2", "teacher123", Role.TEACHER, "GV002", null);
+        createOrUpdateUser("teacher3", "teacher123", Role.TEACHER, "GV003", null);
+        createOrUpdateUser("teacher4", "teacher123", Role.TEACHER, "GV004", null);
+        createOrUpdateUser("student", "student123", Role.STUDENT, null, "SV001");
+        createOrUpdateUser("student2", "student123", Role.STUDENT, null, "SV002");
+        createOrUpdateUser("student3", "student123", Role.STUDENT, null, "SV003");
+        createOrUpdateUser("student4", "student123", Role.STUDENT, null, "SV004");
+        createOrUpdateUser("student5", "student123", Role.STUDENT, null, "SV005");
+        createOrUpdateUser("student6", "student123", Role.STUDENT, null, "SV006");
+        createOrUpdateUser("student7", "student123", Role.STUDENT, null, "SV007");
+        createOrUpdateUser("student8", "student123", Role.STUDENT, null, "SV008");
     }
 
-    private void createUserIfNotExists(String username, String rawPassword, Role role, String teacherId, String studentId) {
-        if (userRepository.findByUserName(username).isEmpty()) {
-            User user = User.builder()
-                    .userName(username)
-                    .password(passwordEncoder.encode(rawPassword))
-                    .role(role)
-                    .teacherId(teacherId)
-                    .studentId(studentId)
-                    .build();
-            userRepository.save(user);
-        }
+    private void createOrUpdateUser(String username, String rawPassword, Role role, String teacherId, String studentId) {
+        userRepository.findByUserName(username).ifPresentOrElse(
+                user -> {
+                    boolean modified = false;
+                    if (role != null && user.getRole() != role) {
+                        user.setRole(role);
+                        modified = true;
+                    }
+                    if (teacherId != null && (user.getTeacherId() == null || user.getTeacherId().trim().isEmpty())) {
+                        user.setTeacherId(teacherId);
+                        modified = true;
+                    }
+                    if (studentId != null && (user.getStudentId() == null || user.getStudentId().trim().isEmpty())) {
+                        user.setStudentId(studentId);
+                        modified = true;
+                    }
+                    if (modified) {
+                        userRepository.save(user);
+                        log.info("Auto-synced existing user {} with teacherId: {}, studentId: {}", username, user.getTeacherId(), user.getStudentId());
+                    }
+                },
+                () -> {
+                    User user = User.builder()
+                            .userName(username)
+                            .password(passwordEncoder.encode(rawPassword))
+                            .role(role)
+                            .teacherId(teacherId)
+                            .studentId(studentId)
+                            .build();
+                    userRepository.save(user);
+                }
+        );
     }
 
     private void seedFaculties() {
