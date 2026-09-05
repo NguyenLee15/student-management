@@ -19,11 +19,27 @@ pnpm-debug.log*
 
 # Environment & Secrets
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
 *.env
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.jks
+*.keystore
+
+# Build Outputs, Logs & Binaries
+bin/
+**/bin/
+build_output.txt
+*.dump
+*.dumpstream
+
+# Unrelated / scratch projects & temporary directories
+scratch-cloner/
+scratch/
+**/scratch/
 
 # IDE & Editor
 .idea/
@@ -50,13 +66,47 @@ Thumbs.db
 docker-data/
 data/
 
-# AI Prompts & Workflow Templates
+# AI Prompts, Agent rules & IDE AI configs
 .agents/
 **/.agents/
 project-standards-template/
 **/.project-standards-template/
 .cursorrules
 **/.cursorrules
+.cursor/
+**/.cursor/
+.windsurfrules
+**/.windsurfrules
+.windsurf/
+**/.windsurf/
+.clinerules
+**/.clinerules
+.cline/
+**/.cline/
+.claude/
+**/.claude/
+.codex/
+**/.codex/
+.continue/
+**/.continue/
+.amazonq/
+**/.amazonq/
+.augment/
+**/.augment/
+.opencode/
+**/.opencode/
+.kiro/
+**/.kiro/
+.roo/
+**/.roo/
+.aider*
+**/.aider*
+AGENTS.md
+**/AGENTS.md
+CLAUDE.md
+**/CLAUDE.md
+GEMINI.md
+**/GEMINI.md
 PROMPT_CHEATSHEET.md
 **/PROMPT_CHEATSHEET.md
 PRODUCTION_CHECKLIST.md
@@ -65,7 +115,5 @@ SPEC_TEMPLATE.md
 **/SPEC_TEMPLATE.md
 WORKFLOW.md
 **/WORKFLOW.md
-GEMINI.md
-**/GEMINI.md
 
 
