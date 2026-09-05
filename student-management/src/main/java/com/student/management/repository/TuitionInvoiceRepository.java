@@ -13,6 +13,8 @@ public interface TuitionInvoiceRepository extends JpaRepository<TuitionInvoice, 
     @EntityGraph(attributePaths = {"student", "semester", "items", "items.creditClass", "items.creditClass.subject"})
     Optional<TuitionInvoice> findByStudent_StudentIdAndSemester_Id(String studentId, Long semesterId);
 
+    @EntityGraph(attributePaths = {"student", "semester", "items", "items.creditClass", "items.creditClass.subject"})
     List<TuitionInvoice> findByStudent_StudentIdOrderByDueDateDesc(String studentId);
 
     Optional<TuitionInvoice> findByInvoiceCode(String invoiceCode);
+}
