@@ -27,6 +27,7 @@ public class TuitionItem extends BaseEntity {
     @JoinColumn(name = "invoice_id", nullable = false)
     @NotNull(message = "Hóa đơn học phí là bắt buộc")
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private TuitionInvoice invoice;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -51,10 +51,21 @@ public class GradeCalculationUtils {
     }
 
     public static TranscriptResponseDto buildTranscript(Student student, List<AcademicGrade> allGrades) {
+        if (student == null) {
+            return null;
+        }
+
+        List<AcademicGrade> safeGrades = (allGrades != null) ? allGrades : List.of();
+
         // Group by Semester + AcademicYear + StudyPhase
-        Map<String, List<AcademicGrade>> grouped = allGrades.stream()
-                .collect(Collectors.groupingBy(g -> g.getAcademicYear() + "_" + g.getSemester().name() + "_" + g.getStudyPhase().name(),
-                        LinkedHashMap::new, Collectors.toList()));
+        Map<String, List<AcademicGrade>> grouped = safeGrades.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(g -> {
+                    String y = g.getAcademicYear() != null ? g.getAcademicYear() : "N/A";
+                    String s = g.getSemester() != null ? g.getSemester().name() : "SEMESTER_1";
+                    String p = g.getStudyPhase() != null ? g.getStudyPhase().name() : "PHASE_1";
+                    return y + "_" + s + "_" + p;
+                }, LinkedHashMap::new, Collectors.toList()));
 
         List<TranscriptResponseDto.SemesterTranscriptDto> semesterList = new ArrayList<>();
 
@@ -118,8 +129,8 @@ public class GradeCalculationUtils {
 
         // Calculate Cumulative Statistics applying "Highest Grade Wins" policy
         // Group all attempts by subjectId
-        Map<String, List<AcademicGrade>> subjectAttempts = allGrades.stream()
-                .filter(g -> g.getSubject() != null)
+        Map<String, List<AcademicGrade>> subjectAttempts = safeGrades.stream()
+                .filter(g -> g != null && g.getSubject() != null && g.getSubject().getSubjectId() != null)
                 .collect(Collectors.groupingBy(g -> g.getSubject().getSubjectId()));
 
         int totalCumulativeEarned = 0;
@@ -151,8 +162,8 @@ public class GradeCalculationUtils {
             cumWeighted4 = cumWeighted4.add(bestS4.multiply(BigDecimal.valueOf(credits)));
         }
 
-        int totalCreditsRegistered = allGrades.stream()
-                .mapToInt(g -> g.getSubject() != null && g.getSubject().getCredits() != null ? g.getSubject().getCredits() : 3)
+        int totalCreditsRegistered = safeGrades.stream()
+                .mapToInt(g -> g != null && g.getSubject() != null && g.getSubject().getCredits() != null ? g.getSubject().getCredits() : 3)
                 .sum();
 
         BigDecimal cumulativeGpa10 = totalUniqueCredits > 0 

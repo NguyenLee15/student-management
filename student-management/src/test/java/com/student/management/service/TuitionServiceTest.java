@@ -96,8 +96,8 @@ class TuitionServiceTest {
                 .remainingAmount(BigDecimal.ZERO)
                 .status(TuitionInvoiceStatus.UNPAID)
                 .dueDate(LocalDate.of(2026, 10, 1))
-                .items(new ArrayList<>())
-                .payments(new ArrayList<>())
+                .items(new java.util.LinkedHashSet<>())
+                .payments(new java.util.LinkedHashSet<>())
                 .build();
     }
 

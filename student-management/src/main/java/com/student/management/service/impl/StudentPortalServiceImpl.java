@@ -66,22 +66,40 @@ public class StudentPortalServiceImpl implements StudentPortalService {
         Long activeSemesterId = resolveActiveSemesterId(null);
 
         // 3. Môn học và tín chỉ đăng ký học kỳ này
-        List<Enrollment> enrollments = enrollmentRepository.findActiveEnrollmentsByStudentAndSemester(studentId, activeSemesterId);
+        List<Enrollment> enrollments = (activeSemesterId != null) 
+                ? enrollmentRepository.findActiveEnrollmentsByStudentAndSemester(studentId, activeSemesterId) 
+                : List.of();
         int currentSemCredits = enrollments.stream()
-                .mapToInt(e -> e.getCreditClass().getSubject() != null && e.getCreditClass().getSubject().getCredits() != null 
+                .mapToInt(e -> e.getCreditClass() != null && e.getCreditClass().getSubject() != null && e.getCreditClass().getSubject().getCredits() != null 
                         ? e.getCreditClass().getSubject().getCredits() : 0)
                 .sum();
 
-        // 4. Học phí công nợ học kỳ này
-        TuitionInvoiceResponseDto invoice = tuitionService.getStudentInvoiceBySemester(studentId, activeSemesterId);
-        BigDecimal outstandingTuition = invoice != null ? invoice.getRemainingAmount() : BigDecimal.ZERO;
+        // 4. Học phí công nợ học kỳ này (bảo vệ phòng thủ nếu chưa tạo hóa đơn)
+        BigDecimal outstandingTuition = BigDecimal.ZERO;
+        if (activeSemesterId != null) {
+            try {
+                TuitionInvoiceResponseDto invoice = tuitionService.getStudentInvoiceBySemester(studentId, activeSemesterId);
+                if (invoice != null && invoice.getRemainingAmount() != null) {
+                    outstandingTuition = invoice.getRemainingAmount();
+                }
+            } catch (Exception e) {
+                log.warn("Không thể tải hóa đơn học phí cho sinh viên {} học kỳ {}: {}", studentId, activeSemesterId, e.getMessage());
+            }
+        }
 
         // 5. Lịch học tuần và lọc riêng lịch học ngày hôm nay
-        List<StudentTimetableEntryDto> allTimetable = getMyTimetable(studentId, activeSemesterId);
-        DayOfWeek todayDow = LocalDate.now().getDayOfWeek();
-        List<StudentTimetableEntryDto> todaySchedule = allTimetable.stream()
-                .filter(t -> matchesDayOfWeek(t.getStudyTime(), todayDow))
-                .toList();
+        List<StudentTimetableEntryDto> todaySchedule = List.of();
+        if (activeSemesterId != null) {
+            try {
+                List<StudentTimetableEntryDto> allTimetable = getMyTimetable(studentId, activeSemesterId);
+                DayOfWeek todayDow = LocalDate.now().getDayOfWeek();
+                todaySchedule = allTimetable.stream()
+                        .filter(t -> matchesDayOfWeek(t.getStudyTime(), todayDow))
+                        .toList();
+            } catch (Exception e) {
+                log.warn("Không thể tải lịch học hôm nay cho sinh viên {} học kỳ {}: {}", studentId, activeSemesterId, e.getMessage());
+            }
+        }
 
         return StudentPortalOverviewDto.builder()
                 .studentId(student.getStudentId())
@@ -113,9 +131,14 @@ public class StudentPortalServiceImpl implements StudentPortalService {
     @Transactional(readOnly = true)
     public List<StudentTimetableEntryDto> getMyTimetable(String studentId, Long semesterId) {
         Long semId = resolveActiveSemesterId(semesterId);
+        if (semId == null) {
+            return List.of();
+        }
+
         List<Enrollment> enrollments = enrollmentRepository.findActiveEnrollmentsByStudentAndSemester(studentId, semId);
 
         List<Long> classIds = enrollments.stream()
+                .filter(e -> e.getCreditClass() != null && e.getCreditClass().getId() != null)
                 .map(e -> e.getCreditClass().getId())
                 .toList();
 
@@ -125,6 +148,7 @@ public class StudentPortalServiceImpl implements StudentPortalService {
 
         List<SemesterSchedule> schedules = semesterScheduleRepository.findByCreditClass_CreditClassIdIn(classIds);
         return schedules.stream()
+                .filter(s -> s != null && s.getCreditClass() != null && s.getSubject() != null)
                 .map(s -> StudentTimetableEntryDto.builder()
                         .scheduleId(s.getScheduleId())
                         .creditClassId(s.getCreditClass().getId())
@@ -153,7 +177,12 @@ public class StudentPortalServiceImpl implements StudentPortalService {
         if (!activeSemesters.isEmpty()) {
             return activeSemesters.get(0).getId();
         }
-        return 1L;
+        // Fallback linh hoạt: Lấy học kỳ mới nhất trong cơ sở dữ liệu
+        List<Semester> allSemesters = semesterRepository.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "startDate", "id"));
+        if (!allSemesters.isEmpty()) {
+            return allSemesters.get(0).getId();
+        }
+        return null;
     }
 
     private boolean matchesDayOfWeek(String studyTime, DayOfWeek dow) {

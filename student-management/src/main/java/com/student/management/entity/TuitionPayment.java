@@ -31,6 +31,7 @@ public class TuitionPayment extends BaseEntity {
     @JoinColumn(name = "invoice_id", nullable = false)
     @NotNull(message = "Hóa đơn là bắt buộc")
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private TuitionInvoice invoice;
 
     @Column(name = "amount", nullable = false, precision = 12, scale = 2)

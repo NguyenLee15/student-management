@@ -18,6 +18,10 @@ public interface StudentRepository extends JpaRepository<Student, String> {
 
     @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})
     @org.springframework.lang.NonNull
+    java.util.Optional<Student> findById(@org.springframework.lang.NonNull String id);
+
+    @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})
+    @org.springframework.lang.NonNull
     Page<Student> findAll(@org.springframework.lang.NonNull Pageable pageable);
 
     @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})

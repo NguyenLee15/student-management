@@ -168,7 +168,8 @@ public class TuitionServiceImpl implements TuitionService {
     }
 
     private TuitionInvoiceResponseDto toInvoiceDto(TuitionInvoice invoice) {
-        List<TuitionItemResponseDto> itemDtos = invoice.getItems().stream()
+        List<TuitionItemResponseDto> itemDtos = invoice.getItems() != null ? invoice.getItems().stream()
+                .filter(item -> item != null)
                 .map(item -> TuitionItemResponseDto.builder()
                         .id(item.getId())
                         .enrollmentId(item.getEnrollment() != null ? item.getEnrollment().getId() : null)
@@ -181,33 +182,34 @@ public class TuitionServiceImpl implements TuitionService {
                         .amount(item.getAmount())
                         .status(item.getStatus())
                         .build())
-                .toList();
+                .toList() : List.of();
 
-        List<TuitionPaymentResponseDto> paymentDtos = invoice.getPayments().stream()
+        List<TuitionPaymentResponseDto> paymentDtos = invoice.getPayments() != null ? invoice.getPayments().stream()
+                .filter(pay -> pay != null)
                 .map(pay -> TuitionPaymentResponseDto.builder()
                         .id(pay.getId())
                         .transactionCode(pay.getTransactionCode())
                         .invoiceId(invoice.getId())
                         .amount(pay.getAmount())
                         .paymentMethod(pay.getPaymentMethod())
-                        .paymentMethodName(pay.getPaymentMethod().getDisplayName())
+                        .paymentMethodName(pay.getPaymentMethod() != null ? pay.getPaymentMethod().getDisplayName() : "")
                         .paymentTime(pay.getPaymentTime())
                         .note(pay.getNote())
                         .build())
-                .toList();
+                .toList() : List.of();
 
         return TuitionInvoiceResponseDto.builder()
                 .id(invoice.getId())
                 .invoiceCode(invoice.getInvoiceCode())
-                .studentId(invoice.getStudent().getStudentId())
-                .studentName(invoice.getStudent().getFullName())
-                .semesterId(invoice.getSemester().getId())
-                .semesterName(invoice.getSemester().getName())
-                .totalAmount(invoice.getTotalAmount())
-                .paidAmount(invoice.getPaidAmount())
-                .remainingAmount(invoice.getRemainingAmount())
+                .studentId(invoice.getStudent() != null ? invoice.getStudent().getStudentId() : null)
+                .studentName(invoice.getStudent() != null ? invoice.getStudent().getFullName() : "")
+                .semesterId(invoice.getSemester() != null ? invoice.getSemester().getId() : null)
+                .semesterName(invoice.getSemester() != null ? invoice.getSemester().getName() : "")
+                .totalAmount(invoice.getTotalAmount() != null ? invoice.getTotalAmount() : BigDecimal.ZERO)
+                .paidAmount(invoice.getPaidAmount() != null ? invoice.getPaidAmount() : BigDecimal.ZERO)
+                .remainingAmount(invoice.getRemainingAmount() != null ? invoice.getRemainingAmount() : BigDecimal.ZERO)
                 .status(invoice.getStatus())
-                .statusName(invoice.getStatus().getDisplayName())
+                .statusName(invoice.getStatus() != null ? invoice.getStatus().getDisplayName() : "")
                 .dueDate(invoice.getDueDate())
                 .items(itemDtos)
                 .payments(paymentDtos)
