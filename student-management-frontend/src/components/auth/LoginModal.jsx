@@ -209,7 +209,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
           ) : (
             <>
               <LogIn className="h-4 w-4" />
-              <span>Đăng Nhập Vào Hệ Thống</span>
+              <span>Đăng Nhập</span>
             </>
           )}
         </button>
