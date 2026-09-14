@@ -204,7 +204,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Đang xác thực bảo mật...</span>
+              <span>Đang đăng nhập...</span>
             </>
           ) : (
             <>
