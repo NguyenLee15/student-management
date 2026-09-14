@@ -23,11 +23,11 @@ export default function TeacherTable({
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
             <tr>
-              <th className="px-5 py-3.5">Mã Giảng Viên</th>
-              <th className="px-5 py-3.5">Họ và tên</th>
-              <th className="px-5 py-3.5">Khoa / Viện Đào Tạo</th>
-              <th className="px-5 py-3.5">Email Công Vụ</th>
-              <th className="px-5 py-3.5 text-right">Thao tác</th>
+              <th scope="col" className="px-5 py-3.5">Mã Giảng Viên</th>
+              <th scope="col" className="px-5 py-3.5">Họ và tên</th>
+              <th scope="col" className="px-5 py-3.5">Khoa / Viện Đào Tạo</th>
+              <th scope="col" className="px-5 py-3.5">Email Công Vụ</th>
+              <th scope="col" className="px-5 py-3.5 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
@@ -73,6 +73,7 @@ export default function TeacherTable({
                       <>
                         <button
                           onClick={() => onEdit(t)}
+                          aria-label="Chỉnh sửa"
                           title="Sửa Giảng Viên"
                           className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-500 transition"
                         >
@@ -80,6 +81,7 @@ export default function TeacherTable({
                         </button>
                         <button
                           onClick={() => onDelete(t)}
+                          aria-label="Xóa"
                           title="Xóa Giảng viên"
                           className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
                         >
@@ -105,4 +107,3 @@ export default function TeacherTable({
     </div>
   );
 }
-

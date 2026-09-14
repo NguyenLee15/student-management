@@ -252,6 +252,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
       {/* Schedule Table Component */}
       <ScheduleTable
         schedules={schedules}
+        loading={loading}
         isAdmin={isAdmin}
         page={page}
         size={size}

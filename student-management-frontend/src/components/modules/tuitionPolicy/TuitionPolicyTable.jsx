@@ -49,12 +49,12 @@ export default function TuitionPolicyTable({
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
             <tr>
-              <th className="px-5 py-3.5">Phạm Vi Áp Dụng</th>
-              <th className="px-5 py-3.5">Học Kỳ</th>
-              <th className="px-5 py-3.5">Đơn Giá / Tín Chỉ</th>
-              <th className="px-5 py-3.5">Ngày Hiệu Lực</th>
-              <th className="px-5 py-3.5 text-center">Trạng Thái</th>
-              <th className="px-5 py-3.5 text-right">Thao Tác</th>
+              <th scope="col" className="px-5 py-3.5">Phạm Vi Áp Dụng</th>
+              <th scope="col" className="px-5 py-3.5">Học Kỳ</th>
+              <th scope="col" className="px-5 py-3.5">Đơn Giá / Tín Chỉ</th>
+              <th scope="col" className="px-5 py-3.5">Ngày Hiệu Lực</th>
+              <th scope="col" className="px-5 py-3.5 text-center">Trạng Thái</th>
+              <th scope="col" className="px-5 py-3.5 text-right">Thao Tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
@@ -103,8 +103,9 @@ export default function TuitionPolicyTable({
                       <>
                         <button
                           onClick={() => onToggleActive(p)}
+                          aria-label={p.active ? "Tắt kích hoạt" : "Bật kích hoạt"}
                           title={p.active ? "Tắt kích hoạt" : "Bật kích hoạt"}
-                          className={`p-1.5 rounded-lg transition ${
+                          className={`min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-2 rounded-lg transition ${
                             p.active 
                               ? 'text-emerald-400 hover:text-amber-400 hover:bg-slate-800' 
                               : 'text-slate-500 hover:text-emerald-400 hover:bg-slate-800'
@@ -114,15 +115,17 @@ export default function TuitionPolicyTable({
                         </button>
                         <button
                           onClick={() => onOpenEdit(p)}
+                          aria-label="Sửa chính sách"
                           title="Sửa biểu phí"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
+                          className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onOpenDelete(p)}
+                          aria-label="Xóa chính sách"
                           title="Xóa biểu phí"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                          className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

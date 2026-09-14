@@ -24,14 +24,14 @@ export default function SubjectTable({
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
             <tr>
-              <th className="px-5 py-3.5">Mã Môn</th>
-              <th className="px-5 py-3.5">Tên Môn Học</th>
-              <th className="px-5 py-3.5">Phân Loại & Khoa</th>
-              <th className="px-5 py-3.5">Số Tín Chỉ</th>
-              <th className="px-5 py-3.5">Tỷ Lệ Điểm</th>
-              <th className="px-5 py-3.5">Môn Tiên Quyết</th>
-              <th className="px-5 py-3.5">Học Phí / Tín</th>
-              <th className="px-5 py-3.5 text-right">Thao tác</th>
+              <th scope="col" className="px-5 py-3.5">Mã Môn</th>
+              <th scope="col" className="px-5 py-3.5">Tên Môn Học</th>
+              <th scope="col" className="px-5 py-3.5">Phân Loại & Khoa</th>
+              <th scope="col" className="px-5 py-3.5">Số Tín Chỉ</th>
+              <th scope="col" className="px-5 py-3.5">Tỷ Lệ Điểm</th>
+              <th scope="col" className="px-5 py-3.5">Môn Tiên Quyết</th>
+              <th scope="col" className="px-5 py-3.5">Học Phí / Tín</th>
+              <th scope="col" className="px-5 py-3.5 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
@@ -96,6 +96,7 @@ export default function SubjectTable({
                       <>
                         <button
                           onClick={() => onOpenEdit(s)}
+                          aria-label="Chỉnh sửa"
                           title="Sửa môn học"
                           className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 active:scale-95 transition"
                         >
@@ -103,6 +104,7 @@ export default function SubjectTable({
                         </button>
                         <button
                           onClick={() => onOpenDelete(s)}
+                          aria-label="Xóa"
                           title="Xóa môn học"
                           className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 transition"
                         >
@@ -129,4 +131,3 @@ export default function SubjectTable({
     </div>
   );
 }
-

@@ -100,7 +100,7 @@ export default function Sidebar({ activeTab, onTabChange, counts = {}, currentUs
             <div className="h-2 w-2 rounded-full bg-emerald-400"></div>
             <span className="text-[11px] font-semibold text-slate-300">EduPortal v3.5</span>
           </div>
-          <span className="text-[10px] text-slate-500 font-mono">TiDB Cloud</span>
+          <span className="text-[10px] text-slate-400 font-mono">TiDB Cloud</span>
         </div>
       </div>
     </aside>

@@ -195,9 +195,10 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
 
       {/* 3. Urgent Action & Academic Alerts Strip */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div 
+        <button
+          type="button"
           onClick={() => setShowWarningModal(true)}
-          className="panel-card p-4 flex items-center justify-between border-l-4 border-l-rose-500 hover:bg-slate-800/40 cursor-pointer transition select-none"
+          className="panel-card w-full p-4 flex items-center justify-between border-l-4 border-l-rose-500 hover:bg-slate-800/40 cursor-pointer text-left transition select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
         >
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400">
@@ -216,7 +217,7 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
           <div className="p-1.5 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition">
             <ChevronRight className="h-4 w-4" />
           </div>
-        </div>
+        </button>
 
         <div className="panel-card p-4 flex items-center justify-between border-l-4 border-l-amber-500">
           <div className="flex items-center gap-3">

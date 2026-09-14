@@ -39,7 +39,7 @@ export default function RecentActivityFeed({
                   </p>
                 </div>
               </div>
-              <span className="text-[11px] text-slate-500 font-mono">
+              <span className="text-[11px] text-slate-400 font-mono">
                 {log.timestamp
                   ? new Date(log.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
                   : 'Vừa xong'}
@@ -47,7 +47,7 @@ export default function RecentActivityFeed({
             </div>
           ))
         ) : (
-          <div className="py-6 text-center text-xs text-slate-500">
+          <div className="py-6 text-center text-xs text-slate-400">
             Chưa có ghi nhận biến động mới trong phiên làm việc này.
           </div>
         )}
@@ -55,4 +55,3 @@ export default function RecentActivityFeed({
     </div>
   );
 }
-

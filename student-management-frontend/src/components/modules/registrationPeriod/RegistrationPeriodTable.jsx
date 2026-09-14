@@ -45,12 +45,12 @@ export default function RegistrationPeriodTable({
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
             <tr>
-              <th className="px-5 py-3.5">Tên Đợt Đăng Ký</th>
-              <th className="px-5 py-3.5">Học Kỳ / Niên Khóa</th>
-              <th className="px-5 py-3.5">Thời Gian Mở - Đóng</th>
-              <th className="px-5 py-3.5 text-center">TC Tối Đa</th>
-              <th className="px-5 py-3.5 text-center">Trạng Thái</th>
-              <th className="px-5 py-3.5 text-right">Thao Tác</th>
+              <th scope="col" className="px-5 py-3.5">Tên Đợt Đăng Ký</th>
+              <th scope="col" className="px-5 py-3.5">Học Kỳ / Niên Khóa</th>
+              <th scope="col" className="px-5 py-3.5">Thời Gian Mở - Đóng</th>
+              <th scope="col" className="px-5 py-3.5 text-center">TC Tối Đa</th>
+              <th scope="col" className="px-5 py-3.5 text-center">Trạng Thái</th>
+              <th scope="col" className="px-5 py-3.5 text-right">Thao Tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
@@ -108,8 +108,9 @@ export default function RegistrationPeriodTable({
                       <>
                         <button
                           onClick={() => onToggleActive(p)}
+                          aria-label={isActive ? "Tắt kích hoạt" : "Bật kích hoạt"}
                           title={isActive ? "Tắt kích hoạt" : "Bật kích hoạt"}
-                          className={`p-1.5 rounded-lg transition ${
+                          className={`min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-2 rounded-lg transition ${
                             isActive 
                               ? 'text-emerald-400 hover:text-amber-400 hover:bg-slate-800' 
                               : 'text-slate-500 hover:text-emerald-400 hover:bg-slate-800'
@@ -119,15 +120,17 @@ export default function RegistrationPeriodTable({
                         </button>
                         <button
                           onClick={() => onOpenEdit(p)}
+                          aria-label="Sửa đợt đăng ký"
                           title="Sửa đợt đăng ký"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
+                          className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onOpenDelete(p)}
+                          aria-label="Xóa đợt đăng ký"
                           title="Xóa đợt đăng ký"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                          className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

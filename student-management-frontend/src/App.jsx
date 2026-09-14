@@ -17,6 +17,7 @@ export default function App() {
 
   const [isBackendConnected, setIsBackendConnected] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [adminActiveTab, setAdminActiveTab] = useState('overview');
   const [isInitializingAuth, setIsInitializingAuth] = useState(
     !!(localStorage.getItem('user_info') || sessionStorage.getItem('user_info')) && !isResetPasswordPath
   );
@@ -230,6 +231,8 @@ export default function App() {
       {/* 👑 RENDER ADMIN CONTROL CENTER WORKSPACE */}
       {effectiveRole === 'ROLE_ADMIN' && (
         <AdminLayout
+          adminActiveTab={adminActiveTab}
+          onTabChange={setAdminActiveTab}
           currentUser={currentUser}
           isBackendConnected={isBackendConnected}
           apiChecking={apiChecking}
@@ -250,7 +253,10 @@ export default function App() {
       <CommandPalette
         isOpen={showCommandPalette}
         onClose={() => setShowCommandPalette(false)}
-        onNavigate={() => {}}
+        onNavigate={(tabId) => {
+          setAdminActiveTab(tabId);
+          setShowCommandPalette(false);
+        }}
       />
 
       {/* 🔐 AUTH LOGIN MODAL */}

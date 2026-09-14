@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import Modal from './Modal';
 
 export default function ConfirmDialog({
@@ -12,7 +12,8 @@ export default function ConfirmDialog({
   confirmText = 'Xóa',
   cancelText = 'Hủy',
   isDanger = true,
-  isDestructive
+  isDestructive,
+  loading = false,
 }) {
   const handleClose = onClose || onCancel || (() => {});
   const danger = isDestructive !== undefined ? isDestructive : isDanger;
@@ -33,7 +34,8 @@ export default function ConfirmDialog({
           <button
             type="button"
             onClick={handleClose}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
+            disabled={loading}
+            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {cancelText}
           </button>
@@ -43,13 +45,19 @@ export default function ConfirmDialog({
               if (onConfirm) onConfirm();
               handleClose();
             }}
-            className={`px-4 py-2 rounded-xl text-white text-xs font-semibold shadow-lg transition active:scale-95 ${
+            disabled={loading}
+            className={`px-4 py-2 rounded-xl text-white text-xs font-semibold shadow-lg transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${
               danger 
                 ? 'bg-rose-600 hover:bg-rose-500 shadow-rose-600/20' 
                 : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/20'
             }`}
           >
-            {confirmText}
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Đang xử lý...</span>
+              </>
+            ) : confirmText}
           </button>
         </div>
       </div>

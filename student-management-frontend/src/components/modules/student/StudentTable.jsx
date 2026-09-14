@@ -58,52 +58,41 @@ export default function StudentTable({
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800 select-none">
             <tr>
-              <th className="px-4 py-3.5 w-10 text-center">
+              <th scope="col" className="px-4 py-3.5 w-10 text-center">
                 <input
                   type="checkbox"
                   checked={selectedIds.size === students.length && students.length > 0}
                   onChange={onSelectAll}
+                  aria-label="Chọn tất cả sinh viên"
                   className="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                 />
               </th>
-              <th 
-                onClick={() => onSort('studentId')}
-                className="px-5 py-3.5 cursor-pointer hover:text-white transition"
-              >
-                <div className="flex items-center gap-1.5">
+              <th scope="col" aria-sort={sortField === 'studentId' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'} className="px-5 py-3.5">
+                <button type="button" onClick={() => onSort('studentId')} className="flex items-center gap-1.5 hover:text-slate-200 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1">
                   <span>Mã sinh viên</span>
                   {sortField === 'studentId' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
-                </div>
+                </button>
               </th>
-              <th 
-                onClick={() => onSort('fullName')}
-                className="px-5 py-3.5 cursor-pointer hover:text-white transition"
-              >
-                <div className="flex items-center gap-1.5">
+              <th scope="col" aria-sort={sortField === 'fullName' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'} className="px-5 py-3.5">
+                <button type="button" onClick={() => onSort('fullName')} className="flex items-center gap-1.5 hover:text-slate-200 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1">
                   <span>Họ và Tên & Giới tính</span>
                   {sortField === 'fullName' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
-                </div>
+                </button>
               </th>
-              <th 
-                onClick={() => onSort('className')}
-                className="px-5 py-3.5 cursor-pointer hover:text-white transition"
-              >
-                <div className="flex items-center gap-1.5">
+              <th scope="col" aria-sort={sortField === 'className' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'} className="px-5 py-3.5">
+                <button type="button" onClick={() => onSort('className')} className="flex items-center gap-1.5 hover:text-slate-200 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1">
                   <span>Lớp / Khoa</span>
                   {sortField === 'className' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
-                </div>
+                </button>
               </th>
-              <th 
-                onClick={() => onSort('academicYearId')}
-                className="px-5 py-3.5 cursor-pointer hover:text-white transition"
-              >
-                <div className="flex items-center gap-1.5">
+              <th scope="col" aria-sort={sortField === 'academicYearId' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'} className="px-5 py-3.5">
+                <button type="button" onClick={() => onSort('academicYearId')} className="flex items-center gap-1.5 hover:text-slate-200 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1">
                   <span>Niên khóa</span>
                   {sortField === 'academicYearId' ? (sortOrder === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-indigo-400" /> : <ArrowDown className="w-3.5 h-3.5 text-indigo-400" />) : <ArrowUpDown className="w-3 h-3 text-slate-600" />}
-                </div>
+                </button>
               </th>
-              <th className="px-5 py-3.5">Thông tin liên hệ</th>
-              <th className="px-5 py-3.5 text-right">Thao tác</th>
+              <th scope="col" className="px-5 py-3.5">Thông tin liên hệ</th>
+              <th scope="col" className="px-5 py-3.5 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
@@ -133,6 +122,7 @@ export default function StudentTable({
                       type="checkbox"
                       checked={selectedIds.has(st.studentId)}
                       onChange={() => onToggleSelect(st.studentId)}
+                      aria-label={`Chọn sinh viên ${st.fullName || st.studentId}`}
                       className="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                     />
                   </td>
@@ -166,6 +156,7 @@ export default function StudentTable({
                   <td className="px-5 py-3.5 text-right space-x-1">
                     <button
                       onClick={() => onOpenTranscript(st)}
+                      aria-label="Xem bảng điểm sinh viên"
                       title="Xem Bảng Điểm & GPA Chi Tiết"
                       className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-500 transition"
                     >
@@ -175,6 +166,7 @@ export default function StudentTable({
                       <>
                         <button
                           onClick={() => onOpenEdit(st)}
+                          aria-label="Chỉnh sửa thông tin sinh viên"
                           title="Sửa Sinh Viên"
                           className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-indigo-500 transition"
                         >
@@ -182,6 +174,7 @@ export default function StudentTable({
                         </button>
                         <button
                           onClick={() => onOpenDelete(st)}
+                          aria-label="Xóa sinh viên"
                           title="Xóa Sinh viên"
                           className="inline-flex items-center justify-center min-w-[36px] min-h-[36px] p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500 transition"
                         >
@@ -208,4 +201,3 @@ export default function StudentTable({
     </div>
   );
 }
-

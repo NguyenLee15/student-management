@@ -60,17 +60,19 @@ export default function Header({
       {/* Right: Server Status, Search, Profile */}
       <div className="flex items-center gap-2.5">
         {/* Backend Status indicator */}
-        <div 
+        <button
+          type="button"
           onClick={onRefreshHealth}
+          aria-label="Làm mới trạng thái kết nối máy chủ"
           title="Bấm để kiểm tra kết nối máy chủ"
-          className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-[11px] text-slate-300 hover:border-slate-700 cursor-pointer transition select-none"
+          className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-[11px] text-slate-300 hover:border-slate-700 cursor-pointer transition select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <span className={`h-2 w-2 rounded-full ${isBackendConnected ? 'bg-emerald-400 shadow-sm shadow-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
           <span className="hidden xl:inline text-slate-300 font-medium">
             {isBackendConnected ? 'API Sẵn sàng' : 'Đang kết nối...'}
           </span>
           <RefreshCw className={`h-3 w-3 text-slate-400 ${apiChecking ? 'animate-spin text-indigo-400' : ''}`} />
-        </div>
+        </button>
 
         {/* Universal Search Command Button */}
         <button

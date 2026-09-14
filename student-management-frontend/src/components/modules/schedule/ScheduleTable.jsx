@@ -3,9 +3,12 @@ import React from 'react';
 import { Edit3, Trash2, User } from 'lucide-react';
 import { msg } from '../../../lib/messages';
 import Pagination from '../../common/Pagination';
+import Skeleton from '../../common/Skeleton';
+import EmptyState from '../../common/EmptyState';
 
 export default function ScheduleTable({
   schedules = [],
+  loading = false,
   isAdmin = false,
   page = 0,
   size = 10,
@@ -30,7 +33,26 @@ export default function ScheduleTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
-            {schedules.map((s) => (
+            {loading ? (
+              Array.from({ length: 4 }, (_, index) => (
+                <tr key={index}>
+                  {Array.from({ length: 6 }, (_, cellIndex) => (
+                    <td key={cellIndex} className="px-5 py-3.5">
+                      <Skeleton className="h-4 w-full" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : schedules.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="p-0">
+                  <EmptyState
+                    title="Chưa có thời khóa biểu"
+                    message="Không có lịch học nào khớp với bộ lọc hiện tại."
+                  />
+                </td>
+              </tr>
+            ) : schedules.map((s) => (
               <tr key={s.scheduleId} className="hover:bg-slate-800/40 transition">
                 <td className="px-5 py-3.5 font-bold text-teal-400">
                   <div>
@@ -94,4 +116,3 @@ export default function ScheduleTable({
     </div>
   );
 }
-

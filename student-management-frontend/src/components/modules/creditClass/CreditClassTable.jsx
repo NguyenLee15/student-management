@@ -25,12 +25,12 @@ export default function CreditClassTable({
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
             <tr>
-              <th className="px-5 py-3.5">Mã Lớp</th>
-              <th className="px-5 py-3.5">Môn Học</th>
-              <th className="px-5 py-3.5">Giảng Viên</th>
-              <th className="px-5 py-3.5">Phòng / Học Kỳ</th>
-              <th className="px-5 py-3.5 text-center">Sĩ Số</th>
-              <th className="px-5 py-3.5 text-right">Thao Tác</th>
+              <th scope="col" className="px-5 py-3.5">Mã Lớp</th>
+              <th scope="col" className="px-5 py-3.5">Môn Học</th>
+              <th scope="col" className="px-5 py-3.5">Giảng Viên</th>
+              <th scope="col" className="px-5 py-3.5">Phòng / Học Kỳ</th>
+              <th scope="col" className="px-5 py-3.5 text-center">Sĩ Số</th>
+              <th scope="col" className="px-5 py-3.5 text-right">Thao Tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
@@ -86,8 +86,9 @@ export default function CreditClassTable({
                     <td className="px-5 py-3.5 text-right space-x-1">
                       <button
                         onClick={() => onOpenStudents(c)}
+                        aria-label="Xem danh sách sinh viên"
                         title="Danh sách sinh viên trong lớp"
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-slate-800 transition"
+                        className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-slate-800 transition"
                       >
                         <Users className="h-4 w-4" />
                       </button>
@@ -95,15 +96,17 @@ export default function CreditClassTable({
                         <>
                           <button
                             onClick={() => onOpenEdit(c)}
+                            aria-label="Chỉnh sửa"
                             title="Sửa lớp tín chỉ"
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
+                            className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
                           >
                             <Edit3 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => onOpenDelete(c)}
+                            aria-label="Xóa"
                             title="Xóa lớp tín chỉ"
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                            className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>

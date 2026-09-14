@@ -24,15 +24,15 @@ export default function GradeTable({
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
             <tr>
-              <th className="px-5 py-3.5">Sinh Viên</th>
-              <th className="px-5 py-3.5">Môn Học</th>
-              <th className="px-3 py-3.5 text-center">Chuyên Cần</th>
-              <th className="px-3 py-3.5 text-center">Giữa Kỳ</th>
-              <th className="px-3 py-3.5 text-center">Cuối Kỳ</th>
-              <th className="px-3 py-3.5 text-center font-bold">Tổng Kết</th>
-              <th className="px-3 py-3.5 text-center">Hệ 4</th>
-              <th className="px-3 py-3.5 text-center">Điểm Chữ</th>
-              <th className="px-5 py-3.5 text-right">Thao Tác</th>
+              <th scope="col" className="px-5 py-3.5">Sinh Viên</th>
+              <th scope="col" className="px-5 py-3.5">Môn Học</th>
+              <th scope="col" className="px-3 py-3.5 text-center">Chuyên Cần</th>
+              <th scope="col" className="px-3 py-3.5 text-center">Giữa Kỳ</th>
+              <th scope="col" className="px-3 py-3.5 text-center">Cuối Kỳ</th>
+              <th scope="col" className="px-3 py-3.5 text-center font-bold">Tổng Kết</th>
+              <th scope="col" className="px-3 py-3.5 text-center">Hệ 4</th>
+              <th scope="col" className="px-3 py-3.5 text-center">Điểm Chữ</th>
+              <th scope="col" className="px-5 py-3.5 text-right">Thao Tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
@@ -104,15 +104,17 @@ export default function GradeTable({
                         <>
                           <button
                             onClick={() => onOpenEdit(g)}
+                            aria-label="Chỉnh sửa"
                             title="Sửa điểm"
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
+                            className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-slate-800 transition"
                           >
                             <Edit3 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => onOpenDelete(g)}
+                            aria-label="Xóa"
                             title="Xóa điểm"
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                            className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -138,4 +140,3 @@ export default function GradeTable({
     </div>
   );
 }
-

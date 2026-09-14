@@ -37,6 +37,8 @@ const TAB_TITLES = {
 };
 
 export default function AdminLayout({
+  adminActiveTab,
+  onTabChange,
   currentUser,
   isBackendConnected,
   apiChecking,
@@ -48,8 +50,15 @@ export default function AdminLayout({
   counts,
   facultiesList
 }) {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [localActiveTab, setLocalActiveTab] = useState('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const activeTab = adminActiveTab ?? localActiveTab;
+
+  const handleTabChange = (tab) => {
+    setLocalActiveTab(tab);
+    onTabChange?.(tab);
+    setIsMobileMenuOpen(false);
+  };
 
   const currentTabInfo = TAB_TITLES[activeTab] || { title: 'Quản Trị', group: 'Hệ Thống' };
 
@@ -81,10 +90,7 @@ export default function AdminLayout({
         {/* 📱 SIDEBAR */}
         <Sidebar
           activeTab={activeTab}
-          onTabChange={(tab) => {
-            setActiveTab(tab);
-            setIsMobileMenuOpen(false);
-          }}
+          onTabChange={handleTabChange}
           counts={counts}
           currentUser={currentUser}
           isMobileMenuOpen={isMobileMenuOpen}
@@ -95,7 +101,7 @@ export default function AdminLayout({
           {/* Breadcrumbs Navigation */}
           <div className="flex items-center gap-2 text-xs text-slate-400 pb-1">
             <button 
-              onClick={() => setActiveTab('overview')} 
+              onClick={() => handleTabChange('overview')}
               className="flex items-center gap-1 hover:text-indigo-400 transition"
             >
               <Home className="w-3.5 h-3.5" />
@@ -111,7 +117,7 @@ export default function AdminLayout({
             <DashboardModule
               stats={counts}
               faculties={facultiesList}
-              onNavigate={(tab) => setActiveTab(tab)}
+              onNavigate={handleTabChange}
               currentUser={currentUser}
               isBackendConnected={isBackendConnected}
             />

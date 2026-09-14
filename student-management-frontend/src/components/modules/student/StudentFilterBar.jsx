@@ -30,6 +30,7 @@ export default function StudentFilterBar({
             type="text"
             placeholder="Tìm kiếm theo họ tên hoặc mã sinh viên (VD: SV001)..."
             value={keyword}
+            aria-label="Tìm kiếm theo mã sinh viên, họ tên hoặc email"
             onChange={(e) => setKeyword(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition"
           />
@@ -38,6 +39,7 @@ export default function StudentFilterBar({
         <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
           <select
             value={selectedFaculty}
+            aria-label="Lọc theo khoa viện"
             onChange={(e) => setSelectedFaculty(e.target.value)}
             className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition"
           >
@@ -51,6 +53,7 @@ export default function StudentFilterBar({
 
           <select
             value={selectedClass}
+            aria-label="Lọc theo lớp sinh viên"
             onChange={(e) => setSelectedClass(e.target.value)}
             className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition"
           >
@@ -64,6 +67,7 @@ export default function StudentFilterBar({
 
           <select
             value={selectedYear}
+            aria-label="Lọc theo niên khóa"
             onChange={(e) => setSelectedYear(e.target.value)}
             className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition font-mono"
           >
@@ -77,6 +81,7 @@ export default function StudentFilterBar({
 
           <select
             value={selectedStatus}
+            aria-label="Lọc theo trạng thái học tập"
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition"
           >
@@ -107,4 +112,3 @@ export default function StudentFilterBar({
     </div>
   );
 }
-
