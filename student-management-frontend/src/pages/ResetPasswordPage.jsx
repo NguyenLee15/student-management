@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { KeyRound, CheckCircle2, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { KeyRound, CheckCircle2, ArrowRight, AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { authApi } from '../api';
 
 export default function ResetPasswordPage() {
   const [token, setToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPasswords, setShowPasswords] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -49,7 +50,7 @@ export default function ResetPasswordPage() {
 
   if (!token && !error) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-950">
+      <div className="flex min-h-[100dvh] w-full items-center justify-center bg-slate-950">
         <div className="flex flex-col items-center gap-4 p-8 bg-slate-900 border border-rose-500/30 rounded-2xl">
           <AlertCircle className="w-12 h-12 text-rose-500" />
           <h2 className="text-xl font-bold text-white">Liên kết không hợp lệ</h2>
@@ -83,34 +84,64 @@ export default function ResetPasswordPage() {
         {!success ? (
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm">
+              <div role="alert" className="flex items-center gap-3 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm">
                 <AlertCircle className="h-5 w-5 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Mật khẩu mới</label>
-              <input
-                type="password"
-                required
-                placeholder="Ít nhất 8 ký tự"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition"
-              />
+              <label htmlFor="reset-new-password" className="block text-xs font-semibold text-slate-300 mb-1.5">Mật khẩu mới</label>
+              <div className="relative">
+                <input
+                  id="reset-new-password"
+                  name="newPassword"
+                  type={showPasswords ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  disabled={loading}
+                  required
+                  placeholder="Ít nhất 8 ký tự"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-3 pr-12 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition disabled:opacity-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswords((visible) => !visible)}
+                  aria-label={showPasswords ? 'Ẩn mật khẩu mới' : 'Hiện mật khẩu mới'}
+                  aria-pressed={showPasswords}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                >
+                  {showPasswords ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Xác nhận mật khẩu mới</label>
-              <input
-                type="password"
-                required
-                placeholder="Nhập lại mật khẩu"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition"
-              />
+              <label htmlFor="reset-confirm-password" className="block text-xs font-semibold text-slate-300 mb-1.5">Xác nhận mật khẩu mới</label>
+              <div className="relative">
+                <input
+                  id="reset-confirm-password"
+                  name="confirmPassword"
+                  type={showPasswords ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  disabled={loading}
+                  required
+                  placeholder="Nhập lại mật khẩu"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 pr-12 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition disabled:opacity-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswords((visible) => !visible)}
+                  aria-label={showPasswords ? 'Ẩn xác nhận mật khẩu mới' : 'Hiện xác nhận mật khẩu mới'}
+                  aria-pressed={showPasswords}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                >
+                  {showPasswords ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              </div>
             </div>
 
             <button

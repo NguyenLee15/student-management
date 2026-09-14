@@ -80,10 +80,14 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
 
   // Render form contents
   const renderLoginForm = () => (
-    <form onSubmit={handleLogin} className="space-y-4 text-xs">
+    <form onSubmit={handleLogin} className="space-y-4 text-sm">
       {error && (
-        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs animate-shake">
-          <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
+        <div
+          className="flex items-center gap-2.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm animate-shake"
+          role="alert"
+          aria-live="assertive"
+        >
+          <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" aria-hidden="true" />
           <span>{error}</span>
         </div>
       )}
@@ -100,7 +104,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
           {activeRole === 'student' ? 'Mã Sinh Viên / Tên Đăng Nhập *' : 'Tên Đăng Nhập *'}
         </label>
         <div className="relative">
-          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" aria-hidden="true" />
           <input
             id="login-username"
             name="username"
@@ -111,7 +115,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
             placeholder={ROLE_PRESETS[activeRole]?.placeholder || 'Nhập tên đăng nhập'}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition placeholder:text-slate-600"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition placeholder:text-slate-600"
           />
         </div>
       </div>
@@ -131,7 +135,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
           </button>
         </div>
         <div className="relative">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" aria-hidden="true" />
           <input
             id="login-password"
             name="password"
@@ -143,22 +147,24 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
             onChange={(e) => setPassword(e.target.value)}
             onKeyUp={handleKeyUp}
             onKeyDown={handleKeyUp}
-            className="w-full pl-10 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition font-mono"
+            className="w-full pl-10 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition font-mono"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+            aria-pressed={showPassword}
             title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-300 transition"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 min-w-[40px] min-h-[40px] inline-flex items-center justify-center text-slate-500 hover:text-slate-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg"
           >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
           </button>
         </div>
 
         {/* CapsLock Indicator */}
         {isCapsLockOn && (
-          <div className="flex items-center gap-1.5 mt-1.5 text-amber-400 text-[11px]">
-            <AlertTriangle className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-1.5 mt-1.5 text-amber-400 text-xs" role="status">
+            <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Phím Caps Lock đang bật</span>
           </div>
         )}
@@ -214,15 +220,11 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
   // 🌟 CASE 1: FULL-PAGE ACADEMIC LOGIN PORTAL (Khi người dùng chưa đăng nhập)
   if (!currentUser && isOpen && !showForgot) {
     return (
-      <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-12 relative overflow-hidden selection:bg-indigo-500 selection:text-white">
-        {/* Ambient Glows */}
-        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-sky-600/10 rounded-full blur-3xl pointer-events-none"></div>
-
+      <div className="min-h-[100dvh] w-full bg-slate-950 text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-12 relative overflow-x-hidden overflow-y-auto selection:bg-indigo-500 selection:text-white">
         <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
           
           {/* Left Column: Academic Brand & Value Props */}
-          <div className="lg:col-span-7 space-y-6 text-left">
+          <div className="order-2 lg:order-1 lg:col-span-7 space-y-6 text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
               <GraduationCap className="w-4 h-4 text-indigo-400" />
               <span>EduPortal Higher Education Platform v3.5</span>
@@ -230,7 +232,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
               Cổng Thông Tin Đào Tạo & <br className="hidden sm:inline" />
-              <span className="bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-400 bg-clip-text text-transparent">
+              <span className="text-indigo-400">
                 Học Vụ Đại Học Số
               </span>
             </h1>
@@ -280,7 +282,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
           </div>
 
           {/* Right Column: Glassmorphism Login Card */}
-          <div className="lg:col-span-5">
+          <div className="order-1 lg:order-2 lg:col-span-5">
             <div className="bg-slate-900/90 backdrop-blur-2xl border border-slate-800 p-6 sm:p-8 rounded-3xl shadow-2xl shadow-indigo-950/40 relative">
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-white tracking-tight">Đăng Nhập Hệ Thống</h2>
@@ -294,11 +296,6 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
         </div>
 
         {/* 🔑 FORGOT PASSWORD MODAL */}
-        <ForgotPasswordModal
-          isOpen={showForgot}
-          onClose={() => setShowForgot(false)}
-          onBackToLogin={() => setShowForgot(false)}
-        />
       </div>
     );
   }

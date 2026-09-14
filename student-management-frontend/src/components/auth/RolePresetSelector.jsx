@@ -38,14 +38,18 @@ export default function RolePresetSelector({ activeRole, onRoleSelect }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
-        <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+        <span id="login-role-label" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
           Chọn Vai Trò Đăng Nhập
-        </label>
+        </span>
         <span className="text-[10px] text-indigo-400 font-medium">
           Tự động điền tài khoản
         </span>
       </div>
-      <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-950/90 border border-slate-800 rounded-xl">
+      <div
+        className="grid grid-cols-3 gap-1.5 p-1 bg-slate-950/90 border border-slate-800 rounded-xl"
+        role="group"
+        aria-labelledby="login-role-label"
+      >
         {Object.entries(ROLE_PRESETS).map(([key, item]) => {
           const Icon = item.icon;
           const isSelected = activeRole === key;
@@ -53,14 +57,15 @@ export default function RolePresetSelector({ activeRole, onRoleSelect }) {
             <button
               key={key}
               type="button"
+              aria-pressed={isSelected}
               onClick={() => onRoleSelect(key)}
-              className={`flex items-center justify-center gap-1.5 py-2 px-1 rounded-lg text-xs font-semibold transition ${
+              className={`min-h-[40px] flex items-center justify-center gap-1.5 py-2 px-1 rounded-lg text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-950 ${
                 isSelected
                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
               }`}
             >
-              <Icon className="w-3.5 h-3.5 shrink-0" />
+              <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               <span className="truncate">{item.label}</span>
             </button>
           );
@@ -68,22 +73,18 @@ export default function RolePresetSelector({ activeRole, onRoleSelect }) {
       </div>
 
       {/* Hiển thị tài khoản & mật khẩu mẫu tương ứng */}
-      <div className="mt-2 px-3 py-2 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between text-[11px] text-slate-300">
+      <div className="mt-2 px-3 py-2 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between text-xs text-slate-300" aria-live="polite">
         <div className="flex items-center gap-1.5 truncate">
-          <span className="text-slate-400 font-medium">Demo:</span>
+          <span className="text-slate-400 font-medium">Tài khoản mẫu:</span>
           <code className="text-indigo-400 font-mono font-bold bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">
             {currentPreset.demoUser}
           </code>
-          <span className="text-slate-500">/</span>
-          <code className="text-emerald-400 font-mono font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-            {currentPreset.demoPass}
-          </code>
+          <span className="text-slate-500">•</span>
+          <span className="text-[10px] text-slate-400 truncate">
+            {currentPreset.demoName}
+          </span>
         </div>
-        <span className="text-[10px] text-slate-400 truncate ml-2">
-          {currentPreset.demoName}
-        </span>
       </div>
     </div>
   );
 }
-
