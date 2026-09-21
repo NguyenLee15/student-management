@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://eduportal-backend-176j.onrender.com/api/$1"
+      "destination": "https://student-management-fsav.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",
