@@ -48,7 +48,8 @@ public class StudentRestController {
             @RequestParam(required = false) String facultyId,
             @RequestParam(required = false) String academicYearId) {
 
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(sortBy));
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        PageRequest pageRequest = PageRequest.of(page, safeSize, Sort.by(sortBy));
         Page<StudentResponseDto> result = studentService.searchAndFilter(keyword, classId, facultyId, academicYearId, pageRequest);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách sinh viên thành công", result));
     }
@@ -86,6 +87,25 @@ public class StudentRestController {
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         studentService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Xóa sinh viên thành công", null));
+    }
+
+    @PostMapping("/batch-delete")
+    @Operation(summary = "Xóa nhiều sinh viên theo danh sách mã SV")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteBatch(@RequestBody List<String> studentIds) {
+        studentService.deleteBatch(studentIds);
+        return ResponseEntity.ok(ApiResponse.success("Xóa danh sách sinh viên thành công", null));
+    }
+
+    @PostMapping("/batch-assign-class")
+    @Operation(summary = "Chuyển lớp sinh hoạt hàng loạt")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> assignClassBatch(@RequestBody Map<String, Object> payload) {
+        @SuppressWarnings("unchecked")
+        List<String> studentIds = (List<String>) payload.get("studentIds");
+        String classId = (String) payload.get("classId");
+        studentService.assignClassBatch(studentIds, classId);
+        return ResponseEntity.ok(ApiResponse.success("Chuyển lớp thành công cho danh sách sinh viên", null));
     }
 
     @PostMapping("/import")

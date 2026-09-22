@@ -23,5 +23,7 @@ public interface StudentService {
     List<StudentResponseDto> getAllForExport();
     List<StudentResponseDto> getStudentsByClassId(String classId);
     List<StudentResponseDto> getStudentsByCreditClassId(Long creditClassId);
+    void deleteBatch(List<String> studentIds);
+    void assignClassBatch(List<String> studentIds, String classId);
 }
 

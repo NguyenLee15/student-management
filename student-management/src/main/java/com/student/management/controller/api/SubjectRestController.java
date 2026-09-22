@@ -41,7 +41,8 @@ public class SubjectRestController {
     public ResponseEntity<ApiResponse<Page<SubjectResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<SubjectResponseDto> result = subjectService.getAll(page, size);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        Page<SubjectResponseDto> result = subjectService.getAll(page, safeSize);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách môn học thành công", result));
     }
 

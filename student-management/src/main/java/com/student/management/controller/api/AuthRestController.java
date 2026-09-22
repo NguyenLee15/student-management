@@ -81,7 +81,7 @@ public class AuthRestController {
     public ResponseEntity<ApiResponse<UserResponseDto>> register(@Valid @RequestBody UserRequestDto dto) {
         UserResponseDto createdUser = userService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Đăng ký tài khoản thành công", createdUser));
+                .body(ApiResponse.success(201, "Đăng ký tài khoản thành công", createdUser));
     }
 
     @PostMapping("/refresh")
@@ -134,10 +134,9 @@ public class AuthRestController {
     @PostMapping("/forgot-password")
     @Operation(summary = "Quên mật khẩu (gửi email reset)")
     public ResponseEntity<ApiResponse<Void>> forgotPassword(
-            @Valid @RequestBody com.student.management.dto.req.ForgotPasswordRequestDto dto,
-            @RequestHeader(value = "Origin", required = false) String origin) {
+            @Valid @RequestBody com.student.management.dto.req.ForgotPasswordRequestDto dto) {
             
-        String appUrl = (origin != null && !origin.isEmpty()) ? origin : "http://localhost:5173";
+        String appUrl = "http://localhost:5173";
         userService.forgotPassword(dto.getEmail(), appUrl);
         
         return ResponseEntity.ok(ApiResponse.success("Nếu email tồn tại, link reset đã được gửi", null));

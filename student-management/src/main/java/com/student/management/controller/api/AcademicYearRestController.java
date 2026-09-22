@@ -30,7 +30,8 @@ public class AcademicYearRestController {
     public ResponseEntity<ApiResponse<Page<AcademicYearResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<AcademicYearResponseDto> result = academicYearService.getAll(PageRequest.of(page, size));
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        Page<AcademicYearResponseDto> result = academicYearService.getAll(PageRequest.of(page, safeSize));
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách Academic years thành công", result));
     }
 

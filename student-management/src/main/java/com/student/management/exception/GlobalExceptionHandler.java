@@ -105,9 +105,12 @@ public class GlobalExceptionHandler {
         logger.warn("Validation Error: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.<Map<String, String>>builder()
+                        .success(false)
                         .status(HttpStatus.BAD_REQUEST.value())
+                        .code("VALIDATION_ERROR")
                         .message("Dữ liệu đầu vào không hợp lệ.")
                         .data(errors)
+                        .details(errors)
                         .build());
     }
 

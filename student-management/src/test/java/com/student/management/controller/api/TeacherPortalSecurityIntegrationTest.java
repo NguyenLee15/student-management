@@ -63,9 +63,9 @@ class TeacherPortalSecurityIntegrationTest {
     }
 
     @Test
-    @DisplayName("Auto-healing: Demo teacher with NULL teacherId in DB should automatically heal to GV002 and succeed")
+    @DisplayName("Security: Teacher with NULL teacherId should get ACCESS_DENIED (no unsafe auto-heal)")
     @WithMockUser(username = "teacher2", roles = {"TEACHER"})
-    void getMe_WithNullTeacherId_ShouldAutoHealAndSucceed() throws Exception {
+    void getMe_WithNullTeacherId_ShouldReturn403_NoUnsafeAutoHeal() throws Exception {
         // Explicitly simulate legacy/broken state where teacher2 has null teacherId
         User teacher2 = userRepository.findByUserName("teacher2").orElseGet(() ->
                 User.builder()
@@ -77,15 +77,10 @@ class TeacherPortalSecurityIntegrationTest {
         teacher2.setTeacherId(null);
         userRepository.save(teacher2);
 
-        // Calling /api/v1/teachers/me should trigger auto-healing and succeed with GV002
+        // After security hardening: username "teacher2" does NOT match a real teacherId,
+        // so auto-heal cannot resolve and should return ACCESS_DENIED (403)
         mockMvc.perform(get("/api/v1/teachers/me")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.data.teacherId").value("GV002"));
-
-        // Verify DB record is now healed
-        User healedUser = userRepository.findByUserName("teacher2").orElseThrow();
-        assertEquals("GV002", healedUser.getTeacherId());
+                .andExpect(status().isForbidden());
     }
 }

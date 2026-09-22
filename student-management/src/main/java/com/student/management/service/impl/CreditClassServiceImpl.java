@@ -226,7 +226,7 @@ public class CreditClassServiceImpl implements CreditClassService {
     @Override
     @Transactional
     public void addStudentToCreditClass(Long creditClassId, String studentId) {
-        CreditClass cc = creditClassRepository.findById(creditClassId)
+        CreditClass cc = creditClassRepository.findByIdForUpdate(creditClassId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CLASS_NOT_FOUND, "Không tìm thấy lớp tín chỉ ID: " + creditClassId));
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy sinh viên ID: " + studentId));

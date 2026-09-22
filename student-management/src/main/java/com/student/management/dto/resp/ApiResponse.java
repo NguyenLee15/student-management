@@ -45,6 +45,16 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    public static <T> ApiResponse<T> success(int status, String message, T data) {
+        return ApiResponse.<T>builder()
+                .success(true)
+                .status(status)
+                .message(message)
+                .data(data)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
     public static <T> ApiResponse<T> error(int status, String message) {
         return ApiResponse.<T>builder()
                 .success(false)

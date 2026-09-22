@@ -44,8 +44,9 @@ public class SemesterScheduleRestController {
             @RequestParam(required = false) String teacherId,
             @RequestParam(required = false) String roomId,
             @RequestParam(required = false) ClassShift classShift) {
+        int safeSize = Math.min(Math.max(size, 1), 100);
         Page<SemesterScheduleResponseDto> result = semesterScheduleService.searchAndFilter(
-                creditClassId, subjectId, semester, academicYear, teacherId, roomId, classShift, PageRequest.of(page, size)
+                creditClassId, subjectId, semester, academicYear, teacherId, roomId, classShift, PageRequest.of(page, safeSize)
         );
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lịch trình thành công", result));
     }

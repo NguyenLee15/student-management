@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RateLimitingFilter extends OncePerRequestFilter {
 
+    private static final int MAX_CACHE_SIZE = 10_000;
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
 
     private Bucket createNewBucket(String ip, boolean isAuth) {
@@ -36,6 +37,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     private Bucket resolveBucket(String ip, boolean isAuth) {
         String key = ip + (isAuth ? "_auth" : "_api");
+        // Evict all entries when cache exceeds max size to prevent OOM
+        if (cache.size() > MAX_CACHE_SIZE) {
+            cache.clear();
+        }
         return cache.computeIfAbsent(key, k -> createNewBucket(ip, isAuth));
     }
 

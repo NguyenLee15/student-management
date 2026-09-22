@@ -33,7 +33,8 @@ public class ClassroomRestController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Building building) {
-        Page<ClassroomResponseDto> result = classroomService.searchAndFilter(keyword, building, PageRequest.of(page, size));
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        Page<ClassroomResponseDto> result = classroomService.searchAndFilter(keyword, building, PageRequest.of(page, safeSize));
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách phòng học thành công", result));
     }
 

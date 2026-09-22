@@ -18,6 +18,8 @@ export const studentApi = {
   create: (data) => axiosClient.post('/students', data),
   update: (id, data) => axiosClient.put(`/students/${id}`, data),
   delete: (id) => axiosClient.delete(`/students/${id}`),
+  deleteBatch: (studentIds) => axiosClient.post('/students/batch-delete', studentIds),
+  assignClassBatch: (studentIds, classId) => axiosClient.post('/students/batch-assign-class', { studentIds, classId }),
   exportExcel: () => {
     return axios.get(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/students/export`, {
       responseType: 'blob',

@@ -27,7 +27,8 @@ public class AuditLogRestController {
     public ResponseEntity<ApiResponse<Page<AuditLogResponseDto>>> getAuditLogs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
-        Page<AuditLogResponseDto> result = auditLogService.getAll(PageRequest.of(page, size));
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        Page<AuditLogResponseDto> result = auditLogService.getAll(PageRequest.of(page, safeSize));
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lịch sử hệ thống thành công", result));
     }
 }

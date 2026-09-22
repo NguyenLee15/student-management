@@ -43,7 +43,8 @@ public class StudentClassRestController {
             return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lớp học thành công", list));
         }
 
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("classId"));
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        PageRequest pageRequest = PageRequest.of(page, safeSize, Sort.by("classId"));
         Page<StudentClassResponseDto> result;
         if (facultyId != null && !facultyId.trim().isEmpty()) {
             result = studentClassService.getByFacultyId(facultyId, pageRequest);

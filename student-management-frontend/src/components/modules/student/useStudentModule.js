@@ -60,7 +60,7 @@ export function useStudentModule({ onNotify }) {
     try {
       const [facRes, clsRes, yrRes] = await Promise.allSettled([
         facultyApi.getAll({ unpaged: true }),
-        studentClassApi.getAll({ page: 0, size: 50 }),
+        studentClassApi.getAll({ unpaged: true }),
         academicYearApi.getAll({ unpaged: true }),
       ]);
 
@@ -245,12 +245,7 @@ export function useStudentModule({ onNotify }) {
     }
     setLoading(true);
     try {
-      for (const id of Array.from(selectedIds)) {
-        const st = students.find((s) => s.studentId === id);
-        if (st) {
-          await studentApi.update(id, { ...st, classId: batchClassId });
-        }
-      }
+      await studentApi.assignClassBatch(Array.from(selectedIds), batchClassId);
       onNotify('success', `Đã chuyển lớp thành công cho ${selectedIds.size} sinh viên!`);
       setSelectedIds(new Set());
       setShowBatchClassModal(false);
@@ -268,9 +263,7 @@ export function useStudentModule({ onNotify }) {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa ${selectedIds.size} sinh viên đã chọn không?`)) return;
     setLoading(true);
     try {
-      for (const id of Array.from(selectedIds)) {
-        await studentApi.delete(id);
-      }
+      await studentApi.deleteBatch(Array.from(selectedIds));
       onNotify('success', `Đã xóa thành công ${selectedIds.size} sinh viên!`);
       setSelectedIds(new Set());
       loadStudents();

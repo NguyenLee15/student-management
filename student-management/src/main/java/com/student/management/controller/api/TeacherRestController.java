@@ -43,7 +43,8 @@ public class TeacherRestController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String facultyId) {
-        Page<TeacherResponseDto> result = teacherService.searchAndFilter(keyword, facultyId, PageRequest.of(page, size));
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        Page<TeacherResponseDto> result = teacherService.searchAndFilter(keyword, facultyId, PageRequest.of(page, safeSize));
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách giảng viên thành công", result));
     }
  

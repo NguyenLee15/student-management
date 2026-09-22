@@ -40,7 +40,8 @@ public class FacultyRestController {
             return ResponseEntity.ok(ApiResponse.success("Lấy danh sách khoa thành công", list));
         }
 
-        Page<FacultyResponseDto> result = facultyService.getAll(PageRequest.of(page, size, Sort.by("facultyId")));
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        Page<FacultyResponseDto> result = facultyService.getAll(PageRequest.of(page, safeSize, Sort.by("facultyId")));
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách khoa thành công", result));
     }
 

@@ -45,12 +45,12 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setContentType("application/json;charset=UTF-8");
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.getWriter().write("{\"status\":401,\"message\":\"Chưa xác thực hoặc JWT token không hợp lệ.\",\"data\":null}");
+                            response.getWriter().write("{\"success\":false,\"status\":401,\"code\":\"UNAUTHORIZED\",\"message\":\"Chưa xác thực hoặc JWT token không hợp lệ.\",\"data\":null}");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setContentType("application/json;charset=UTF-8");
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.getWriter().write("{\"status\":403,\"message\":\"Từ chối truy cập: Bạn không đủ quyền thực hiện thao tác này.\",\"data\":null}");
+                            response.getWriter().write("{\"success\":false,\"status\":403,\"code\":\"ACCESS_DENIED\",\"message\":\"Từ chối truy cập: Bạn không đủ quyền thực hiện thao tác này.\",\"data\":null}");
                         })
                 )
                 .authorizeHttpRequests(requests -> requests
@@ -58,6 +58,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/logout",
+                                "/api/v1/auth/forgot-password",
+                                "/api/v1/auth/reset-password",
                                 "/api/v1/payments/payos-webhook",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

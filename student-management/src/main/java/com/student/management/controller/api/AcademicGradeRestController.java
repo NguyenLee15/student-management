@@ -51,8 +51,9 @@ public class AcademicGradeRestController {
             queryStudentId = securityService.getCurrentStudentId();
         }
 
+        int safeSize = Math.min(Math.max(size, 1), 100);
         Page<AcademicGradeResponseDto> result = academicGradeService.searchAndFilter(
-                queryStudentId, subjectId, semester, academicYear, studyPhase, PageRequest.of(page, size)
+                queryStudentId, subjectId, semester, academicYear, studyPhase, PageRequest.of(page, safeSize)
         );
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách Grades thành công", result));
     }

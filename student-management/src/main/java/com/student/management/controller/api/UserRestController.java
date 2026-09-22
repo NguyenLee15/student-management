@@ -50,7 +50,8 @@ public class UserRestController {
     public ResponseEntity<ApiResponse<Page<UserResponseDto>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<UserResponseDto> result = userService.getAll(PageRequest.of(page, size));
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        Page<UserResponseDto> result = userService.getAll(PageRequest.of(page, safeSize));
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách người dùng thành công", result));
     }
 

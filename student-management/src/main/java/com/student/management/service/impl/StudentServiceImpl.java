@@ -245,5 +245,35 @@ public class StudentServiceImpl implements StudentService {
         }
         return Gender.MALE;
     }
+
+    @Override
+    @Transactional
+    public void deleteBatch(List<String> studentIds) {
+        if (studentIds == null || studentIds.isEmpty()) return;
+        for (String id : studentIds) {
+            if (studentRepository.existsById(id)) {
+                studentRepository.deleteById(id);
+                if (auditLogService != null) {
+                    auditLogService.log("DELETE", "Student", id, "Xóa hồ sơ sinh viên (hàng loạt)", "admin");
+                }
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void assignClassBatch(List<String> studentIds, String classId) {
+        if (studentIds == null || studentIds.isEmpty()) return;
+        StudentClass studentClass = studentClassRepository.findById(classId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp học: " + classId));
+        List<Student> students = studentRepository.findAllById(studentIds);
+        for (Student s : students) {
+            s.setStudentClass(studentClass);
+        }
+        studentRepository.saveAll(students);
+        if (auditLogService != null) {
+            auditLogService.log("UPDATE", "Student", "BATCH", "Chuyển lớp sinh hoạt hàng loạt sang " + classId, "admin");
+        }
+    }
 }
 

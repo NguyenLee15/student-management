@@ -19,12 +19,26 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     @Override
     public void log(String action, String entityName, String entityId, String details, String performedBy) {
+        // Derive actor from SecurityContext for trustworthy audit trail
+        String actor = performedBy;
+        try {
+            org.springframework.security.core.Authentication auth =
+                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+                actor = auth.getName();
+            }
+        } catch (Exception ignored) {
+            // Fallback to provided performedBy (e.g. during system/scheduler operations)
+        }
+        if (actor == null || actor.isBlank()) {
+            actor = "system";
+        }
         AuditLog auditLog = AuditLog.builder()
                 .action(action)
                 .entityName(entityName)
                 .entityId(entityId)
                 .details(details)
-                .performedBy(performedBy != null ? performedBy : "admin")
+                .performedBy(actor)
                 .timestamp(LocalDateTime.now())
                 .build();
         auditLogRepository.save(auditLog);

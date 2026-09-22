@@ -12,6 +12,29 @@ export default function GradeFormModal({
   subjects = [],
   onSubmit,
 }) {
+  const [studentSearch, setStudentSearch] = React.useState('');
+  const [subjectSearch, setSubjectSearch] = React.useState('');
+
+  const filteredStudents = React.useMemo(() => {
+    if (!studentSearch.trim()) return students;
+    const q = studentSearch.trim().toLowerCase();
+    return students.filter(
+      (s) =>
+        s.studentId?.toLowerCase().includes(q) ||
+        s.fullName?.toLowerCase().includes(q)
+    );
+  }, [students, studentSearch]);
+
+  const filteredSubjects = React.useMemo(() => {
+    if (!subjectSearch.trim()) return subjects;
+    const q = subjectSearch.trim().toLowerCase();
+    return subjects.filter(
+      (sub) =>
+        sub.subjectId?.toLowerCase().includes(q) ||
+        sub.subjectName?.toLowerCase().includes(q)
+    );
+  }, [subjects, subjectSearch]);
+
   return (
     <Modal
       isOpen={isOpen}
@@ -22,6 +45,15 @@ export default function GradeFormModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">Sinh viên *</label>
+            {!isEdit && (
+              <input
+                type="text"
+                placeholder="Tìm sinh viên theo tên/mã..."
+                value={studentSearch}
+                onChange={(e) => setStudentSearch(e.target.value)}
+                className="w-full mb-1.5 px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              />
+            )}
             <select
               required
               disabled={isEdit}
@@ -29,8 +61,8 @@ export default function GradeFormModal({
               onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
               className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
             >
-              <option value="">Chọn sinh viên</option>
-              {students.map((s) => (
+              <option value="">Chọn sinh viên ({filteredStudents.length})</option>
+              {filteredStudents.map((s) => (
                 <option key={s.studentId} value={s.studentId}>
                   {s.fullName} ({s.studentId})
                 </option>
@@ -39,6 +71,15 @@ export default function GradeFormModal({
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">Môn học *</label>
+            {!isEdit && (
+              <input
+                type="text"
+                placeholder="Tìm môn học theo tên/mã..."
+                value={subjectSearch}
+                onChange={(e) => setSubjectSearch(e.target.value)}
+                className="w-full mb-1.5 px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              />
+            )}
             <select
               required
               disabled={isEdit}
@@ -46,8 +87,8 @@ export default function GradeFormModal({
               onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
               className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
             >
-              <option value="">Chọn môn học</option>
-              {subjects.map((sub) => (
+              <option value="">Chọn môn học ({filteredSubjects.length})</option>
+              {filteredSubjects.map((sub) => (
                 <option key={sub.subjectId} value={sub.subjectId}>
                   {sub.subjectName} ({sub.subjectId})
                 </option>

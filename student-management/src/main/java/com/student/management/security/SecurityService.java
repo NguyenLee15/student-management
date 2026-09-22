@@ -111,6 +111,12 @@ public class SecurityService {
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
             throw new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.UNAUTHORIZED);
         }
+
+        // Guard: Only ROLE_STUDENT should resolve a studentId
+        if (!isStudentRole()) {
+            throw new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.ACCESS_DENIED, "Chỉ tài khoản sinh viên mới có thể truy cập tài nguyên sinh viên.");
+        }
+
         String username = authentication.getName();
         User user = userRepository.findByUserName(username)
                 .orElseThrow(() -> new com.student.management.exception.BusinessException(com.student.management.exception.ErrorCode.USER_NOT_FOUND));
@@ -118,34 +124,13 @@ public class SecurityService {
             return user.getStudentId();
         }
 
-        // Auto-heal missing student_id dynamically
+        // Auto-heal missing student_id: only match by username if it exists as a student ID
         String resolvedStudentId = null;
         if (studentRepository.existsById(username)) {
             resolvedStudentId = username;
-        } else if ("student".equalsIgnoreCase(username)) {
-            resolvedStudentId = "SV001";
-        } else if ("student2".equalsIgnoreCase(username)) {
-            resolvedStudentId = "SV002";
-        } else if ("student3".equalsIgnoreCase(username)) {
-            resolvedStudentId = "SV003";
-        } else if ("student4".equalsIgnoreCase(username)) {
-            resolvedStudentId = "SV004";
-        } else if ("student5".equalsIgnoreCase(username)) {
-            resolvedStudentId = "SV005";
-        } else if ("student6".equalsIgnoreCase(username)) {
-            resolvedStudentId = "SV006";
-        } else if ("student7".equalsIgnoreCase(username)) {
-            resolvedStudentId = "SV007";
-        } else if ("student8".equalsIgnoreCase(username)) {
-            resolvedStudentId = "SV008";
-        } else {
-            resolvedStudentId = studentRepository.findAll().stream()
-                    .findFirst()
-                    .map(com.student.management.entity.Student::getStudentId)
-                    .orElse(null);
         }
 
-        if (resolvedStudentId != null && studentRepository.existsById(resolvedStudentId)) {
+        if (resolvedStudentId != null) {
             user.setStudentId(resolvedStudentId);
             userRepository.saveAndFlush(user);
             return resolvedStudentId;
@@ -170,26 +155,13 @@ public class SecurityService {
             return user.getTeacherId();
         }
 
-        // Auto-heal missing teacher_id dynamically
+        // Auto-heal missing teacher_id: only match by username if it exists as a teacher ID
         String resolvedTeacherId = null;
         if (teacherRepository.existsById(username)) {
             resolvedTeacherId = username;
-        } else if ("teacher".equalsIgnoreCase(username)) {
-            resolvedTeacherId = "GV001";
-        } else if ("teacher2".equalsIgnoreCase(username)) {
-            resolvedTeacherId = "GV002";
-        } else if ("teacher3".equalsIgnoreCase(username)) {
-            resolvedTeacherId = "GV003";
-        } else if ("teacher4".equalsIgnoreCase(username)) {
-            resolvedTeacherId = "GV004";
-        } else {
-            resolvedTeacherId = teacherRepository.findAll().stream()
-                    .findFirst()
-                    .map(com.student.management.entity.Teacher::getTeacherId)
-                    .orElse(null);
         }
 
-        if (resolvedTeacherId != null && teacherRepository.existsById(resolvedTeacherId)) {
+        if (resolvedTeacherId != null) {
             user.setTeacherId(resolvedTeacherId);
             userRepository.saveAndFlush(user);
             return resolvedTeacherId;

@@ -53,8 +53,8 @@ export default function GradeModule({ onNotify, currentUser }) {
   const loadDependencies = async () => {
     try {
       const [stRes, subRes] = await Promise.allSettled([
-        studentApi.getAll({ page: 0, size: 50 }),
-        subjectApi.getAll({ page: 0, size: 50 }),
+        studentApi.getAll({ page: 0, size: 100 }),
+        subjectApi.getAll({ page: 0, size: 100 }),
       ]);
       if (stRes.status === 'fulfilled') {
         const d = stRes.value.data || stRes.value;

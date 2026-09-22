@@ -50,7 +50,8 @@ public class CreditClassRestController {
             return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lớp tín chỉ thành công", creditClassService.getAll()));
         }
 
-        Page<CreditClassResponseDto> result = creditClassService.getAll(PageRequest.of(page, size));
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        Page<CreditClassResponseDto> result = creditClassService.getAll(PageRequest.of(page, safeSize));
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách lớp tín chỉ thành công", result));
     }
 
