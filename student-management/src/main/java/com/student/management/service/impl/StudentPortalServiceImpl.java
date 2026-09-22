@@ -159,12 +159,38 @@ public class StudentPortalServiceImpl implements StudentPortalService {
                         .teacherName(s.getTeacher() != null ? s.getTeacher().getFullName() : null)
                         .roomName(s.getClassroom() != null ? s.getClassroom().getRoomName() : null)
                         .studyTime(s.getStudyTime())
+                        .dayOfWeek(extractDayOfWeek(s.getStudyTime()))
+                        .slotKey(extractSlotKey(s.getStudyTime()))
                         .classShift(s.getClassShift())
                         .shiftName(s.getClassShift() != null ? s.getClassShift().getDisplayName() : null)
                         .startDate(s.getStartDate())
                         .endDate(s.getEndDate())
                         .build())
                 .toList();
+    }
+
+    private static Integer extractDayOfWeek(String studyTime) {
+        if (studyTime == null) return null;
+        String lower = studyTime.toLowerCase();
+        if (lower.contains("chủ nhật") || lower.contains("cn") || lower.contains("sunday")) return 8;
+        if (lower.contains("thứ 2") || lower.contains("thứ hai") || lower.contains("t2") || lower.contains("monday")) return 2;
+        if (lower.contains("thứ 3") || lower.contains("thứ ba") || lower.contains("t3") || lower.contains("tuesday")) return 3;
+        if (lower.contains("thứ 4") || lower.contains("thứ tư") || lower.contains("t4") || lower.contains("wednesday")) return 4;
+        if (lower.contains("thứ 5") || lower.contains("thứ năm") || lower.contains("t5") || lower.contains("thursday")) return 5;
+        if (lower.contains("thứ 6") || lower.contains("thứ sáu") || lower.contains("t6") || lower.contains("friday")) return 6;
+        if (lower.contains("thứ 7") || lower.contains("thứ bảy") || lower.contains("t7") || lower.contains("saturday")) return 7;
+        return null;
+    }
+
+    private static String extractSlotKey(String studyTime) {
+        if (studyTime == null) return null;
+        String lower = studyTime.toLowerCase();
+        if (lower.contains("1-3") || lower.contains("1 - 3") || lower.contains("tiết 1") || lower.contains("ca 1")) return "1-3";
+        if (lower.contains("4-6") || lower.contains("4 - 6") || lower.contains("tiết 4") || lower.contains("ca 2")) return "4-6";
+        if (lower.contains("7-9") || lower.contains("7 - 9") || lower.contains("tiết 7") || lower.contains("ca 3")) return "7-9";
+        if (lower.contains("10-12") || lower.contains("10 - 12") || lower.contains("tiết 10") || lower.contains("ca 4")) return "10-12";
+        if (lower.contains("13-15") || lower.contains("13 - 15") || lower.contains("tiết 13") || lower.contains("ca 5")) return "13-15";
+        return null;
     }
 
     private Long resolveActiveSemesterId(Long semesterId) {

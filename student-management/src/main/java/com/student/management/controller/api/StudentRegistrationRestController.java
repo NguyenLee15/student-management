@@ -31,7 +31,7 @@ public class StudentRegistrationRestController {
 
     @GetMapping("/available-classes")
     @Operation(summary = "Lấy danh sách các lớp học phần đang mở đăng ký")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<List<CreditClassResponseDto>>> getAvailableClasses(
             @RequestParam(required = false) Long semesterId) {
         String studentId = securityService.getCurrentStudentId();
@@ -41,7 +41,7 @@ public class StudentRegistrationRestController {
 
     @PostMapping("/cart-validate")
     @Operation(summary = "Kiểm tra toàn diện giỏ môn học (trả về toàn bộ danh sách vi phạm nếu có)")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<CartValidationResponseDto>> validateCart(
             @Valid @RequestBody CartValidationRequestDto requestDto) {
         String studentId = securityService.getCurrentStudentId();
@@ -51,7 +51,7 @@ public class StudentRegistrationRestController {
 
     @PostMapping("/register-batch")
     @Operation(summary = "Thực hiện đăng ký học phần theo lô nguyên tử (Atomic Batch Registration)")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<RegistrationBatchResponseDto>> registerBatch(
             @Valid @RequestBody RegistrationBatchRequestDto requestDto) {
         String studentId = securityService.getCurrentStudentId();
@@ -61,7 +61,7 @@ public class StudentRegistrationRestController {
 
     @PostMapping("/drop-class/{enrollmentId}")
     @Operation(summary = "Rút môn học đã đăng ký")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<Void>> dropCourse(@PathVariable Long enrollmentId) {
         String studentId = securityService.getCurrentStudentId();
         courseRegistrationService.dropCourse(studentId, enrollmentId);
@@ -70,7 +70,7 @@ public class StudentRegistrationRestController {
 
     @GetMapping("/my-enrollments")
     @Operation(summary = "Lấy danh sách các lớp học phần sinh viên đã đăng ký")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<List<EnrollmentResponseDto>>> getMyEnrollments(
             @RequestParam(required = false) Long semesterId) {
         String studentId = securityService.getCurrentStudentId();

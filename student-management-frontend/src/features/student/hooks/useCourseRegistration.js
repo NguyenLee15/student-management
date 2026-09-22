@@ -18,12 +18,13 @@ export function useCourseRegistration({ onNotify }) {
   const [errorMessage, setErrorMessage] = useState(null);
   const [withdrawTarget, setWithdrawTarget] = useState(null);
 
-  const loadRegistrationData = useCallback(async () => {
+  const loadRegistrationData = useCallback(async (activeGuard) => {
     setLoading(true);
     setErrorMessage(null);
     try {
       // 1. Load active registration period
       const periodRes = await registrationPeriodApi.getActive();
+      if (activeGuard && !activeGuard.active) return;
       const periods = periodRes.data || [];
       let currentSemesterId = null;
       if (periods.length > 0) {
@@ -33,22 +34,31 @@ export function useCourseRegistration({ onNotify }) {
 
       // 2. Load available classes
       const classesRes = await studentRegistrationApi.getAvailableClasses(currentSemesterId);
+      if (activeGuard && !activeGuard.active) return;
       setAvailableClasses(classesRes.data || []);
 
       // 3. Load my registered classes
       const enrollmentsRes = await studentRegistrationApi.getMyEnrollments(currentSemesterId);
+      if (activeGuard && !activeGuard.active) return;
       setMyEnrollments(enrollmentsRes.data || []);
     } catch (err) {
+      if (activeGuard && !activeGuard.active) return;
       console.error('Lỗi khi tải danh sách môn học đăng ký', err);
       const errMsg = err.response?.data?.message || err.message || 'Không thể tải dữ liệu đợt đăng ký tín chỉ.';
       setErrorMessage(errMsg);
     } finally {
-      setLoading(false);
+      if (!activeGuard || activeGuard.active) {
+        setLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
-    loadRegistrationData();
+    const guard = { active: true };
+    loadRegistrationData(guard);
+    return () => {
+      guard.active = false;
+    };
   }, [loadRegistrationData]);
 
   const validateCurrentCart = useCallback(async () => {

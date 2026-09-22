@@ -73,9 +73,26 @@ export default function MatrixTimetableView({ onNotify }) {
   };
 
   const getEntriesForCell = (day, slot) => {
+    const dayMap = {
+      'thứ 2': 2,
+      'thứ 3': 3,
+      'thứ 4': 4,
+      'thứ 5': 5,
+      'thứ 6': 6,
+      'thứ 7': 7,
+      'chủ nhật': 8,
+    };
+
     return timetable.filter((item) => {
-      const studyTime = (item.studyTime || '').toLowerCase();
       const dayNorm = day.toLowerCase();
+
+      // Priority 1: Structured fields from backend
+      if (item.dayOfWeek != null && item.slotKey != null) {
+        return item.dayOfWeek === dayMap[dayNorm] && item.slotKey === slot.key;
+      }
+
+      // Priority 2: Fallback text heuristic
+      const studyTime = (item.studyTime || '').toLowerCase();
       const dayMatches = studyTime.includes(dayNorm) || 
         (dayNorm === 'thứ 2' && (studyTime.includes('thứ hai') || studyTime.includes('t2') || studyTime.includes('monday'))) ||
         (dayNorm === 'thứ 3' && (studyTime.includes('thứ ba') || studyTime.includes('t3') || studyTime.includes('tuesday'))) ||

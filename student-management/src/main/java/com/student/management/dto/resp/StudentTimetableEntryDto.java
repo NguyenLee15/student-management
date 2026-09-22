@@ -23,6 +23,8 @@ public class StudentTimetableEntryDto {
     private String teacherName;
     private String roomName;
     private String studyTime;
+    private Integer dayOfWeek;
+    private String slotKey;
     private ClassShift classShift;
     private String shiftName;
     private LocalDate startDate;

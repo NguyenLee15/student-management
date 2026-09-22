@@ -28,7 +28,7 @@ public class StudentPortalRestController {
 
     @GetMapping("/overview")
     @Operation(summary = "Lấy thông tin tổng quan hồ sơ sinh viên, GPA, tiến độ học tập")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<StudentPortalOverviewDto>> getMyOverview() {
         String studentId = securityService.getCurrentStudentId();
         StudentPortalOverviewDto overview = studentPortalService.getMyOverview(studentId);
@@ -37,7 +37,7 @@ public class StudentPortalRestController {
 
     @GetMapping("/transcript")
     @Operation(summary = "Lấy bảng điểm học tập cá nhân của sinh viên")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<TranscriptResponseDto>> getMyTranscript() {
         String studentId = securityService.getCurrentStudentId();
         TranscriptResponseDto transcript = studentPortalService.getMyTranscript(studentId);
@@ -46,7 +46,7 @@ public class StudentPortalRestController {
 
     @GetMapping("/timetable")
     @Operation(summary = "Lấy thời khóa biểu học tập của sinh viên")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<List<StudentTimetableEntryDto>>> getMyTimetable(
             @RequestParam(required = false) Long semesterId) {
         String studentId = securityService.getCurrentStudentId();
@@ -56,7 +56,7 @@ public class StudentPortalRestController {
 
     @GetMapping("/tuition")
     @Operation(summary = "Lấy hóa đơn học phí và công nợ của sinh viên theo học kỳ")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<TuitionInvoiceResponseDto>> getMyTuition(
             @RequestParam(required = false) Long semesterId) {
         String studentId = securityService.getCurrentStudentId();
@@ -66,7 +66,7 @@ public class StudentPortalRestController {
 
     @GetMapping("/tuition/all")
     @Operation(summary = "Lấy toàn bộ lịch sử hóa đơn học phí của sinh viên")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<List<TuitionInvoiceResponseDto>>> getAllMyTuition() {
         String studentId = securityService.getCurrentStudentId();
         List<TuitionInvoiceResponseDto> invoices = tuitionService.getAllStudentInvoices(studentId);
@@ -75,7 +75,7 @@ public class StudentPortalRestController {
 
     @PostMapping("/tuition/pay")
     @Operation(summary = "Thanh toán học phí trực tuyến")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<ApiResponse<TuitionPaymentResponseDto>> payTuition(
             @Valid @RequestBody TuitionPaymentRequestDto requestDto) {
         String studentId = securityService.getCurrentStudentId();

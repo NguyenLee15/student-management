@@ -167,7 +167,8 @@ public class PayOSService {
      */
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> processWebhook(Map<String, Object> payload) {
-        log.info("🔔 PAYOS_WEBHOOK_RECEIVED payload={}", payload);
+        // H1: Mask sensitive webhook payload: log only presence and keys, not raw secret data
+        log.info("🔔 PAYOS_WEBHOOK_RECEIVED payload_keys={}", payload != null ? payload.keySet() : "null");
 
         try {
             String rawJson = objectMapper.writeValueAsString(payload);
@@ -197,6 +198,7 @@ public class PayOSService {
             int code = root.path("code").asInt(dataNode.path("code").asInt(0));
             String desc = root.path("desc").asText(dataNode.path("desc").asText(""));
             String reference = dataNode.path("reference").asText("");
+            log.info("🔔 PAYOS_WEBHOOK_PARSED orderCode={} code={}", orderCode, code);
 
             Optional<PaymentTransaction> optionalTxn = paymentTransactionRepository.findByOrderCodeForUpdate(orderCode);
             if (optionalTxn.isEmpty()) {
@@ -223,12 +225,7 @@ public class PayOSService {
                     return Map.of("error", 1, "message", "Số tiền không khớp");
                 }
 
-                // Thanh toán thành công
-                txn.setStatus(PaymentTransactionStatus.PAID);
-                txn.setPaidAt(LocalDateTime.now());
-                paymentTransactionRepository.save(txn);
-
-                // Cập nhật sổ cái học phí (Tuition Ledger)
+                // C1: Cập nhật sổ cái học phí (Tuition Ledger) TRƯỚC khi đánh dấu PAID
                 TuitionPaymentRequestDto paymentReq = TuitionPaymentRequestDto.builder()
                         .invoiceId(txn.getInvoice().getId())
                         .amount(txn.getAmount())
@@ -237,6 +234,11 @@ public class PayOSService {
                         .build();
 
                 tuitionService.recordPayment(txn.getStudent().getStudentId(), paymentReq);
+
+                // Cập nhật trạng thái giao dịch sau khi sổ nợ đã được ghi nhận thành công
+                txn.setStatus(PaymentTransactionStatus.PAID);
+                txn.setPaidAt(LocalDateTime.now());
+                paymentTransactionRepository.save(txn);
 
                 // Gửi email biên lai học phí bất đồng bộ
                 emailReceiptService.sendPaymentReceipt(txn.getStudent(), txn);
@@ -253,6 +255,8 @@ public class PayOSService {
         } catch (Exception e) {
             log.error("❌ PAYOS_WEBHOOK_PROCESSING_ERROR: {}", e.getMessage(), e);
             telegramAlertService.sendAlert("Lỗi xử lý Webhook PayOS", e.getMessage(), "ERROR");
+            // C1: Đảm bảo transaction được rollback nếu có lỗi trong quá trình cập nhật ledger
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Map.of("error", 1, "message", e.getMessage());
         }
     }
@@ -295,10 +299,7 @@ public class PayOSService {
                 log.info("🔍 PayOS Active Check orderCode={} status={}", orderCode, status);
 
                 if ("PAID".equalsIgnoreCase(status)) {
-                    txn.setStatus(PaymentTransactionStatus.PAID);
-                    txn.setPaidAt(LocalDateTime.now());
-                    paymentTransactionRepository.save(txn);
-
+                    // C1: Cập nhật sổ cái học phí TRƯỚC khi đánh dấu PAID
                     TuitionPaymentRequestDto paymentReq = TuitionPaymentRequestDto.builder()
                             .invoiceId(txn.getInvoice().getId())
                             .amount(txn.getAmount())
@@ -307,6 +308,10 @@ public class PayOSService {
                             .build();
 
                     tuitionService.recordPayment(txn.getStudent().getStudentId(), paymentReq);
+
+                    txn.setStatus(PaymentTransactionStatus.PAID);
+                    txn.setPaidAt(LocalDateTime.now());
+                    paymentTransactionRepository.save(txn);
                     emailReceiptService.sendPaymentReceipt(txn.getStudent(), txn);
                 } else if ("CANCELLED".equalsIgnoreCase(status)) {
                     txn.setStatus(PaymentTransactionStatus.CANCELLED);
@@ -317,6 +322,8 @@ public class PayOSService {
                 }
             } catch (Exception e) {
                 log.warn("⚠️ Failed to sync orderCode {} with PayOS API: {}", orderCode, e.getMessage());
+                org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "Lỗi đồng bộ giao dịch và sổ nợ học phí: " + e.getMessage());
             }
         }
 

@@ -233,35 +233,40 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
         log.info("REGISTRATION_BATCH_START studentId={} classIds={} key={}",
                 studentId, requestDto.getCreditClassIds(), requestDto.getIdempotencyKey());
 
+        String scopedKey = null;
         if (requestDto.getIdempotencyKey() != null && !requestDto.getIdempotencyKey().isBlank()) {
+            scopedKey = studentId + ":" + requestDto.getIdempotencyKey().trim();
             long nowTs = System.currentTimeMillis();
-            idempotencyCache.entrySet().removeIf(e -> nowTs - e.getValue() > 60000); // 1 min TTL
-            if (idempotencyCache.putIfAbsent(requestDto.getIdempotencyKey(), nowTs) != null) {
-                log.warn("IDEMPOTENCY_KEY_DUPLICATE key={}", requestDto.getIdempotencyKey());
+            if (idempotencyCache.size() > 10_000) {
+                idempotencyCache.entrySet().removeIf(e -> nowTs - e.getValue() > 60000); // 1 min TTL
+            }
+            if (idempotencyCache.putIfAbsent(scopedKey, nowTs) != null) {
+                log.warn("IDEMPOTENCY_KEY_DUPLICATE studentId={} key={}", studentId, requestDto.getIdempotencyKey());
                 return RegistrationBatchResponseDto.builder()
                         .success(false)
-                        .message("Yêu cầu đang được xử lý hoặc đã được xử lý (Duplicate Request).")
+                        .message("Yêu cầu đăng ký đang được xử lý hoặc đã được xử lý (Duplicate Request).")
                         .build();
             }
         }
 
-        // 1. KHÓA BẢN GHI SINH VIÊN (Chống race condition trần tín chỉ khi mở nhiều tab đồng thời)
-        Student student = studentRepository.findByIdForUpdate(studentId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND, "Không tìm thấy sinh viên: " + studentId));
+        try {
+            // 1. KHÓA BẢN GHI SINH VIÊN (Chống race condition trần tín chỉ khi mở nhiều tab đồng thời)
+            Student student = studentRepository.findByIdForUpdate(studentId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_NOT_FOUND, "Không tìm thấy sinh viên: " + studentId));
 
-        // 2. Validate giỏ môn học (Kiểm tra điều kiện toàn diện)
-        CartValidationRequestDto validateReq = CartValidationRequestDto.builder()
-                .creditClassIds(requestDto.getCreditClassIds())
-                .build();
-        CartValidationResponseDto validationResult = validateCart(studentId, validateReq);
+            // 2. Validate giỏ môn học (Kiểm tra điều kiện toàn diện)
+            CartValidationRequestDto validateReq = CartValidationRequestDto.builder()
+                    .creditClassIds(requestDto.getCreditClassIds())
+                    .build();
+            CartValidationResponseDto validationResult = validateCart(studentId, validateReq);
 
-        if (!validationResult.isValid()) {
-            ValidationViolationDto firstError = validationResult.getViolations().get(0);
-            throw new BusinessException(firstError.getErrorCode(), firstError.getMessage(), validationResult.getViolations());
-        }
+            if (!validationResult.isValid()) {
+                ValidationViolationDto firstError = validationResult.getViolations().get(0);
+                throw new BusinessException(firstError.getErrorCode(), firstError.getMessage(), validationResult.getViolations());
+            }
 
-        RegistrationPeriod activePeriod = registrationPeriodService.getActivePeriodForRegistration();
-        Semester semester = activePeriod.getSemester();
+            RegistrationPeriod activePeriod = registrationPeriodService.getActivePeriodForRegistration();
+            Semester semester = activePeriod.getSemester();
 
         // 3. SẮP XẾP ID TĂNG DẦN VÀ KHÓA TỪNG LỚP HỌC PHẦN (Pessimistic Lock - Chống Deadlock & Sĩ số)
         List<Long> sortedClassIds = requestDto.getCreditClassIds().stream().sorted().distinct().toList();
@@ -314,6 +319,12 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
                 .enrollments(enrollmentDtos)
                 .message("Đăng ký học phần thành công! Các môn học đã được cập nhật vào Thời khóa biểu và Hóa đơn học phí.")
                 .build();
+        } catch (BusinessException e) {
+            if (scopedKey != null) {
+                idempotencyCache.remove(scopedKey);
+            }
+            throw e;
+        }
     }
 
     @Override

@@ -23,8 +23,12 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     private static final int MAX_CACHE_SIZE = 10_000;
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
 
-    private Bucket createNewBucket(String ip, boolean isAuth) {
-        if (isAuth) {
+    private Bucket createNewBucket(String ip, String bucketType) {
+        if ("webhook".equals(bucketType)) {
+            // Webhook endpoints: 60 requests / 1 minute (prevents HMAC verification CPU exhaustion while ensuring delivery)
+            Bandwidth limit = Bandwidth.builder().capacity(60).refillIntervally(60, Duration.ofMinutes(1)).build();
+            return Bucket.builder().addLimit(limit).build();
+        } else if ("auth".equals(bucketType)) {
             // Auth endpoints: 10 requests / 1 minute
             Bandwidth limit = Bandwidth.builder().capacity(10).refillIntervally(10, Duration.ofMinutes(1)).build();
             return Bucket.builder().addLimit(limit).build();
@@ -35,13 +39,13 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         }
     }
 
-    private Bucket resolveBucket(String ip, boolean isAuth) {
-        String key = ip + (isAuth ? "_auth" : "_api");
+    private Bucket resolveBucket(String ip, String bucketType) {
+        String key = ip + "_" + bucketType;
         // Evict all entries when cache exceeds max size to prevent OOM
         if (cache.size() > MAX_CACHE_SIZE) {
             cache.clear();
         }
-        return cache.computeIfAbsent(key, k -> createNewBucket(ip, isAuth));
+        return cache.computeIfAbsent(key, k -> createNewBucket(ip, bucketType));
     }
 
     @Override
@@ -49,25 +53,24 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
             
         String path = request.getRequestURI();
-        
-        // Exclude PayOS Webhook from rate limiting to prevent dropping payment confirmations
-        if ("/api/v1/payments/payos-webhook".equals(path)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         if (path.startsWith("/api/")) {
             String ip = request.getRemoteAddr();
-            boolean isAuthOrPayment = path.startsWith("/api/v1/auth/") || path.contains("/payments/create-checkout");
+            String bucketType = "general";
+            if ("/api/v1/payments/payos-webhook".equals(path)) {
+                bucketType = "webhook";
+            } else if (path.startsWith("/api/v1/auth/") || path.contains("/payments/create-checkout")) {
+                bucketType = "auth";
+            }
             
-            Bucket bucket = resolveBucket(ip, isAuthOrPayment);
+            Bucket bucket = resolveBucket(ip, bucketType);
             
             if (bucket.tryConsume(1)) {
                 filterChain.doFilter(request, response);
             } else {
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write("{\"status\":429,\"message\":\"Quá nhiều yêu cầu (Rate limit exceeded). Vui lòng thử lại sau ít phút.\",\"data\":null}");
+                response.getWriter().write("{\"success\":false,\"status\":429,\"code\":\"RATE_LIMIT_EXCEEDED\",\"message\":\"Quá nhiều yêu cầu (Rate limit exceeded). Vui lòng thử lại sau ít phút.\",\"data\":null}");
             }
         } else {
             filterChain.doFilter(request, response);

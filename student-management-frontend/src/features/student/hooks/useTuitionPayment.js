@@ -17,21 +17,25 @@ export function useTuitionPayment({ onNotify }) {
   const [currentOrderCode, setCurrentOrderCode] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  const loadInvoice = useCallback(async () => {
+  const loadInvoice = useCallback(async (activeGuard) => {
     setLoading(true);
     setErrorMsg(null);
     try {
       const res = await studentPortalApi.getMyTuition(selectedSemester);
+      if (activeGuard && !activeGuard.active) return;
       const inv = res.data;
       setInvoice(inv);
       if (inv) {
         setPayAmount(inv.remainingAmount || 0);
       }
     } catch (err) {
+      if (activeGuard && !activeGuard.active) return;
       console.warn('Chưa phát sinh học phí học kỳ này:', err?.response?.data?.message || err.message);
       setInvoice(null);
     } finally {
-      setLoading(false);
+      if (!activeGuard || activeGuard.active) {
+        setLoading(false);
+      }
     }
   }, [selectedSemester]);
 
@@ -95,7 +99,8 @@ export function useTuitionPayment({ onNotify }) {
   }, []);
 
   useEffect(() => {
-    loadInvoice();
+    const guard = { active: true };
+    loadInvoice(guard);
 
     // Check if returning from PayOS checkout URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -112,6 +117,10 @@ export function useTuitionPayment({ onNotify }) {
       onNotify?.('warning', cancelMsg);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+
+    return () => {
+      guard.active = false;
+    };
   }, [selectedSemester, loadInvoice, handleSyncPayOSStatus, onNotify]);
 
   const handleProcessPayment = async (e) => {
