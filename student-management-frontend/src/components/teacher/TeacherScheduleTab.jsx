@@ -24,15 +24,15 @@ export default function TeacherScheduleTab({ schedules = [], classes = [], loadi
         </div>
 
         {/* Day Filter */}
-        <div role="tablist" aria-label="Bộ lọc ngày trong tuần" className="flex items-center gap-1.5 overflow-x-auto pb-2 sm:pb-0">
+        <div role="tablist" aria-label="Bộ lọc ngày trong tuần" className="flex items-center gap-1.5 overflow-x-auto pb-2 sm:pb-0 select-none">
           <button
             role="tab"
             aria-selected={selectedDay === 'ALL'}
             onClick={() => setSelectedDay('ALL')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
               selectedDay === 'ALL'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'bg-slate-800 text-slate-400 hover:text-white'
+                ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
+                : 'bg-slate-900 text-slate-400 hover:text-white border-slate-800 hover:border-slate-700'
             }`}
           >
             Cả tuần
@@ -43,10 +43,10 @@ export default function TeacherScheduleTab({ schedules = [], classes = [], loadi
               role="tab"
               aria-selected={selectedDay === d.key}
               onClick={() => setSelectedDay(d.key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
                 selectedDay === d.key
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
+                  : 'bg-slate-900 text-slate-400 hover:text-white border-slate-800 hover:border-slate-700'
               }`}
             >
               {d.label}
