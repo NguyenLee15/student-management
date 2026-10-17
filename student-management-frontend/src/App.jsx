@@ -1,5 +1,5 @@
 import { msg } from './lib/messages';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import Toast from './components/common/Toast';
 import LoginModal from './components/auth/LoginModal';
@@ -61,11 +61,16 @@ export default function App() {
 
   // Global Toast
   const [toast, setToast] = useState(null);
+  const toastTimeoutRef = useRef(null);
 
   const showToast = (type, message) => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
     setToast({ type, message });
-    setTimeout(() => {
+    toastTimeoutRef.current = setTimeout(() => {
       setToast(null);
+      toastTimeoutRef.current = null;
     }, 4000);
   };
 
@@ -96,6 +101,9 @@ export default function App() {
     window.addEventListener('auth:ratelimit', handleRateLimit);
 
     return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
       window.removeEventListener('auth:unauthorized', handleUnauthorized);
       window.removeEventListener('auth:forbidden', handleForbidden);
       window.removeEventListener('auth:ratelimit', handleRateLimit);

@@ -1,5 +1,6 @@
 // cSpell:disable
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 import Modal from '../../common/Modal';
 
 export default function RegistrationPeriodFormModal({
@@ -10,6 +11,7 @@ export default function RegistrationPeriodFormModal({
   setFormData,
   semesters = [],
   onSubmit,
+  isSubmitting = false,
 }) {
   return (
     <Modal
@@ -111,15 +113,24 @@ export default function RegistrationPeriodFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
+            disabled={isSubmitting}
+            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Hủy
           </button>
           <button
             type="submit"
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/20 transition active:scale-95"
+            disabled={isSubmitting}
+            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/20 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {isEdit ? "Cập Nhật" : "Tạo Đợt Đăng Ký"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Đang xử lý...</span>
+              </>
+            ) : (
+              isEdit ? "Cập Nhật" : "Tạo Đợt Đăng Ký"
+            )}
           </button>
         </div>
       </form>

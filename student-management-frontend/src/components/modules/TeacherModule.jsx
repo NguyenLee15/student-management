@@ -38,7 +38,42 @@ export default function TeacherModule({ onNotify, currentUser }) {
   }, []);
 
   useEffect(() => {
-    loadTeachers();
+    let isCancelled = false;
+    const fetchTeachers = async () => {
+      setLoading(true);
+      try {
+        const res = await teacherApi.getAll({
+          page,
+          size,
+          keyword: keyword || undefined,
+          facultyId: selectedFaculty || undefined,
+        });
+        if (isCancelled) return;
+        const pageData = res.data || res;
+        if (pageData && pageData.content) {
+          setTeachers(pageData.content);
+          setTotalPages(pageData.totalPages || 1);
+          setTotalElements(pageData.totalElements || pageData.content.length);
+        } else if (Array.isArray(pageData)) {
+          setTeachers(pageData);
+          setTotalPages(1);
+          setTotalElements(pageData.length);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          console.warn('Lỗi khi tải danh sách giảng viên', err);
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTeachers();
+    return () => {
+      isCancelled = true;
+    };
   }, [page, size, selectedFaculty]);
 
   const loadFaculties = async () => {

@@ -8,18 +8,23 @@ export function useStudentImport({ onNotify, onRefresh }) {
   const [importing, setImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(null);
   const pollRef = useRef(null);
+  const timeoutRef = useRef(null);
   const consecutiveErrorsRef = useRef(0);
 
-  const clearPolling = () => {
+  const clearTimers = () => {
     if (pollRef.current) {
       clearInterval(pollRef.current);
       pollRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
     consecutiveErrorsRef.current = 0;
   };
 
   useEffect(() => {
-    return () => clearPolling();
+    return () => clearTimers();
   }, []);
 
   const handleFileUpload = async (e) => {
@@ -28,7 +33,7 @@ export function useStudentImport({ onNotify, onRefresh }) {
 
     setImporting(true);
     setImportProgress({ status: 'UPLOADING', processedRows: 0, totalRows: 0, errorCount: 0 });
-    clearPolling();
+    clearTimers();
 
     try {
       const res = await studentApi.importExcel(file);
@@ -53,7 +58,7 @@ export function useStudentImport({ onNotify, onRefresh }) {
               taskData.status === 'COMPLETED_WITH_ERRORS' ||
               taskData.status === 'FAILED'
             ) {
-              clearPolling();
+              clearTimers();
               setImporting(false);
               if (taskData.status === 'FAILED') {
                 onNotify('error', `Nhập dữ liệu thất bại: ${msg.safeMessage(taskData.errorDetails, 'Lỗi không xác định')}`);
@@ -63,9 +68,10 @@ export function useStudentImport({ onNotify, onRefresh }) {
               } else {
                 onNotify('success', 'Nhập dữ liệu Excel thành công!');
                 if (onRefresh) onRefresh();
-                setTimeout(() => {
+                timeoutRef.current = setTimeout(() => {
                   setShowImportModal(false);
                   setImportProgress(null);
+                  timeoutRef.current = null;
                 }, 2000);
               }
             }
@@ -74,14 +80,14 @@ export function useStudentImport({ onNotify, onRefresh }) {
           consecutiveErrorsRef.current += 1;
           console.error('Lỗi kiểm tra tiến trình import:', pollErr);
           if (consecutiveErrorsRef.current >= 5) {
-            clearPolling();
+            clearTimers();
             setImporting(false);
             onNotify('error', 'Mất kết nối theo dõi tiến trình nhập file. Vui lòng tải lại trang để kiểm tra kết quả.');
           }
         }
       }, 2000);
     } catch (err) {
-      clearPolling();
+      clearTimers();
       setImporting(false);
       setImportProgress(null);
       onNotify('error', err?.response?.data?.message || err?.message || 'Lỗi khi bắt đầu nhập file');

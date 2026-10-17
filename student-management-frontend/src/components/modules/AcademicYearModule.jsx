@@ -15,6 +15,8 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const initialForm = { academicYearId: '', academicYearName: '' };
   const [formData, setFormData] = useState(initialForm);
@@ -50,6 +52,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       if (isEdit) {
         await academicYearApi.update(formData.academicYearId, formData);
@@ -62,17 +65,23 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
       loadYears();
     } catch (err) {
       onNotify('error', err?.message || 'Lỗi khi lưu niên khóa');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
       await academicYearApi.delete(deleteTarget.academicYearId);
       onNotify('success', msg.success.deleted('niên khóa', deleteTarget.academicYearId));
       loadYears();
     } catch (err) {
       onNotify('error', err?.message || 'Lỗi khi xóa niên khóa');
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
     }
   };
 
@@ -121,6 +130,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
         formData={formData}
         setFormData={setFormData}
         onSubmit={handleSave}
+        isSubmitting={isSubmitting}
       />
 
       <ConfirmDialog
@@ -132,6 +142,7 @@ export default function AcademicYearModule({ onNotify, currentUser }) {
         onConfirm={handleConfirmDelete}
         onClose={() => setDeleteTarget(null)}
         isDanger={true}
+        loading={isDeleting}
       />
     </div>
   );

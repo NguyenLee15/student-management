@@ -47,7 +47,42 @@ export default function GradeModule({ onNotify, currentUser }) {
   }, []);
 
   useEffect(() => {
-    loadGrades();
+    let isCancelled = false;
+    const fetchGrades = async () => {
+      setLoading(true);
+      try {
+        const res = await gradeApi.getAll({
+          page,
+          size,
+          studentId: studentSearch || undefined,
+          semester: selectedSemester || undefined,
+        });
+        if (isCancelled) return;
+        const d = res.data || res;
+        if (d && d.content) {
+          setGrades(d.content);
+          setTotalPages(d.totalPages || 1);
+          setTotalElements(d.totalElements || d.content.length);
+        } else if (Array.isArray(d)) {
+          setGrades(d);
+          setTotalPages(1);
+          setTotalElements(d.length);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          console.warn('Lỗi khi tải bảng điểm', err);
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchGrades();
+    return () => {
+      isCancelled = true;
+    };
   }, [page, size, selectedSemester]);
 
   const loadDependencies = async () => {

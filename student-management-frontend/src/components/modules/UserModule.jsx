@@ -20,6 +20,8 @@ export default function UserModule({ onNotify }) {
 
   const [showModal, setShowModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const initialForm = { userName: '', password: '', role: 'ROLE_TEACHER', studentId: '' };
   const [formData, setFormData] = useState(initialForm);
@@ -78,6 +80,7 @@ export default function UserModule({ onNotify }) {
       role: formData.role.replace('ROLE_', ''),
       studentId: formData.role.includes('STUDENT') ? (formData.studentId?.trim() || null) : null,
     };
+    setIsSubmitting(true);
     try {
       await userApi.create(payload);
       onNotify('success', msg.success.created('tài khoản', payload.userName));
@@ -85,17 +88,23 @@ export default function UserModule({ onNotify }) {
       loadUsers();
     } catch (err) {
       onNotify('error', err?.response?.data?.message || err?.message || 'Lỗi khi tạo tài khoản');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
       await userApi.delete(deleteTarget.userName);
       onNotify('success', msg.success.deleted('tài khoản', deleteTarget.userName));
       loadUsers();
     } catch (err) {
       onNotify('error', err?.message || 'Lỗi khi xóa tài khoản');
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
     }
   };
 
@@ -170,6 +179,7 @@ export default function UserModule({ onNotify }) {
         formData={formData}
         setFormData={setFormData}
         onSubmit={handleSave}
+        isSubmitting={isSubmitting}
       />
 
       <ConfirmDialog
@@ -178,6 +188,7 @@ export default function UserModule({ onNotify }) {
         onConfirm={handleConfirmDelete}
         title="Xóa Tài Khoản Người Dùng"
         message={`Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản "${deleteTarget?.userName}"?`}
+        loading={isDeleting}
       />
     </div>
   );
