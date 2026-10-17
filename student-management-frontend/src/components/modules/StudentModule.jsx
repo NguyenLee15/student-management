@@ -1,6 +1,6 @@
 // cSpell:disable
 import React from 'react';
-import { Plus, Upload, Download } from 'lucide-react';
+import { Plus, Upload, Download, AlertCircle, RefreshCw } from 'lucide-react';
 import ConfirmDialog from '../common/ConfirmDialog';
 import TranscriptModal from './TranscriptModal';
 import StudentFilterBar from './student/StudentFilterBar';
@@ -18,6 +18,8 @@ export default function StudentModule({ onNotify, currentUser }) {
   const {
     sortedStudents,
     loading,
+    fetchError,
+    saving,
     page,
     setPage,
     size,
@@ -140,6 +142,23 @@ export default function StudentModule({ onNotify, currentUser }) {
         loading={loading}
       />
 
+      {/* Error Alert Banner */}
+      {fetchError && (
+        <div className="flex items-center justify-between p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{fetchError}</span>
+          </div>
+          <button
+            onClick={loadStudents}
+            className="flex items-center gap-1.5 px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-semibold rounded-lg transition"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Thử lại</span>
+          </button>
+        </div>
+      )}
+
       {/* Main Student Data Table */}
       <StudentTable
         students={sortedStudents}
@@ -174,6 +193,7 @@ export default function StudentModule({ onNotify, currentUser }) {
         classes={classes}
         academicYears={academicYears}
         onSubmit={handleSaveStudent}
+        saving={saving}
       />
 
       {/* Excel Import Modal */}

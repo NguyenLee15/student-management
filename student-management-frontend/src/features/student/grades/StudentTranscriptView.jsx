@@ -97,15 +97,15 @@ export default function StudentTranscriptView({ currentUser, onNotify }) {
 
       return [
         idx + 1,
-        `"${g.subjectId || ''}"`,
+        `"${(g.subjectId || '').replace(/"/g, '""')}"`,
         `"${(g.subjectName || '').replace(/"/g, '""')}"`,
-        g.credits || 3,
+        g.credits ?? 0,
         score10,
         score4,
-        letter,
-        result,
-        `"${sem}"`,
-        `"${year}"`
+        `"${letter.replace(/"/g, '""')}"`,
+        `"${result.replace(/"/g, '""')}"`,
+        `"${sem.replace(/"/g, '""')}"`,
+        `"${year.replace(/"/g, '""')}"`
       ].join(',');
     });
 

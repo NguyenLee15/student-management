@@ -44,7 +44,7 @@ export default function StudentTranscriptTable({ grades = [], loading = false })
                   {g.subjectName || g.subject?.subjectName || 'Học phần'}
                 </td>
                 <td className="p-2 border-r border-slate-300 text-center font-semibold">
-                  {g.credits || 3}
+                  {g.credits ?? 0}
                 </td>
                 <td className="p-2 border-r border-slate-300 text-center font-mono font-bold text-slate-800">
                   {g.scoreScale10 != null ? Number(g.scoreScale10).toFixed(1) : '--'}

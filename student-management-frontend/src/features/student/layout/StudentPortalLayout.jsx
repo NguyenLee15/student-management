@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   LayoutDashboard, BookOpen, Calendar, Award, 
-  CreditCard, LogOut, User, Bell, GraduationCap, 
-  ChevronRight, Menu, X, Shield 
+  CreditCard, LogOut, User, GraduationCap, 
+  Menu, X, Shield 
 } from 'lucide-react';
 import StudentDashboardView from '../dashboard/StudentDashboardView';
 import CourseRegistrationView from '../registration/CourseRegistrationView';
@@ -64,8 +64,13 @@ export default function StudentPortalLayout({ user, onLogout, onNotify, onSwitch
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Switch to Admin if user has Admin role */}
-            {(user?.role === 'ROLE_ADMIN' || user?.roles?.includes('ROLE_ADMIN') || user?.roles?.includes('ADMIN') || onSwitchToAdmin) && (
+            {/* Switch to Admin ONLY if user has Admin role and callback exists */}
+            {Boolean(
+              user?.role === 'ROLE_ADMIN' ||
+              user?.role === 'ADMIN' ||
+              user?.roles?.includes('ROLE_ADMIN') ||
+              user?.roles?.includes('ADMIN')
+            ) && onSwitchToAdmin && (
               <button
                 onClick={onSwitchToAdmin}
                 className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold rounded-lg border border-slate-700 transition-colors"

@@ -9,6 +9,7 @@ export function useStudentImport({ onNotify, onRefresh }) {
   const [importProgress, setImportProgress] = useState(null);
   const pollRef = useRef(null);
   const timeoutRef = useRef(null);
+  const isPollingRef = useRef(false);
   const consecutiveErrorsRef = useRef(0);
 
   const clearTimers = () => {
@@ -21,6 +22,7 @@ export function useStudentImport({ onNotify, onRefresh }) {
       timeoutRef.current = null;
     }
     consecutiveErrorsRef.current = 0;
+    isPollingRef.current = false;
   };
 
   useEffect(() => {
@@ -30,6 +32,24 @@ export function useStudentImport({ onNotify, onRefresh }) {
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validate file extension
+    const validExtensions = ['.xlsx', '.xls'];
+    const fileName = file.name.toLowerCase();
+    const isValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+    if (!isValidExtension) {
+      if (onNotify) onNotify('error', 'Chỉ hỗ trợ file Excel có định dạng .xlsx hoặc .xls!');
+      e.target.value = '';
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const MAX_SIZE_BYTES = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE_BYTES) {
+      if (onNotify) onNotify('error', 'Dung lượng file vượt quá giới hạn cho phép (tối đa 10MB)!');
+      e.target.value = '';
+      return;
+    }
 
     setImporting(true);
     setImportProgress({ status: 'UPLOADING', processedRows: 0, totalRows: 0, errorCount: 0 });
@@ -41,6 +61,8 @@ export function useStudentImport({ onNotify, onRefresh }) {
       if (!taskId) throw new Error('Không nhận được mã tác vụ (taskId) từ máy chủ');
 
       pollRef.current = setInterval(async () => {
+        if (isPollingRef.current) return;
+        isPollingRef.current = true;
         try {
           const taskRes = await studentApi.getImportTask(taskId);
           consecutiveErrorsRef.current = 0;
@@ -84,6 +106,8 @@ export function useStudentImport({ onNotify, onRefresh }) {
             setImporting(false);
             onNotify('error', 'Mất kết nối theo dõi tiến trình nhập file. Vui lòng tải lại trang để kiểm tra kết quả.');
           }
+        } finally {
+          isPollingRef.current = false;
         }
       }, 2000);
     } catch (err) {

@@ -6,6 +6,8 @@ import { msg } from '../../../lib/messages';
 export function useStudentModule({ onNotify }) {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -83,6 +85,7 @@ export function useStudentModule({ onNotify }) {
 
   const loadStudents = async () => {
     setLoading(true);
+    setFetchError(null);
     try {
       const res = await studentApi.getAll({
         page,
@@ -105,6 +108,7 @@ export function useStudentModule({ onNotify }) {
       }
     } catch (err) {
       console.warn('Lỗi khi tải danh sách sinh viên', err);
+      setFetchError(err?.message || 'Không thể tải danh sách sinh viên. Vui lòng kiểm tra kết nối mạng.');
     } finally {
       setLoading(false);
     }
@@ -195,6 +199,7 @@ export function useStudentModule({ onNotify }) {
       onNotify('error', 'Số điện thoại phải từ 9 đến 11 chữ số.');
       return;
     }
+    setSaving(true);
     try {
       if (isEdit) {
         await studentApi.update(formData.studentId, formData);
@@ -207,6 +212,8 @@ export function useStudentModule({ onNotify }) {
       loadStudents();
     } catch (err) {
       onNotify('error', err?.message || msg.error.save('sinh viên'));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -222,9 +229,10 @@ export function useStudentModule({ onNotify }) {
   };
 
   const handleExportExcel = async () => {
+    let url = null;
     try {
       const response = await studentApi.exportExcel();
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `DanhSachSinhVien_${new Date().toISOString().slice(0, 10)}.xlsx`);
@@ -234,6 +242,10 @@ export function useStudentModule({ onNotify }) {
       onNotify('success', 'Xuất báo cáo Excel thành công!');
     } catch {
       onNotify('error', 'Xuất file Excel thất bại.');
+    } finally {
+      if (url) {
+        window.URL.revokeObjectURL(url);
+      }
     }
   };
 
@@ -294,6 +306,8 @@ export function useStudentModule({ onNotify }) {
     students,
     sortedStudents,
     loading,
+    fetchError,
+    saving,
     page,
     setPage,
     size,
