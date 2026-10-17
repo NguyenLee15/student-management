@@ -16,11 +16,14 @@ export default function StudentFilterBar({
   faculties = [],
   classes = [],
   academicYears = [],
+  currentUser,
   onSearchSubmit,
   onClearFilters,
   onReload,
   loading = false,
 }) {
+  const isFacultyScoped = Boolean(currentUser?.facultyId);
+
   return (
     <div className="panel-card p-4 space-y-3">
       <div className="flex flex-col lg:flex-row items-center gap-3">
@@ -40,15 +43,28 @@ export default function StudentFilterBar({
           <select
             value={selectedFaculty}
             aria-label="Lọc theo khoa viện"
+            disabled={isFacultyScoped}
             onChange={(e) => setSelectedFaculty(e.target.value)}
-            className="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 transition"
+            className={`bg-slate-950 border text-xs rounded-xl px-3 py-2 focus:outline-none transition ${
+              isFacultyScoped 
+                ? 'border-amber-500/40 text-amber-300 cursor-not-allowed opacity-90' 
+                : 'border-slate-800 text-slate-300 focus:border-indigo-500'
+            }`}
           >
-            <option value="">Tất cả Khoa</option>
-            {faculties.map((f) => (
-              <option key={f.facultyId} value={f.facultyId}>
-                {f.facultyName || f.facultyId}
+            {isFacultyScoped ? (
+              <option value={currentUser.facultyId}>
+                🏢 Khoa {currentUser.facultyId} (Cố định theo quyền)
               </option>
-            ))}
+            ) : (
+              <>
+                <option value="">Tất cả Khoa</option>
+                {faculties.map((f) => (
+                  <option key={f.facultyId} value={f.facultyId}>
+                    {f.facultyName || f.facultyId}
+                  </option>
+                ))}
+              </>
+            )}
           </select>
 
           <select

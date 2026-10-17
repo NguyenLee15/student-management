@@ -49,8 +49,9 @@ public class AuthRestController {
         );
 
         UserResponseDto user = userService.getByUserName(auth.getName());
+        String facultyId = user.getFacultyId();
 
-        String token = jwtTokenProvider.generateToken(user.getUserName(), user.getRole().name(), user.getStudentId());
+        String token = jwtTokenProvider.generateToken(user.getUserName(), user.getRole().name(), user.getStudentId(), facultyId);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getUserName());
 
         // Set Secure HttpOnly Cookie for Refresh Token
@@ -71,6 +72,7 @@ public class AuthRestController {
         responseData.put("role", user.getRole());
         responseData.put("studentId", user.getStudentId());
         responseData.put("teacherId", user.getTeacherId());
+        responseData.put("facultyId", facultyId);
         responseData.put("expiresInMs", 900000); // 15 mins
 
         return ResponseEntity.ok(ApiResponse.success("Đăng nhập thành công", responseData));
@@ -103,10 +105,11 @@ public class AuthRestController {
                 .orElseThrow(() -> new IllegalArgumentException("Refresh token không hợp lệ hoặc đã hết hạn!"));
 
         UserResponseDto user = userService.getByUserName(oldToken.getUserName());
+        String facultyId = user.getFacultyId();
         
         // Refresh token rotation: Revoke old token and create new one
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getUserName());
-        String newAccessToken = jwtTokenProvider.generateToken(user.getUserName(), user.getRole().name(), user.getStudentId());
+        String newAccessToken = jwtTokenProvider.generateToken(user.getUserName(), user.getRole().name(), user.getStudentId(), facultyId);
 
         // Update Cookie
         ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefreshToken.getToken())
@@ -126,6 +129,7 @@ public class AuthRestController {
         responseData.put("role", user.getRole());
         responseData.put("studentId", user.getStudentId());
         responseData.put("teacherId", user.getTeacherId());
+        responseData.put("facultyId", facultyId);
         responseData.put("expiresInMs", 900000);
 
         return ResponseEntity.ok(ApiResponse.success("Làm mới token thành công", responseData));

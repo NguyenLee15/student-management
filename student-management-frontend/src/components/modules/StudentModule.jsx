@@ -40,6 +40,7 @@ export default function StudentModule({ onNotify, currentUser }) {
     sortOrder,
     faculties,
     classes,
+    filteredClasses,
     academicYears,
     showModal,
     setShowModal,
@@ -67,7 +68,7 @@ export default function StudentModule({ onNotify, currentUser }) {
     handleExportExcel,
     handleBatchClassSubmit,
     handleBatchDelete,
-  } = useStudentModule({ onNotify });
+  } = useStudentModule({ onNotify, currentUser });
 
   const {
     showImportModal,
@@ -134,8 +135,9 @@ export default function StudentModule({ onNotify, currentUser }) {
         selectedStatus={selectedStatus}
         setSelectedStatus={setSelectedStatus}
         faculties={faculties}
-        classes={classes}
+        classes={filteredClasses}
         academicYears={academicYears}
+        currentUser={currentUser}
         onSearchSubmit={handleSearchSubmit}
         onClearFilters={handleClearFilters}
         onReload={loadStudents}
@@ -192,6 +194,7 @@ export default function StudentModule({ onNotify, currentUser }) {
         faculties={faculties}
         classes={classes}
         academicYears={academicYears}
+        currentUser={currentUser}
         onSubmit={handleSaveStudent}
         saving={saving}
       />

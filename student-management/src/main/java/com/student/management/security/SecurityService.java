@@ -105,7 +105,41 @@ public class SecurityService {
     public boolean isAdminRole() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_FACULTY_ADMIN"));
+    }
+
+    public boolean isFacultyAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) return false;
+        boolean hasFacultyRole = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_FACULTY_ADMIN"));
+        return hasFacultyRole || (isAdminRole() && getCurrentFacultyId() != null);
+    }
+
+    public boolean isSuperAdmin() {
+        return isAdminRole() && getCurrentFacultyId() == null;
+    }
+
+    public String getCurrentFacultyId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return null;
+        }
+        String username = authentication.getName();
+        return userRepository.findByUserName(username)
+                .map(User::getFacultyId)
+                .filter(f -> f != null && !f.trim().isEmpty())
+                .orElse(null);
+    }
+
+    public boolean canAccessFaculty(String facultyId) {
+        if (facultyId == null || facultyId.isBlank()) return true;
+        String userFacultyId = getCurrentFacultyId();
+        if (userFacultyId == null) {
+            // Super Admin has access to all faculties
+            return true;
+        }
+        return userFacultyId.trim().equalsIgnoreCase(facultyId.trim());
     }
 
     @org.springframework.transaction.annotation.Transactional

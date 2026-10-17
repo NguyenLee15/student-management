@@ -3,7 +3,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { studentApi, facultyApi, studentClassApi, academicYearApi } from '../../../api';
 import { msg } from '../../../lib/messages';
 
-export function useStudentModule({ onNotify }) {
+export function useStudentModule({ onNotify, currentUser }) {
+  const defaultFaculty = currentUser?.facultyId || '';
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
@@ -15,7 +16,7 @@ export function useStudentModule({ onNotify }) {
 
   // Filters & Sorting
   const [keyword, setKeyword] = useState('');
-  const [selectedFaculty, setSelectedFaculty] = useState('');
+  const [selectedFaculty, setSelectedFaculty] = useState(defaultFaculty);
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
@@ -138,9 +139,14 @@ export function useStudentModule({ onNotify }) {
     setSelectedIds(next);
   };
 
+  const filteredClasses = useMemo(() => {
+    if (!selectedFaculty) return classes;
+    return classes.filter((c) => c.facultyId === selectedFaculty);
+  }, [classes, selectedFaculty]);
+
   const handleClearFilters = () => {
     setKeyword('');
-    setSelectedFaculty('');
+    setSelectedFaculty(defaultFaculty);
     setSelectedClass('');
     setSelectedYear('');
     setSelectedStatus('');
@@ -155,10 +161,12 @@ export function useStudentModule({ onNotify }) {
 
   const handleOpenCreate = () => {
     setIsEdit(false);
+    const initialFacId = defaultFaculty || faculties[0]?.facultyId || '';
+    const matchingClasses = classes.filter((c) => !initialFacId || c.facultyId === initialFacId);
     setFormData({
       ...initialForm,
-      facultyId: faculties[0]?.facultyId || '',
-      classId: classes[0]?.classId || '',
+      facultyId: initialFacId,
+      classId: matchingClasses[0]?.classId || '',
       academicYearId: academicYears[0]?.academicYearId || '',
     });
     setShowModal(true);
@@ -330,6 +338,7 @@ export function useStudentModule({ onNotify }) {
     sortOrder,
     faculties,
     classes,
+    filteredClasses,
     academicYears,
     showModal,
     setShowModal,

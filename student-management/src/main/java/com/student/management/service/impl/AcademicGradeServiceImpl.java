@@ -10,13 +10,11 @@ import com.student.management.entity.Student;
 import com.student.management.entity.Subject;
 import com.student.management.enums.Semester;
 import com.student.management.enums.StudyPhase;
-import com.student.management.entity.CreditClass;
 import com.student.management.exception.BusinessException;
 import com.student.management.exception.ErrorCode;
 import com.student.management.exception.NotFoundException;
 import com.student.management.mapping.AcademicGradeMapper;
 import com.student.management.repository.AcademicGradeRepository;
-import com.student.management.repository.CreditClassStudentRepository;
 import com.student.management.repository.StudentRepository;
 import com.student.management.repository.SubjectRepository;
 import com.student.management.service.AcademicGradeService;
@@ -51,7 +49,6 @@ public class AcademicGradeServiceImpl implements AcademicGradeService {
     private final AcademicGradeRepository academicGradeRepository;
     private final StudentRepository studentRepository;
     private final SubjectRepository subjectRepository;
-    private final CreditClassStudentRepository creditClassStudentRepository;
 
     @Override
     @Transactional(readOnly = true)

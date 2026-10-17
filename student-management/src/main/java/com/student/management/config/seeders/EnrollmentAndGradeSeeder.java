@@ -139,7 +139,7 @@ public class EnrollmentAndGradeSeeder {
         Student student = studentRepository.findById(studentId).orElse(null);
         if (student == null) return;
 
-        Enrollment enrollment = enrollmentRepository.save(Enrollment.builder()
+        enrollmentRepository.save(Enrollment.builder()
                 .student(student)
                 .creditClass(cc)
                 .semester(sem)

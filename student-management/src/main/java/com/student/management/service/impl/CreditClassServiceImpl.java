@@ -37,7 +37,6 @@ public class CreditClassServiceImpl implements CreditClassService {
     private final CreditClassStudentRepository creditClassStudentRepository;
     private final AcademicGradeRepository academicGradeRepository;
     private final SemesterRepository semesterRepository;
-    private final SemesterScheduleRepository semesterScheduleRepository;
 
     @Override
     @Transactional(readOnly = true)

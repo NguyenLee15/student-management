@@ -40,8 +40,6 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     private final RegistrationPeriodService registrationPeriodService;
     private final TuitionPolicyService tuitionPolicyService;
     private final TuitionService tuitionService;
-    private final CreditClassStudentRepository creditClassStudentRepository;
-    private final SemesterRepository semesterRepository;
 
     @Override
     @Transactional(readOnly = true)

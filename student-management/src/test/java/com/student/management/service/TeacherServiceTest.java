@@ -8,6 +8,7 @@ import com.student.management.entity.Teacher;
 import com.student.management.exception.NotFoundException;
 import com.student.management.repository.FacultyRepository;
 import com.student.management.repository.TeacherRepository;
+import com.student.management.security.SecurityService;
 import com.student.management.service.impl.TeacherServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +32,9 @@ public class TeacherServiceTest {
 
     @Mock
     private FacultyRepository facultyRepository;
+
+    @Mock
+    private SecurityService securityService;
 
     @InjectMocks
     private TeacherServiceImpl teacherService;
@@ -84,6 +88,7 @@ public class TeacherServiceTest {
     @Test
     @DisplayName("Create Teacher - Success")
     void testCreateTeacherSuccess() {
+        when(securityService.canAccessFaculty(any())).thenReturn(true);
         when(facultyRepository.findById("CNTT")).thenReturn(Optional.of(faculty));
         when(teacherRepository.save(any(Teacher.class))).thenReturn(teacher);
 
@@ -94,5 +99,3 @@ public class TeacherServiceTest {
         verify(teacherRepository, times(1)).save(any(Teacher.class));
     }
 }
-
-

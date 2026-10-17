@@ -40,15 +40,20 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(String username, String role, String studentId) {
+        return generateToken(username, role, studentId, null);
+    }
+
+    public String generateToken(String username, String role, String studentId, String facultyId) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
-        logger.debug("Generating JWT for username: {}, role: {}", username, role);
+        logger.debug("Generating JWT for username: {}, role: {}, facultyId: {}", username, role, facultyId);
 
         return Jwts.builder()
             .setSubject(username)
             .claim("role", role)
             .claim("studentId", studentId)
+            .claim("facultyId", facultyId)
             .setIssuedAt(now)
             .setExpiration(validity)
             .signWith(secretKey, io.jsonwebtoken.SignatureAlgorithm.HS512)

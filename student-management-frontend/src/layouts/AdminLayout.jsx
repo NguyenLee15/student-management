@@ -122,19 +122,34 @@ export default function AdminLayout({
 
         {/* 📊 WORKSPACE ROUTER */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6">
-          {/* Breadcrumbs Navigation */}
-          <div className="flex items-center gap-2 text-xs text-slate-400 pb-1">
-            <button 
-              onClick={() => handleTabChange('overview')}
-              className="flex items-center gap-1 hover:text-indigo-400 transition"
-            >
-              <Home className="w-3.5 h-3.5" />
-              <span>Quản trị</span>
-            </button>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-            <span className="text-slate-500">{currentTabInfo.group}</span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-            <span className="font-semibold text-slate-200">{currentTabInfo.title}</span>
+          {/* Breadcrumbs Navigation & Faculty Scope Badge */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <button 
+                onClick={() => handleTabChange('overview')}
+                className="flex items-center gap-1 hover:text-indigo-400 transition"
+              >
+                <Home className="w-3.5 h-3.5" />
+                <span>Quản trị</span>
+              </button>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+              <span className="text-slate-500">{currentTabInfo.group}</span>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+              <span className="font-semibold text-slate-200">{currentTabInfo.title}</span>
+            </div>
+
+            {/* Scope Badge */}
+            {currentUser?.facultyId ? (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-medium">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                <span>Phạm vi quản trị: <strong>Khoa {currentUser.facultyId}</strong></span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-medium">
+                <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
+                <span>Phạm vi quản trị: <strong>Toàn trường (Super Admin)</strong></span>
+              </div>
+            )}
           </div>
 
           {activeTab === 'overview' && (

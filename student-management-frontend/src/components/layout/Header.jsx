@@ -122,7 +122,9 @@ export default function Header({
               </div>
               <div className="text-left hidden md:block">
                 <div className="text-xs font-semibold text-white leading-tight">{currentUser.username}</div>
-                <div className="text-[10px] text-emerald-400 font-mono">Quản trị viên</div>
+                <div className="text-[10px] text-emerald-400 font-mono">
+                  {currentUser.facultyId ? `Giáo vụ Khoa (${currentUser.facultyId})` : 'Quản trị viên'}
+                </div>
               </div>
               <Settings className="h-3.5 w-3.5 text-slate-400 hover:text-white transition" />
             </button>

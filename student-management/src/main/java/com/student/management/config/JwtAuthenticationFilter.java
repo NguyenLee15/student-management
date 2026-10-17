@@ -17,7 +17,10 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import org.springframework.security.core.GrantedAuthority;
 
 @Component
 @lombok.RequiredArgsConstructor
@@ -58,9 +61,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     } else {
                         logger.info("Validated JWT token for username: {}, role: {}", username, role);
     
-                        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.toUpperCase());
+                        List<GrantedAuthority> authorities = new ArrayList<>();
+                        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
+                        if ("FACULTY_ADMIN".equalsIgnoreCase(role)) {
+                            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                        }
                         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            username, null, Collections.singletonList(authority));
+                            username, null, authorities);
                         auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         
                         SecurityContextHolder.getContext().setAuthentication(auth);

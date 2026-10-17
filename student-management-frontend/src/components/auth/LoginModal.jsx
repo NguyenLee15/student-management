@@ -57,6 +57,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
           username: payload.userName || loginUser.trim(),
           role: payload.role,
           studentId: payload.studentId,
+          facultyId: payload.facultyId,
         };
         if (rememberMe) {
           localStorage.setItem('user_info', JSON.stringify(userInfo));

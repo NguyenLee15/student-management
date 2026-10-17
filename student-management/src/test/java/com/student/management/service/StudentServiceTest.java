@@ -39,6 +39,9 @@ public class StudentServiceTest {
     @Mock
     private AcademicYearRepository academicYearRepository;
 
+    @Mock
+    private com.student.management.security.SecurityService securityService;
+
     @InjectMocks
     private StudentServiceImpl studentService;
 
@@ -105,6 +108,7 @@ public class StudentServiceTest {
     @Test
     @DisplayName("Test create student success")
     void testCreateStudentSuccess() {
+        when(securityService.canAccessFaculty(any())).thenReturn(true);
         when(studentClassRepository.findById("CNTT1-K65")).thenReturn(Optional.of(studentClass));
         when(academicYearRepository.findById("K65")).thenReturn(Optional.of(academicYear));
         when(studentRepository.save(any(Student.class))).thenReturn(student);

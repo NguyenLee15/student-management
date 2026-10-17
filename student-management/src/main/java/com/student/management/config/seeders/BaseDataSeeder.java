@@ -40,22 +40,24 @@ public class BaseDataSeeder {
     }
 
     private void seedUsers() {
-        createOrUpdateUser("admin", "admin123", Role.ADMIN, null, null);
-        createOrUpdateUser("teacher", "teacher123", Role.TEACHER, "GV001", null);
-        createOrUpdateUser("teacher2", "teacher123", Role.TEACHER, "GV002", null);
-        createOrUpdateUser("teacher3", "teacher123", Role.TEACHER, "GV003", null);
-        createOrUpdateUser("teacher4", "teacher123", Role.TEACHER, "GV004", null);
-        createOrUpdateUser("student", "student123", Role.STUDENT, null, "SV001");
-        createOrUpdateUser("student2", "student123", Role.STUDENT, null, "SV002");
-        createOrUpdateUser("student3", "student123", Role.STUDENT, null, "SV003");
-        createOrUpdateUser("student4", "student123", Role.STUDENT, null, "SV004");
-        createOrUpdateUser("student5", "student123", Role.STUDENT, null, "SV005");
-        createOrUpdateUser("student6", "student123", Role.STUDENT, null, "SV006");
-        createOrUpdateUser("student7", "student123", Role.STUDENT, null, "SV007");
-        createOrUpdateUser("student8", "student123", Role.STUDENT, null, "SV008");
+        createOrUpdateUser("admin", "admin123", Role.ADMIN, null, null, null);
+        createOrUpdateUser("admin_cntt", "admin123", Role.FACULTY_ADMIN, null, null, "CNTT");
+        createOrUpdateUser("admin_qtkd", "admin123", Role.FACULTY_ADMIN, null, null, "QTKD");
+        createOrUpdateUser("teacher", "teacher123", Role.TEACHER, "GV001", null, null);
+        createOrUpdateUser("teacher2", "teacher123", Role.TEACHER, "GV002", null, null);
+        createOrUpdateUser("teacher3", "teacher123", Role.TEACHER, "GV003", null, null);
+        createOrUpdateUser("teacher4", "teacher123", Role.TEACHER, "GV004", null, null);
+        createOrUpdateUser("student", "student123", Role.STUDENT, null, "SV001", null);
+        createOrUpdateUser("student2", "student123", Role.STUDENT, null, "SV002", null);
+        createOrUpdateUser("student3", "student123", Role.STUDENT, null, "SV003", null);
+        createOrUpdateUser("student4", "student123", Role.STUDENT, null, "SV004", null);
+        createOrUpdateUser("student5", "student123", Role.STUDENT, null, "SV005", null);
+        createOrUpdateUser("student6", "student123", Role.STUDENT, null, "SV006", null);
+        createOrUpdateUser("student7", "student123", Role.STUDENT, null, "SV007", null);
+        createOrUpdateUser("student8", "student123", Role.STUDENT, null, "SV008", null);
     }
 
-    private void createOrUpdateUser(String username, String rawPassword, Role role, String teacherId, String studentId) {
+    private void createOrUpdateUser(String username, String rawPassword, Role role, String teacherId, String studentId, String facultyId) {
         userRepository.findByUserName(username).ifPresentOrElse(
                 user -> {
                     boolean modified = false;
@@ -71,9 +73,13 @@ public class BaseDataSeeder {
                         user.setStudentId(studentId);
                         modified = true;
                     }
+                    if (facultyId != null && (user.getFacultyId() == null || user.getFacultyId().trim().isEmpty())) {
+                        user.setFacultyId(facultyId);
+                        modified = true;
+                    }
                     if (modified) {
                         userRepository.save(user);
-                        log.info("Auto-synced existing user {} with teacherId: {}, studentId: {}", username, user.getTeacherId(), user.getStudentId());
+                        log.info("Auto-synced existing user {} with teacherId: {}, studentId: {}, facultyId: {}", username, user.getTeacherId(), user.getStudentId(), user.getFacultyId());
                     }
                 },
                 () -> {
@@ -83,6 +89,7 @@ public class BaseDataSeeder {
                             .role(role)
                             .teacherId(teacherId)
                             .studentId(studentId)
+                            .facultyId(facultyId)
                             .build();
                     userRepository.save(user);
                 }

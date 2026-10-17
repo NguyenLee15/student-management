@@ -7,11 +7,14 @@ import com.student.management.entity.AcademicYear;
 import com.student.management.entity.Student;
 import com.student.management.entity.StudentClass;
 import com.student.management.enums.Gender;
+import com.student.management.exception.BusinessException;
+import com.student.management.exception.ErrorCode;
 import com.student.management.exception.NotFoundException;
 import com.student.management.mapping.StudentMapper;
 import com.student.management.repository.AcademicYearRepository;
 import com.student.management.repository.StudentClassRepository;
 import com.student.management.repository.StudentRepository;
+import com.student.management.security.SecurityService;
 import com.student.management.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -41,17 +44,24 @@ public class StudentServiceImpl implements StudentService {
     private final StudentClassRepository studentClassRepository;
     private final AcademicYearRepository academicYearRepository;
     private final com.student.management.service.AuditLogService auditLogService;
+    private final SecurityService securityService;
 
     @Override
     @Transactional(readOnly = true)
     public Page<StudentResponseDto> getAll(Pageable pageable) {
+        String facultyId = securityService.getCurrentFacultyId();
+        if (facultyId != null) {
+            return studentRepository.findByStudentClass_Faculty_FacultyId(facultyId, pageable).map(StudentMapper::toDto);
+        }
         return studentRepository.findAll(pageable).map(StudentMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<StudentResponseDto> searchAndFilter(String keyword, String classId, String facultyId, String academicYearId, Pageable pageable) {
-        return studentRepository.searchAndFilterStudents(keyword, classId, facultyId, academicYearId, pageable)
+        String userFacultyId = securityService.getCurrentFacultyId();
+        String effectiveFacultyId = userFacultyId != null ? userFacultyId : facultyId;
+        return studentRepository.searchAndFilterStudents(keyword, classId, effectiveFacultyId, academicYearId, pageable)
                 .map(StudentMapper::toDto);
     }
 
@@ -77,6 +87,10 @@ public class StudentServiceImpl implements StudentService {
         }
         StudentClass studentClass = studentClassRepository.findById(dto.getClassId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp học: " + dto.getClassId()));
+        String classFacultyId = studentClass.getFaculty() != null ? studentClass.getFaculty().getFacultyId() : null;
+        if (!securityService.canAccessFaculty(classFacultyId)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Bạn không có quyền quản lý sinh viên của khoa khác.");
+        }
         AcademicYear academicYear = academicYearRepository.findById(dto.getAcademicYearId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy Academic year: " + dto.getAcademicYearId()));
         Student student = StudentMapper.toEntity(dto, studentClass, academicYear);
@@ -92,8 +106,17 @@ public class StudentServiceImpl implements StudentService {
     public StudentResponseDto update(String studentId, StudentRequestDto dto) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy sinh viên: " + studentId));
+        String currentFacultyId = student.getStudentClass() != null && student.getStudentClass().getFaculty() != null
+                ? student.getStudentClass().getFaculty().getFacultyId() : null;
+        if (!securityService.canAccessFaculty(currentFacultyId)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Bạn không có quyền chỉnh sửa sinh viên của khoa khác.");
+        }
         StudentClass studentClass = studentClassRepository.findById(dto.getClassId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp học: " + dto.getClassId()));
+        String targetFacultyId = studentClass.getFaculty() != null ? studentClass.getFaculty().getFacultyId() : null;
+        if (!securityService.canAccessFaculty(targetFacultyId)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không thể chuyển sinh viên sang lớp của khoa khác.");
+        }
         AcademicYear academicYear = academicYearRepository.findById(dto.getAcademicYearId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy Academic year: " + dto.getAcademicYearId()));
         
@@ -123,10 +146,14 @@ public class StudentServiceImpl implements StudentService {
     @Override
     @Transactional
     public void delete(String studentId) {
-        if (!studentRepository.existsById(studentId)) {
-            throw new NotFoundException("Không tìm thấy sinh viên: " + studentId);
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sinh viên: " + studentId));
+        String currentFacultyId = student.getStudentClass() != null && student.getStudentClass().getFaculty() != null
+                ? student.getStudentClass().getFaculty().getFacultyId() : null;
+        if (!securityService.canAccessFaculty(currentFacultyId)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Bạn không có quyền xóa sinh viên của khoa khác.");
         }
-        studentRepository.deleteById(studentId);
+        studentRepository.delete(student);
         if (auditLogService != null) {
             auditLogService.log("DELETE", "Student", studentId, "Xóa hồ sơ sinh viên", "admin");
         }
@@ -143,7 +170,11 @@ public class StudentServiceImpl implements StudentService {
     @Override
     @Transactional(readOnly = true)
     public List<StudentResponseDto> getAllForExport() {
-        return StudentMapper.toDtoList(studentRepository.findAll());
+        String facultyId = securityService.getCurrentFacultyId();
+        List<Student> students = facultyId != null
+                ? studentRepository.findByStudentClass_Faculty_FacultyId(facultyId)
+                : studentRepository.findAll();
+        return StudentMapper.toDtoList(students);
     }
 
     @Override

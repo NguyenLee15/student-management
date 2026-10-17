@@ -5,10 +5,13 @@ import com.student.management.dto.req.StudentClassRequestDto;
 import com.student.management.dto.resp.StudentClassResponseDto;
 import com.student.management.entity.Faculty;
 import com.student.management.entity.StudentClass;
+import com.student.management.exception.BusinessException;
+import com.student.management.exception.ErrorCode;
 import com.student.management.exception.NotFoundException;
 import com.student.management.mapping.StudentClassMapper;
 import com.student.management.repository.FacultyRepository;
 import com.student.management.repository.StudentClassRepository;
+import com.student.management.security.SecurityService;
 import com.student.management.service.StudentClassService;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -33,23 +36,34 @@ public class StudentClassServiceImpl implements StudentClassService {
 
     private final StudentClassRepository studentClassRepository;
     private final FacultyRepository facultyRepository;
+    private final SecurityService securityService;
 
     @Override
     @Transactional(readOnly = true)
     public Page<StudentClassResponseDto> getAll(Pageable pageable) {
+        String facultyId = securityService.getCurrentFacultyId();
+        if (facultyId != null) {
+            return studentClassRepository.findByFacultyId(facultyId, pageable).map(StudentClassMapper::toDto);
+        }
         return studentClassRepository.findAll(pageable).map(StudentClassMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<StudentClassResponseDto> getAll() {
+        String facultyId = securityService.getCurrentFacultyId();
+        if (facultyId != null) {
+            return StudentClassMapper.toDtoList(studentClassRepository.findByFacultyId(facultyId));
+        }
         return StudentClassMapper.toDtoList(studentClassRepository.findAll());
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<StudentClassResponseDto> getByFacultyId(String facultyId, Pageable pageable) {
-        return studentClassRepository.findByFacultyId(facultyId, pageable).map(StudentClassMapper::toDto);
+        String userFacultyId = securityService.getCurrentFacultyId();
+        String effectiveFacultyId = userFacultyId != null ? userFacultyId : facultyId;
+        return studentClassRepository.findByFacultyId(effectiveFacultyId, pageable).map(StudentClassMapper::toDto);
     }
 
     @Override
@@ -63,6 +77,9 @@ public class StudentClassServiceImpl implements StudentClassService {
     @Override
     @Transactional
     public StudentClassResponseDto create(StudentClassRequestDto dto) {
+        if (!securityService.canAccessFaculty(dto.getFacultyId())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Bạn không có quyền quản lý lớp học của khoa khác.");
+        }
         if (studentClassRepository.existsById(dto.getClassId())) {
             throw new IllegalArgumentException("Mã lớp đã tồn tại: " + dto.getClassId());
         }
@@ -77,6 +94,13 @@ public class StudentClassServiceImpl implements StudentClassService {
     public StudentClassResponseDto update(String classId, StudentClassRequestDto dto) {
         StudentClass sc = studentClassRepository.findById(classId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp học: " + classId));
+        String currentFaculty = sc.getFaculty() != null ? sc.getFaculty().getFacultyId() : null;
+        if (!securityService.canAccessFaculty(currentFaculty)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Bạn không có quyền chỉnh sửa lớp học của khoa khác.");
+        }
+        if (!securityService.canAccessFaculty(dto.getFacultyId())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không thể chuyển lớp học sang khoa khác.");
+        }
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + dto.getFacultyId()));
         sc.setClassName(dto.getClassName());
@@ -87,10 +111,13 @@ public class StudentClassServiceImpl implements StudentClassService {
     @Override
     @Transactional
     public void delete(String classId) {
-        if (!studentClassRepository.existsById(classId)) {
-            throw new NotFoundException("Không tìm thấy lớp học: " + classId);
+        StudentClass sc = studentClassRepository.findById(classId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy lớp học: " + classId));
+        String currentFaculty = sc.getFaculty() != null ? sc.getFaculty().getFacultyId() : null;
+        if (!securityService.canAccessFaculty(currentFaculty)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Bạn không có quyền xóa lớp học của khoa khác.");
         }
-        studentClassRepository.deleteById(classId);
+        studentClassRepository.delete(sc);
     }
 
     @Override

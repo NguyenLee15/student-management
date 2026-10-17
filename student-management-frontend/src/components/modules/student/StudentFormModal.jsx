@@ -11,9 +11,12 @@ export default function StudentFormModal({
   faculties = [],
   classes = [],
   academicYears = [],
+  currentUser,
   onSubmit,
   saving = false,
 }) {
+  const isFacultyScoped = Boolean(currentUser?.facultyId);
+
   return (
     <Modal
       isOpen={isOpen}
@@ -99,15 +102,26 @@ export default function StudentFormModal({
             <label className="block text-xs font-semibold text-slate-300 mb-1">Khoa / Viện</label>
             <select
               value={formData.facultyId}
-              onChange={(e) => setFormData({ ...formData, facultyId: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+              disabled={isFacultyScoped}
+              onChange={(e) => setFormData({ ...formData, facultyId: e.target.value, classId: '' })}
+              className={`w-full px-3 py-2 bg-slate-950 border rounded-xl text-xs text-slate-100 focus:outline-none focus:border-indigo-500 ${
+                isFacultyScoped ? 'border-amber-500/40 text-amber-300 cursor-not-allowed opacity-90' : 'border-slate-800'
+              }`}
             >
-              <option value="">Chọn Khoa</option>
-              {faculties.map((f) => (
-                <option key={f.facultyId} value={f.facultyId}>
-                  {f.facultyName || f.facultyId}
+              {isFacultyScoped ? (
+                <option value={currentUser.facultyId}>
+                  Khoa {currentUser.facultyId}
                 </option>
-              ))}
+              ) : (
+                <>
+                  <option value="">Chọn Khoa</option>
+                  {faculties.map((f) => (
+                    <option key={f.facultyId} value={f.facultyId}>
+                      {f.facultyName || f.facultyId}
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
           </div>
           <div>
@@ -118,11 +132,13 @@ export default function StudentFormModal({
               className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
             >
               <option value="">Chọn Lớp</option>
-              {classes.map((c) => (
-                <option key={c.classId} value={c.classId}>
-                  {c.className || c.classId}
-                </option>
-              ))}
+              {classes
+                .filter((c) => !formData.facultyId || c.facultyId === formData.facultyId)
+                .map((c) => (
+                  <option key={c.classId} value={c.classId}>
+                    {c.className || c.classId}
+                  </option>
+                ))}
             </select>
           </div>
           <div>

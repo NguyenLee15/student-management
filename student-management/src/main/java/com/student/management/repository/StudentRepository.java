@@ -40,6 +40,14 @@ public interface StudentRepository extends JpaRepository<Student, String> {
     List<Student> findByClassId(@Param("classId") String classId);
 
     @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})
+    Page<Student> findByStudentClass_Faculty_FacultyId(String facultyId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})
+    List<Student> findByStudentClass_Faculty_FacultyId(String facultyId);
+
+    long countByStudentClass_Faculty_FacultyId(String facultyId);
+
+    @EntityGraph(attributePaths = {"studentClass", "academicYear", "studentClass.faculty"})
     @Query("SELECT DISTINCT s FROM Student s WHERE " +
            "s.studentId IN (SELECT e.student.studentId FROM Enrollment e WHERE e.creditClass.creditClassId = :creditClassId AND e.status = com.student.management.enums.EnrollmentStatus.ENROLLED) " +
            "OR s.studentId IN (SELECT ccs.student.studentId FROM CreditClassStudent ccs WHERE ccs.creditClass.creditClassId = :creditClassId)")

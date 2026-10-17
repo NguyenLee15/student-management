@@ -1,6 +1,6 @@
 // cSpell:disable
 import React from 'react';
-import { GraduationCap, UserSquare2, ShieldCheck, Zap } from 'lucide-react';
+import { GraduationCap, UserSquare2, ShieldCheck, Zap, Building2 } from 'lucide-react';
 
 export const ROLE_PRESETS = {
   student: {
@@ -39,6 +39,24 @@ export const ROLE_PRESETS = {
       buttonBg: 'hover:bg-sky-500/20 text-sky-300 border-sky-500/30',
     },
   },
+  faculty_admin: {
+    label: 'Giáo Vụ Khoa',
+    roleName: 'ROLE_FACULTY_ADMIN',
+    tagline: 'Quản lý sinh viên, giảng viên & phân lớp thuộc Khoa',
+    icon: Building2,
+    placeholder: 'Tài khoản giáo vụ khoa (admin_cntt)',
+    demoUser: 'admin_cntt',
+    demoPass: 'admin123',
+    demoName: 'Giáo Vụ Khoa CNTT',
+    theme: {
+      activeBg: 'bg-amber-600',
+      activeText: 'text-white',
+      shadow: 'shadow-amber-900/40',
+      badge: 'border-amber-500/30 text-amber-300 bg-amber-500/10',
+      accentText: 'text-amber-400',
+      buttonBg: 'hover:bg-amber-500/20 text-amber-300 border-amber-500/30',
+    },
+  },
   admin: {
     label: 'Quản Trị Viên',
     roleName: 'ROLE_ADMIN',
@@ -74,9 +92,9 @@ export default function RolePresetSelector({ activeRole, onRoleSelect, onQuickLo
         </span>
       </div>
 
-      {/* 3-Column Role Tabs */}
+      {/* 4-Column Role Tabs */}
       <div
-        className="grid grid-cols-3 gap-1.5 p-1 bg-slate-950/80 border border-slate-800/90 rounded-2xl backdrop-blur-md"
+        className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-slate-950/80 border border-slate-800/90 rounded-2xl backdrop-blur-md"
         role="group"
         aria-labelledby="login-role-label"
       >

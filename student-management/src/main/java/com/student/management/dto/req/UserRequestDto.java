@@ -30,5 +30,7 @@ public class UserRequestDto {
     private String studentId;
 
     private String teacherId;
+
+    private String facultyId;
 }
 

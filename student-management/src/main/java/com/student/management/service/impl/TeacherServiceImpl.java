@@ -42,18 +42,28 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     @Transactional(readOnly = true)
     public Page<TeacherResponseDto> getAll(Pageable pageable) {
+        String facultyId = securityService.getCurrentFacultyId();
+        if (facultyId != null) {
+            return teacherRepository.searchAndFilter(null, facultyId, pageable).map(TeacherMapper::toDto);
+        }
         return teacherRepository.findAll(pageable).map(TeacherMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<TeacherResponseDto> searchAndFilter(String keyword, String facultyId, Pageable pageable) {
-        return teacherRepository.searchAndFilter(keyword, facultyId, pageable).map(TeacherMapper::toDto);
+        String userFacultyId = securityService.getCurrentFacultyId();
+        String effectiveFacultyId = userFacultyId != null ? userFacultyId : facultyId;
+        return teacherRepository.searchAndFilter(keyword, effectiveFacultyId, pageable).map(TeacherMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<TeacherResponseDto> getAll() {
+        String facultyId = securityService.getCurrentFacultyId();
+        if (facultyId != null) {
+            return TeacherMapper.toDtoList(teacherRepository.findByFacultyId(facultyId));
+        }
         return TeacherMapper.toDtoList(teacherRepository.findAll());
     }
 
@@ -75,6 +85,9 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     @Transactional
     public TeacherResponseDto create(TeacherRequestDto dto) {
+        if (!securityService.canAccessFaculty(dto.getFacultyId())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Bạn không có quyền quản lý giảng viên của khoa khác.");
+        }
         if (teacherRepository.existsById(dto.getTeacherId())) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Mã giảng viên đã tồn tại: " + dto.getTeacherId());
         }
@@ -89,6 +102,13 @@ public class TeacherServiceImpl implements TeacherService {
     public TeacherResponseDto update(String teacherId, TeacherRequestDto dto) {
         Teacher teacher = teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy giảng viên: " + teacherId));
+        String currentFaculty = teacher.getFaculty() != null ? teacher.getFaculty().getFacultyId() : null;
+        if (!securityService.canAccessFaculty(currentFaculty)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Bạn không có quyền chỉnh sửa giảng viên của khoa khác.");
+        }
+        if (!securityService.canAccessFaculty(dto.getFacultyId())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Không thể chuyển giảng viên sang khoa khác.");
+        }
         Faculty faculty = facultyRepository.findById(dto.getFacultyId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy khoa: " + dto.getFacultyId()));
         teacher.setFullName(dto.getFullName());
@@ -100,10 +120,13 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     @Transactional
     public void delete(String teacherId) {
-        if (!teacherRepository.existsById(teacherId)) {
-            throw new NotFoundException("Không tìm thấy giảng viên: " + teacherId);
+        Teacher teacher = teacherRepository.findById(teacherId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy giảng viên: " + teacherId));
+        String currentFaculty = teacher.getFaculty() != null ? teacher.getFaculty().getFacultyId() : null;
+        if (!securityService.canAccessFaculty(currentFaculty)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "Bạn không có quyền xóa giảng viên của khoa khác.");
         }
-        teacherRepository.deleteById(teacherId);
+        teacherRepository.delete(teacher);
     }
 
     @Override

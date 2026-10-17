@@ -103,6 +103,9 @@ public class UserServiceImpl implements UserService {
             if (dto.getTeacherId() != null) {
                 user.setTeacherId(dto.getTeacherId());
             }
+            if (dto.getFacultyId() != null) {
+                user.setFacultyId(dto.getFacultyId());
+            }
             return UserMapper.toDto(userRepository.save(user));
         } else {
             return create(dto);

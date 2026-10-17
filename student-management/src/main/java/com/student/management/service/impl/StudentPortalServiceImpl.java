@@ -9,7 +9,6 @@ import com.student.management.dto.resp.TuitionInvoiceResponseDto;
 import com.student.management.entity.*;
 import com.student.management.exception.BusinessException;
 import com.student.management.exception.ErrorCode;
-import com.student.management.repository.AcademicGradeRepository;
 import com.student.management.repository.SemesterRepository;
 import com.student.management.repository.EnrollmentRepository;
 import com.student.management.repository.SemesterScheduleRepository;
@@ -36,7 +35,6 @@ public class StudentPortalServiceImpl implements StudentPortalService {
 
     private final StudentRepository studentRepository;
     private final EnrollmentRepository enrollmentRepository;
-    private final AcademicGradeRepository academicGradeRepository;
     private final SemesterScheduleRepository semesterScheduleRepository;
     private final TuitionService tuitionService;
     private final AcademicGradeService academicGradeService;
