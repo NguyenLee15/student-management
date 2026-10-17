@@ -22,11 +22,18 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-charts': ['recharts'],
-          'vendor-icons': ['lucide-react'],
-          'vendor-http': ['axios'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('recharts')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('axios')) {
+              return 'vendor-http';
+            }
+          }
         }
       }
     }
