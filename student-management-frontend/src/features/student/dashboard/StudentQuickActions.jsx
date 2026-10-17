@@ -3,72 +3,81 @@ import React from 'react';
 import { BookOpen, Calendar, Award, CreditCard, ArrowRight, AlertCircle } from 'lucide-react';
 
 export default function StudentQuickActions({ onNavigateTab }) {
+  const actions = [
+    {
+      id: 'registration',
+      title: 'Đăng ký học phần',
+      desc: 'Mở đợt đăng ký tín chỉ',
+      icon: BookOpen,
+      iconBg: 'bg-blue-50 text-blue-600',
+    },
+    {
+      id: 'timetable',
+      title: 'Thời khóa biểu tuần',
+      desc: 'Lịch học & phòng học',
+      icon: Calendar,
+      iconBg: 'bg-indigo-50 text-indigo-600',
+    },
+    {
+      id: 'grades',
+      title: 'Bảng điểm & In A4',
+      desc: 'Tra cứu GPA & kết quả học tập',
+      icon: Award,
+      iconBg: 'bg-emerald-50 text-emerald-600',
+    },
+    {
+      id: 'tuition',
+      title: 'Học phí & Hóa đơn',
+      desc: 'Biên lai & công nợ kỳ này',
+      icon: CreditCard,
+      iconBg: 'bg-amber-50 text-amber-600',
+    },
+  ];
+
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
+    <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/90 shadow-sm space-y-5 flex flex-col justify-between">
       <div>
-        <h3 className="font-bold text-slate-800 mb-4">Lối Tắt Học Vụ</h3>
-        <div className="space-y-2.5">
-          <button
-            onClick={() => onNavigateTab?.('registration')}
-            className="w-full p-3.5 bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 rounded-xl font-bold text-sm text-left flex items-center justify-between border border-slate-200/60 transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                <BookOpen className="w-4 h-4" />
-              </div>
-              <span>Đăng ký môn học</span>
-            </div>
-            <ArrowRight className="w-4 h-4 text-slate-400" />
-          </button>
+        <div className="pb-3 border-b border-slate-100 mb-3">
+          <h3 className="font-extrabold text-slate-900 text-sm">Lối Tắt Học Vụ</h3>
+          <p className="text-[11px] text-slate-400">Các tiện ích thường dùng của sinh viên</p>
+        </div>
 
-          <button
-            onClick={() => onNavigateTab?.('timetable')}
-            className="w-full p-3.5 bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 rounded-xl font-bold text-sm text-left flex items-center justify-between border border-slate-200/60 transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
-                <Calendar className="w-4 h-4" />
-              </div>
-              <span>Thời khóa biểu tuần</span>
-            </div>
-            <ArrowRight className="w-4 h-4 text-slate-400" />
-          </button>
-
-          <button
-            onClick={() => onNavigateTab?.('grades')}
-            className="w-full p-3.5 bg-slate-50 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 rounded-xl font-bold text-sm text-left flex items-center justify-between border border-slate-200/60 transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
-                <Award className="w-4 h-4" />
-              </div>
-              <span>Bảng điểm & In A4</span>
-            </div>
-            <ArrowRight className="w-4 h-4 text-slate-400" />
-          </button>
-
-          <button
-            onClick={() => onNavigateTab?.('tuition')}
-            className="w-full p-3.5 bg-slate-50 hover:bg-purple-50 text-slate-700 hover:text-purple-700 rounded-xl font-bold text-sm text-left flex items-center justify-between border border-slate-200/60 transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
-                <CreditCard className="w-4 h-4" />
-              </div>
-              <span>Hóa đơn học phí</span>
-            </div>
-            <ArrowRight className="w-4 h-4 text-slate-400" />
-          </button>
+        <div className="space-y-2">
+          {actions.map((act) => {
+            const Icon = act.icon;
+            return (
+              <button
+                key={act.id}
+                onClick={() => onNavigateTab?.(act.id)}
+                className="w-full p-2.5 sm:p-3 bg-slate-50/70 hover:bg-blue-50/40 text-slate-800 rounded-xl text-left flex items-center justify-between border border-slate-200/80 hover:border-blue-300 transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${act.iconBg} transition-transform group-hover:scale-105`}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs text-slate-800 group-hover:text-blue-700 transition-colors">
+                      {act.title}
+                    </div>
+                    <div className="text-[11px] text-slate-400">
+                      {act.desc}
+                    </div>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="p-3.5 bg-blue-50 rounded-xl border border-blue-100 text-xs text-blue-800 space-y-1">
-        <p className="font-bold flex items-center gap-1.5">
-          <AlertCircle className="w-4 h-4 text-blue-600" />
-          Hỗ trợ học vụ
+      <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80 text-xs space-y-1">
+        <p className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+          <AlertCircle className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+          <span>Hỗ trợ kỹ thuật & Đào tạo</span>
         </p>
-        <p className="text-blue-600">
-          Phòng Đào tạo: phongdaotao@university.edu.vn | Hotline: 1900 6868
+        <p className="text-[11px] text-slate-500 leading-relaxed">
+          Email: <span className="text-slate-700 font-medium">daotao@university.edu.vn</span> • Hotline: <span className="text-slate-700 font-medium">1900 6868</span>
         </p>
       </div>
     </div>
