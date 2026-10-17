@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, RefreshCw } from 'lucide-react';
 import { scheduleApi, creditClassApi, teacherApi, classroomApi } from '../../api';
 import { msg } from '../../lib/messages';
+import { parseDayOfWeek } from '../../utils/scheduleUtils';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ScheduleTable from './schedule/ScheduleTable';
 import ScheduleFormModal from './schedule/ScheduleFormModal';
@@ -126,6 +127,9 @@ export default function ScheduleModule({ onNotify, currentUser }) {
 
   const handleOpenEdit = (s) => {
     setIsEdit(true);
+    const dayMap = { MONDAY: 2, TUESDAY: 3, WEDNESDAY: 4, THURSDAY: 5, FRIDAY: 6, SATURDAY: 7, SUNDAY: 8 };
+    const parsedDay = parseDayOfWeek(s);
+    const resolvedDayOfWeek = s.dayOfWeek || dayMap[parsedDay] || 2;
     setFormData({
       scheduleId: s.scheduleId,
       creditClassId: s.creditClassId || '',
@@ -134,7 +138,7 @@ export default function ScheduleModule({ onNotify, currentUser }) {
       roomId: s.roomId || '',
       semester: s.semester || 'SEMESTER_1',
       academicYear: s.academicYear || '2026-2027',
-      dayOfWeek: s.dayOfWeek || 2,
+      dayOfWeek: resolvedDayOfWeek,
       classShift: s.classShift?.startsWith('SHIFT_') ? s.classShift : 'SHIFT_1',
       studyTime: s.studyTime || '',
       startDate: s.startDate || '2026-09-01',

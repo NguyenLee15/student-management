@@ -2,6 +2,7 @@
 import React from 'react';
 import { Edit3, Trash2, User } from 'lucide-react';
 import { msg } from '../../../lib/messages';
+import { parseDayOfWeek, getDayLabel } from '../../../utils/scheduleUtils';
 import Pagination from '../../common/Pagination';
 import Skeleton from '../../common/Skeleton';
 import EmptyState from '../../common/EmptyState';
@@ -56,9 +57,9 @@ export default function ScheduleTable({
               <tr key={s.scheduleId} className="hover:bg-slate-800/40 transition">
                 <td className="px-5 py-3.5 font-bold text-teal-400">
                   <div>
-                    <div>{msg.enum.weekday[s.dayOfWeek] || 'Không xác định'}</div>
+                    <div>{msg.enum.weekday[s.dayOfWeek] || getDayLabel(parseDayOfWeek(s))}</div>
                     <div className="text-[10px] text-slate-400 font-mono font-normal mt-0.5">
-                      {msg.enum.shift[s.classShift] || 'Ca 1'}
+                      {msg.enum.shift[s.classShift] || s.classShift || 'Ca 1'}
                     </div>
                   </div>
                 </td>
