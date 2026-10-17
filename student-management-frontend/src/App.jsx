@@ -119,10 +119,11 @@ export default function App() {
         setIsInitializingAuth(false);
         return;
       }
+      const isAdminUser = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
       const [stRes, tRes, fRes, subRes] = await Promise.allSettled([
         studentApi.getAll({ page: 0, size: 1 }),
         teacherApi.getAll({ page: 0, size: 1 }),
-        facultyApi.getAll({ unpaged: true }),
+        isAdminUser ? facultyApi.getAll({ unpaged: true }) : facultyApi.getAll({ page: 0, size: 1 }),
         subjectApi.getAll({ page: 0, size: 1 }),
       ]);
 

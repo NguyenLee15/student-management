@@ -43,8 +43,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             passCount = stats[2] != null ? ((Number) stats[2]).longValue() : 0L;
         }
 
-        double passRate = totalGrades == 0 ? 96.5 : (double) passCount / totalGrades * 100;
-        double avgGpa4 = avgScore > 0 ? (avgScore / 10.0) * 4.0 : 3.48;
+        double passRate = totalGrades == 0 ? 0.0 : (double) passCount / totalGrades * 100;
+        double avgGpa4 = (totalGrades > 0 && avgScore > 0) ? (avgScore / 10.0) * 4.0 : 0.0;
 
         Map<String, Object> summary = new HashMap<>();
         summary.put("totalStudents", totalStudents);

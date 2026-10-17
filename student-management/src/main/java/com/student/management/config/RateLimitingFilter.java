@@ -1,6 +1,8 @@
 // cSpell:disable
 package com.student.management.config;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 
@@ -14,14 +16,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RateLimitingFilter extends OncePerRequestFilter {
 
     private static final int MAX_CACHE_SIZE = 10_000;
-    private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
+    private final Cache<String, Bucket> cache = Caffeine.newBuilder()
+            .maximumSize(MAX_CACHE_SIZE)
+            .expireAfterAccess(Duration.ofMinutes(10))
+            .build();
 
     private Bucket createNewBucket(String ip, String bucketType) {
         if ("webhook".equals(bucketType)) {
@@ -41,11 +44,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     private Bucket resolveBucket(String ip, String bucketType) {
         String key = ip + "_" + bucketType;
-        // Evict all entries when cache exceeds max size to prevent OOM
-        if (cache.size() > MAX_CACHE_SIZE) {
-            cache.clear();
-        }
-        return cache.computeIfAbsent(key, k -> createNewBucket(ip, bucketType));
+        return cache.get(key, k -> createNewBucket(ip, bucketType));
     }
 
     @Override

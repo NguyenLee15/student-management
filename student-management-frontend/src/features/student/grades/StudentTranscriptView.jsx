@@ -40,7 +40,11 @@ export default function StudentTranscriptView({ currentUser, onNotify }) {
               const parsed = JSON.parse(stored);
               targetStudentId = parsed.studentId || (parsed.username?.startsWith('SV') ? parsed.username : null);
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn('Dữ liệu user_info trong storage bị lỗi định dạng JSON:', e);
+            localStorage.removeItem('user_info');
+            sessionStorage.removeItem('user_info');
+          }
         }
 
         if (targetStudentId) {

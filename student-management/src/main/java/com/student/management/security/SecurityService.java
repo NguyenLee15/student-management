@@ -14,6 +14,7 @@ import java.util.Optional;
 
 @Service("securityService")
 @lombok.RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class SecurityService {
 
     private final UserRepository userRepository;
@@ -44,7 +45,9 @@ public class SecurityService {
                 try {
                     String healedId = getCurrentStudentId();
                     return studentId.equals(healedId);
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    log.debug("Không thể tự động khôi phục studentId cho người dùng {}: {}", username, e.getMessage());
+                }
             }
         }
         

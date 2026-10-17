@@ -388,7 +388,10 @@ public class PayOSService {
         try {
             URI uri = URI.create(url);
             if (ALLOWED_HOSTS.contains(uri.getHost())) return url;
-        } catch (Exception ignored) {}
+            log.warn("URL redirect PayOS không thuộc danh sách host cho phép [{}], fallback về: {}", uri.getHost(), fallback);
+        } catch (Exception e) {
+            log.warn("URL redirect PayOS không đúng định dạng cú pháp [{}]: {}", url, e.getMessage());
+        }
         return fallback;
     }
 

@@ -77,6 +77,17 @@ public class AsyncImportService {
             int errors = 0;
             StringBuilder errorDetails = new StringBuilder();
 
+            // Pre-fetch default fallback IDs once to eliminate N+1 queries during loop
+            String defaultClassId = studentClassRepository.findAll().stream()
+                    .map(com.student.management.entity.StudentClass::getClassId)
+                    .findFirst()
+                    .orElse(null);
+
+            String defaultAcademicYearId = academicYearRepository.findAll().stream()
+                    .map(com.student.management.entity.AcademicYear::getAcademicYearId)
+                    .findFirst()
+                    .orElse(null);
+
             for (int i = 1; i <= totalRows; i++) {
                 try {
                     Row row = sheet.getRow(i);
@@ -106,18 +117,10 @@ public class AsyncImportService {
                     dto.setEmail(formatter.formatCellValue(row.getCell(4)).trim());
 
                     String classId = formatter.formatCellValue(row.getCell(5)).trim();
-                    if (classId.isEmpty()) {
-                        studentClassRepository.findAll().stream().findFirst().ifPresent(c -> dto.setClassId(c.getClassId()));
-                    } else {
-                        dto.setClassId(classId);
-                    }
+                    dto.setClassId(classId.isEmpty() ? defaultClassId : classId);
 
                     String academicYearId = formatter.formatCellValue(row.getCell(6)).trim();
-                    if (academicYearId.isEmpty()) {
-                        academicYearRepository.findAll().stream().findFirst().ifPresent(y -> dto.setAcademicYearId(y.getAcademicYearId()));
-                    } else {
-                        dto.setAcademicYearId(academicYearId);
-                    }
+                    dto.setAcademicYearId(academicYearId.isEmpty() ? defaultAcademicYearId : academicYearId);
 
                     if (dto.getClassId() != null && dto.getAcademicYearId() != null) {
                         studentService.saveOrUpdate(dto);

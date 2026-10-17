@@ -31,6 +31,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/students")
 @Tag(name = "API Quản Lý Sinh Viên", description = "Quản lý sinh viên, tìm kiếm lọc và nhập/xuất Excel")
 @lombok.RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class StudentRestController {
 
     private final StudentService studentService;
@@ -118,8 +119,9 @@ public class StudentRestController {
             data.put("taskId", taskId);
             return ResponseEntity.accepted().body(ApiResponse.success("Quá trình nhập dữ liệu Excel đã được bắt đầu xử lý bất đồng bộ", data));
         } catch (Exception e) {
+            log.error("Lỗi khi xử lý tiếp nhận file import Excel sinh viên: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Lỗi xử lý file import: " + e.getMessage()));
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Không thể khởi tạo tiến trình nhập file Excel. Vui lòng kiểm tra định dạng file và thử lại sau."));
         }
     }
 

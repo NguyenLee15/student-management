@@ -58,7 +58,20 @@ axiosClient.interceptors.response.use(
     if (status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise(function (resolve, reject) {
-          failedQueue.push({ resolve, reject });
+          const timeoutId = setTimeout(() => {
+            reject(new Error('Yêu cầu làm mới phiên xác thực quá thời gian chờ (10s). Vui lòng đăng nhập lại.'));
+          }, 10000);
+
+          failedQueue.push({
+            resolve: (token) => {
+              clearTimeout(timeoutId);
+              resolve(token);
+            },
+            reject: (err) => {
+              clearTimeout(timeoutId);
+              reject(err);
+            },
+          });
         })
           .then((token) => {
             originalRequest._retry = true;

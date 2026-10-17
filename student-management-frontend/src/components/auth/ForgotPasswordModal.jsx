@@ -57,6 +57,13 @@ export default function ForgotPasswordModal({ isOpen, onClose, onBackToLogin }) 
     onClose();
   };
 
+  const maskEmail = (rawEmail) => {
+    if (!rawEmail || !rawEmail.includes('@')) return rawEmail;
+    const [name, domain] = rawEmail.split('@');
+    if (name.length <= 2) return `${name.charAt(0)}***@${domain}`;
+    return `${name.slice(0, 2)}***${name.slice(-1)}@${domain}`;
+  };
+
   return (
     <Modal 
       isOpen={isOpen} 
@@ -145,7 +152,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onBackToLogin }) 
           <div className="space-y-1.5">
             <h3 className="text-base font-bold text-white">Đã Gửi Liên Kết Thành Công</h3>
             <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-              Nếu email <strong className="text-emerald-300 font-mono">{email}</strong> tồn tại trong hệ thống, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu trong hộp thư.
+              Nếu email <strong className="text-emerald-300 font-mono">{maskEmail(email)}</strong> tồn tại trong hệ thống, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu trong hộp thư.
             </p>
           </div>
           <div className="pt-3 border-t border-slate-800/80">
