@@ -52,7 +52,27 @@ export default function AdminLayout({
 }) {
   const [localActiveTab, setLocalActiveTab] = useState('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('admin_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   const activeTab = adminActiveTab ?? localActiveTab;
+
+  const handleToggleSidebarCollapse = () => {
+    setIsSidebarCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('admin_sidebar_collapsed', String(next));
+      } catch {
+        // ignore storage errors
+      }
+      return next;
+    });
+  };
 
   const handleTabChange = (tab) => {
     setLocalActiveTab(tab);
@@ -75,6 +95,8 @@ export default function AdminLayout({
         onLogout={onLogout}
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         isMobileMenuOpen={isMobileMenuOpen}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebarCollapse={handleToggleSidebarCollapse}
       />
 
       {/* Mobile Backdrop */}
@@ -94,6 +116,8 @@ export default function AdminLayout({
           counts={counts}
           currentUser={currentUser}
           isMobileMenuOpen={isMobileMenuOpen}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={handleToggleSidebarCollapse}
         />
 
         {/* 📊 WORKSPACE ROUTER */}

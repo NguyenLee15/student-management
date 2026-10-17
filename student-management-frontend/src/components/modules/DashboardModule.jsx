@@ -163,34 +163,58 @@ export default function DashboardModule({ stats, faculties = [], onNavigate, cur
 
       {/* 2. Top 4 Management KPI Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Tổng Sinh Viên"
-          value={summaryData?.totalStudents ?? stats?.students ?? '—'}
-          subtitle="Sinh viên chính quy"
-          icon={Users}
-          trend={summaryData?.totalStudents ? "+12% kỳ này" : "Đang cập nhật"}
-        />
-        <StatCard
-          title="Tổng Giảng Viên"
-          value={summaryData?.totalTeachers ?? stats?.teachers ?? '—'}
-          subtitle="Cán bộ & Giảng viên"
-          icon={UserSquare2}
-          trend="Đạt chuẩn"
-        />
-        <StatCard
-          title="Lớp Tín Chỉ Đang Mở"
-          value={stats?.creditClasses ?? stats?.classes ?? '—'}
-          subtitle="Học kỳ 1 (2026 - 2027)"
-          icon={Layers}
-          trend="Đang giảng dạy"
-        />
-        <StatCard
-          title="Môn Học Khung"
-          value={summaryData?.totalSubjects ?? stats?.subjects ?? '—'}
-          subtitle="Chương trình đào tạo"
-          icon={BookOpen}
-          trend="Chuẩn hóa"
-        />
+        <button
+          type="button"
+          onClick={() => onNavigate?.('students')}
+          className="text-left group transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl"
+        >
+          <StatCard
+            title="Tổng Sinh Viên"
+            value={summaryData?.totalStudents ?? stats?.students ?? '—'}
+            subtitle="Sinh viên chính quy"
+            icon={Users}
+            trend={summaryData?.totalStudents ? "+12% kỳ này" : "Đang cập nhật"}
+          />
+        </button>
+        <button
+          type="button"
+          onClick={() => onNavigate?.('teachers')}
+          className="text-left group transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl"
+        >
+          <StatCard
+            title="Tổng Giảng Viên"
+            value={summaryData?.totalTeachers ?? stats?.teachers ?? '—'}
+            subtitle="Cán bộ & Giảng viên"
+            icon={UserSquare2}
+            trend="Đạt chuẩn"
+          />
+        </button>
+        <button
+          type="button"
+          onClick={() => onNavigate?.('credit-classes')}
+          className="text-left group transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl"
+        >
+          <StatCard
+            title="Lớp Tín Chỉ Đang Mở"
+            value={stats?.creditClasses ?? stats?.classes ?? '—'}
+            subtitle="Học kỳ 1 (2026 - 2027)"
+            icon={Layers}
+            trend="Đang giảng dạy"
+          />
+        </button>
+        <button
+          type="button"
+          onClick={() => onNavigate?.('subjects')}
+          className="text-left group transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl"
+        >
+          <StatCard
+            title="Môn Học Khung"
+            value={summaryData?.totalSubjects ?? stats?.subjects ?? '—'}
+            subtitle="Chương trình đào tạo"
+            icon={BookOpen}
+            trend="Chuẩn hóa"
+          />
+        </button>
       </div>
 
       {/* 3. Urgent Action & Academic Alerts Strip */}
