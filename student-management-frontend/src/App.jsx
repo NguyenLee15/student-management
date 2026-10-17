@@ -41,7 +41,7 @@ export default function App() {
   const normalizeRole = (role) => {
     if (!role) return null;
     const r = String(role).toUpperCase();
-    if (r === 'ADMIN' || r === 'ROLE_ADMIN') return 'ROLE_ADMIN';
+    if (r === 'ADMIN' || r === 'ROLE_ADMIN' || r === 'FACULTY_ADMIN' || r === 'ROLE_FACULTY_ADMIN') return 'ROLE_ADMIN';
     if (r === 'TEACHER' || r === 'ROLE_TEACHER') return 'ROLE_TEACHER';
     if (r === 'STUDENT' || r === 'ROLE_STUDENT') return 'ROLE_STUDENT';
     return null;
@@ -119,7 +119,7 @@ export default function App() {
         setIsInitializingAuth(false);
         return;
       }
-      const isAdminUser = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
+      const isAdminUser = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN' || currentUser?.role === 'FACULTY_ADMIN' || currentUser?.role === 'ROLE_FACULTY_ADMIN';
       const [stRes, tRes, fRes, subRes] = await Promise.allSettled([
         studentApi.getAll({ page: 0, size: 1 }),
         teacherApi.getAll({ page: 0, size: 1 }),

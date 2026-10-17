@@ -1,163 +1,95 @@
 // cSpell:disable
 import React from 'react';
-import { GraduationCap, UserSquare2, ShieldCheck, Zap, Building2 } from 'lucide-react';
+import { GraduationCap, UserSquare2, ShieldCheck, Building2, Sparkles, Check } from 'lucide-react';
 
 export const ROLE_PRESETS = {
   student: {
-    label: 'Sinh Viên',
+    label: 'Sinh viên',
     roleName: 'ROLE_STUDENT',
-    tagline: 'Đăng ký tín chỉ • Xem điểm học phần & biểu học phí',
+    tagline: 'Học chế tín chỉ • Đăng ký học phần & Xem điểm',
     icon: GraduationCap,
-    placeholder: 'Mã sinh viên hoặc tên đăng nhập (student hoặc SV001)',
+    placeholder: 'Nhập mã số sinh viên (VD: SV001)',
     demoUser: 'student',
     demoPass: 'student123',
     demoName: 'Nguyễn Hữu Đạt (SV001)',
-    theme: {
-      activeBg: 'bg-emerald-600',
-      activeText: 'text-white',
-      shadow: 'shadow-emerald-900/40',
-      badge: 'border-emerald-500/30 text-emerald-300 bg-emerald-500/10',
-      accentText: 'text-emerald-400',
-      buttonBg: 'hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    },
+    codeBadge: 'SV001',
   },
   teacher: {
-    label: 'Giảng Viên',
+    label: 'Giảng viên',
     roleName: 'ROLE_TEACHER',
-    tagline: 'Quản lý lớp tín chỉ • Nhập điểm thành phần & lịch dạy',
+    tagline: 'Quản lý lớp tín chỉ • Nhập điểm & Lịch giảng dạy',
     icon: UserSquare2,
-    placeholder: 'Mã giảng viên hoặc tên đăng nhập (teacher hoặc GV001)',
+    placeholder: 'Nhập mã giảng viên (VD: GV001)',
     demoUser: 'teacher',
     demoPass: 'teacher123',
     demoName: 'TS. Nguyễn Văn An (GV001)',
-    theme: {
-      activeBg: 'bg-sky-600',
-      activeText: 'text-white',
-      shadow: 'shadow-sky-900/40',
-      badge: 'border-sky-500/30 text-sky-300 bg-sky-500/10',
-      accentText: 'text-sky-400',
-      buttonBg: 'hover:bg-sky-500/20 text-sky-300 border-sky-500/30',
-    },
+    codeBadge: 'GV001',
   },
   faculty_admin: {
-    label: 'Giáo Vụ Khoa',
+    label: 'Giáo vụ Khoa',
     roleName: 'ROLE_FACULTY_ADMIN',
-    tagline: 'Quản lý sinh viên, giảng viên & phân lớp thuộc Khoa',
+    tagline: 'Quản trị hồ sơ & phân lớp theo phạm vi Khoa',
     icon: Building2,
-    placeholder: 'Tài khoản giáo vụ khoa (admin_cntt)',
+    placeholder: 'Nhập tài khoản giáo vụ (VD: admin_cntt)',
     demoUser: 'admin_cntt',
     demoPass: 'admin123',
-    demoName: 'Giáo Vụ Khoa CNTT',
-    theme: {
-      activeBg: 'bg-amber-600',
-      activeText: 'text-white',
-      shadow: 'shadow-amber-900/40',
-      badge: 'border-amber-500/30 text-amber-300 bg-amber-500/10',
-      accentText: 'text-amber-400',
-      buttonBg: 'hover:bg-amber-500/20 text-amber-300 border-amber-500/30',
-    },
+    demoName: 'Giáo vụ Khoa CNTT',
+    codeBadge: 'CNTT',
   },
   admin: {
-    label: 'Quản Trị Viên',
+    label: 'Quản trị viên',
     roleName: 'ROLE_ADMIN',
-    tagline: 'Quản trị hệ thống • Quy chế đào tạo & danh mục học vụ',
+    tagline: 'Quản trị hệ sinh thái đào tạo toàn trường',
     icon: ShieldCheck,
-    placeholder: 'Tài khoản quản trị viên (admin)',
+    placeholder: 'Nhập tài khoản quản trị (VD: admin)',
     demoUser: 'admin',
     demoPass: 'admin123',
-    demoName: 'Ban Quản Trị Đào Tạo',
-    theme: {
-      activeBg: 'bg-indigo-600',
-      activeText: 'text-white',
-      shadow: 'shadow-indigo-900/40',
-      badge: 'border-indigo-500/30 text-indigo-300 bg-indigo-500/10',
-      accentText: 'text-indigo-400',
-      buttonBg: 'hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-    },
+    demoName: 'Ban Quản trị Đào tạo',
+    codeBadge: 'Admin',
   },
 };
 
 export default function RolePresetSelector({ activeRole, onRoleSelect, onQuickLogin, disabled = false }) {
-  const currentPreset = ROLE_PRESETS[activeRole] || ROLE_PRESETS.student;
-
   return (
-    <div className="space-y-2.5">
-      <div className="flex items-center justify-between">
-        <span id="login-role-label" className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-          Chọn vai trò đăng nhập
+    <div className="pt-4 border-t border-slate-800/80 space-y-2">
+      <div className="flex items-center justify-between text-[11px] text-slate-400">
+        <span className="font-medium text-slate-400 flex items-center gap-1.5">
+          <span>Điền nhanh tài khoản mẫu:</span>
         </span>
-        <span className="text-[10px] text-slate-400 font-medium">
-          Tự động điền dữ liệu mẫu
-        </span>
+        <span className="text-[10px] text-slate-400 font-mono">Dành cho đánh giá / demo</span>
       </div>
 
-      {/* 4-Column Role Tabs */}
-      <div
-        className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-slate-950/80 border border-slate-800/90 rounded-2xl backdrop-blur-md"
-        role="group"
-        aria-labelledby="login-role-label"
-      >
+      {/* Clean 4-Pill Segmented List */}
+      <div className="grid grid-cols-2 gap-2" role="group" aria-label="Tài khoản mẫu">
         {Object.entries(ROLE_PRESETS).map(([key, item]) => {
-          const Icon = item.icon;
           const isSelected = activeRole === key;
-          const theme = item.theme;
+          const Icon = item.icon;
 
           return (
             <button
               key={key}
               type="button"
               disabled={disabled}
-              aria-pressed={isSelected}
               onClick={() => onRoleSelect(key)}
-              className={`min-h-[44px] flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 rounded-xl text-xs font-semibold transition-all duration-200 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-50 ${
+              title={`Điền tài khoản ${item.label} (${item.demoUser})`}
+              className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-xs font-medium transition select-none ${
                 isSelected
-                  ? `${theme.activeBg} ${theme.activeText} shadow-lg ${theme.shadow} scale-[1.02]`
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-              }`}
+                  ? 'bg-blue-600/10 border-blue-500/50 text-blue-300 ring-1 ring-blue-500/30'
+                  : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 hover:border-slate-700'
+              } disabled:opacity-50`}
             >
-              <div className="flex items-center gap-1.5">
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-white' : 'text-slate-400'}`} aria-hidden="true" />
+              <div className="flex items-center gap-1.5 truncate">
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-blue-400' : 'text-slate-500'}`} />
                 <span className="truncate">{item.label}</span>
               </div>
+              <span className={`text-[10px] font-mono px-1 py-0.2 rounded shrink-0 ${
+                isSelected ? 'bg-blue-500/20 text-blue-200' : 'bg-slate-800 text-slate-400'
+              }`}>
+                {item.codeBadge}
+              </span>
             </button>
           );
         })}
-      </div>
-
-      {/* Role Preset Banner with 1-Click Login Trigger */}
-      <div
-        className="p-2.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3 text-xs backdrop-blur-sm transition-all"
-        aria-live="polite"
-      >
-        <div className="min-w-0 flex-1 space-y-0.5">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] text-slate-400">Tài khoản:</span>
-            <code className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded border bg-slate-900 border-slate-700/80 text-white">
-              {currentPreset.demoUser}
-            </code>
-            <span className="text-slate-600 hidden sm:inline">•</span>
-            <span className="text-[11px] text-slate-300 font-medium truncate">
-              {currentPreset.demoName}
-            </span>
-          </div>
-          <p className="text-[10px] text-slate-400 truncate">
-            {currentPreset.tagline}
-          </p>
-        </div>
-
-        {onQuickLogin && (
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => onQuickLogin(activeRole)}
-            title="Đăng nhập ngay lập tức với tài khoản mẫu này"
-            className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 hover:text-white text-[11px] font-semibold transition active:scale-95 disabled:opacity-50 shadow-sm shadow-indigo-950"
-          >
-            <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            <span>Đăng nhập 1-chạm</span>
-          </button>
-        )}
       </div>
     </div>
   );

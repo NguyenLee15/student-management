@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { 
   LogIn, Lock, User, AlertCircle, ShieldCheck, Eye, EyeOff, 
   Loader2, GraduationCap, AlertTriangle,
-  Award, BookOpen, CreditCard, Sparkles, HelpCircle, CornerDownLeft
+  BookOpen, Calendar, CreditCard, HelpCircle, FileText, CheckCircle2, ChevronRight
 } from 'lucide-react';
 import Modal from '../common/Modal';
 import ForgotPasswordModal from './ForgotPasswordModal';
@@ -98,7 +98,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
     <form onSubmit={handleLogin} className="space-y-4 text-sm">
       {error && (
         <div
-          className="flex items-start gap-2.5 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs animate-shake"
+          className="flex items-start gap-2.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs"
           role="alert"
           aria-live="assertive"
         >
@@ -107,21 +107,13 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
         </div>
       )}
 
-      {/* Role Selection Tabs Component with 1-Click Login Trigger */}
-      <RolePresetSelector
-        activeRole={activeRole}
-        onRoleSelect={handleRoleSelect}
-        onQuickLogin={handleQuickLogin}
-        disabled={loading}
-      />
-
       {/* Username / Student ID */}
       <div className="space-y-1.5">
         <label htmlFor="login-username" className="block text-xs font-semibold text-slate-300">
-          {activeRole === 'student' ? 'Mã Sinh Viên / Tên Đăng Nhập *' : 'Tên Đăng Nhập *'}
+          Mã số sinh viên / Tên đăng nhập <span className="text-rose-400">*</span>
         </label>
         <div className="relative">
-          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" aria-hidden="true" />
+          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" aria-hidden="true" />
           <input
             id="login-username"
             name="username"
@@ -130,30 +122,33 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
             autoFocus={!currentUser}
             required
             disabled={loading}
-            placeholder={ROLE_PRESETS[activeRole]?.placeholder || 'Nhập tên đăng nhập'}
+            placeholder="VD: SV001 hoặc admin"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-950/80 border border-slate-800/90 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition placeholder:text-slate-600 disabled:opacity-50"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition placeholder:text-slate-600 disabled:opacity-50"
           />
         </div>
+        <p className="text-[11px] text-slate-400">
+          Sinh viên nhập mã SV (VD: SV001). Cán bộ & Giảng viên nhập tên tài khoản.
+        </p>
       </div>
 
       {/* Password */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label htmlFor="login-password" className="block text-xs font-semibold text-slate-300">
-            Mật khẩu *
+            Mật khẩu <span className="text-rose-400">*</span>
           </label>
           <button
             type="button"
             onClick={() => setShowForgot(true)}
-            className="text-[11px] text-indigo-400 hover:text-indigo-300 transition font-medium focus-visible:outline-none focus-visible:underline"
+            className="text-[11px] text-blue-400 hover:text-blue-300 transition font-medium focus-visible:outline-none focus-visible:underline"
           >
             Quên mật khẩu?
           </button>
         </div>
         <div className="relative">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" aria-hidden="true" />
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" aria-hidden="true" />
           <input
             id="login-password"
             name="password"
@@ -166,7 +161,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
             onChange={(e) => setPassword(e.target.value)}
             onKeyUp={handleKeyUp}
             onKeyDown={handleKeyUp}
-            className="w-full pl-10 pr-10 py-2.5 bg-slate-950/80 border border-slate-800/90 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition font-mono disabled:opacity-50"
+            className="w-full pl-10 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono disabled:opacity-50"
           />
           <button
             type="button"
@@ -174,7 +169,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
             aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
             aria-pressed={showPassword}
             title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 min-w-[36px] min-h-[36px] inline-flex items-center justify-center text-slate-500 hover:text-slate-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 min-w-[36px] min-h-[36px] inline-flex items-center justify-center text-slate-400 hover:text-slate-200 transition focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 rounded-lg"
           >
             {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
           </button>
@@ -182,45 +177,33 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
 
         {/* CapsLock Indicator */}
         {isCapsLockOn && (
-          <div className="flex items-center gap-1.5 pt-1 text-amber-400 text-xs animate-pulse" role="status">
+          <div className="flex items-center gap-1.5 pt-1 text-amber-400 text-xs" role="status">
             <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            <span>Phím Caps Lock đang được bật</span>
+            <span>Phím Caps Lock đang bật</span>
           </div>
         )}
       </div>
 
       {/* Remember Me */}
       <div className="flex items-center justify-between pt-0.5">
-        <label className="flex items-center gap-2 cursor-pointer select-none text-slate-400 hover:text-slate-200">
+        <label className="flex items-center gap-2 cursor-pointer select-none text-slate-400 hover:text-slate-300">
           <input
             type="checkbox"
             checked={rememberMe}
             disabled={loading}
             onChange={(e) => setRememberMe(e.target.checked)}
-            className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+            className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500 cursor-pointer"
           />
-          <span className="text-xs">Ghi nhớ đăng nhập</span>
+          <span className="text-xs">Ghi nhớ đăng nhập trên thiết bị này</span>
         </label>
       </div>
 
       {/* Submit Button */}
-      <div className="pt-2 flex justify-end gap-2.5">
-        {currentUser && (
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 text-xs font-semibold transition"
-          >
-            Đóng
-          </button>
-        )}
+      <div className="pt-2">
         <button
           type="submit"
           disabled={loading}
-          className={`flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 hover:from-indigo-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] disabled:opacity-50 select-none ${
-            currentUser ? 'px-6' : 'w-full'
-          }`}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-sm font-semibold transition shadow-sm disabled:opacity-50 select-none cursor-pointer"
         >
           {loading ? (
             <>
@@ -230,138 +213,192 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
           ) : (
             <>
               <LogIn className="h-4 w-4" />
-              <span>Đăng Nhập Ngay</span>
-              <CornerDownLeft className="w-3.5 h-3.5 text-indigo-200 opacity-60 hidden sm:inline" />
+              <span>Đăng nhập hệ thống</span>
             </>
           )}
         </button>
       </div>
 
-      {/* Quick Tips */}
-      <div className="pt-2 border-t border-slate-800/80 flex items-center justify-center gap-3 text-[11px] text-slate-400 text-center">
-        <span>💡 Nhấn <kbd className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-mono">Enter</kbd> để đăng nhập</span>
-        <span>•</span>
-        <span>Dùng <kbd className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-mono">Tab</kbd> chuyển ô</span>
-      </div>
+      {/* Discreet Demo Quick-Fill Bar */}
+      <RolePresetSelector
+        activeRole={activeRole}
+        onRoleSelect={handleRoleSelect}
+        onQuickLogin={handleQuickLogin}
+        disabled={loading}
+      />
     </form>
   );
 
-  // 🌟 CASE 1: FULL-PAGE MODERN EDTECH PORTAL (Khi người dùng chưa đăng nhập)
+  // 🌟 CASE 1: FULL-PAGE INSTITUTIONAL ACADEMIC PORTAL (Khi người dùng chưa đăng nhập)
   if (!currentUser && isOpen && !showForgot) {
     return (
-      <div className="min-h-[100dvh] w-full bg-slate-950 text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-12 relative overflow-x-hidden overflow-y-auto selection:bg-indigo-500 selection:text-white">
+      <div className="min-h-[100dvh] w-full bg-[#0a0f1d] text-slate-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white">
         
-        {/* Ambient Gradient Glows in Background */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-[128px] pointer-events-none" aria-hidden="true" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-[128px] pointer-events-none" aria-hidden="true" />
-        <div className="absolute top-1/2 left-1/3 w-80 h-80 bg-sky-600/10 rounded-full blur-[140px] pointer-events-none" aria-hidden="true" />
+        {/* Top Institutional Header */}
+        <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md px-6 py-3">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-600/30">
+                <GraduationCap className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Trường Đại Học Công Nghệ & Đào Tạo
+                </div>
+                <div className="text-xs font-semibold text-white">
+                  Cổng Thông Tin Đào Tạo & Quản Lý Học Vụ (SIS)
+                </div>
+              </div>
+            </div>
 
-        {/* Subtle Background Grid */}
-        <div 
-          className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b0a_1px,transparent_1px),linear-gradient(to_bottom,#1e293b0a_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" 
-          aria-hidden="true"
-        />
+            <div className="hidden sm:flex items-center gap-4 text-xs text-slate-400">
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                <span>Năm học: 2026 - 2027</span>
+              </span>
+              <span className="text-slate-700">•</span>
+              <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 text-[11px] font-medium">
+                Học kỳ 1
+              </span>
+            </div>
+          </div>
+        </header>
 
-        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center relative z-10">
-          
-          {/* Left Column: Academic Brand & Value Props */}
-          <div className="order-2 lg:order-1 lg:col-span-7 space-y-6 text-left">
+        {/* Main Content: 2-Column Split Institutional Layout */}
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start w-full">
             
-            {/* Version & Environment Pill */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/90 border border-indigo-500/30 text-indigo-300 text-xs font-semibold shadow-inner backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <GraduationCap className="w-4 h-4 text-indigo-400" />
-              <span>EduPortal Higher Education Platform • v3.5 LTS</span>
-            </div>
-
-            {/* Headline */}
-            <div className="space-y-3">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.15]">
-                Cổng Thông Tin Đào Tạo & <br className="hidden sm:inline" />
-                <span className="bg-gradient-to-r from-indigo-400 via-sky-300 to-purple-400 bg-clip-text text-transparent">
-                  Quản Trị Học Vụ Số
-                </span>
-              </h1>
-              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xl">
-                Hệ sinh thái đại học số quản trị đào tạo theo học chế tín chỉ thông minh, tối ưu hóa quy trình đăng ký môn học, tự động hóa tính điểm quy chế và hỗ trợ thanh toán học phí trực tuyến.
-              </p>
-            </div>
-
-            {/* 3 Core Academic Pillars */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2">
-              <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2 backdrop-blur-md hover:border-indigo-500/40 transition-colors group">
-                <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs group-hover:text-indigo-300">
-                  <BookOpen className="w-4 h-4" />
-                  <span>Học Chế Tín Chỉ</span>
-                </div>
-                <p className="text-[11px] text-slate-400 leading-normal">
-                  Đăng ký học phần theo thời gian thực, tự động phát hiện trùng lịch học và sức chứa phòng.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2 backdrop-blur-md hover:border-emerald-500/40 transition-colors group">
-                <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs group-hover:text-emerald-300">
-                  <Award className="w-4 h-4" />
-                  <span>Chuẩn Quy Chế</span>
-                </div>
-                <p className="text-[11px] text-slate-400 leading-normal">
-                  Tính toán điểm chữ, điểm hệ 4 và GPA chuẩn Thông tư 08/2021/TT-BGDĐT.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800/80 space-y-2 backdrop-blur-md hover:border-sky-500/40 transition-colors group">
-                <div className="flex items-center gap-2 text-sky-400 font-bold text-xs group-hover:text-sky-300">
-                  <CreditCard className="w-4 h-4" />
-                  <span>Học Phí VietQR</span>
-                </div>
-                <p className="text-[11px] text-slate-400 leading-normal">
-                  Xuất hóa đơn học phí tự động, thanh toán quét mã QR qua cổng PayOS với webhook đối soát.
-                </p>
-              </div>
-            </div>
-
-            {/* Security & Support Ribbon */}
-            <div className="p-3.5 rounded-2xl bg-slate-900/50 border border-slate-800/60 flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-400">
-              <div className="flex items-center gap-2 text-slate-300 font-medium">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Bảo mật Stateless JWT • Phân quyền RBAC 3 cấp độ</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1 hover:text-slate-200 transition">
-                  <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
-                  Hotline: 1900 6868
-                </span>
-                <span>•</span>
-                <span>support@eduportal.edu.vn</span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column: Modern Glassmorphism Login Card */}
-          <div className="order-1 lg:order-2 lg:col-span-5">
-            <div className="bg-slate-900/90 backdrop-blur-2xl border border-slate-800/90 p-6 sm:p-8 rounded-3xl shadow-2xl shadow-indigo-950/60 relative">
+            {/* Left Column (7 cols): Academic Notice Board & Institutional Info */}
+            <div className="lg:col-span-7 space-y-6">
               
-              {/* Header inside Card */}
-              <div className="mb-5 space-y-1 text-left">
-                <div className="flex items-center justify-between">
-                  <div className="inline-flex items-center gap-2 text-indigo-400 text-xs font-semibold">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Xác thực hệ thống</span>
-                  </div>
-                  <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-medium">
-                    Sẵn sàng kết nối
-                  </span>
+              {/* Badge & Headline */}
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Cổng Đăng Nhập Tập Trung (Central Authentication Service)</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Đăng Nhập Cổng Đào Tạo</h2>
-                <p className="text-xs text-slate-400">Chọn vai trò để tự động điền tài khoản mẫu hoặc nhập tài khoản của bạn</p>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                  Hệ Thống Quản Trị Đào Tạo & Thông Tin Học Vụ
+                </h1>
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-2xl">
+                  Nền tảng số quản lý học chế tín chỉ, đăng ký môn học trực tuyến, theo dõi tiến độ đào tạo, biểu học phí và kết quả học tập dành cho sinh viên, giảng viên và các khoa đào tạo.
+                </p>
               </div>
 
-              {renderLoginForm()}
+              {/* Academic Notices (Bảng tin thông báo số) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-300 pb-1 border-b border-slate-800">
+                  <span className="flex items-center gap-1.5 text-blue-400">
+                    <FileText className="w-4 h-4" />
+                    <span>Thông Báo Học Vụ Mới Nhất</span>
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-normal">Học kỳ 1 • 2026 - 2027</span>
+                </div>
+
+                {/* Notice 1: Course Registration */}
+                <article className="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/80 hover:border-slate-700 transition space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                      Đang diễn ra
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-mono">20/08 - 05/09/2026</span>
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-semibold text-slate-200">
+                    Kế hoạch Đăng ký Học phần & Lớp Tín chỉ Học kỳ 1 (2026 - 2027)
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Hệ thống mở cổng đăng ký tín chỉ tự động. Sinh viên kiểm tra điều kiện tiên quyết và lịch biểu trước khi bấm xác nhận đăng ký học phần.
+                  </p>
+                </article>
+
+                {/* Notice 2: Tuition & VietQR */}
+                <article className="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/80 hover:border-slate-700 transition space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                      <CreditCard className="w-3 h-3" />
+                      Thanh toán số
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-mono">Tự động 24/7</span>
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-semibold text-slate-200">
+                    Hướng dẫn Nộp Học phí Trực tuyến qua Cổng VietQR / PayOS
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Hóa đơn học phí được xuất tự động theo số tín chỉ đăng ký. Sinh viên quét mã QR trên phiếu thu để hệ thống tự động gạch nợ tức thời qua đối soát ngân hàng.
+                  </p>
+                </article>
+
+                {/* Notice 3: Circular 08 Regulations */}
+                <article className="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/80 hover:border-slate-700 transition space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                      <BookOpen className="w-3 h-3" />
+                      Quy chế Đào tạo
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-mono">Thông tư 08/BGDĐT</span>
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-semibold text-slate-200">
+                    Quy chuẩn Thang điểm chữ, Điểm hệ 4 và Điều kiện Cảnh báo Học vụ
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Tính toán điểm học phần (A, B, C, D, F) và tự động gắn cờ cảnh báo đối với sinh viên có điểm GPA tích lũy dưới 2.0 theo quy chế hiện hành.
+                  </p>
+                </article>
+              </div>
+
+              {/* Help & Support Line */}
+              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-1">
+                <span className="flex items-center gap-1.5">
+                  <HelpCircle className="w-4 h-4 text-blue-400" />
+                  <span>Hỗ trợ kỹ thuật: <strong>(024) 3754 7506</strong></span>
+                </span>
+                <span className="text-slate-700 hidden sm:inline">•</span>
+                <span>Email: daotao@eduportal.edu.vn</span>
+              </div>
+
+            </div>
+
+            {/* Right Column (5 cols): Clean Professional Login Box */}
+            <div className="lg:col-span-5">
+              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-7 shadow-xl shadow-black/40">
+                
+                {/* Form Header */}
+                <div className="mb-5 space-y-1 text-left pb-4 border-b border-slate-800/80">
+                  <h2 className="text-xl font-bold text-white tracking-tight">
+                    Đăng Nhập Tài Khoản
+                  </h2>
+                  <p className="text-xs text-slate-400">
+                    Sử dụng tài khoản nội bộ do Nhà trường cấp để đăng nhập
+                  </p>
+                </div>
+
+                {renderLoginForm()}
+
+                {/* Security Note Footer */}
+                <div className="mt-5 pt-3 border-t border-slate-800/60 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Xác thực an toàn qua giao thức mã hóa HTTPS & Stateless JWT</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </main>
+
+        {/* Institutional Footer */}
+        <footer className="border-t border-slate-800/80 bg-slate-950/90 py-3 px-6 text-center text-xs text-slate-400">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span>© 2026 Trường Đại học Công nghệ & Đào tạo. Bản quyền thuộc về Phòng Đào tạo & Quản lý Học sinh - Sinh viên.</span>
+            <div className="flex items-center gap-3">
+              <a href="#" className="hover:text-slate-300 transition">Quy chế đào tạo</a>
+              <span>•</span>
+              <a href="#" className="hover:text-slate-300 transition">Chính sách bảo mật</a>
+              <span>•</span>
+              <a href="#" className="hover:text-slate-300 transition">Liên hệ hỗ trợ</a>
             </div>
           </div>
-
-        </div>
+        </footer>
 
       </div>
     );
@@ -374,7 +411,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, currentUse
         isOpen={isOpen && !showForgot}
         onClose={currentUser ? onClose : () => {}}
         title="Đăng Nhập Hệ Thống"
-        subtitle="Cổng Thông Tin Đào Tạo & Quản Lý EduPortal"
+        subtitle="Cổng Thông Tin Đào Tạo & Quản Lý Học Vụ"
         maxWidth="max-w-md"
       >
         {renderLoginForm()}
