@@ -1,5 +1,5 @@
 // cSpell:disable
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { creditClassApi, gradeApi } from '../../api';
 import { normalizeSemesterEnum, normalizeAcademicYear } from '../../utils/gradeCalculations';
 import { useGradeStats } from './useGradeStats';
@@ -32,13 +32,19 @@ export function useTeacherGrades({ onNotify }) {
 
   const {
     saving,
+    savingStudentId,
     handleSaveAllGrades: saveAllInternal,
     handleSaveSingleGrade: saveSingleInternal,
   } = useGradePersistence({ onNotify, setGradeSheet });
 
+  const activeClassIdRef = useRef(null);
+
   // 🟢 Tải bảng điểm cho lớp tín chỉ
   const handleSelectClass = useCallback(async (cls) => {
     if (!cls) return;
+    const currentRequestedId = cls.creditClassId;
+    activeClassIdRef.current = currentRequestedId;
+
     setSelectedClass(cls);
     setLoadingGrades(true);
     setGradeSheet({});
@@ -46,10 +52,12 @@ export function useTeacherGrades({ onNotify }) {
     try {
       // 1. Thử gọi Dedicated Gradebook API (tối ưu hóa 1 query đơn lẻ)
       try {
-        const gbRes = await creditClassApi.getGradebook(cls.creditClassId);
-        const gb = gbRes.data || gbRes;
+        const gbRes = await creditClassApi.getGradebook?.(cls.creditClassId);
+        const gb = gbRes?.data || gbRes;
 
         if (gb && Array.isArray(gb.students)) {
+          if (activeClassIdRef.current !== currentRequestedId) return;
+
           const stList = gb.students.map(item => ({
             studentId: item.studentId,
             fullName: item.fullName,
@@ -80,6 +88,8 @@ export function useTeacherGrades({ onNotify }) {
 
       // 2. Chế độ dự phòng (Fallback)
       const stRes = await creditClassApi.getStudents(cls.creditClassId);
+      if (activeClassIdRef.current !== currentRequestedId) return;
+
       const stData = stRes.data || stRes;
       const stList = Array.isArray(stData) ? stData : (stData.content || []);
       setStudents(stList);
@@ -95,11 +105,14 @@ export function useTeacherGrades({ onNotify }) {
           academicYear: baseYear,
           size: 100,
         });
+        if (activeClassIdRef.current !== currentRequestedId) return;
         const gData = gRes.data || gRes;
         gradeList = Array.isArray(gData) ? gData : (gData.content || []);
       } catch (gErr) {
         console.warn('Lỗi khi tải bảng điểm lớp qua search:', gErr);
       }
+
+      if (activeClassIdRef.current !== currentRequestedId) return;
 
       const initialGrades = {};
       stList.forEach((s) => {
@@ -125,10 +138,13 @@ export function useTeacherGrades({ onNotify }) {
       });
       setGradeSheet(initialGrades);
     } catch (err) {
+      if (activeClassIdRef.current !== currentRequestedId) return;
       console.error('Lỗi khi tải bảng điểm lớp tín chỉ:', err);
       if (onNotify) onNotify('error', 'Không thể tải danh sách sinh viên và bảng điểm của lớp này.');
     } finally {
-      setLoadingGrades(false);
+      if (activeClassIdRef.current === currentRequestedId) {
+        setLoadingGrades(false);
+      }
     }
   }, [onNotify, setGradeSheet]);
 
@@ -190,6 +206,7 @@ export function useTeacherGrades({ onNotify }) {
     setStudentSearch,
     loadingGrades,
     saving,
+    savingStudentId,
     totalGradedCount,
     gradeProgressPercent,
     gradeStats,

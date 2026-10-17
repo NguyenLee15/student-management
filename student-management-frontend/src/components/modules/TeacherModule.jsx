@@ -1,6 +1,6 @@
 // cSpell:disable
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, RefreshCw, Download } from 'lucide-react';
+import { Plus, Search, RefreshCw, Download, AlertCircle } from 'lucide-react';
 import { teacherApi, facultyApi } from '../../api';
 import { msg } from '../../lib/messages';
 import ConfirmDialog from '../common/ConfirmDialog';
@@ -12,6 +12,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
 
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -41,6 +42,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
     let isCancelled = false;
     const fetchTeachers = async () => {
       setLoading(true);
+      setFetchError(null);
       try {
         const res = await teacherApi.getAll({
           page,
@@ -62,6 +64,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
       } catch (err) {
         if (!isCancelled) {
           console.warn('Lỗi khi tải danh sách giảng viên', err);
+          setFetchError('Không thể tải danh sách giảng viên. Vui lòng kiểm tra kết nối mạng hoặc máy chủ.');
         }
       } finally {
         if (!isCancelled) {
@@ -88,6 +91,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
 
   const loadTeachers = async () => {
     setLoading(true);
+    setFetchError(null);
     try {
       const res = await teacherApi.getAll({
         page,
@@ -107,6 +111,7 @@ export default function TeacherModule({ onNotify, currentUser }) {
       }
     } catch (err) {
       console.warn('Lỗi khi tải danh sách giảng viên', err);
+      setFetchError('Không thể tải danh sách giảng viên. Vui lòng kiểm tra kết nối mạng hoặc máy chủ.');
     } finally {
       setLoading(false);
     }
@@ -179,9 +184,10 @@ export default function TeacherModule({ onNotify, currentUser }) {
   };
 
   const handleExportExcel = async () => {
+    let url = null;
     try {
       const response = await teacherApi.exportExcel();
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `DanhSachGiangVien_${new Date().toISOString().slice(0, 10)}.xlsx`);
@@ -191,6 +197,10 @@ export default function TeacherModule({ onNotify, currentUser }) {
       onNotify('success', 'Xuất báo cáo Excel giảng viên thành công!');
     } catch (err) {
       onNotify('error', 'Xuất file Excel thất bại.');
+    } finally {
+      if (url) {
+        window.URL.revokeObjectURL(url);
+      }
     }
   };
 
@@ -258,6 +268,22 @@ export default function TeacherModule({ onNotify, currentUser }) {
           </button>
         </div>
       </div>
+
+      {/* Error Alert Banner */}
+      {fetchError && (
+        <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center justify-between text-xs text-rose-300">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
+            <span>{fetchError}</span>
+          </div>
+          <button
+            onClick={loadTeachers}
+            className="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 font-semibold rounded-lg border border-rose-500/30 transition text-xs shrink-0"
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
 
       {/* Teacher Table Component */}
       <TeacherTable

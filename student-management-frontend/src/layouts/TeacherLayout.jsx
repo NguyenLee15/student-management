@@ -30,6 +30,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
     setStudentSearch,
     loading,
     saving,
+    savingStudentId,
     totalGradedCount,
     gradeProgressPercent,
     gradeStats,
@@ -137,6 +138,7 @@ export default function TeacherLayout({ currentUser, onLogout, onNotify, onRoleS
                 studentSearch={studentSearch}
                 setStudentSearch={setStudentSearch}
                 saving={saving}
+                savingStudentId={savingStudentId}
                 loading={loading}
                 handleGradeChange={handleGradeChange}
                 handleGradeBlur={handleGradeBlur}

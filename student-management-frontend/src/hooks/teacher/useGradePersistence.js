@@ -9,6 +9,7 @@ import { normalizeSemesterEnum, normalizeAcademicYear, getWeights, calculateFina
  */
 export function useGradePersistence({ onNotify, setGradeSheet }) {
   const [saving, setSaving] = useState(false);
+  const [savingStudentId, setSavingStudentId] = useState(null);
 
   const handleSaveAllGrades = useCallback(async ({ selectedClass, students, gradeSheet }) => {
     if (!selectedClass || students.length === 0) return;
@@ -65,6 +66,7 @@ export function useGradePersistence({ onNotify, setGradeSheet }) {
       }
 
       let successCount = 0;
+      let failureCount = 0;
       try {
         const res = await gradeApi.saveBatch(batchPayloads);
         const savedList = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
@@ -108,6 +110,7 @@ export function useGradePersistence({ onNotify, setGradeSheet }) {
                 }
               } catch (singleErr) {
                 console.warn(`Lưu điểm cho SV ${p.studentId} thất bại:`, singleErr);
+                failureCount++;
               }
             })
           );
@@ -118,7 +121,11 @@ export function useGradePersistence({ onNotify, setGradeSheet }) {
 
       if (successCount > 0) {
         const skippedMsg = skippedCount > 0 ? ` (Bỏ qua ${skippedCount} sinh viên chưa nhập điểm)` : '';
-        if (onNotify) onNotify('success', `Đã lưu thành công điểm cho ${successCount} sinh viên!${skippedMsg}`);
+        if (failureCount > 0) {
+          if (onNotify) onNotify('warning', `Đã lưu thành công ${successCount} sinh viên, thất bại ${failureCount} sinh viên (vui lòng kiểm tra lại).${skippedMsg}`);
+        } else {
+          if (onNotify) onNotify('success', `Đã lưu thành công điểm cho ${successCount} sinh viên!${skippedMsg}`);
+        }
       } else {
         if (onNotify) onNotify('error', 'Không thể lưu bảng điểm. Vui lòng kiểm tra lại kết nối mạng hoặc liên hệ quản trị.');
       }
@@ -132,7 +139,7 @@ export function useGradePersistence({ onNotify, setGradeSheet }) {
   }, [onNotify, setGradeSheet]);
 
   const handleSaveSingleGrade = useCallback(async ({ st, selectedClass, gradeSheet }) => {
-    if (!st || !selectedClass) return;
+    if (!st || !selectedClass || savingStudentId === st.studentId) return;
     const entry = gradeSheet[st.studentId] || {};
     const attNum = entry.attendanceScore !== '' && entry.attendanceScore != null ? Number(entry.attendanceScore) : null;
     const midNum = entry.midtermScore !== '' && entry.midtermScore != null ? Number(entry.midtermScore) : null;
@@ -147,6 +154,7 @@ export function useGradePersistence({ onNotify, setGradeSheet }) {
     const weights = getWeights(selectedClass);
     const calc = calculateFinalScore(entry, weights);
 
+    setSavingStudentId(st.studentId);
     try {
       const baseSemester = normalizeSemesterEnum(selectedClass.semester);
       const baseYear = normalizeAcademicYear(selectedClass.academicYearName || selectedClass.academicYearId);
@@ -193,11 +201,14 @@ export function useGradePersistence({ onNotify, setGradeSheet }) {
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || `Lỗi khi lưu điểm cho SV ${st.studentId}`;
       if (onNotify) onNotify('error', msg);
+    } finally {
+      setSavingStudentId(null);
     }
-  }, [onNotify, setGradeSheet]);
+  }, [onNotify, setGradeSheet, savingStudentId]);
 
   return {
     saving,
+    savingStudentId,
     handleSaveAllGrades,
     handleSaveSingleGrade,
   };

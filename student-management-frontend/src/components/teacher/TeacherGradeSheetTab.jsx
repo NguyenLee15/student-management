@@ -18,6 +18,7 @@ export default function TeacherGradeSheetTab({
   studentSearch = '',
   setStudentSearch,
   saving = false,
+  savingStudentId = null,
   loading = false,
   handleGradeChange,
   handleGradeBlur,
@@ -144,6 +145,7 @@ export default function TeacherGradeSheetTab({
             currentWeights={currentWeights}
             studentSearch={studentSearch}
             loading={loading}
+            savingStudentId={savingStudentId}
             handleGradeChange={handleGradeChange}
             handleGradeBlur={handleGradeBlur}
             handleGradeKeyDown={handleGradeKeyDown}

@@ -11,6 +11,7 @@ export default function TeacherGradeTable({
   currentWeights = { att: 0.1, mid: 0.3, fin: 0.6 },
   studentSearch = '',
   loading = false,
+  savingStudentId = null,
   handleGradeChange,
   handleGradeBlur,
   handleGradeKeyDown,
@@ -65,6 +66,7 @@ export default function TeacherGradeTable({
                   idx={idx}
                   entry={entry}
                   calc={calc}
+                  isSaving={savingStudentId === st.studentId}
                   handleGradeChange={handleGradeChange}
                   handleGradeBlur={handleGradeBlur}
                   handleGradeKeyDown={handleGradeKeyDown}

@@ -10,6 +10,7 @@ const TeacherGradeRow = memo(function TeacherGradeRow({
   idx,
   entry = {},
   calc,
+  isSaving = false,
   handleGradeChange,
   handleGradeBlur,
   handleGradeKeyDown,
@@ -102,10 +103,11 @@ const TeacherGradeRow = memo(function TeacherGradeRow({
       <td className="px-5 py-3 text-center">
         <button
           onClick={() => handleSaveSingleGrade(st)}
-          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white text-[11px] font-semibold transition"
+          disabled={isSaving}
+          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white text-[11px] font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
           title="Lưu riêng điểm sinh viên này"
         >
-          Lưu
+          {isSaving ? 'Đang lưu...' : 'Lưu'}
         </button>
       </td>
     </tr>

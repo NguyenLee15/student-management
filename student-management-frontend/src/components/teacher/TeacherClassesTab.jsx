@@ -46,10 +46,12 @@ export default function TeacherClassesTab({
               {classes.map((c) => {
                 const isSelected = selectedClass?.creditClassId === c.creditClassId;
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={c.creditClassId}
                     onClick={() => handleSelectClassSafe(c)}
-                    className={`p-4 rounded-xl border cursor-pointer transition ${
+                    aria-pressed={isSelected}
+                    className={`w-full text-left p-4 rounded-xl border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                       isSelected
                         ? 'bg-slate-900 border-emerald-500 shadow-md shadow-emerald-500/10'
                         : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-800/40'
@@ -76,7 +78,7 @@ export default function TeacherClassesTab({
                         {msg.enum.semester[c.semester] || c.semester || 'HK1'}
                       </span>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
